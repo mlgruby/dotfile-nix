@@ -1,0 +1,28 @@
+# Nix
+result
+result-*
+.direnv
+# Logs and databases
+*.log
+*.sqlite
+# Environment files
+.env
+.envrc
+# Build outputs
+dist/
+build/
+# Temporary files
+*.tmp
+*.temp
+.*.swp
+# Home Manager
+.config/home-manager/home.nix.backup
+# Nix build outputs
+/result
+/result-*
+# Nix store paths
+.nix-defexpr
+.nix-profile
+.local/state/nix
+# Darwin system files
+/private/var/folders/

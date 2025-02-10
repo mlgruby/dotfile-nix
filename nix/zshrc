@@ -1,0 +1,17 @@
+# Minimal .zshrc
+# Most configuration is managed by home-manager in home/shell.nix
+
+# Load home-manager zsh configuration
+if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+  source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+fi
+
+# Source dynamic configurations
+source ~/.dynamic-config.zsh
+
+# Load any local machine-specific configurations if they exist
+[[ -f "$HOME/.local/.zshrc" ]] && source "$HOME/.local/.zshrc"
+[[ -f "$HOME/.aws_cred" ]] && source "$HOME/.aws_cred"
+
+# iTerm2 integration
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
