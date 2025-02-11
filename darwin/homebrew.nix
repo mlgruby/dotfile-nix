@@ -1,4 +1,26 @@
 # darwin/homebrew.nix
+#
+# Manages Homebrew package installation and configuration.
+# 
+# Key features:
+# - Automatic Homebrew installation and migration
+# - Package auto-updates and cleanup
+# - Development tools: git, sbt
+# - Essential applications:
+#   - Browsers: Brave
+#   - Development: VSCode, iTerm2, Cursor, JetBrains Toolbox
+#   - Productivity: Rectangle, Insync
+#   - Media: Spotify, VLC
+#   - Communication: WhatsApp
+#   - Security: Bitwarden
+# - Programming fonts:
+#   - JetBrains Mono Nerd Font (primary)
+#   - Fira Code Nerd Font
+#   - Hack Nerd Font
+#   - Meslo LG Nerd Font
+#
+# Note: Configured to auto-update and cleanup on activation
+
 { config, lib, ... }: {
   nix-homebrew = {
     # Install Homebrew under the default prefix

@@ -1,3 +1,17 @@
+# home-manager/modules/zsh.nix
+#
+# Zsh shell configuration
+# Manages:
+# - Shell environment setup
+# - Aliases and functions
+# - Prompt configuration
+# - Plugin management
+# - Path modifications
+# - Shell options and behavior
+# - Integration with other tools
+#
+# This module serves as the primary shell environment configuration
+
 { config, pkgs, ... }:
 
 let
