@@ -40,9 +40,10 @@
       "brave-browser"
       "cursor"
       "iterm2"
-      "jetbrains-mono"  # Updated font package names
-      "font-hack"
-      "font-fira-code"
+      "font-jetbrains-mono-nerd-font"  # Primary coding font
+      "font-fira-code-nerd-font"       # Alternative with nice ligatures
+      "font-hack-nerd-font"            # Clean and minimal
+      "font-meslo-lg-nerd-font"        # Good for terminals
       "insync" 
       "jetbrains-toolbox"
       "rectangle"
