@@ -1,4 +1,23 @@
 # darwin/configuration.nix
+#
+# Main nix-darwin configuration file that manages system-level settings for macOS.
+#
+# Key components:
+# - Nix package manager settings and trusted users
+# - System-wide package installation via Nix
+# - Homebrew integration setup
+# - Core system utilities and development tools
+# - Cloud platform CLIs (AWS, GCP, Terraform)
+# - macOS system preferences and defaults
+# - Security settings (TouchID for sudo)
+# - AWS credential management scripts
+#
+# Notable configurations:
+# - Enables experimental Nix features (flakes, nix-command)
+# - Sets up application aliases in /Applications/Nix Apps
+# - Configures dark mode and 24-hour time
+# - Manages AWS credential copying and environment cleanup
+
 { pkgs, config, lib, ... }: {
   # Nix package manager settings
   nix.settings = {

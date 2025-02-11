@@ -1,3 +1,16 @@
+# home-manager/modules/aws.nix
+#
+# AWS CLI configuration module
+# Manages:
+# - AWS CLI installation and setup
+# - Default region settings
+# - Output format preferences
+# - CLI behavior configurations
+# - AWS tools and utilities
+# - Session management
+#
+# Note: Credentials are managed separately in aws-cred.nix
+
 { config, pkgs, ... }: {
   programs.zsh = {
     initExtra = ''

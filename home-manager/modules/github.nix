@@ -1,3 +1,106 @@
+# home-manager/modules/github.nix
+#
+# GitHub CLI (gh) configuration and workflow automation.
+#
+# Core Features:
+# - GitHub CLI setup with SSH protocol
+# - Vim as default editor
+#
+# Interactive Functions:
+# ghpr [state]
+#   Lists PRs with fuzzy search
+#   Example: ghpr open     # List open PRs
+#           ghpr closed   # List closed PRs
+#
+# ghprall
+#   Lists all PRs with fuzzy search
+#   Example: ghprall      # Shows all PRs for selection
+#
+# ghpropen
+#   Lists only open PRs
+#   Example: ghpropen     # Shows only open PRs
+#
+# ghprco [options] [PR-number]
+#   Interactive PR checkout with options:
+#   Example: ghprco           # Interactive PR selection
+#           ghprco 123       # Checkout PR #123
+#           ghprco -f 123    # Force checkout PR #123
+#           ghprco -d 123    # Checkout PR #123 in detached mode
+#
+# Shell Aliases:
+# PR Management:
+#   ghprcr = "gh pr create --web"
+#     Example: ghprcr
+#     # Opens browser to create new PR from current branch
+#
+#   ghprv = "ghopr"
+#     Example: ghprv
+#     # Interactively select and view PR in browser
+#
+#   ghprl = "ghprall"
+#     Example: ghprl
+#     # Lists all PRs with fuzzy search
+#
+#   ghpro = "ghpropen"
+#     Example: ghpro
+#     # Lists only open PRs with fuzzy search
+#
+#   ghprc = "ghprco"
+#     Example: ghprc
+#     # Interactive PR checkout
+#
+#   ghprch = "ghprcheck"
+#     Example: ghprch
+#     # Shows CI status for selected PR
+#
+# Repository Operations:
+#   ghrv = "gh repo view --web"
+#     Example: ghrv
+#     # Opens current repo in browser
+#
+#   ghrc = "gh repo clone"
+#     Example: ghrc owner/repo
+#     # Clones repository
+#
+#   ghrf = "gh repo fork"
+#     Example: ghrf
+#     # Forks current repository
+#
+# Issue Management:
+#   ghil = "gh issue list"
+#     Example: ghil
+#     # Lists all issues
+#
+#   ghic = "gh issue create --web"
+#     Example: ghic
+#     # Opens browser to create new issue
+#
+#   ghiv = "gh issue view --web"
+#     Example: ghiv 123
+#     # Views issue #123 in browser
+#
+# CI/CD Operations:
+#   ghrl = "gh run list"
+#     Example: ghrl
+#     # Lists recent workflow runs
+#
+#   ghrw = "gh run watch"
+#     Example: ghrw 123456
+#     # Watches workflow run #123456
+#
+# Search Operations:
+#   ghrs = "gh repo search"
+#     Example: ghrs "nix config"
+#     # Searches for repositories
+#
+#   ghis = "gh issue search"
+#     Example: ghis "is:open label:bug"
+#     # Searches for open bug issues
+#
+#   ghps = "gh pr search"
+#     Example: ghps "is:open review-requested:@me"
+#     # Searches for PRs requesting your review
+
 { config, pkgs, ... }: {
   programs.gh = {
     enable = true;

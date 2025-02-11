@@ -1,3 +1,17 @@
+# home-manager/modules/aws-cred.nix
+#
+# AWS credentials management
+# Handles:
+# - AWS credential file structure
+# - Profile configurations
+# - SSO settings
+# - Role assumptions
+# - Credential helpers
+# - Security configurations
+#
+# Important: Keep sensitive information in separate files
+# and use environment variables where appropriate
+
 { config, pkgs, ... }: {
   # Create directory for AWS credential management scripts
   home.file = {
