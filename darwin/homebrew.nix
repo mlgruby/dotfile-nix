@@ -40,6 +40,9 @@
       "brave-browser"
       "cursor"
       "iterm2"
+      "jetbrains-mono"  # Updated font package names
+      "font-hack"
+      "font-fira-code"
       "insync" 
       "jetbrains-toolbox"
       "rectangle"

@@ -93,7 +93,7 @@ let
     dotfile = "cd $HOME/Documents/dotfile";
 
     # Reload zshrc and clear terminal screen (macOS)
-    re = "source ~/.zshrc && osascript -e 'tell application \"System Events\" to keystroke \"k\" using command down'";
+#    re = "source ~/.zshrc && osascript -e 'tell application \"System Events\" to keystroke \"k\" using command down'";
   } else {};
 
   # Linux specific aliases

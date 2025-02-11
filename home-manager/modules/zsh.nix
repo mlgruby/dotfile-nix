@@ -68,10 +68,10 @@ let
     '' else "";
 
     # Shell commands
-    restart = "exec zsh";      # Restart the shell
-    re = "exec zsh";          # Short alias for restart
-    reload = "source ~/.zshrc"; # Reload config
-    rl = "source ~/.zshrc";    # Short alias for reload
+    restart = "clear && exec zsh";       # Restart the shell
+    re = "clear && exec zsh";            # Short alias for restart
+    reload = "clear && source ~/.zshrc"; # Reload config
+    rl = "clear && source ~/.zshrc";     # Short alias for reload
   };
 in
 {
