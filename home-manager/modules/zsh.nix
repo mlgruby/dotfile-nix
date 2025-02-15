@@ -3,14 +3,21 @@
 # Zsh shell configuration
 # Manages:
 # - Shell environment setup
-# - Aliases and functions
-# - Prompt configuration
-# - Plugin management
-# - Path modifications
-# - Shell options and behavior
-# - Integration with other tools
+# - PATH management
+#   - pipx binaries ($HOME/.local/bin)
+#   - poetry ($HOME/Library/Application Support/pypoetry/venv/bin)
+#   - pyenv initialization
 #
-# This module serves as the primary shell environment configuration
+# Tool initializations:
+# - SDKMAN for Java version management
+# - pyenv for Python version management
+# - Starship prompt with Gruvbox theme
+#
+# Features:
+# - Oh My Zsh integration with plugins
+# - Custom aliases for development workflow
+# - Syntax highlighting and autosuggestions
+# - Git integration
 
 { config, pkgs, ... }:
 
@@ -71,13 +78,10 @@ let
       echo "🧹 Cleaning up system..." && \
       echo "🗑️  Removing .DS_Store files..." && \
       find . -type f -name '*.DS_Store' -ls -delete && \
-      echo "🗑️  Emptying trash..." && \
-      sudo rm -rfv /Volumes/*/.Trashes && \
-      sudo rm -rfv ~/.Trash && \
       echo "📝 Cleaning system logs..." && \
-      sudo rm -rfv /private/var/log/asl/*.asl && \
+      sudo rm -rf /private/var/log/asl/*.asl 2>/dev/null || echo "⚠️  Could not clean system logs (permission denied)" && \
       echo "🧹 Cleaning quarantine events..." && \
-      sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent' && \
+      sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent' 2>/dev/null || echo "⚠️  Could not clean quarantine events" && \
       echo "✨ Cleanup complete!"
     '' else "";
 
@@ -96,7 +100,7 @@ in
     
     # Add environment variables
     sessionVariables = {
-      PATH = "$HOME/Library/Application Support/pypoetry/venv/bin:$HOME/.local/bin:$PATH";
+      PATH = "$HOME/.local/bin:$HOME/Library/Application Support/pypoetry/venv/bin:$PATH";
       NIX_PATH = "$HOME/.nix-defexpr/channels:$NIX_PATH";
     };
 
@@ -104,6 +108,28 @@ in
       # Set up Starship with Gruvbox Rainbow preset
       if [ ! -f ~/.config/starship.toml ] || ! grep -q "gruvbox" ~/.config/starship.toml; then
         starship preset gruvbox-rainbow -o ~/.config/starship.toml
+      fi
+
+      # Initialize SDKMAN if installed
+      if [ -d "$HOME/.sdkman" ]; then
+        export SDKMAN_DIR="$HOME/.sdkman"
+        [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+      fi
+
+      # Initialize pyenv
+      if [ -d "$HOME/.pyenv" ]; then
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init -)"
+      fi
+
+      # Ensure pipx and poetry paths are available
+      if [ -d "$HOME/.local/bin" ]; then
+        export PATH="$HOME/.local/bin:$PATH"
+      fi
+
+      if [ -d "$HOME/Library/Application Support/pypoetry/venv/bin" ]; then
+        export PATH="$HOME/Library/Application Support/pypoetry/venv/bin:$PATH"
       fi
     '';
 

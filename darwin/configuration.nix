@@ -5,18 +5,25 @@
 # Key components:
 # - Nix package manager settings and trusted users
 # - System-wide package installation via Nix
-# - Homebrew integration setup
-# - Core system utilities and development tools
-# - Cloud platform CLIs (AWS, GCP, Terraform)
-# - macOS system preferences and defaults
-# - Security settings (TouchID for sudo)
-# - AWS credential management scripts
+#   - Core system utilities (curl, wget, gnutls)
+#   - Python base (python3, pipx)
+#   - Build dependencies (openssl, readline, sqlite, zlib)
+#   - Cloud platform CLIs (AWS, GCP, Terraform)
 #
-# Notable configurations:
-# - Enables experimental Nix features (flakes, nix-command)
-# - Sets up application aliases in /Applications/Nix Apps
-# - Configures dark mode and 24-hour time
-# - Manages AWS credential copying and environment cleanup
+# Post-activation scripts:
+# - SDKMAN and Java version management
+#   - Installs Java 8, 11, 17 (Amazon Corretto)
+#   - Sets Java 11 as default
+# - Python environment setup
+#   - Poetry installation and management
+#   - pyenv Python version management
+# - AWS credential management
+#
+# System preferences:
+# - Dark mode
+# - 24-hour time
+# - TouchID for sudo
+# - Application aliases in /Applications/Nix Apps
 
 { pkgs, config, lib, ... }: {
   # Nix package manager settings
@@ -26,6 +33,12 @@
     keep-outputs = true;
     experimental-features = [ "nix-command" "flakes" ];
   };
+
+  # Enable Nix daemon
+  nix.enable = true;
+
+  # Set correct GID for nixbld group
+  ids.gids.nixbld = 350;
 
   # Required for proper Homebrew installation
   system.activationScripts.preUserActivation.text = ''
@@ -37,17 +50,27 @@
 
   # System-wide packages installed via Nix
   environment.systemPackages = [
+    # System frameworks and core tools
+    pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
+    pkgs.darwin.apple_sdk.frameworks.CoreServices
+    pkgs.darwin.apple_sdk.frameworks.Security
+    pkgs.darwin.cctools
+    pkgs.xcodebuild
+
+    # Basic system utilities
+    pkgs.curl
+    pkgs.wget
+    pkgs.gnutls
+    pkgs.python3
+    pkgs.pipx
+
     # Shell Tools
     pkgs._1password-cli       # Password manager CLI
-    pkgs.eza                  # Modern ls replacement
     pkgs.pkg-config           # Development tool
-    pkgs.starship             # Shell prompt
     pkgs.tree                 # Directory viewer
 
     # Internet/Network Tools
     pkgs.discord              # Communication
-    pkgs.gnutls               # SSL/TLS toolkit
-    pkgs.wget                 # File downloader
 
     # Cloud Tools
     pkgs.awscli2              # AWS CLI version 2
@@ -55,18 +78,18 @@
     pkgs.terraform            # Infrastructure as Code
     pkgs.kubectl              # Kubernetes CLI
 
-    # Basic utilities
-    pkgs.curl
-    pkgs.python3
-    
     # Build tools and SDK
-    pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
-    pkgs.darwin.apple_sdk.frameworks.CoreServices
-    pkgs.darwin.apple_sdk.frameworks.Security
-    pkgs.darwin.cctools
     pkgs.xcodebuild  # Added for xcrun
 
     # Your other package groups...
+    pkgs.python3Packages.pip
+
+    # Python build dependencies
+    pkgs.openssl
+    pkgs.readline
+    pkgs.sqlite
+    pkgs.zlib
+    pkgs.git  # For pyenv installation
   ];
 
   # Enable and configure zsh
@@ -106,17 +129,14 @@
     };
   };
 
-  # Enable the Nix daemon service
-  services.nix-daemon.enable = true;
-
-  # System state version
-  system.stateVersion = lib.mkForce 4;
-
   # Platform architecture
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   # Security settings
   security.pam.enableSudoTouchIdAuth = true;
+
+  # System state version
+  system.stateVersion = lib.mkForce 4;
 
   # AWS credential management setup
   system.activationScripts.aws-cred-setup.text = ''
@@ -180,5 +200,102 @@
     EOF
     
     chmod +x /opt/aws_cred_copy/copy_credentials_from_env
+  '';
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    users.satyasheel = import ../home-manager;
+    backupFileExtension = lib.mkForce "backup";
+  };
+
+  system.activationScripts.postUserActivation.text = ''
+    echo "Setting up development tools..."
+    
+    # Install SDKMAN and Java versions
+    if [ ! -d "$HOME/.sdkman" ]; then
+      echo "Installing SDKMAN..."
+      TMPFILE=$(mktemp)
+      ${pkgs.curl}/bin/curl -s "https://get.sdkman.io" > "$TMPFILE"
+      export SDKMAN_DIR="$HOME/.sdkman"
+      export sdkman_auto_answer=true
+      export sdkman_selfupdate_feature=false
+      export SDKMAN_BASH_COMPLETION=false
+      PATH="${pkgs.unzip}/bin:${pkgs.zip}/bin:${pkgs.gnutar}/bin:${pkgs.curl}/bin:${pkgs.gnused}/bin:$PATH" bash "$TMPFILE" || true
+      rm "$TMPFILE"
+    fi
+    
+    # Install Java versions if SDKMAN is installed
+    if [ -d "$HOME/.sdkman" ]; then
+      echo "Installing Java versions..."
+      export SDKMAN_DIR="$HOME/.sdkman"
+      export SDKMAN_BASH_COMPLETION=false
+      
+      # Disable shellcheck warning about not following the source
+      # shellcheck disable=SC1090,SC1091
+      source "$HOME/.sdkman/bin/sdkman-init.sh" 2>/dev/null || true
+      
+      install_java_version() {
+        if [ ! -d "$HOME/.sdkman/candidates/java/$1" ]; then
+          echo "Installing Java $1"
+          sdk install java "$1" || echo "Failed to install Java $1"
+        else
+          echo "Java $1 is already installed"
+        fi
+      }
+
+      install_java_version "8.0.392-amzn"
+      install_java_version "11.0.21-amzn"
+      install_java_version "17.0.9-amzn"
+      
+      if sdk current java 2>/dev/null | grep -q "11.0.21-amzn"; then
+        echo "Java 11 is already default"
+      else
+        echo "Setting Java 11 as default"
+        sdk default java "11.0.21-amzn"
+      fi
+    fi
+
+    # Python environment setup
+    echo "Setting up Python environment..."
+    
+    # Check for poetry installation
+    POETRY_PATH="$HOME/.local/bin/poetry"
+    if [ ! -f "$POETRY_PATH" ] || ! "$POETRY_PATH" --version | grep -q "1.5.1"; then
+      echo "Installing Poetry 1.5.1..."
+      pipx install poetry==1.5.1
+      # Ensure pipx binaries are in PATH
+      pipx ensurepath
+    else
+      echo "Poetry $(poetry --version) is already installed at $POETRY_PATH"
+    fi
+
+    # Setup pyenv and install Python versions
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="${pkgs.pyenv}/bin:$PATH"
+    
+    if command -v pyenv &> /dev/null; then
+      echo "Setting up Python versions..."
+      mkdir -p "$PYENV_ROOT"
+      eval "$(pyenv init -)"
+
+      # Function to install Python version if not already installed
+      install_python_version() {
+        if ! pyenv versions | grep -q "$1"; then
+          echo "Installing Python $1"
+          pyenv install "$1"
+        else
+          echo "Python $1 is already installed"
+        fi
+      }
+
+      # Install Python versions
+      install_python_version "3.10"
+
+      # Set Python 3.10 as global default
+      pyenv global 3.10
+    else
+      echo "pyenv not found. Please ensure it's installed via Nix"
+    fi
   '';
 }

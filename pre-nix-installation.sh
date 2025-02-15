@@ -1,4 +1,89 @@
 #!/bin/bash
+#
+# Pre-Nix Installation Script
+# ==========================
+#
+# This script automates the setup of a new macOS system with Nix, nix-darwin, and dotfiles.
+#
+# Features:
+# ---------
+# 1. System Preparation:
+#    - Installs Xcode Command Line Tools
+#    - Sets up Homebrew
+#    - Installs essential packages (git, stow)
+#
+# 2. Nix Setup:
+#    - Installs Nix package manager
+#    - Configures multi-user installation
+#    - Enables experimental features (flakes)
+#
+# 3. Dotfiles Management:
+#    - Clones your dotfiles repository
+#    - Creates necessary directory structure
+#    - Sets up proper symlinks
+#
+# 4. Git/GitHub Configuration:
+#    - Configures Git identity
+#    - Sets up SSH keys for GitHub
+#    - Tests GitHub connectivity
+#
+# Usage:
+# ------
+# 1. Basic Installation:
+#    ```bash
+#    curl -o pre-nix-installation.sh https://raw.githubusercontent.com/your-repo/pre-nix-installation.sh
+#    chmod +x pre-nix-installation.sh
+#    ./pre-nix-installation.sh
+#    ```
+#
+# 2. Interactive Options:
+#    - The script will prompt for:
+#      * Dotfiles repository URL
+#      * Git user name and email
+#      * SSH key generation for GitHub
+#
+# Directory Structure Created:
+# --------------------------
+# ~/.config/
+# ├── nix/
+# ├── darwin/
+# └── home-manager/
+#
+# ~/Documents/dotfile/ (Your configuration repository)
+#
+# Requirements:
+# ------------
+# - macOS operating system
+# - Internet connection
+# - GitHub account (for dotfiles and SSH setup)
+#
+# Error Handling:
+# --------------
+# - The script uses set -e to exit on any error
+# - Custom error handling function for better feedback
+# - Backup creation for important files
+#
+# Post-Installation:
+# ----------------
+# After running the script:
+# 1. Restart your terminal
+# 2. Run 'darwin-rebuild switch --flake .#ss-mbp'
+# 3. Test your new configuration
+#
+# Troubleshooting:
+# ---------------
+# If you encounter issues:
+# 1. Check the terminal output for error messages
+# 2. Verify your dotfiles repository is accessible
+# 3. Ensure you have proper permissions
+# 4. Check system requirements are met
+#
+# Maintenance:
+# -----------
+# To update your system after installation:
+# 1. cd ~/Documents/dotfile
+# 2. git pull
+# 3. darwin-rebuild switch --flake .#ss-mbp
 
 # Exit on any error
 set -e
