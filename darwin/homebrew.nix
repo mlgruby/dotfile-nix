@@ -1,25 +1,27 @@
 # darwin/homebrew.nix
 #
-# Manages Homebrew package installation and configuration.
-# 
-# Key features:
-# - Automatic Homebrew installation and migration
-# - Package auto-updates and cleanup
-# - Development tools: git, sbt
-# - Essential applications:
+# Homebrew package management for macOS
+#
+# Manages:
+# - GUI Applications
+#   - Development: VSCode, JetBrains Toolbox
+#   - Terminal: Alacritty
+#   - Utilities: Rectangle, The Unarchiver
 #   - Browsers: Brave
-#   - Development: VSCode, iTerm2, Cursor, JetBrains Toolbox
-#   - Productivity: Rectangle, Insync
-#   - Media: Spotify, VLC
-#   - Communication: WhatsApp
-#   - Security: Bitwarden
-# - Programming fonts:
+#
+# - CLI Tools (when Homebrew versions preferred)
+#   - git
+#   - starship (shell prompt)
+#
+# - Fonts
 #   - JetBrains Mono Nerd Font (primary)
 #   - Fira Code Nerd Font
 #   - Hack Nerd Font
-#   - Meslo LG Nerd Font
 #
-# Note: Configured to auto-update and cleanup on activation
+# Configuration:
+# - Auto-updates enabled
+# - Brewfile generation
+# - Mac App Store integration
 
 { config, lib, ... }: {
   nix-homebrew = {
@@ -44,43 +46,45 @@
     
     onActivation = {
       autoUpdate = true;
+      cleanup = "zap";      # More aggressive cleanup
       upgrade = true;
-      cleanup = "uninstall";
     };
 
     # CLI Tools
     brews = [
-      "mas"
-      "starship"
       "git"      # Required for initial setup
+      "mas"
       "sbt"
+      "starship"
     ];
 
     # GUI Applications (Casks)
     casks = [
+      "alacritty"                      # Fast, GPU-accelerated terminal emulator
       "bitwarden"
       "brave-browser"
       "cursor"
-      "iterm2"
-      "font-jetbrains-mono-nerd-font"  # Primary coding font
       "font-fira-code-nerd-font"       # Alternative with nice ligatures
       "font-hack-nerd-font"            # Clean and minimal
+      "font-jetbrains-mono-nerd-font"  # Primary coding font
       "font-meslo-lg-nerd-font"        # Good for terminals
       "insync" 
       "jetbrains-toolbox"
+      "karabiner-elements"             # Powerful keyboard customization
+      "postman"
       "rectangle"
+      "spotify"
       "the-unarchiver"
+      "visual-studio-code"
       "vlc"
       "whatsapp"
-      "spotify"
-      "visual-studio-code"
-      "postman"
     ];
 
     # Global options
     global = {
       autoUpdate = true;
       brewfile = true;
+      lockfiles = true;
     };
 
     # Mac App Store apps
