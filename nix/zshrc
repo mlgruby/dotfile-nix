@@ -1,12 +1,42 @@
-# Minimal .zshrc
-# Most configuration is managed by home-manager in home/shell.nix
+# nix/zshrc
+#
+# Minimal ZSH configuration bootstrap
+#
+# Purpose:
+# - Provides initial shell configuration
+# - Bootstraps home-manager integration
+# - Loads dynamic configurations
+#
+# Installation:
+# - Used by @pre-nix-installation.sh
+# - Copied to ~/.zshrc during setup
+# - Serves as initial shell config
+# - Part of initial Nix bootstrap (with nix.conf and dynamic-config.zsh)
+#
+# Features:
+# - Home Manager integration
+# - Dynamic config loading
+# - Local customization support
+# - iTerm2 integration
+#
+# Related Files:
+# - nix/nix.conf: Core Nix configuration
+# - nix/dynamic-config.zsh: Shell functions
+# - home-manager/modules/zsh.nix: Main ZSH config
+#
+# Note:
+# - Most config managed by home-manager
+# - Minimal by design
+# - Supports local overrides
+# - Required for initial system setup
 
 # Load home-manager zsh configuration
 if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
   source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
 fi
 
-# Source dynamic configurations
+# Load dynamic functions and configurations
+# This file is copied by pre-nix-installation.sh
 source ~/.dynamic-config.zsh
 
 # Load any local machine-specific configurations if they exist

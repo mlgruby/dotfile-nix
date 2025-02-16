@@ -1,6 +1,12 @@
 # home-manager/modules/aws-cred.nix
 #
 # AWS credentials management
+#
+# Purpose:
+# - Manages AWS credentials securely
+# - Provides easy profile switching
+# - Handles temporary credentials
+#
 # Handles:
 # - AWS credential file structure
 # - Profile configurations
@@ -8,6 +14,24 @@
 # - Role assumptions
 # - Credential helpers
 # - Security configurations
+#
+# Features:
+# - Secure credential file management
+# - Environment variable handling
+# - Profile switching commands:
+#   - awsdef: Switch to default profile
+#   - awsprod: Switch to production profile
+#   - awsdev: Switch to development profile
+#
+# Security:
+# - Credentials stored in ~/.aws/credentials
+# - Environment variables cleared after use
+# - Terminal cleared during profile switch
+#
+# Integration:
+# - Works with aws.nix for CLI configuration
+# - Uses ZSH aliases for easy switching
+# - Compatible with AWS SSO sessions
 #
 # Important: Keep sensitive information in separate files
 # and use environment variables where appropriate

@@ -2,6 +2,11 @@
 #
 # User-specific configuration and package management
 #
+# Purpose:
+# - Central configuration for Home Manager
+# - Manages user-specific packages and settings
+# - Coordinates all module imports
+#
 # Packages:
 # - Development tools
 #   - pyenv: Python version management
@@ -15,67 +20,80 @@
 #   - ripgrep: Modern grep
 #
 # - Cloud tools
-#   - awscli2: AWS CLI
 #   - google-cloud-sdk: GCP tools
-#   - tfswitch: Terraform version manager
 #
 # Imports:
+# Core:
 # - Shell configuration (zsh)
 # - Terminal emulator (alacritty)
 # - Keyboard customization (karabiner)
+#
+# Development:
+# - Git configuration and utilities
+# - LazyGit TUI configuration
+# - GitHub CLI settings
+#
+# Cloud & Infrastructure:
 # - Cloud platform configs (aws, gcloud)
+# - AWS credentials management
+#
+# Integration:
+# - Works with darwin/configuration.nix
+# - Uses homebrew.nix for macOS packages
+# - Coordinates with aliases.nix for shell commands
 { config, pkgs, lib, ... }: {
   imports = [
+    # Version Control
     ./git.nix
+    # Shell Environment
     ./shell.nix
+    ./modules/tmux.nix
+    # Cloud Platform Tools
     ./modules/aws.nix
     ./modules/aws-cred.nix
     ./modules/gcloud.nix
+    # Development Tools
     ./modules/git.nix
     ./modules/github.nix
+    # Core Environment
     ./modules/zsh.nix
     ./modules/alacritty
     ./modules/karabiner
+    ./modules/lazygit.nix
   ];
 
-  # Packages needed for aliases and shell functions
+  # Core packages required for basic functionality
   home.packages = with pkgs; [
-    # Development tools
-    pyenv
-    gh
-    lazygit
-
-    # CLI utilities
-    eza
-    fd
-    fzf
-    ripgrep
-
-    # Cloud tools
-    awscli2
-    google-cloud-sdk
-    tfswitch
-
-    # Shell
     oh-my-zsh
   ];
 
-  # Programs configuration
   programs = {
+    # Shell Configuration
+    zsh = {
+      enable = true;
+      # Import aliases from central location
+      shellAliases = import ./aliases.nix { inherit pkgs config; };
+    };
+    # Fuzzy Finder Configuration
     fzf = {
       enable = true;
       enableZshIntegration = true;
+      # Use fd for file finding (respects .gitignore)
       defaultCommand = "fd --type f";
+      # Default appearance and behavior
       defaultOptions = ["--height 40%" "--border"];
     };
     home-manager.enable = true;
   };
 
+  # Enable font configuration
   fonts.fontconfig.enable = true;
 
+  # User Environment Settings
   home = {
     username = "satyasheel";
     homeDirectory = "/Users/satyasheel";
+    # Version for home-manager
     stateVersion = "23.11";
   };
 }

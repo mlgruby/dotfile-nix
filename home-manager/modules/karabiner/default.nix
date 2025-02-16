@@ -2,19 +2,45 @@
 #
 # Karabiner-Elements keyboard customization
 #
+# Purpose:
+# - Provides custom keyboard shortcuts for application launching
+# - Manages Karabiner-Elements configuration
+# - Creates consistent keyboard behavior across apps
+#
 # Features:
 # - Custom key mappings
 # - Complex modifications
 # - Device-specific settings
 # - Profile management
+#
+# Shortcuts:
+# Command + Shift +
+#   Enter -> Alacritty (Terminal)
+#   I     -> IntelliJ IDEA
+#   P     -> PyCharm
+#   S     -> Slack
+#   C     -> Cursor
+#   G     -> Google Chrome
+#   B     -> Brave Browser
+#
+# Integration:
+# - Works with macOS application management
+# - Compatible with other keyboard customizations
+# - Supports multiple profiles and devices
+#
+# Note:
+# - Requires Karabiner-Elements to be installed (homebrew.nix)
+# - Configuration stored in ~/.config/karabiner/
 
 { config, lib, pkgs, ... }:
 
 {
-  # Create a directory for our custom rules
+  # Custom Modification Rules
+  # Defines application launching shortcuts
   home.file.".config/karabiner/assets/complex_modifications/custom.json".text = builtins.toJSON {
     title = "Custom Rules";
     rules = [
+      # Terminal Emulator
       {
         description = "Open Alacritty with Command + Shift + Enter";
         manipulators = [{
@@ -31,6 +57,7 @@
           }];
         }];
       }
+      # Development IDEs
       {
         description = "Open IntelliJ with Command + Shift + I";
         manipulators = [{
@@ -63,6 +90,7 @@
           }];
         }];
       }
+      # Communication Tools
       {
         description = "Open Slack with Command + Shift + S";
         manipulators = [{
@@ -79,6 +107,7 @@
           }];
         }];
       }
+      # Development Tools
       {
         description = "Open Cursor with Command + Shift + C";
         manipulators = [{
@@ -95,6 +124,7 @@
           }];
         }];
       }
+      # Web Browsers
       {
         description = "Open Google Chrome with Command + Shift + G";
         manipulators = [{
@@ -130,27 +160,35 @@
     ];
   };
 
-  # Create initial configuration if it doesn't exist
+  # Karabiner Initial Configuration
+  # Sets up default configuration if none exists
+  # This ensures a consistent starting point
   home.activation.setupKarabiner = lib.hm.dag.entryAfter ["writeBoundary"] ''
     if [ ! -f "$HOME/.config/karabiner/karabiner.json" ]; then
       mkdir -p "$HOME/.config/karabiner"
       cat > "$HOME/.config/karabiner/karabiner.json" << 'EOF'
       {
+        # Global Settings
         "global": {
           "check_for_updates_on_startup": true,
           "show_in_menu_bar": true,
           "show_profile_name_in_menu_bar": false
         },
+        # Keyboard Preferences
         "preferences": {
           "keyboard_type_if_empty": "iso"
         },
+        # Profile Configuration
         "profiles": [
           {
             "name": "Default",
             "selected": true,
+            # Basic key remapping
             "simple_modifications": [],
+            # Advanced modifications
             "complex_modifications": {
               "parameters": {
+                # Timing for simultaneous key presses
                 "basic.simultaneous_threshold_milliseconds": 50
               },
               "rules": []
