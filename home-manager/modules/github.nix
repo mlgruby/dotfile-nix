@@ -2,11 +2,26 @@
 #
 # GitHub CLI (gh) configuration and workflow automation.
 #
+# Purpose:
+# - Streamlines GitHub workflows via CLI
+# - Provides interactive PR management
+# - Automates common GitHub tasks
+#
 # Core Features:
 # - GitHub CLI setup with SSH protocol
 # - Vim as default editor
+# - Interactive fuzzy search integration
+# - Comprehensive PR management
+# - Repository and issue handling
+#
+# Integration:
+# - Works with git.nix for version control
+# - Uses FZF for interactive selection
+# - Complements LazyGit workflow
+# - Installed via Homebrew (homebrew.nix)
 #
 # Interactive Functions:
+# PR Management:
 # ghpr [state]
 #   Lists PRs with fuzzy search
 #   Example: ghpr open     # List open PRs
@@ -26,6 +41,13 @@
 #           ghprco 123       # Checkout PR #123
 #           ghprco -f 123    # Force checkout PR #123
 #           ghprco -d 123    # Checkout PR #123 in detached mode
+#
+# Workflow Organization:
+# 1. PR Management - Create, view, list, checkout PRs
+# 2. Repository Ops - View, clone, fork repositories
+# 3. Issue Tracking - List, create, view issues
+# 4. CI/CD Integration - Monitor workflow runs
+# 5. Search Operations - Find repos, issues, PRs
 #
 # Shell Aliases:
 # PR Management:
@@ -105,33 +127,38 @@
   programs.gh = {
     enable = true;
     settings = {
-      # GitHub CLI settings
+      # Use SSH for better security and no password prompts
       git_protocol = "ssh";
+      # Default editor for PR/Issue descriptions
       editor = "vim";
     };
   };
 
-  # GitHub specific functions
+  # Custom GitHub Workflow Functions
   programs.zsh.initExtra = ''
-    # GitHub PR functions
+    # Basic PR listing with state filter
     function ghpr() {
       gh pr list --state "$1" --limit 1000 | fzf
     }
 
-    # Interactive PR selection and action functions
+    # Comprehensive PR listing functions
+    # Shows all PRs regardless of state
     function ghprall() {
       gh pr list --state all --limit 1000 | fzf
     }
 
+    # Shows only open PRs for active work
     function ghpropen() {
       gh pr list --state open --limit 1000 | fzf
     }
 
+    # Open selected PR in browser
     function ghopr() {
       id="$(ghprall | cut -f1)"
       [ -n "$id" ] && gh pr view "$id" --web
     }
 
+    # Check CI status for selected PR
     function ghprcheck() {
       id="$(ghpropen | cut -f1)"
       [ -n "$id" ] && gh pr checks "$id"
@@ -140,7 +167,10 @@
     # Enhanced PR checkout function
     function ghprco() {
       if [ $# -eq 0 ]; then
-        # Interactive mode: list PRs and checkout selected one
+        # Interactive mode:
+        # 1. List open PRs with fuzzy search
+        # 2. Extract PR number from selection
+        # 3. Checkout selected PR
         PR_NUM=$(gh pr list --state open | fzf | cut -f1)
         if [ -n "$PR_NUM" ]; then
           gh pr checkout "$PR_NUM"
@@ -148,15 +178,19 @@
       else
         case "$1" in
           -f|--force)
-            # Force checkout
+            # Force checkout: Overwrite local changes
+            # Useful when PR branch has diverged
             gh pr checkout "$2" --force
             ;;
           -d|--detach)
-            # Detached HEAD checkout
+            # Detached HEAD checkout:
+            # Review PR without creating local branch
             gh pr checkout "$2" --detach
             ;;
           *)
-            # Normal checkout with PR number/URL/branch
+            # Standard checkout:
+            # Accepts PR number, URL, or branch name
+            # Creates local branch tracking PR
             gh pr checkout "$1"
             ;;
         esac
@@ -164,8 +198,11 @@
     }
   '';
 
-  # GitHub aliases
+  # GitHub Command Aliases
+  # Organized by workflow category
   programs.zsh.shellAliases = {
+    # Pull Request Workflow
+    # Quick actions for PR management
     ghprcr = "gh pr create --web";      # Create PR in web browser
     ghprv = "ghopr";                    # Interactive select and view PR in browser
     ghprl = "ghprall";                  # List all PRs with fzf
@@ -173,21 +210,25 @@
     ghprc = "ghprco";                   # Interactive checkout PR using the function
     ghprch = "ghprcheck";               # Check PR status
     
-    # Repository management
+    # Repository Operations
+    # Quick access to repo-level actions
     ghrv = "gh repo view --web";        # View repo in browser
     ghrc = "gh repo clone";             # Clone repo
     ghrf = "gh repo fork";              # Fork repo
     
-    # Issues
+    # Issue Tracking
+    # Streamlined issue management
     ghil = "gh issue list";             # List issues
     ghic = "gh issue create --web";     # Create issue in browser
     ghiv = "gh issue view --web";       # View issue in browser
     
-    # Workflows/Actions
+    # CI/CD Monitoring
+    # GitHub Actions workflow management
     ghrl = "gh run list";               # List workflow runs
     ghrw = "gh run watch";              # Watch workflow run
     
-    # Search
+    # Search Operations
+    # Quick access to GitHub search
     ghrs = "gh repo search";            # Search repositories
     ghis = "gh issue search";           # Search issues
     ghps = "gh pr search";              # Search PRs

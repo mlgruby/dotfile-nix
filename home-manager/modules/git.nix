@@ -2,14 +2,18 @@
 #
 # Comprehensive Git configuration module.
 #
+# Purpose:
+# - Manages Git configuration and workflows
+# - Provides convenient aliases and shortcuts
+# - Streamlines common Git operations
+#
 # Features:
-# - Personal identity configuration
-# - Core Git settings:
-#   - Default branch: develop
-#   - Pull with rebase
-#   - Auto setup remote on push
-#   - Input line ending handling
-# 
+# - Secure identity management
+# - Customized Git aliases
+# - Shell integration
+# - Workflow automation
+# - Repository management
+#
 # Git Command Aliases:
 #   st = status              # Quick status check
 #   ci = commit              # Shorter commit command
@@ -17,6 +21,12 @@
 #   co = checkout            # Switch branches
 #   df = diff                # View changes
 #   lg = log --graph ...     # Pretty log with branch graph
+#
+# Integration:
+# - Works with GitHub CLI (github.nix)
+# - Uses LazyGit for TUI operations
+# - Compatible with ZSH configuration
+# - Supports multiple remote workflows
 #
 # Shell Aliases:
 # Basic Operations:
@@ -83,118 +93,88 @@
   programs.git = {
     enable = true;
     
-    # Your identity
+    # User Identity
+    # Used for commit authorship
     userName = "Satyasheel";
     userEmail = "satyasheel@lightricks.com";
 
-    # Default settings
+    # Git Core Configuration
+    # Global settings for all repositories
     extraConfig = {
-      init.defaultBranch = "develop";
-      pull.rebase = true;
-      push.autoSetupRemote = true;
+      # Branch Configuration
+      init.defaultBranch = "develop";    # Default for new repositories
+      # Pull/Push Behavior
+      pull.rebase = true;                # Avoid merge commits on pull
+      push.autoSetupRemote = true;       # Auto-configure upstream
+      # Editor and File Handling
       core = {
-        editor = "vim";
-        autocrlf = "input";
+        editor = "vim";                  # Default editor for commits
+        autocrlf = "input";              # Line ending management
       };
-      color.ui = true;
+      # UI Configuration
+      color.ui = true;                   # Colorized output
     };
 
-    # Git command aliases
+    # Built-in Git Aliases
+    # Shorter versions of common commands
     aliases = {
-      # Quick status check
-      st = "status";
-
-      # Shorter commit command
-      ci = "commit";
-
-      # List or create branches
-      br = "branch";
-
-      # Switch branches
-      co = "checkout";
-
-      # View changes
-      df = "diff";
-
-      # Pretty log with branch graph
+      st = "status";                     # Quick status check
+      ci = "commit";                     # Shorter commit command
+      br = "branch";                     # Branch management
+      co = "checkout";                   # Branch switching
+      df = "diff";                       # Change viewing
+      # Enhanced Log View
+      # Shows commit graph with colors and author info
       lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
     };
 
+    # Global Ignores
+    # Files to ignore in all repositories
     ignores = [
-      ".DS_Store"
-      "*.swp"
-      ".env"
-      ".direnv"
-      "node_modules"
-      ".vscode"
-      ".idea"
+      ".DS_Store"                        # macOS metadata
+      "*.swp"                           # Vim swap files
+      ".env"                            # Environment variables
+      ".direnv"                         # Direnv cache
+      "node_modules"                    # Node.js dependencies
+      ".vscode"                         # VS Code settings
+      ".idea"                           # IntelliJ settings
     ];
   };
 
-  # Git-specific shell aliases
+  # Shell Integration
+  # ZSH aliases for Git workflows
   programs.zsh.shellAliases = {
-    # Basic git operations
-    # Push current branch to origin
-    # Example: gp
-    gp = "git push";
+    # Basic Operations
+    # Quick access to common Git commands
+    gp = "git push";                     # Push to remote
+    gl = "git pull";                     # Pull from remote
+    gs = "git status";                   # Check status
+    gd = "git diff";                     # View changes
 
-    # Pull latest changes from current branch
-    # Example: gl
-    gl = "git pull";
+    # Advanced Operations
+    # Complex Git workflows simplified
+    gpush = "git add . && git commit -m";            # Stage and commit
+    gpushf = "git add . && git commit --amend --no-edit && git push -f";  # Amend and force push
+    gpushnew = "git push -u origin HEAD";            # Push new branch
 
-    # Check repository status
-    # Example: gs
-    gs = "git status";
+    # Remote Management
+    # Handle remote repository operations
+    gare = "git remote add upstream";               # Add upstream
+    gre = "git remote -v";                          # List remotes
+    gcan = "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit -v -a --no-edit --amend";  # Amend changes
+    gfa = "git fetch --all";                        # Fetch all remotes
+    gfap = "git fetch --all --prune";               # Fetch and clean
 
-    # View uncommitted changes
-    # Example: gd file.txt
-    gd = "git diff";
-    
-    # Quick add and push operations
-    # Stage all changes and commit with message
-    # Example: gpush "feat: add new button"
-    gpush = "git add . && git commit -m";
-
-    # Amend current commit and force push
-    # Example: gpushf
-    # CAUTION: Only use on personal branches!
-    gpushf = "git add . && git commit --amend --no-edit && git push -f";
-
-    # Push new branch and set upstream
-    # Example: gpushnew
-    gpushnew = "git push -u origin HEAD";
-    
-    # Remote operations
-    # Add upstream remote for forks
-    # Example: gare https://github.com/org/repo.git
-    gare = "git remote add upstream";
-
-    # List all remotes and their URLs
-    # Example: gre
-    gre = "git remote -v";
-
-    # Add all changes to previous commit
-    # Example: gcan
-    gcan = "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit -v -a --no-edit --amend";
-
-    # Fetch all remotes
-    # Example: gfa
-    gfa = "git fetch --all";
-
-    # Fetch all remotes and prune deleted branches
-    # Example: gfap
-    gfap = "git fetch --all --prune";
-    
-    # Tools
-    # Open LazyGit terminal UI
-    # Example: lg
-    lg = "lazygit";
+    # Development Tools
+    # External tool integration
+    lg = "lazygit";                                 # Terminal UI
   };
 
-  # Git utility functions
+  # Utility Functions
+  # Custom Git helper functions
   programs.zsh.initExtra = ''
-    # Get the default branch (main/master) of the repository
-    # Example: git checkout $(gitdefaultbranch)
+    # Branch Detection
+    # Determine default branch name
     function gitdefaultbranch() {
       git remote show origin | grep 'HEAD' | cut -d':' -f2 | sed -e 's/^ *//g' -e 's/ *$//g'
     }

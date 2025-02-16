@@ -1,6 +1,12 @@
 # home-manager/modules/zsh.nix
 #
 # Zsh shell configuration
+#
+# Purpose:
+# - Provides a fully-featured ZSH environment
+# - Integrates development tools and utilities
+# - Sets up consistent shell experience
+#
 # Manages:
 # - Shell environment setup
 # - PATH management
@@ -18,80 +24,40 @@
 # - Custom aliases for development workflow
 # - Syntax highlighting and autosuggestions
 # - Git integration
+#
+# Key Bindings:
+# - ALT-Left/Right: Word navigation
+# - CTRL-Delete/Backspace: Word deletion
+# - CTRL-U: Clear line before cursor
+# - CTRL-A/E: Start/end of line
+# - ALT-Up/Down: Directory history
+# - CTRL-_: Open file in VSCode with FZF
+# - ALT-d: FZF directory navigation
+# - CTRL-G: FZF git status
+#
+# Custom Functions:
+# - fzf-git-status: Interactive git status
+# - fzf-cd-with-hidden: Directory navigation with hidden files
+#
+# Plugins:
+# - git: Enhanced git integration
+# - git-extras: Additional git utilities
+# - docker: Docker commands and completion
+# - docker-compose: Docker Compose support
+# - extract: Smart archive extraction
+# - mosh: Mobile shell support
+# - timer: Command execution timing
+# - zsh-autosuggestions: Command suggestions
+# - zsh-syntax-highlighting: Syntax highlighting
+#
+# Integration:
+# - Works with aliases.nix for command shortcuts
+# - Supports git.nix for Git functionality
+# - Uses starship from shell.nix for prompt
+# - Compatible with tmux configuration
 
 { config, pkgs, ... }:
 
-let
-  generateAliases = pkgs: {
-    # VS Code
-    c = "code .";
-    ce = "code . && exit";
-    cdf = "cd $(ls -d */ | fzf)";
-
-    # Nix commands
-    rebuild = "cd ~/Documents/dotfile && darwin-rebuild switch --flake .#ss-mbp && cd -";
-    update = ''
-      echo "🔄 Updating Nix flake..." && \
-      cd ~/Documents/dotfile && \
-      nix flake update && \
-      echo "🔄 Rebuilding system..." && \
-      darwin-rebuild switch --flake .#ss-mbp && \
-      cd - && \
-      echo "✨ System update complete!"
-    '';
-
-    # Directory operations
-    mkdir = "mkdir -p";
-    rm = "rm -rf";
-    cp = "cp -r";
-    mv = "mv -i";
-    dl = "cd $HOME/Downloads";
-    docs = "cd $HOME/Documents";
-
-    # Editor
-    v = "nvim";
-    vim = "nvim";
-
-    # exa aliases
-    ls = "exa -l";
-    lsa = "exa -l -a";
-    lst = "exa -l -T";
-    lsr = "exa -l -R";
-
-    # Terraform aliases
-    tf = "terraform";
-    tfin = "terraform init";
-    tfp = "terraform plan";
-    tfwst = "terraform workspace select";
-    tfwsw = "terraform workspace show";
-    tfwls = "terraform workspace list";
-
-    # Docker aliases
-    d = "docker";
-    dc = "docker-compose";
-
-    # Common utilities
-    ipp = "curl https://ipecho.net/plain; echo";
-
-    # macOS specific aliases
-    cleanup = if pkgs.stdenv.isDarwin then ''
-      echo "🧹 Cleaning up system..." && \
-      echo "🗑️  Removing .DS_Store files..." && \
-      find . -type f -name '*.DS_Store' -ls -delete && \
-      echo "📝 Cleaning system logs..." && \
-      sudo rm -rf /private/var/log/asl/*.asl 2>/dev/null || echo "⚠️  Could not clean system logs (permission denied)" && \
-      echo "🧹 Cleaning quarantine events..." && \
-      sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent' 2>/dev/null || echo "⚠️  Could not clean quarantine events" && \
-      echo "✨ Cleanup complete!"
-    '' else "";
-
-    # Shell commands
-    restart = "clear && exec zsh";       # Restart the shell
-    re = "clear && exec zsh";            # Short alias for restart
-    reload = "clear && source ~/.zshrc"; # Reload config
-    rl = "clear && source ~/.zshrc";     # Short alias for reload
-  };
-in
 {
   programs.zsh = {
     enable = true;
@@ -100,16 +66,20 @@ in
     
     # Add environment variables
     sessionVariables = {
+      # Ensure all necessary paths are available
       PATH = "$HOME/.local/bin:$HOME/Library/Application Support/pypoetry/venv/bin:$PATH";
       NIX_PATH = "$HOME/.nix-defexpr/channels:$NIX_PATH";
+      FPATH = "$HOME/.zsh/completion:$FPATH";
     };
 
     initExtra = ''
+      # Theme Setup
       # Set up Starship with Gruvbox Rainbow preset
       if [ ! -f ~/.config/starship.toml ] || ! grep -q "gruvbox" ~/.config/starship.toml; then
         starship preset gruvbox-rainbow -o ~/.config/starship.toml
       fi
 
+      # Development Tools Setup
       # Initialize SDKMAN if installed
       if [ -d "$HOME/.sdkman" ]; then
         export SDKMAN_DIR="$HOME/.sdkman"
@@ -117,13 +87,14 @@ in
       fi
 
       # Initialize pyenv
-      if [ -d "$HOME/.pyenv" ]; then
+      if command -v pyenv &> /dev/null; then
         export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
         eval "$(pyenv init -)"
+        eval "$(pyenv init --path)"
       fi
 
-      # Ensure pipx and poetry paths are available
+      # Ensure UV is in PATH
       if [ -d "$HOME/.local/bin" ]; then
         export PATH="$HOME/.local/bin:$PATH"
       fi
@@ -131,10 +102,114 @@ in
       if [ -d "$HOME/Library/Application Support/pypoetry/venv/bin" ]; then
         export PATH="$HOME/Library/Application Support/pypoetry/venv/bin:$PATH"
       fi
+
+      # Initialize zoxide
+      eval "$(zoxide init zsh)"
+      
+      # FZF Integration Widgets
+      # Interactive git status with file preview
+      function fzf-git-status() {
+        local selections=$(
+          git status --porcelain | \
+          fzf --ansi \
+              --preview 'if [ -f {2} ]; then
+                          bat --color=always --style=numbers {2}
+                        elif [ -d {2} ]; then
+                          tree -C {2}
+                        fi' \
+              --preview-window right:70% \
+              --multi
+        )
+        if [ -n "$selections" ]; then
+          LBUFFER+="$(echo "$selections" | awk '{print $2}' | tr '\n' ' ')"
+        fi
+        zle reset-prompt
+      }
+      zle -N fzf-git-status
+      
+      # Directory navigation with hidden files
+      function fzf-cd-with-hidden() {
+        local dir
+        dir=$(find "''${1:-$PWD}" -type d 2> /dev/null | fzf +m) && cd "$dir"
+        zle reset-prompt
+      }
+      zle -N fzf-cd-with-hidden
+      
+      # History and Directory Navigation
+      # Enable up/down arrow history search
+      autoload -U up-line-or-beginning-search
+      autoload -U down-line-or-beginning-search
+      zle -N up-line-or-beginning-search
+      zle -N down-line-or-beginning-search
+      # Enable directory history navigation
+      zle -N dirhistory_zle_dirhistory_up
+      zle -N dirhistory_zle_dirhistory_down
+      
+      # Key Binding Configuration
+      # Word Navigation
+      # ALT-Left/Right for word navigation
+      bindkey "^[f" forward-word
+      bindkey "^[b" backward-word
+      
+      # Word Deletion
+      # CTRL-Delete/Backspace for word deletion
+      bindkey "^[[3;5~" kill-word
+      bindkey "^H" backward-kill-word
+      
+      # Line Editing
+      # CTRL-U clears line before cursor
+      bindkey "^U" backward-kill-line
+      
+      # ALT-Backspace deletes word before cursor
+      bindkey "^[^?" backward-kill-word
+      
+      # Cursor Movement
+      # CTRL-A/E for start/end of line (like in Emacs)
+      bindkey "^A" beginning-of-line
+      bindkey "^E" end-of-line
+      
+      # Directory Navigation
+      # ALT-Up/Down for directory history
+      bindkey "^[[1;3A" dirhistory_zle_dirhistory_up
+      bindkey "^[[1;3B" dirhistory_zle_dirhistory_down
+      
+      # FZF Enhanced Functions
+      # Directory navigation with preview
+      fzf-cd-with-hidden() {
+        local dir
+        dir=$(find "''${1:-$PWD}" -type d 2> /dev/null | fzf +m) && cd "$dir"
+      }
+      
+      # Git status with preview
+      fzf-git-status() {
+        local selections=$(
+          git status --porcelain | \
+          fzf --ansi \
+              --preview 'if [ -f {2} ]; then
+                          bat --color=always --style=numbers {2}
+                        elif [ -d {2} ]; then
+                          tree -C {2}
+                        fi' \
+              --preview-window right:70% \
+              --multi
+        )
+        if [ -n "$selections" ]; then
+          echo "$selections" | awk '{print $2}' | tr '\n' ' '
+        fi
+      }
+      
+      # FZF Key Bindings
+      # CTRL-_ to open file in VSCode
+      bindkey -s '^_' 'code $(fzf)^M'
+      # ALT-d for directory navigation
+      bindkey "^[d" fzf-cd-with-hidden
+      # CTRL-G for git status
+      bindkey '^G' fzf-git-status
     '';
 
     oh-my-zsh = {
       enable = true;
+      # Core functionality plugins
       plugins = [
         "git"
         "git-extras"
@@ -147,8 +222,10 @@ in
       theme = "agnoster";
     };
 
+    # Additional ZSH plugins
     plugins = [
       {
+        # Command auto-completion suggestions
         name = "zsh-autosuggestions";
         src = pkgs.fetchFromGitHub {
           owner = "zsh-users";
@@ -158,6 +235,7 @@ in
         };
       }
       {
+        # Syntax highlighting for commands
         name = "zsh-syntax-highlighting";
         src = pkgs.fetchFromGitHub {
           owner = "zsh-users";
@@ -167,8 +245,6 @@ in
         };
       }
     ];
-
-    shellAliases = generateAliases pkgs;
   };
 
   # Explicitly enable home-manager to manage zsh

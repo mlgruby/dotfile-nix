@@ -1,13 +1,43 @@
 # Configuration for Alacritty, the GPU enhanced terminal emulator.
+#
+# Purpose:
+# - Configures Alacritty terminal with focus on performance and aesthetics
+# - Sets up consistent development environment
+# - Integrates with tmux for session management
+#
+# Features:
+# - Theme: Gruvbox Dark for optimal readability
+# - Font: JetBrains Mono Nerd Font with full variant support
+# - Window:
+#   - Buttonless design for clean look
+#   - 70% opacity with blur for depth
+#   - Dynamic title support
+#   - 10px padding for comfort
+#
+# Integration:
+# - Auto-starts with tmux (main session)
+# - Supports Nerd Font symbols for prompt
+# - Compatible with shell configuration (zsh.nix)
+#
+# Key Bindings:
+# - Cmd+N: Create new window
+#
+# Performance:
+# - GPU-accelerated rendering
+# - 10k lines scroll history
+# - Optimized cursor blinking
+
 [general]
 import = [
     "~/.config/alacritty/themes/themes/gruvbox_dark.toml"
 ]
 
 [ env ]
+# Ensure proper color support
 TERM = "xterm-256color"
 
 [window]
+# Window appearance and behavior
 padding = { x = 10, y = 10 }
 decorations = "Buttonless"
 startup_mode = "Fullscreen"
@@ -16,6 +46,7 @@ blur = true
 dynamic_title = true
 
 [font]
+# JetBrains Mono with all variants for rich text support
 normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
@@ -23,17 +54,26 @@ bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
 size = 16.0
 
 [cursor]
+# Block cursor with moderate blink rate
 style = { shape = "Block", blinking = "On" }
 blink_interval = 750
 
 [mouse]
+# Hide mouse when typing for cleaner view
 hide_when_typing = true
 
 [keyboard]
+# Custom key bindings for window management
 bindings = [
     { key = "N", mods = "Command", action = "CreateNewWindow" }
 ]
 
 [scrolling]
+# Generous scroll history with faster multiplier
 history = 10000
-multiplier = 3 
+multiplier = 3
+
+# Auto-start with tmux session
+[terminal.shell]
+program = "zsh"
+args = ["-l", "-c", "tmux new-session -A -s main"]  # Auto-attach to 'main' session
