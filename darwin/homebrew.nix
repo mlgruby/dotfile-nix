@@ -39,13 +39,13 @@
 # - Use cleanup = "zap" for aggressive cleanup of old versions
 # - Brewfile is auto-generated for backup/replication
 
-{ config, lib, ... }: {
+{ config, pkgs, lib, userConfig, ... }: {
   nix-homebrew = {
     # Install Homebrew under the default prefix
     enable = true;
 
     # Set Homebrew owner
-    user = "satyasheel";
+    user = userConfig.username;
 
     # Handle existing Homebrew installations
     autoMigrate = true;

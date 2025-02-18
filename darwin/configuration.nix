@@ -48,7 +48,7 @@
 # - Some features need manual intervention
 # - Check activation script output for status
 
-{ config, pkgs, lib, ... }: {
+{ config, pkgs, lib, userConfig, ... }: {
   # Nix package manager settings
   nix = {
     settings = {
@@ -58,7 +58,7 @@
       # Enable flakes and new CLI
       experimental-features = [ "nix-command" "flakes" ];
       # System administrators and trusted users
-      trusted-users = [ "@admin" "satyasheel" ];
+      trusted-users = [ "@admin" userConfig.username ];
     };
   };
 
@@ -236,7 +236,7 @@
   home-manager = {
     useGlobalPkgs = true;      # Use system-level packages
     useUserPackages = true;     # Enable user-specific packages
-    users.satyasheel = import ../home-manager;
+    users.${userConfig.username} = import ../home-manager;
     backupFileExtension = lib.mkForce "bak";
   };
 

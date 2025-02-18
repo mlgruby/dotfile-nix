@@ -26,3 +26,5 @@ build/
 .local/state/nix
 # Darwin system files
 /private/var/folders/
+# User Configuration
+user-config.nix
