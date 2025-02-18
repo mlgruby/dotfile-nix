@@ -27,8 +27,9 @@
 # - Main shell configuration is in modules/zsh.nix
 # - This file focuses on shell utilities and prompt
 
-{ config, pkgs, ... }:
-
+{ config, pkgs, lib, ... }@args: let
+  inherit (args) hostname;
+in
 {
   # Starship: Cross-shell prompt
   programs.starship = {
@@ -43,5 +44,9 @@
     enableZshIntegration = true;
     # Additional FZF settings are in zsh.nix
     # and various FZF-enhanced aliases in aliases.nix
+  };
+
+  programs.zsh = {
+    enable = true;
   };
 }

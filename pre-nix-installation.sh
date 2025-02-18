@@ -467,10 +467,10 @@ if [[ $setup_dotfiles =~ ^[Yy]$ ]]; then
     # Install and build nix-darwin
     export NIX_CONFIG="experimental-features = nix-command flakes"
     cd "$HOME/Documents/dotfile"  # Change to the directory containing flake.nix
-    nix run nix-darwin -- switch --flake .#ss-mbp || handle_error "Failed to install nix-darwin"
+    nix run nix-darwin -- switch --flake .#"$HOSTNAME" || handle_error "Failed to install nix-darwin"
     
     echo -e "${GREEN}nix-darwin installed successfully!${NC}"
-    echo -e "${BLUE}You can now use 'cd ~/Documents/dotfile && darwin-rebuild switch --flake .#ss-mbp' to update your system${NC}"
+    echo -e "${BLUE}You can now use 'cd ~/Documents/dotfile && darwin-rebuild switch --flake .#$HOSTNAME' to update your system${NC}"
 fi
 
 # Stage 6: Shell Configuration
@@ -501,16 +501,50 @@ fi
 echo -e "${BLUE}Do you want to setup Git SSH for GitHub? (y/n)${NC}"
 read -r setup_git_ssh
 if [[ $setup_git_ssh =~ ^[Yy]$ ]]; then
-    # Git Identity Configuration
-    # Configure Git
+    # Get user information
+    echo -e "${BLUE}Enter your macOS username (the one you use to log in):${NC}"
+    read -r USERNAME
+    # Verify username matches the current user
+    if [ "$USERNAME" != "$USER" ]; then
+        echo -e "${RED}Warning: The username you entered ($USERNAME) doesn't match your current macOS username ($USER)${NC}"
+        echo -e "${BLUE}Do you want to continue anyway? (y/n)${NC}"
+        read -r continue_anyway
+        if [[ ! $continue_anyway =~ ^[Yy]$ ]]; then
+            echo -e "${RED}Aborting. Please run the script again with your correct macOS username.${NC}"
+            exit 1
+        fi
+    fi
+    echo -e "${BLUE}Enter your full name:${NC}"
+    read -r FULLNAME
+    echo -e "${BLUE}Enter your email:${NC}"
+    read -r EMAIL
+    echo -e "${BLUE}Enter your GitHub username:${NC}"
+    read -r GITHUB_USERNAME
+    echo -e "${BLUE}Enter your desired hostname (e.g., macbook-pro):${NC}"
+    read -r HOSTNAME
+
+    # Git Configuration
     echo -e "${BLUE}Enter your Git name:${NC}"
     read -r git_name
     echo -e "${BLUE}Enter your Git email:${NC}"
     read -r git_email
-    
+
+    # Configure Git globally
     git config --global user.name "$git_name"
     git config --global user.email "$git_email"
     
+    # Create/Update user-config.nix
+    echo -e "${BLUE}Creating user configuration...${NC}"
+    cat > user-config.nix << EOF
+    {
+      username = "$USERNAME";
+      fullName = "$FULLNAME";
+      email = "$EMAIL";
+      githubUsername = "$GITHUB_USERNAME";
+      hostname = "$HOSTNAME";
+    }
+    EOF
+
     # SSH Key Generation
     # Generate SSH key
     echo -e "${BLUE}Generating SSH key...${NC}"
@@ -580,4 +614,4 @@ ln -sf "$HOME/Documents/dotfile/nix/zshrc" "$HOME/.zshrc" || handle_error "Faile
 echo -e "${GREEN}Pre-installation setup completed!${NC}"
 echo -e "${BLUE}Next steps:${NC}"
 echo -e "1. Open a new terminal window to load all changes"
-echo -e "2. Run 'darwin-rebuild switch --flake .#ss-mbp' if you make any changes to your configuration"
+echo -e "2. Run 'darwin-rebuild switch --flake .#$HOSTNAME' if you make any changes to your configuration"

@@ -89,14 +89,16 @@
 #     # Returns 'main' or 'master' depending on repository
 #     # Usage: git checkout $(gitdefaultbranch)
 
-{ config, pkgs, ... }: {
+{ config, pkgs, lib, ... }@args: let
+  inherit (args) fullName email;
+in {
   programs.git = {
     enable = true;
     
     # User Identity
     # Used for commit authorship
-    userName = "Satyasheel";
-    userEmail = "satyasheel@lightricks.com";
+    userName = fullName;
+    userEmail = email;
 
     # Git Core Configuration
     # Global settings for all repositories

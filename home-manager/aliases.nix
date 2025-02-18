@@ -47,9 +47,8 @@
 # - Platform-specific features are guarded
 # - Uses Home Manager config paths
 
-{ pkgs, config, ... }:
-
-let
+{ pkgs, config, ... }@args: let
+  inherit (args.userConfig) username hostname;
   # System Detection
   # Determine operating system for conditional aliases
   isMacOS = pkgs.stdenv.isDarwin;
@@ -61,18 +60,43 @@ let
 
   # Common aliases for both platforms
   commonAliases = {
-    # Editor and IDE
-    # Quick VS Code commands
-    c = "code .";                    # Open current directory
-    ce = "code . && exit";          # Open and close terminal
-    cdf = "cd $(ls -d */ | fzf)";   # Fuzzy find directories
+    # Core System Commands
+    # System state management
+    rollback = ''
+      generation=$(darwin-rebuild list-generations | 
+        fzf --header "Select a generation to roll back to" \
+            --preview "echo {} | grep -o '[0-9]\\+' | xargs -I % sh -c 'nix-store -q --references /nix/var/nix/profiles/system-%'" \
+            --preview-window "right:60%" \
+            --layout=reverse) &&
+      if [ -n "$generation" ]; then
+        generation_number=$(echo $generation | grep -o '[0-9]\+' | head -1) &&
+        echo "Rolling back to generation $generation_number..." &&
+        darwin-rebuild switch --switch-generation $generation_number
+      fi
+    '';
 
     # Shell Management
-    # Commands for managing shell state
     reload = "source ${homeDir}/.zshrc && clear";  # Reload shell configuration
     rl = "reload";                                 # Short for reload
     restart = "exec zsh";                          # Start a completely new shell
     re = "restart";                                # Short for restart
+
+    # Navigation and File Management
+    dotfile = "cd ${dotfileDir}";                 # Navigate to dotfiles
+    dl = "cd ${homeDir}/Downloads";               # Quick downloads access
+    docs = "cd ${homeDir}/Documents";             # Quick documents access
+    cdf = "cd $(ls -d */ | fzf)";                # Fuzzy find directories
+
+    # Modern CLI Tools
+    cat = "bat";                                  # Better cat
+    ls = "eza -l";                               # Better ls
+    find = "fd";                                 # Better find
+    top = "btop";                                # Better top
+
+    # Editor and IDE
+    # Quick VS Code commands
+    c = "code .";                    # Open current directory
+    ce = "code . && exit";          # Open and close terminal
 
     # File Operations
     # Enhanced basic commands
@@ -80,11 +104,6 @@ let
     rm = "rm -rf";                  # Recursive force remove
     cp = "cp -r";                   # Recursive copy
     mv = "mv -i";                   # Interactive move
-
-    # Directory Navigation
-    # Quick directory access
-    dl = "cd ${homeDir}/Downloads";
-    docs = "cd ${homeDir}/Documents";
 
     # Text Editors
     # Default editor aliases
@@ -94,7 +113,6 @@ let
     # Modern Replacements
     # Enhanced alternatives to standard commands
     # eza (ls replacement)
-    ls = "eza -l";                  # List in long format
     lsa = "eza -la";                # List all files including hidden
     lst = "eza -T";                 # Tree view
     lsta = "eza -Ta";               # Tree view with hidden files
@@ -129,7 +147,6 @@ let
     # System Monitoring
     # Performance and resource monitoring tools
     # btop - for detailed system analysis
-    top = "btop";               # Full system monitor
     htop = "btop";              # Replace htop with btop
     
     # Disk Usage
@@ -162,11 +179,6 @@ let
     cheat = "tldr";          # Quick command cheatsheet
     # Documentation Updates
     tldr-update = "tldr --update";  # Update documentation database
-
-    # Modern CLI Replacements
-    # Better alternatives to traditional commands
-    cat = "bat";                         # Modern cat with syntax highlighting
-    find = "fd";                         # Faster and simpler find
 
     # File Search Utilities
     # Enhanced fd (find) commands
@@ -268,12 +280,29 @@ let
     # Quick Session
     # Default session management
     t = "tmux new-session -A -s main";  # Attach to 'main' or create it
+
+    # Development Shortcuts
+    # Quick access to dotfiles
+    codedot = ''
+      if command -v cursor &> /dev/null; then
+        cursor "${dotfileDir}"    # Open in Cursor if available
+      else
+        code "${dotfileDir}"      # Fall back to VS Code
+      fi
+    '';   # Smart editor selection for dotfiles
   };
 
   # macOS specific aliases
   macAliases = if isMacOS then {
-    # System Maintenance
-    # Comprehensive system cleanup script
+    # System Management
+    rebuild = "cd ${dotfileDir} && darwin-rebuild switch --flake .#\"$(hostname)\" --option max-jobs auto && cd -";
+    update = ''
+      echo "🔄 Updating Nix flake..." && \
+      cd ${dotfileDir} && \
+      nix --option max-jobs auto flake update && \
+      echo "🔄 Rebuilding system..." && rebuild && \
+      echo "✨ System update complete!"
+    '';
     cleanup = ''
       # Start cleanup process
       echo "🧹 Running system cleanup..." && \
@@ -328,23 +357,6 @@ let
       echo "✨ Cleanup complete!"
     '';
     
-    # System Update Commands
-    # Flake and system update management
-    update = ''
-      # Update Nix Flake
-      echo "🔄 Updating Nix flake..." && \
-      cd ${dotfileDir} && \
-      nix --option max-jobs auto flake update && \
-      # Rebuild System
-      echo "🔄 Rebuilding system..." && \
-      darwin-rebuild switch --flake .#ss-mbp --option max-jobs auto && \
-      echo "✨ System update complete!"
-    '';
-
-    # Quick System Rebuild
-    # Rebuild system without updating flake
-    rebuild = "cd ${dotfileDir} && darwin-rebuild switch --flake .#ss-mbp --option max-jobs auto && cd -";
-    
     # Finder Controls
     # Toggle visibility settings
     show = "defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder";
@@ -361,8 +373,13 @@ let
 
     # Development Shortcuts
     # Quick access to dotfiles
-    codedot = "code ${dotfileDir}";     # Open dotfiles in VS Code
-    dotfile = "cd ${dotfileDir}";       # Navigate to dotfiles
+    codedot = ''
+      if command -v cursor &> /dev/null; then
+        cursor "${dotfileDir}"    # Open in Cursor if available
+      else
+        code "${dotfileDir}"      # Fall back to VS Code
+      fi
+    '';   # Smart editor selection for dotfiles
   } else {};
 
   # Linux specific aliases
@@ -372,7 +389,13 @@ let
     update = "sudo apt update && sudo apt -y --allow-downgrades full-upgrade && sudo apt -y autoremove && cs update";
     # Development Shortcuts
     dotfile = "cd ${dotfileDir}";       # Navigate to dotfiles
-    codedot = "code ${dotfileDir}";     # Open dotfiles in VS Code
+    codedot = ''
+      if command -v code &> /dev/null; then
+        code "${dotfileDir}"      # Use VS Code on Linux
+      else
+        nano "${dotfileDir}"      # Fall back to nano
+      fi
+    '';   # Smart editor selection for dotfiles
   } else {};
 
 in

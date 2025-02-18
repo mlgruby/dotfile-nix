@@ -36,7 +36,7 @@
 # - Supports M1/M2 Macs (aarch64-darwin)
 
 {
-  description = "Satya's nix-darwin system configuration";
+  description = "Nix-darwin system configuration";
 
   inputs = {
     # Package Sources
@@ -71,10 +71,13 @@
     };
   };
 
-  outputs = { self, darwin, nixpkgs, home-manager, nix-homebrew, ... }:
+  outputs = { self, darwin, nixpkgs, home-manager, nix-homebrew, ... }@inputs:
   let
     system = "aarch64-darwin";
-    username = "satyasheel";
+    # Import user configuration
+    userConfig = if builtins.pathExists ./user-config.nix
+      then import ./user-config.nix
+      else import ./user-config.default.nix;
     nixpkgsConfig = {
       config = {
         allowUnfree = true;
@@ -84,8 +87,9 @@
   {
     # Darwin System Configuration
     # Main system definition for MacBook Pro
-    darwinConfigurations."ss-mbp" = darwin.lib.darwinSystem {
+    darwinConfigurations.${userConfig.hostname} = darwin.lib.darwinSystem {
       inherit system;
+      specialArgs = { inherit userConfig; };
       modules = [
         # Core System Modules
         # Base darwin configuration
@@ -103,14 +107,15 @@
             backupFileExtension = "bak";   # Backup extension
             # User-specific Arguments
             extraSpecialArgs = {
-              inherit username;
+              inherit userConfig;
+              inherit (userConfig) username fullName email githubUsername hostname;
             };
             # User Configuration
-            users.${username} = { pkgs, lib, ... }: {
+            users.${userConfig.username} = { pkgs, lib, ... }: {
               imports = [ ./home-manager/default.nix ];
               home = {
-                username = lib.mkForce username;
-                homeDirectory = lib.mkForce "/Users/${username}";
+                username = lib.mkForce userConfig.username;
+                homeDirectory = lib.mkForce "/Users/${userConfig.username}";
                 stateVersion = "23.11";
               };
               programs.home-manager.enable = true;
@@ -129,7 +134,7 @@
           # Nix Settings
           # Package manager configuration
           nix.settings = {
-            trusted-users = [ "root" username ];    # Trust specific users
+            trusted-users = [ "root" userConfig.username ];    # Trust specific users
             keep-derivations = true;               # Keep build dependencies
             keep-outputs = true;                   # Keep build outputs
             experimental-features = [ "nix-command" "flakes" ];  # Enable modern features
@@ -188,8 +193,8 @@
           };
 
           # User Account Setup
-          users.users.${username} = {
-            home = "/Users/${username}";
+          users.users.${userConfig.username} = {
+            home = "/Users/${userConfig.username}";
             shell = "${pkgs.zsh}/bin/zsh";
           };
         })
@@ -197,7 +202,7 @@
     };
 
     # Package Exports
-    darwinPackages = self.darwinConfigurations."ss-mbp".pkgs;
+    darwinPackages = self.darwinConfigurations.${userConfig.hostname}.pkgs;
   };
 }
   

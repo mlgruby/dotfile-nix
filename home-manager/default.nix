@@ -41,10 +41,8 @@
 # - Works with darwin/configuration.nix
 # - Uses homebrew.nix for macOS packages
 # - Coordinates with aliases.nix for shell commands
-{ config, pkgs, lib, ... }: {
+{ config, pkgs, lib, username, fullName, email, githubUsername, userConfig, ... }: {
   imports = [
-    # Version Control
-    ./git.nix
     # Shell Environment
     ./shell.nix
     ./modules/tmux.nix
@@ -72,7 +70,7 @@
     zsh = {
       enable = true;
       # Import aliases from central location
-      shellAliases = import ./aliases.nix { inherit pkgs config; };
+      shellAliases = import ./aliases.nix { inherit pkgs config userConfig; };
     };
     # Fuzzy Finder Configuration
     fzf = {
@@ -91,8 +89,8 @@
 
   # User Environment Settings
   home = {
-    username = "satyasheel";
-    homeDirectory = "/Users/satyasheel";
+    username = username;
+    homeDirectory = "/Users/${username}";
     # Version for home-manager
     stateVersion = "23.11";
   };
