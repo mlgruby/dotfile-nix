@@ -1,29 +1,18 @@
 # home-manager/modules/gcloud.nix
 #
-# Google Cloud SDK configuration
+# Google Cloud SDK Shell Setup
 #
 # Purpose:
-# - Sets up Google Cloud SDK environment
-# - Configures shell integration
-# - Manages command-line completions
-#
-# Configures:
-# - Google Cloud SDK installation
-# - Default project settings
-# - Authentication methods
-# - Component management
-# - Configuration preferences
-# - Custom commands and aliases
+# - Adds gcloud to shell PATH
+# - Enables command completion
 #
 # Features:
-# - ZSH completions for gcloud commands
-# - Automatic PATH configuration
-# - Component auto-discovery
+# - SDK installed via Homebrew
+# - Works with ZSH configuration
 #
 # Integration:
-# - SDK installed via Homebrew (homebrew.nix)
-# - Works with ZSH configuration (zsh.nix)
-# - Compatible with other cloud tools (aws.nix)
+# - SDK installed via Homebrew
+# - Works with ZSH configuration
 #
 # Usage:
 # - Use 'gcloud' command for GCP operations

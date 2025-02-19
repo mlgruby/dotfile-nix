@@ -1,51 +1,54 @@
 # home/aliases.nix
 #
-# Shell alias configuration and helper functions
+# Shell Aliases and Functions
 #
 # Purpose:
-# - Provides consistent command shortcuts across systems
-# - Enhances common tools with better alternatives
-# - Streamlines development workflows
+# - Standardizes command-line workflows
+# - Enhances system interaction
+# - Automates common tasks
 #
-# Features:
-# - Platform-specific aliases (macOS/Linux)
-# - Enhanced file operations
-# - Development tool shortcuts
-# - System maintenance commands
-# - FZF-enhanced searching
+# Command Categories:
+# 1. System Operations:
+#    - System maintenance
+#    - Package management
+#    - Service control
+#    - Configuration reload
 #
-# Categories:
-# 1. Core Utilities:
-#    - File operations (ls, cp, mv, mkdir)
-#    - Modern replacements (bat, eza, fd)
-#    - Directory navigation
+# 2. File Management:
+#    - Enhanced navigation
+#    - Bulk operations
+#    - Search and filtering
+#    - Archive handling
 #
-# 2. Development Tools:
-#    - Git operations
-#    - Docker commands
-#    - Terraform management
-#    - VS Code shortcuts
+# 3. Development:
+#    - Version control
+#    - Container management
+#    - Infrastructure as code
+#    - IDE integration
 #
-# 3. System Management:
-#    - System monitoring (btop, duf)
-#    - Cleanup operations
-#    - Update commands
+# 4. Cloud & DevOps:
+#    - Cloud platform tools
+#    - Deployment helpers
+#    - Credential management
+#    - Environment switching
 #
-# 4. FZF Integrations:
-#    - File searching
-#    - Git operations
-#    - Process management
-#    - Docker containers
+# 5. Productivity:
+#    - Quick shortcuts
+#    - Fuzzy finding
+#    - Batch processing
+#    - Task automation
 #
 # Integration:
-# - Works with ZSH configuration
-# - Supports Home Manager paths
-# - Platform-aware functionality
+# - Platform detection (macOS/Linux)
+# - Environment awareness
+# - Dynamic path handling
+# - Command availability checks
 #
 # Note:
-# - Some aliases require external tools
-# - Platform-specific features are guarded
-# - Uses Home Manager config paths
+# - Some features need external tools
+# - OS-specific features are guarded
+# - Paths are managed by Home Manager
+# - Commands check for dependencies
 
 { pkgs, config, ... }@args: let
   inherit (args.userConfig) username hostname;
@@ -85,18 +88,18 @@
     dotfile = "cd ${dotfileDir}";                 # Navigate to dotfiles
     dl = "cd ${homeDir}/Downloads";               # Quick downloads access
     docs = "cd ${homeDir}/Documents";             # Quick documents access
-    cdf = "cd $(ls -d */ | fzf)";                # Fuzzy find directories
+    cdf = "cd $(ls -d */ | fzf)";                 # Fuzzy find directories
 
     # Modern CLI Tools
     cat = "bat";                                  # Better cat
-    ls = "eza -l";                               # Better ls
-    find = "fd";                                 # Better find
-    top = "btop";                                # Better top
+    ls = "eza -l";                                # Better ls
+    find = "fd";                                  # Better find
+    top = "btop";                                 # Better top
 
     # Editor and IDE
     # Quick VS Code commands
     c = "code .";                    # Open current directory
-    ce = "code . && exit";          # Open and close terminal
+    ce = "code . && exit";           # Open and close terminal
 
     # File Operations
     # Enhanced basic commands
@@ -127,9 +130,9 @@
     tfin = "terraform init";        # Initialize
     tfp = "terraform plan";         # Plan changes
     # Version Management
-    tfi = "tfswitch -i";           # Install version
-    tfu = "tfswitch -u";           # Use version
-    tfl = "tfswitch -l";           # List versions
+    tfi = "tfswitch -i";            # Install version
+    tfu = "tfswitch -u";            # Use version
+    tfl = "tfswitch -l";            # List versions
     # Workspace Management
     tfwst = "terraform workspace select";
     tfwsw = "terraform workspace show";
@@ -294,9 +297,14 @@
 
   # macOS specific aliases
   macAliases = if isMacOS then {
-    # System Management
+    # System Update Commands
+    # Quick System Rebuild
+    # Rebuild system without updating flake
     rebuild = "cd ${dotfileDir} && darwin-rebuild switch --flake .#\"$(hostname)\" --option max-jobs auto && cd -";
+
+    # Flake and system update management
     update = ''
+      # Update Nix Flake
       echo "🔄 Updating Nix flake..." && \
       cd ${dotfileDir} && \
       nix --option max-jobs auto flake update && \

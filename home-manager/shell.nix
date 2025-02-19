@@ -1,31 +1,40 @@
 # home/shell.nix
 #
-# Shell Environment Configuration
+# Shell Environment and Prompt
 #
 # Purpose:
-# - Configures shell prompt and utilities
-# - Sets up interactive shell features
-# - Manages shell integrations
+# - Provides consistent shell experience
+# - Configures core shell tools
+# - Integrates shell components
 #
-# Components:
-# 1. Starship Prompt:
-#    - Modern, minimal shell prompt
-#    - Customizable with starship.toml
-#    - Shows git status, Python env, etc.
+# Features:
+# 1. Command Line:
+#    - Starship prompt:
+#      - Modern, minimal design
+#      - Using gruvbox-rainbow theme
+#      - Managed via configuration.nix
 #
-# 2. FZF (Fuzzy Finder):
-#    - Fuzzy file and history search
-#    - ZSH integration for enhanced features
-#    - Used by various aliases in aliases.nix
+# 2. Search & Navigation:
+#    - FZF integration:
+#      - Command-line fuzzy finding
+#      - ZSH shell integration
+#      - Enhanced by aliases
+#
+# 3. Shell Configuration:
+#    - ZSH as primary shell
+#    - Basic shell enablement
+#    - Component coordination
 #
 # Integration:
-# - Works with zsh.nix for shell configuration
-# - Complements aliases.nix for enhanced commands
-# - Supports git workflow with lazygit.nix
+# - Works with configuration.nix for themes
+# - Connects with zsh.nix for shell settings
+# - Enhances aliases.nix functionality
 #
 # Note:
-# - Main shell configuration is in modules/zsh.nix
-# - This file focuses on shell utilities and prompt
+# - Minimal configuration here
+# - Main settings in other modules
+# - Focuses on core integrations
+# - See related files for details
 
 { config, pkgs, lib, ... }@args: let
   inherit (args) hostname;

@@ -1,32 +1,14 @@
 # home-manager/modules/aws.nix
 #
-# AWS CLI configuration module
+# AWS CLI Basic Setup
 #
 # Purpose:
-# - Configures AWS CLI environment and defaults
-# - Sets up shell integration and completions
-# - Manages regional preferences
-#
-# Manages:
-# - AWS CLI installation and setup
-# - Default region settings
-# - Output format preferences
-# - CLI behavior configurations
-# - AWS tools and utilities
-# - Session management
-#
-# Features:
-# - Command completion for AWS CLI
-# - Default region set to us-west-2
-# - Environment variable configuration
+# - Enables AWS CLI command completion
+# - Sets default AWS region
 #
 # Integration:
 # - AWS CLI installed via Homebrew (homebrew.nix)
 # - Credentials managed by aws-cred.nix
-# - Works with ZSH configuration (zsh.nix)
-# - Supports aliases defined in aliases.nix
-#
-# Note: Credentials are managed separately in aws-cred.nix
 
 { config, pkgs, ... }: {
   programs.zsh = {

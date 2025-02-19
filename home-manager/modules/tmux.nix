@@ -1,11 +1,11 @@
 # home-manager/modules/tmux.nix
 #
-# Tmux terminal multiplexer configuration
+# Tmux Configuration
 #
 # Purpose:
-# - Provides terminal session management
-# - Enables split panes and multiple windows
-# - Maintains persistent sessions
+# - Sets up tmux defaults
+# - Configures plugins
+# - Manages keybindings
 #
 # Features:
 # - Custom key bindings for easy navigation
@@ -43,14 +43,13 @@
 # - tmux-gruvbox: Theme integration
 #
 # Integration:
-# - Works with Alacritty terminal
-# - Matches system color scheme
-# - Supports system clipboard
+# - Works with shell config
+# - Uses TPM for plugins
 #
 # Note:
-# - Requires TPM (Tmux Plugin Manager)
-# - Some features need external dependencies
-# - Config auto-reloads on changes
+# - Uses Ctrl+a prefix
+# - Mouse mode enabled
+# - Vi keys supported
 
 { config, lib, pkgs, ... }: {
   programs.tmux = {

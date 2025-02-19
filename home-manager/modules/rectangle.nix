@@ -1,46 +1,14 @@
 # home-manager/modules/rectangle.nix
 #
-# Rectangle window management configuration
+# Rectangle Window Manager
 #
 # Purpose:
-# - Configures window management shortcuts
-# - Provides precise window positioning
-# - Enables multi-display window control
-#
-# Features:
-# - Window positioning shortcuts
-# - Multi-monitor support
-# - Thirds and halves layouts
-# - Window resizing controls
-#
-# Shortcuts (Command + Option +):
-# Window Halves:
-#   ←  Left half              →  Right half
-#   ↑  Top half              ↓  Bottom half
-#
-# Window Corners:
-#   U  Top left              I  Top right
-#   J  Bottom left           K  Bottom right
-#
-# Window Thirds:
-#   1  First third           2  Center third
-#   3  Last third            Q  First two thirds
-#   W  Last two thirds
-#
-# Window Controls:
-#   Return  Maximize         C  Center
-#   -      Smaller           =  Larger
-#   ↑+Shift Height only
-#
-# Display Management:
-# Command + Control + Option +
-#   →  Next display
-#   ←  Previous display
+# - Sets up window shortcuts
+# - Configures window layouts
 #
 # Integration:
-# - Works with macOS window system
-# - Compatible with multiple displays
-# - Supports application switching
+# - App from Homebrew
+# - System-wide shortcuts
 #
 # Note:
 # - Requires Rectangle.app (installed via homebrew.nix)
