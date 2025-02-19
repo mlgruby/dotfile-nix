@@ -97,4 +97,4 @@ programs.karabiner = {
   # Complex modifications
   # Key mappings
 };
-``` 
+```

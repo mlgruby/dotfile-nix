@@ -8,20 +8,30 @@
 # - Handles system activation and initialization
 #
 # Key components:
-# System Configuration:
+# 1. System Configuration:
 # - Nix package manager settings and trusted users
 # - Performance tuning (jobs and cores)
 # - Architecture settings (aarch64-darwin)
 # - Security settings (TouchID, sudo)
 #
-# Package Management:
+# 2. Package Management:
 # - System-wide package installation via Nix
 #   - Core system utilities (curl, wget, gnutls)
 #   - Python base (python3, pipx)
 #   - Build dependencies (openssl, readline, sqlite, zlib)
 #   - Cloud platform CLIs (AWS, GCP, Terraform)
 #
-# Development Environment:
+# 3. macOS Integration:
+# System preferences:
+# - Dark mode by default
+# - 24-hour time format
+# - TouchID for sudo
+# - Fast key repeat rate
+# - Column view in Finder
+# - Show hidden files
+# - Show path bar and status bar
+#
+# 4. Development Environment:
 # Post-activation scripts:
 # - SDKMAN and Java version management
 #   - Installs Java 8, 11, 17 (Amazon Corretto)
@@ -31,12 +41,11 @@
 #   - pyenv Python version management
 # - AWS credential management
 #
-# macOS Integration:
-# System preferences:
-# - Dark mode
-# - 24-hour time
-# - TouchID for sudo
-# - Application aliases in /Applications/Nix Apps
+# 5. Security:
+# - TouchID/password authentication for sudo
+# - Secure system defaults
+# - Guest login disabled
+# - Trusted users configuration
 #
 # Integration:
 # - Works with home-manager for user config
@@ -47,6 +56,8 @@
 # - Requires Xcode Command Line Tools
 # - Some features need manual intervention
 # - Check activation script output for status
+# - System configuration is validated during build
+# - Hostname must be valid (letters, numbers, hyphens only)
 
 { config, pkgs, lib, userConfig, ... }: {
   # Nix package manager settings

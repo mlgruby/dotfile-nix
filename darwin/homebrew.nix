@@ -7,21 +7,52 @@
 # - Handles GUI applications (casks) that aren't available via Nix
 # - Maintains consistent font installation across systems
 #
-# Manages:
-# - GUI Applications
-#   - Development: VSCode, JetBrains Toolbox
-#   - Terminal: Alacritty
-#   - Utilities: Rectangle, The Unarchiver
-#   - Browsers: Brave
+# Package Categories:
+# 1. CLI Tools:
+#    - Core System Utilities:
+#      - File and disk management
+#      - Directory navigation
+#      - Mac App Store integration
+#      - System monitoring
+#    - Development Tools:
+#      - Version control systems
+#      - Build tools and compilers
+#      - Development utilities
+#    - Text Processing:
+#      - Modern CLI alternatives
+#      - Search and filtering
+#      - Data format processors
+#    - Terminal Utilities:
+#      - System monitoring
+#      - Shell enhancements
+#      - Documentation tools
+#    - Cloud Tools:
+#      - Cloud provider CLIs
+#      - Infrastructure management
+#      - Version managers
 #
-# - CLI Tools (when Homebrew versions preferred)
-#   - git
-#   - starship (shell prompt)
+# 2. GUI Applications (Casks):
+#    - Development:
+#      - Code editors and IDEs
+#      - API testing tools
+#      - Containerization
+#    - Terminal:
+#      - GPU-accelerated emulators
+#    - System Tools:
+#      - Keyboard customization
+#      - Window management
+#      - File utilities
+#    - Browsers & Communication:
+#      - Web browsers
+#      - Messaging platforms
+#      - Cloud storage clients
+#    - Cloud Tools:
+#      - Cloud platform SDKs
 #
-# - Fonts
-#   - JetBrains Mono Nerd Font (primary)
-#   - Fira Code Nerd Font
-#   - Hack Nerd Font
+# 3. Fonts:
+#    - Programming fonts with ligatures
+#    - Terminal-optimized fonts
+#    - Nerd Font variants for icons
 #
 # Configuration:
 # - Auto-updates enabled
@@ -33,11 +64,15 @@
 #   1. They require frequent updates (e.g., browsers)
 #   2. They integrate better with macOS when installed via Homebrew
 #   3. The Homebrew version is more up-to-date
+#   4. They need system-level integration
+#   5. They handle auto-updates better
 #
 # Usage:
 # - New packages can be added to appropriate sections (brews/casks)
 # - Use cleanup = "zap" for aggressive cleanup of old versions
 # - Brewfile is auto-generated for backup/replication
+# - Packages are organized by category for better maintenance
+# - Comments explain package purposes and dependencies
 
 { config, pkgs, lib, userConfig, ... }: {
   nix-homebrew = {

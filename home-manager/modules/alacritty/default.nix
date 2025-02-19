@@ -1,27 +1,18 @@
 # home-manager/modules/alacritty/default.nix
 #
-# Alacritty terminal configuration
+# Alacritty Theme Management
 #
 # Purpose:
-# - Sets up Alacritty configuration and themes
-# - Manages theme repository and updates
-# - Links configuration files to correct locations
-#
-# Features:
-# - GPU-accelerated terminal emulator
-# - Automatic theme management:
-#   - Clones alacritty-theme repository
-#   - Updates themes on rebuild
-#   - Uses Gruvbox Dark theme
+# - Manages Alacritty themes
+# - Links configuration file
 #
 # Integration:
-# - Uses config.toml for main configuration
-# - Symlinks configuration to ~/.config/alacritty/
-# - Works with Home Manager activation system
+# - Links config.toml
+# - Uses Home Manager activation
 #
 # Note:
-# - Alacritty package is installed via Homebrew (homebrew.nix)
-# - Main configuration is in ./config.toml
+# - Package from Homebrew
+# - Config in config.toml
 
 { config, lib, pkgs, ... }:
 

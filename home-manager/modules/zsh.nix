@@ -1,11 +1,11 @@
 # home-manager/modules/zsh.nix
 #
-# Zsh shell configuration
+# ZSH Configuration
 #
 # Purpose:
-# - Provides a fully-featured ZSH environment
-# - Integrates development tools and utilities
-# - Sets up consistent shell experience
+# - Sets up shell environment
+# - Configures completions
+# - Manages history
 #
 # Manages:
 # - Shell environment setup
@@ -51,10 +51,14 @@
 # - zsh-syntax-highlighting: Syntax highlighting
 #
 # Integration:
-# - Works with aliases.nix for command shortcuts
-# - Supports git.nix for Git functionality
-# - Uses starship from shell.nix for prompt
-# - Compatible with tmux configuration
+# - Works with starship
+# - Uses fzf features
+# - Manages plugins
+#
+# Note:
+# - History sharing on
+# - Auto-completion enabled
+# - Syntax highlighting active
 
 { config, pkgs, ... }:
 
@@ -73,12 +77,8 @@
     };
 
     initExtra = ''
-      # Theme Setup
-      # Set up Starship with Gruvbox Rainbow preset
-      if [ ! -f ~/.config/starship.toml ] || ! grep -q "gruvbox" ~/.config/starship.toml; then
-        starship preset gruvbox-rainbow -o ~/.config/starship.toml
-      fi
-
+      # Starship prompt configured via starship.nix
+      
       # Development Tools Setup
       # Initialize SDKMAN if installed
       if [ -d "$HOME/.sdkman" ]; then

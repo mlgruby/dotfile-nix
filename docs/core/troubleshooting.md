@@ -58,6 +58,42 @@ cp user-config.template.nix user-config.nix
 # Error: Wrong hostname
 hostname  # Check current hostname
 # Update hostname in user-config.nix
+
+# Error: Missing required attributes in user-config.nix
+# This error occurs when required fields are missing from your configuration.
+# Required fields:
+# - username
+# - hostname
+# - email
+# - fullName
+# - githubUsername
+# Solution:
+# ```bash
+# # Check your configuration
+# cat user-config.nix
+# 
+# # Ensure all required fields are present
+# cp user-config.template.nix user-config.nix
+# # Edit user-config.nix with your details
+# ```
+
+# Error: Invalid hostname format
+# This error occurs when your hostname contains invalid characters.
+# Requirements:
+# - Use only letters (a-z, A-Z)
+# - Numbers (0-9)
+# - Single hyphens (not at start/end)
+# Examples:
+# - ✅ Valid: macbook-pro, dev-laptop, work-m1
+# - ❌ Invalid: macbook.pro, dev_laptop, -m1-mac
+# Solution:
+# ```bash
+# # Check current hostname
+# hostname
+# 
+# # Update hostname in user-config.nix
+# # Use a valid format like: macbook-pro
+# ```
 ```
 
 ### Build Errors
@@ -72,6 +108,26 @@ nix flake update
 ```
 
 ## Common Error Messages
+
+### "Unable to create new symlink" for Terraform
+
+This usually means:
+
+1. Existing terraform symlink
+2. Permission issues with `/usr/local/bin`
+
+Solution:
+
+```bash
+# Remove existing symlink
+sudo unlink /usr/local/bin/terraform
+
+# Fix permissions
+sudo chown -R $(whoami):admin /usr/local/bin
+
+# Rebuild system
+rebuild
+```
 
 ### "attribute 'foo' missing"
 

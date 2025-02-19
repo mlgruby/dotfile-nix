@@ -1,33 +1,14 @@
 # home-manager/modules/lazygit.nix
 #
-# LazyGit Terminal UI Configuration
+# LazyGit Configuration
 #
 # Purpose:
-# - Configures LazyGit, a simple terminal UI for git commands
-# - Provides custom keybindings for common git operations
-# - Sets up theme and UI preferences
-#
-# Features:
-# - File Tree: Visual directory structure
-# - Auto Operations:
-#   - Auto fetch for remote updates
-#   - Auto refresh for real-time status
-# - Custom Keybindings:
-#   - C: Quick commit
-#   - P: Push changes
-#   - p: Pull changes
-#   - R: Refresh view
-#   - q: Quit
-#   - y: Copy commit hash
-#
-# Theme:
-# - Dark theme optimized for terminal use
-# - Color-coded borders for active/inactive panels
-# - Blue highlighting for selected items
+# - Sets up LazyGit defaults
+# - Configures keybindings
 #
 # Integration:
-# - Works with aliases defined in aliases.nix
-# - Complements git configuration in git.nix
+# - Works with git.nix
+# - Used by shell aliases
 
 { config, pkgs, ... }:
 

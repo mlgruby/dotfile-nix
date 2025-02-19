@@ -241,5 +241,3 @@ This configuration was developed with the assistance of [Cursor](https://cursor.
 - Debug Nix expressions
 - Create comprehensive documentation
 - Maintain consistent code style
-
-The editor's AI capabilities significantly contributed to the development process and documentation quality.

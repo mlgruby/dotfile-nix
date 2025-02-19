@@ -1,46 +1,60 @@
 # home/default.nix
 #
-# User-specific configuration and package management
+# Main Home Manager configuration
 #
 # Purpose:
-# - Central configuration for Home Manager
-# - Manages user-specific packages and settings
-# - Coordinates all module imports
+# - Manages user environment and dotfiles
+# - Configures development tools and shells
+# - Sets up personal preferences and aliases
 #
-# Packages:
-# - Development tools
-#   - pyenv: Python version management
-#   - gh: GitHub CLI
-#   - lazygit: Git TUI
+# Configuration Areas:
+# 1. Shell Environment:
+#    - Modern shell setup
+#    - Custom prompt configuration
+#    - Command-line completion
+#    - Directory navigation
 #
-# - CLI utilities
-#   - eza: Modern ls replacement
-#   - fd: Find alternative
-#   - fzf: Fuzzy finder
-#   - ripgrep: Modern grep
+# 2. Development Tools:
+#    - Version control configuration
+#    - Code editing and IDE setup
+#    - Language-specific tooling
+#    - Build and debug tools
 #
-# - Cloud tools
-#   - google-cloud-sdk: GCP tools
+# 3. Terminal Enhancement:
+#    - GPU-accelerated terminal
+#    - Session management
+#    - Search and filtering
+#    - Text processing
 #
-# Imports:
-# Core:
-# - Shell configuration (zsh)
-# - Terminal emulator (alacritty)
-# - Keyboard customization (karabiner)
+# 4. Cloud & Infrastructure:
+#    - Cloud provider configurations
+#    - Infrastructure as Code tools
+#    - Credential management
+#    - Platform SDKs
 #
-# Development:
-# - Git configuration and utilities
-# - LazyGit TUI configuration
-# - GitHub CLI settings
+# 5. System Integration:
+#    - Keyboard customization
+#    - Window management
+#    - Application shortcuts
+#    - System utilities
 #
-# Cloud & Infrastructure:
-# - Cloud platform configs (aws, gcloud)
-# - AWS credentials management
+# Features:
+# - Modular configuration system
+# - Consistent tool configuration
+# - Cross-platform compatibility
+# - Automated environment setup
 #
 # Integration:
-# - Works with darwin/configuration.nix
-# - Uses homebrew.nix for macOS packages
-# - Coordinates with aliases.nix for shell commands
+# - Works with nix-darwin system config
+# - Complements Homebrew packages
+# - Manages dotfiles and configs
+#
+# Note:
+# - User-specific settings in user-config.nix
+# - Some features need manual setup
+# - Check module docs for details
+# - Configuration is declarative
+# - Changes require rebuild
 { config, pkgs, lib, username, fullName, email, githubUsername, userConfig, ... }: {
   imports = [
     # Shell Environment
@@ -58,6 +72,7 @@
     ./modules/alacritty
     ./modules/karabiner
     ./modules/lazygit.nix
+    ./modules/starship.nix
   ];
 
   # Core packages required for basic functionality

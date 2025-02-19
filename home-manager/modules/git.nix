@@ -1,93 +1,25 @@
 # home-manager/modules/git.nix
 #
-# Comprehensive Git configuration module.
+# Git Configuration and Aliases
 #
 # Purpose:
-# - Manages Git configuration and workflows
-# - Provides convenient aliases and shortcuts
-# - Streamlines common Git operations
+# - Sets up Git user identity
+# - Configures Git defaults
+# - Provides Git aliases
 #
-# Features:
-# - Secure identity management
-# - Customized Git aliases
-# - Shell integration
-# - Workflow automation
-# - Repository management
-#
-# Git Command Aliases:
-#   st = status              # Quick status check
-#   ci = commit              # Shorter commit command
-#   br = branch              # List or create branches
-#   co = checkout            # Switch branches
-#   df = diff                # View changes
-#   lg = log --graph ...     # Pretty log with branch graph
+# Configuration:
+# - User identity (name, email)
+# - Default branch name
+# - Pull/push behavior
+# - Common aliases
 #
 # Integration:
-# - Works with GitHub CLI (github.nix)
-# - Uses LazyGit for TUI operations
-# - Compatible with ZSH configuration
-# - Supports multiple remote workflows
+# - Uses user settings from config
+# - Works with shell aliases
 #
-# Shell Aliases:
-# Basic Operations:
-#   gp = "git push"         # Push current branch
-#     Example: gp           # Pushes current branch to origin
-#
-#   gl = "git pull"         # Pull current branch
-#     Example: gl           # Pulls latest changes
-#
-#   gs = "git status"       # Check repository status
-#     Example: gs           # Shows modified/staged files
-#
-#   gd = "git diff"         # View uncommitted changes
-#     Example: gd file.txt  # Shows changes in file.txt
-#
-# Quick Workflows:
-#   gpush = "git add . && git commit -m"
-#     Example: gpush "feat: add new button"
-#     # Stages all changes and commits with message
-#
-#   gpushf = "git add . && git commit --amend --no-edit && git push -f"
-#     Example: gpushf
-#     # Amends last commit with current changes and force pushes
-#     # CAUTION: Only use on your personal branches!
-#
-#   gpushnew = "git push -u origin HEAD"
-#     Example: gpushnew
-#     # Pushes new local branch and sets up tracking
-#
-# Remote Operations:
-#   gare = "git remote add upstream"
-#     Example: gare https://github.com/org/repo.git
-#     # Adds upstream remote for forked repositories
-#
-#   gre = "git remote -v"
-#     Example: gre
-#     # Lists all configured remotes and their URLs
-#
-#   gcan = "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit -v -a --no-edit --amend"
-#     Example: gcan
-#     # Adds all changes to the previous commit
-#     # Useful for fixups before pushing
-#
-#   gfa = "git fetch --all"
-#     Example: gfa
-#     # Fetches all remotes
-#
-#   gfap = "git fetch --all --prune"
-#     Example: gfap
-#     # Fetches all remotes and removes deleted references
-#
-# Tools:
-#   lg = "lazygit"
-#     Example: lg
-#     # Opens the LazyGit terminal UI
-#
-# Functions:
-#   gitdefaultbranch
-#     Example: gitdefaultbranch
-#     # Returns 'main' or 'master' depending on repository
-#     # Usage: git checkout $(gitdefaultbranch)
+# Note:
+# - Identity from user-config
+# - Additional aliases in aliases.nix
 
 { config, pkgs, lib, ... }@args: let
   inherit (args) fullName email;

@@ -74,10 +74,30 @@
   outputs = { self, darwin, nixpkgs, home-manager, nix-homebrew, ... }@inputs:
   let
     system = "aarch64-darwin";
+    # Validate hostname format
+    validateHostname = hostname: 
+      let
+        # Nix allows only letters, numbers, and hyphens as valid characters for hostnames
+        validFormat = builtins.match "[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*" hostname != null;
+      in
+      if hostname == null || hostname == "" 
+      then throw "Hostname must be defined in user-config.nix"
+      else if !validFormat 
+      then throw "Invalid hostname format: ${hostname}. Use only letters, numbers, and hyphens." 
+      else hostname;
+
     # Import user configuration
     userConfig = if builtins.pathExists ./user-config.nix
       then import ./user-config.nix
       else import ./user-config.default.nix;
+    # Ensure required attributes exist
+    requiredAttrs = ["username" "hostname" "email" "fullName" "githubUsername"];
+    missingAttrs = builtins.filter (attr: !(builtins.hasAttr attr userConfig)) requiredAttrs;
+    _ = if builtins.length missingAttrs > 0
+        then throw "Missing required attributes in user-config.nix: ${builtins.toString missingAttrs}"
+        else null;
+    # Validate the hostname
+    validatedHostname = validateHostname userConfig.hostname;
     nixpkgsConfig = {
       config = {
         allowUnfree = true;
@@ -87,7 +107,7 @@
   {
     # Darwin System Configuration
     # Main system definition for MacBook Pro
-    darwinConfigurations.${userConfig.hostname} = darwin.lib.darwinSystem {
+    darwinConfigurations."${validatedHostname}" = darwin.lib.darwinSystem {
       inherit system;
       specialArgs = { inherit userConfig; };
       modules = [
@@ -202,7 +222,7 @@
     };
 
     # Package Exports
-    darwinPackages = self.darwinConfigurations.${userConfig.hostname}.pkgs;
+    darwinPackages = self.darwinConfigurations.${validatedHostname}.pkgs;
   };
 }
   
