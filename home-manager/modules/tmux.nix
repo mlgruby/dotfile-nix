@@ -122,16 +122,20 @@
       set -g @plugin 'tmux-plugins/tmux-continuum'
       set -g @plugin 'b0o/tmux-autoreload'
       set -g @plugin 'egel/tmux-gruvbox'
-      set -g status-left '#(tmux-cpu-info)'
+      set -g @plugin '2kabhishek/tmux2k'
 
       # Theme Configuration
       # Gruvbox theme settings for consistent look
-      set -g @tmux-gruvbox 'dark' # or 'dark256', 'light', 'light256'
+      # set -g @tmux-gruvbox 'dark' # or 'dark256', 'light', 'light256'
+      set -g @tmux2k-theme 'gruvbox'
 
       # Plugin Settings
       # Configure plugin behavior
       set -g @continuum-restore 'on'
       set -g @resurrect-capture-pane-contents 'on'
+      set -g @tmux2k-icons-only true
+      set -g @tmux2k-git-display-status true
+      set -g @tmux2k-refresh-rate 5
 
       # Plugin Initialization
       # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)

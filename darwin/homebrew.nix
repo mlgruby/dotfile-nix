@@ -129,6 +129,7 @@
       "gh"                          # GitHub CLI
       "git-lfs"                     # Git large file storage
       "lazygit"                     # Terminal UI for git
+      "node"                        # Node.js (includes npm and npx)
       
       # Text Processing and Search
       "bat"                         # Modern cat with syntax highlighting
@@ -179,6 +180,7 @@
       # Productivity and Communication
       "bitwarden"                      # Password manager
       "brave-browser"                  # Privacy-focused browser
+      "claude"                         # Claude AI desktop app
       "insync"                         # Google Drive client
       "spotify"                        # Music streaming
       "whatsapp"                       # Messaging

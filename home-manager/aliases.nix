@@ -327,6 +327,32 @@
       find ${homeDir} -type f -name '.DS_Store' -delete 2>/dev/null || true && \
       find ${homeDir} -type f -name '._*' -delete 2>/dev/null || true && \
       
+      # Node.js Cleanup
+      echo "🧹 Cleaning npm cache..." && \
+      if command -v npm &> /dev/null; then
+        npm cache clean --force 2>/dev/null || true
+        echo "✓ npm cache cleaned"
+      fi && \
+      
+      # Clear global npm packages that aren't needed
+      echo "🧹 Cleaning unused global npm packages..." && \
+      if command -v npm &> /dev/null; then
+        unused_packages=$(npm list -g --depth=0 2>/dev/null | grep -v "npm@" | awk -F@ '/^[^ ]/ {print $1}' | tr -d ' ') && \
+        if [ -n "$unused_packages" ]; then
+          npm uninstall -g $unused_packages 2>/dev/null
+          echo "✓ Unused global npm packages removed"
+        else
+          echo "No unused global npm packages found"
+        fi
+      fi && \
+      
+      # Homebrew Cleanup
+      echo "🧹 Cleaning Homebrew cache and old versions..." && \
+      if command -v brew &> /dev/null; then
+        brew cleanup 2>/dev/null || true
+        echo "✓ Homebrew cleanup complete"
+      fi && \
+      
       # System Log Cleanup
       echo "📝 Cleaning system logs..." && \
       # ASL Logs
