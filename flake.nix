@@ -198,7 +198,6 @@
             hostPlatform = "aarch64-darwin";
           };
           # Security Settings
-          security.pam.enableSudoTouchIdAuth = true;  # Enable Touch ID for sudo
 
           # Shell Configuration
           # ZSH setup and environment

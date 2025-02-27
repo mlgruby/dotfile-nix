@@ -165,7 +165,7 @@
 
   # Security Configuration
   # Enable TouchID for sudo authentication
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   # System state version
   system.stateVersion = lib.mkForce 4;
@@ -350,26 +350,37 @@
       mkdir -p "$PYENV_ROOT"
       eval "$(pyenv init -)"
 
-      # Python Version Installation Helper
-      # Function to install Python version if not already installed
-      install_python_version() {
-        if ! pyenv versions | grep -q "$1"; then
-          echo "Installing Python $1"
-          pyenv install "$1"
-        else
-          echo "Python $1 is already installed"
-        fi
-      }
+      # First check if any Python is already installed
+      if command -v python3 &> /dev/null; then
+        PYTHON_VERSION=$(python3 --version | cut -d' ' -f2)
+        echo "Python $PYTHON_VERSION is already installed on the system"
+      else
+        # Python Version Installation Helper
+        # Function to install Python version if not already installed
+        install_python_version() {
+          # Check if any version that starts with the given prefix exists
+          if ! pyenv versions | grep -q "^[*[:space:]]*$1"; then
+            echo "Installing Python $1"
+            # Use -s flag to skip if version exists
+            pyenv install -s "$1" || true
+          else
+            echo "Python $1 is already installed"
+          fi
+        }
 
-      # Python Version Management
-      # Install and configure specific Python versions
-      install_python_version "3.10"      # Primary development version
-      # Add more versions as needed:
-      # install_python_version "3.9"     # Legacy support
-      # install_python_version "3.11"    # Latest features
-      # Set Global Python Version
-      # Python 3.10 for broad compatibility
-      pyenv global 3.10
+        # Python Version Management
+        # Install and configure specific Python versions
+        install_python_version "3.10"      # Primary development version
+        # Add more versions as needed:
+        # install_python_version "3.9"     # Legacy support
+        # install_python_version "3.11"    # Latest features
+      fi
+      
+      # Set Global Python Version if pyenv has any versions
+      if pyenv versions | grep -q "3\."; then
+        echo "Setting Python 3.10 as global Python version"
+        pyenv global 3.10
+      fi
     else
       # Installation Error Handling
       echo "pyenv not found. Please ensure it's installed via Nix"

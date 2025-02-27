@@ -30,7 +30,7 @@ System-level configurations affect the entire macOS system and all users. These 
      };
 
      # Security settings
-     security.pam.enableSudoTouchIdAuth = true;
+     security.pam.services.sudo_local.touchIdAuth = true;
    }
    ```
 
