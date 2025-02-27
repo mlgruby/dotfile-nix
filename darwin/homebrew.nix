@@ -120,6 +120,7 @@
       # Managed via Homebrew for better macOS integration
       "pyenv"                       # Python version manager
       "uv"                          # Python package manager
+      "pipx"                        # Python package manager
       
       # Development Tools
       # These versions are preferred over Nix for various reasons
