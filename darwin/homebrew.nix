@@ -169,6 +169,7 @@
       # Development Tools
       "cursor"
       "docker"
+      "jetbrains-toolbox"               # JetBrains IDE manager
       "postman"                        # API testing tool
       "visual-studio-code"             # Code editor
       
