@@ -125,6 +125,7 @@
       # Development Tools
       # These versions are preferred over Nix for various reasons
       "cmake"                       # Build system
+      "neovim"                      # Modern vim implementation
       "pkg-config"                  # Development tool
       "git"                         # Version control
       "gh"                          # GitHub CLI
@@ -164,12 +165,12 @@
       "discord"                     # Move from configuration.nix
       
       # Cloud Tools
-      "google-cloud-sdk"           # Google Cloud Platform SDK
+      "google-cloud-sdk"            # Google Cloud Platform SDK
       
       # Development Tools
       "cursor"
       "docker"
-      "jetbrains-toolbox"               # JetBrains IDE manager
+      "jetbrains-toolbox"              # JetBrains IDE manager
       "postman"                        # API testing tool
       "visual-studio-code"             # Code editor
       
@@ -184,6 +185,7 @@
       "brave-browser"                  # Privacy-focused browser
       "claude"                         # Claude AI desktop app
       "insync"                         # Google Drive client
+      "obsidian"                       # Knowledge base and note-taking
       "spotify"                        # Music streaming
       "whatsapp"                       # Messaging
       

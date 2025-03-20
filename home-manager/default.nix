@@ -73,6 +73,7 @@
     ./modules/karabiner
     ./modules/lazygit.nix
     ./modules/starship.nix
+    ./neovim.nix
   ];
 
   # Core packages required for basic functionality
