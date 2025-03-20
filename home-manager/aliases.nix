@@ -110,8 +110,8 @@
 
     # Text Editors
     # Default editor aliases
-    v = "nano";                     # Quick editor access
-    vim = "nano";                   # Remap vim to nano
+    v = "nvim";                     # Quick editor access
+    vim = "nvim";                   # Remap vim to nvim
 
     # Modern Replacements
     # Enhanced alternatives to standard commands
