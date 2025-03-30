@@ -35,4 +35,4 @@
     # Using symlink to maintain single source of truth
     ln -sf "${toString ./config.toml}" "$HOME/.config/alacritty/alacritty.toml"
   '';
-} 
+}

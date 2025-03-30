@@ -130,4 +130,4 @@
     ghis = "gh issue search";           # Search issues
     ghps = "gh pr search";              # Search PRs
   };
-} 
+}

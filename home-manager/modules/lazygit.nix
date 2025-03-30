@@ -56,4 +56,4 @@
         # Copy commit hash
         copyCommitHash: "y"
   '';
-} 
+}

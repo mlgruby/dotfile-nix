@@ -30,4 +30,4 @@
       source "${pkgs.google-cloud-sdk}/google-cloud-sdk/path.zsh.inc"
     '';
   };
-} 
+}

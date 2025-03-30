@@ -250,4 +250,4 @@
   # Explicitly enable home-manager to manage zsh
   home.enableNixpkgsReleaseCheck = false;
   programs.home-manager.enable = true;
-} 
+}
