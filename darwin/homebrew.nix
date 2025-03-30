@@ -92,7 +92,7 @@
     
     # Configure taps
     taps = [
-      "homebrew/bundle"
+      "homebrew/bundle"     # For Brewfile support
       "warrensbox/tap"      # For tfswitch
     ];
     
