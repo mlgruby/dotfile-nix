@@ -161,42 +161,42 @@
 
     # GUI Applications (Casks)
     casks = [
-      # Communication
-      "discord"                     # Move from configuration.nix
+      # Cloud Storage
+      "google-drive"        # Google Drive client
       
-      # Cloud Tools
-      "google-cloud-sdk"            # Google Cloud Platform SDK
+      # Communication
+      "discord"             # Move from configuration.nix
       
       # Development Tools
       "cursor"
       "docker"
-      "jetbrains-toolbox"              # JetBrains IDE manager
-      "postman"                        # API testing tool
-      "visual-studio-code"             # Code editor
+      "jetbrains-toolbox"   # JetBrains IDE manager
+      "postman"             # API testing tool
+      "visual-studio-code"  # Code editor
       
       # Terminal and System Tools
-      "alacritty"                      # GPU-accelerated terminal
-      "karabiner-elements"             # Keyboard customization
-      "rectangle"                      # Window management
-      "the-unarchiver"                 # Archive extraction
+      "alacritty"           # GPU-accelerated terminal
+      "karabiner-elements"  # Keyboard customization
+      "rectangle"           # Window management
+      "the-unarchiver"      # Archive extraction
       
       # Productivity and Communication
-      "bitwarden"                      # Password manager
-      "brave-browser"                  # Privacy-focused browser
-      "claude"                         # Claude AI desktop app
-      "insync"                         # Google Drive client
-      "obsidian"                       # Knowledge base and note-taking
-      "spotify"                        # Music streaming
-      "whatsapp"                       # Messaging
+      "bitwarden"           # Password manager
+      "brave-browser"       # Privacy-focused browser
+      "claude"              # Claude AI desktop app
+      "insync"              # Google Drive client
+      "obsidian"            # Knowledge base and note-taking
+      "spotify"             # Music streaming
+      "whatsapp"            # Messaging
       
       # Media
-      "vlc"                            # Media player
+      "vlc"                 # Media player
       
       # Fonts
-      "font-fira-code-nerd-font"       # Alternative with ligatures
-      "font-hack-nerd-font"            # Clean monospace
-      "font-jetbrains-mono-nerd-font"  # Primary coding font
-      "font-meslo-lg-nerd-font"        # Terminal font
+      "font-fira-code-nerd-font"      # Alternative with ligatures
+      "font-hack-nerd-font"           # Clean monospace
+      "font-jetbrains-mono-nerd-font" # Primary coding font
+      "font-meslo-lg-nerd-font"       # Terminal font
     ];
 
     # Global options
