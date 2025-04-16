@@ -3,8 +3,8 @@
 # AWS CLI Basic Setup
 #
 # Purpose:
-# - Enables AWS CLI command completion
-# - Sets default AWS region
+# - Enables AWS CLI command completion manually.
+# - Sets default AWS region (handled elsewhere now).
 #
 # Integration:
 # - AWS CLI installed via Homebrew (homebrew.nix)
@@ -12,16 +12,15 @@
 
 { config, pkgs, ... }: {
   programs.zsh = {
+    # Use initExtra for manual completion setup
     initExtra = ''
       # Enable AWS CLI command completion
       # Uses aws_completer from awscli2 package
-      complete -C '${pkgs.awscli2}/bin/aws_completer' aws
-      
-      # Set AWS region defaults
-      # Region: us-west-2 (Oregon)
-      # Used by AWS CLI and SDKs
-      export AWS_DEFAULT_REGION=us-west-2
-      export AWS_REGION=us-west-2
+      if command -v aws_completer &> /dev/null; then
+         complete -C aws_completer aws
+      elif [ -x "${pkgs.awscli2}/bin/aws_completer" ]; then # Check Nix pkg path
+         complete -C "${pkgs.awscli2}/bin/aws_completer" aws
+      fi
     '';
   };
 }

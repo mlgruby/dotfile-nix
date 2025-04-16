@@ -1,9 +1,9 @@
 # home-manager/modules/lazygit.nix
 #
-# LazyGit Configuration
+# LazyGit Configuration (Declarative)
 #
 # Purpose:
-# - Sets up LazyGit defaults
+# - Sets up LazyGit defaults using programs.lazygit
 # - Configures keybindings
 #
 # Integration:
@@ -13,47 +13,39 @@
 { config, pkgs, ... }:
 
 {
-  home.file.".config/lazygit/config.yml".text = ''
-    gui:
-      # Show file tree
-      showFileTree: true
-      # Use mouse
-      mouseEvents: true
-      # Show commit hash in commits view
-      showRandomTip: false
-      # Theme
-      theme:
-        lightTheme: false
-        activeBorderColor:
-          - green
-          - bold
-        inactiveBorderColor:
-          - white
-        selectedLineBgColor:
-          - blue
-    git:
-      # Auto fetch
-      autoFetch: true
-      # Auto refresh
-      autoRefresh: true
-      # Commit message length warning
-      commitLength:
-        show: true
-    # Custom keybindings
-    keybinding:
-      universal:
-        # Quick commit
-        commitChanges: "C"
-        # Quick push
-        pushFiles: "P"
-        # Quick pull
-        pullFiles: "p"
-        # Quick refresh
-        refresh: "R"
-        # Quick quit
-        quit: "q"
-      commits:
-        # Copy commit hash
-        copyCommitHash: "y"
-  '';
+  programs.lazygit = {
+    enable = true;
+    settings = {
+      gui = {
+        showFileTree = true;
+        mouseEvents = true;
+        showRandomTip = false;
+        theme = {
+          lightTheme = false;
+          activeBorderColor = [ "green" "bold" ];
+          inactiveBorderColor = [ "white" ];
+          selectedLineBgColor = [ "blue" ];
+        };
+      };
+      git = {
+        autoFetch = true;
+        autoRefresh = true;
+        commitLength = {
+          show = true;
+        };
+      };
+      keybinding = {
+        universal = {
+          commitChanges = "C";
+          pushFiles = "P";
+          pullFiles = "p";
+          refresh = "R";
+          quit = "q";
+        };
+        commits = {
+          copyCommitHash = "y";
+        };
+      };
+    };
+  };
 }
