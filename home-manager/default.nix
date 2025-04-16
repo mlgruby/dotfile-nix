@@ -58,13 +58,13 @@
 { config, pkgs, lib, username, fullName, email, githubUsername, userConfig, ... }: {
   imports = [
     # Shell Environment
-    ./shell.nix
+    # ./shell.nix # Removed - Contents merged into zsh.nix / starship.nix
     ./modules/tmux.nix
     # Cloud Platform Tools
     ./modules/aws.nix
     ./modules/aws-cred.nix
-    ./modules/gcloud.nix
-    # Development Tools
+    # ./modules/gcloud.nix # Deleted
+    # Development Toolswok
     ./modules/git.nix
     ./modules/github.nix
     # Core Environment
@@ -73,12 +73,17 @@
     ./modules/karabiner
     ./modules/lazygit.nix
     ./modules/starship.nix
+    ./modules/rectangle.nix
     ./neovim.nix
   ];
 
-  # Core packages required for basic functionality
+  # List of packages managed by Home Manager
   home.packages = with pkgs; [
-    oh-my-zsh
+    # Cloud SDKs (Managed via Homebrew now)
+    
+    # Core packages required for basic functionality (Example: oh-my-zsh)
+    # oh-my-zsh # Managed via programs.zsh.oh-my-zsh.enable
+    # Other non-migrated packages if any were here...
   ];
 
   programs = {
@@ -88,15 +93,7 @@
       # Import aliases from central location
       shellAliases = import ./aliases.nix { inherit pkgs config userConfig; };
     };
-    # Fuzzy Finder Configuration
-    fzf = {
-      enable = true;
-      enableZshIntegration = true;
-      # Use fd for file finding (respects .gitignore)
-      defaultCommand = "fd --type f";
-      # Default appearance and behavior
-      defaultOptions = ["--height 40%" "--border"];
-    };
+    # FZF settings moved to zsh.nix
     home-manager.enable = true;
   };
 

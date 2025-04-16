@@ -99,42 +99,55 @@ The repository is organized into logical components:
 
 1. **Install Command Line Tools**
 
-     ```bash
-     xcode-select --install
-     ```
+```bash
+xcode-select --install
+```
 
 2. **Clone Configuration**
 
-     ```bash
-     mkdir -p ~/Documents
-     cd ~/Documents
-     git clone <your-repo-url> dotfile
-     cd dotfile
-     ```
+```bash
+mkdir -p ~/Documents
+cd ~/Documents
+git clone <your-repo-url> dotfile
+cd dotfile
+```
 
 3. **Configure User Settings**
 
-     ```bash
-     cp user-config.template.nix user-config.nix
-     ```
+```bash
+cp user-config.template.nix user-config.nix
+```
 
      Edit `user-config.nix` with your information:
 
-     ```nix
-     {
-       username = "your-macos-username";  # Must match your macOS login
-       fullName = "Your Full Name";
-       email = "your.email@example.com";
-       githubUsername = "your-github-username";
-       hostname = "your-hostname";  # e.g., macbook-pro
-     }
-     ```
+```nix
+{
+  username = "your-macos-username";  # Must match your macOS login
+  fullName = "Your Full Name";
+  email = "your.email@example.com";
+  githubUsername = "your-github-username";
+  hostname = "your-hostname";  # e.g., macbook-pro
+}
+```
 
 4. **Run Installation**
 
-     ```bash
-     ./pre-nix-installation.sh
-     ```
+This script automates the initial setup: installs Xcode tools (if needed), Homebrew, Nix, clones this repository if needed, sets up initial symlinks (including for a temporary shell environment from `nix/`), and performs the first system build using `nix-darwin`.
+
+```bash
+./pre-nix-installation.sh
+```
+
+After the script completes and the first build is successful, **open a new terminal window** for the fully configured environment managed by Home Manager to take effect.
+
+## Applying Changes
+
+After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/Documents/dotfile` directory:
+
+```bash
+darwin-rebuild switch --flake .#$(hostname)
+# Or use the 'rebuild' alias if available in your configured shell
+```
 
 ## Directory Structure
 
@@ -171,18 +184,20 @@ The repository is organized into logical components:
 │   └── zshrc                    # ZSH configuration
 ├── pre-nix-installation.sh      # Installation script
 ├── uninstall.sh                 # Uninstallation script
-├── user-config.nix              # User settings
+├── user-config.nix              # User settings (Created from template)
 └── user-config.template.nix     # Template for user settings
 ```
+
+**Note on `nix/` Directory:** The files `nix/zshrc` and `nix/dynamic-config.zsh` are symlinked directly into `~/` by the `pre-nix-installation.sh` script. They provide a minimal, temporary shell environment immediately after the script finishes, before you open a new terminal. The full, robust shell environment is declaratively configured by Home Manager (`home-manager/modules/zsh.nix`) and takes effect in new terminal sessions after the first build.
 
 ## Quick Reference
 
 ### System Commands
 
 ```bash
-rebuild   # Rebuild system
-update    # Update and rebuild
-cleanup   # Clean old generations
+rebuild   # Alias for darwin-rebuild switch --flake .#$(hostname)
+update    # Update flake inputs and rebuild
+cleanup   # Clean old Nix generations
 ```
 
 ### Common Tools
@@ -241,3 +256,7 @@ This configuration was developed with the assistance of [Cursor](https://cursor.
 - Debug Nix expressions
 - Create comprehensive documentation
 - Maintain consistent code style
+
+## Important Notes
+
+-*   **Neovim:** The Neovim configuration (`home-manager/neovim.nix`) uses an activation script to bootstrap a [LazyVim](https://www.lazyvim.org/) starter configuration into `~/.config/nvim` if that directory doesn't exist. Subsequent Neovim configuration changes should be made manually within `~/.config/nvim`. For a fully declarative setup, `programs.neovim` would need significant refactoring.

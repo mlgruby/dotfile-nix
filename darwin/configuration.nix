@@ -61,17 +61,6 @@
 
 { config, pkgs, lib, userConfig, ... }: {
   # Nix package manager settings
-  nix = {
-    settings = {
-      # Performance tuning
-      max-jobs = 6;             # Number of parallel jobs (adjust based on CPU)
-      cores = 2;                # Cores per job (total = max-jobs * cores)
-      # Enable flakes and new CLI
-      experimental-features = [ "nix-command" "flakes" ];
-      # System administrators and trusted users
-      trusted-users = [ "@admin" userConfig.username ];
-    };
-  };
 
   # Enable Nix daemon
   nix.enable = true;
@@ -114,9 +103,6 @@
     pkgs.sqlite               # Database
     pkgs.zlib                 # Compression
   ];
-
-  # Enable and configure zsh
-  programs.zsh.enable = true;
 
   # Application Management
   # Creates aliases in /Applications/Nix Apps for GUI applications
@@ -177,56 +163,6 @@
     # Create AWS credential management directory
     mkdir -p /opt/aws_cred_copy
     mkdir -p $HOME/.aws
-    
-    # AWS Region Configuration
-    # Create AWS config file with default region
-    cat > $HOME/.aws/config << 'EOF'
-    [default]
-    region = us-west-2
-    output = json
-    
-    [profile prod]
-    region = us-west-2
-    output = json
-    EOF
-    
-    # Credential Management Script
-    # Create the Python script for credential management
-    cat > /opt/aws_cred_copy/copy_credentials_from_env << 'EOF'
-    #!/usr/bin/env python3
-    import sys
-    import os
-    import configparser
-    
-    # Default to 'default' profile if none specified
-    profile = "default"
-    if len(sys.argv)> 1:
-        profile = sys.argv[1]
-    
-    # Verify required environment variables exist
-    if not os.environ.get('AWS_ACCESS_KEY_ID'):
-        print("No keys found on env. exit")
-        exit(1)
-    
-    # Update credentials file with current environment
-    HOME = os.environ['HOME']
-    config = configparser.ConfigParser()
-    config.read(f'{HOME}/.aws/credentials')
-    config[profile] = {'aws_access_key_id': os.environ['AWS_ACCESS_KEY_ID'],
-                      'aws_secret_access_key': os.environ['AWS_SECRET_ACCESS_KEY'],
-                      'aws_session_token': os.environ['AWS_SESSION_TOKEN']}
-    
-    # Write updated credentials and clean environment
-    with open(f'{HOME}/.aws/credentials', 'w') as configfile:
-        config.write(configfile)
-    
-    del os.environ['AWS_ACCESS_KEY_ID']
-    del os.environ['AWS_SECRET_ACCESS_KEY']
-    del os.environ['AWS_SESSION_TOKEN']
-    print(f"Updated profile {profile} on ~/.aws/credentials")
-    EOF
-    
-    chmod +x /opt/aws_cred_copy/copy_credentials_from_env
   '';
 
   home-manager = {
@@ -262,11 +198,6 @@
     {
       assertion = config.nix.enable;
       message = "Nix daemon must be enabled for this configuration";
-    }
-    # Verify ZSH is enabled
-    {
-      assertion = config.programs.zsh.enable;
-      message = "ZSH must be enabled for proper shell integration";
     }
   ];
 

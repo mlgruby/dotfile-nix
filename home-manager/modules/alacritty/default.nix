@@ -1,24 +1,28 @@
 # home-manager/modules/alacritty/default.nix
 #
-# Alacritty Theme Management
+# Alacritty Configuration (Declarative)
 #
 # Purpose:
-# - Manages Alacritty themes
-# - Links configuration file
+# - Manages Alacritty themes via activation script
+# - Manages main config via programs.alacritty.settings
 #
 # Integration:
-# - Links config.toml
-# - Uses Home Manager activation
+# - Imports config.toml
+# - Uses Home Manager activation for themes
 #
 # Note:
 # - Package from Homebrew
-# - Config in config.toml
 
 { config, lib, pkgs, ... }:
 
 {
-  # Set up Alacritty themes and configuration
-  # This runs after configuration files are written
+  programs.alacritty = {
+    enable = true;
+    # Read settings directly from the TOML file
+    settings = builtins.fromTOML (builtins.readFile ./config.toml);
+  };
+
+  # Activation script ONLY for managing themes repo
   home.activation.alacrittyThemes = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Clone or update alacritty-theme repository
     if [ ! -d "$HOME/.config/alacritty/themes" ]; then
@@ -30,9 +34,6 @@
         ${pkgs.git}/bin/git pull
       fi
     fi
-
-    # Link our configuration file to Alacritty's expected location
-    # Using symlink to maintain single source of truth
-    ln -sf "${toString ./config.toml}" "$HOME/.config/alacritty/alacritty.toml"
+    # Symlink creation removed - handled by programs.alacritty
   '';
 }

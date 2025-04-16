@@ -212,7 +212,6 @@
     
     # Git UI
     # LazyGit aliases
-    lg = "lazygit";                    # Quick lazygit
     lgc = "lazygit -w $(pwd)";         # LazyGit for current directory
     # Repository Selection
     lgf = "lazygit -f $(find . -type d -name '.git' -exec dirname {} \\; | fzf)";
@@ -432,5 +431,59 @@
     '';   # Smart editor selection for dotfiles
   } else {};
 
+  # Git Aliases (Moved from git.nix)
+  gitAliases = {
+    # Basic Operations
+    gp = "git push";                     # Push to remote
+    gl = "git pull";                     # Pull from remote
+    gs = "git status";                   # Check status
+    gd = "git diff";                     # View changes
+
+    # Advanced Operations
+    gpush = "git add . && git commit -m";            # Stage and commit
+    gpushf = "git add . && git commit --amend --no-edit && git push -f";  # Amend and force push
+    gpushnew = "git push -u origin HEAD";            # Push new branch
+
+    # Remote Management
+    gare = "git remote add upstream";               # Add upstream
+    gre = "git remote -v";                          # List remotes
+    gcan = "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit -v -a --no-edit --amend";  # Amend changes
+    gfa = "git fetch --all";                        # Fetch all remotes
+    gfap = "git fetch --all --prune";               # Fetch and clean
+
+    # Alias for LazyGit
+    lg = "lazygit"; # Preferred alias for lazygit
+  };
+
+  # GitHub Aliases (Moved from github.nix)
+  githubAliases = {
+    # Pull Request Workflow
+    ghprcr = "gh pr create --web";      # Create PR in web browser
+    ghprv = "ghopr";                    # Interactive select and view PR in browser
+    ghprl = "ghprall";                  # List all PRs with fzf
+    ghpro = "ghpropen";                 # List open PRs with fzf
+    ghprc = "ghprco";                   # Interactive checkout PR using the function
+    ghprch = "ghprcheck";               # Check PR status
+    
+    # Repository Operations
+    ghrv = "gh repo view --web";        # View repo in browser
+    ghrc = "gh repo clone";             # Clone repo
+    ghrf = "gh repo fork";              # Fork repo
+    
+    # Issue Tracking
+    ghil = "gh issue list";             # List issues
+    ghic = "gh issue create --web";     # Create issue in browser
+    ghiv = "gh issue view --web";       # View issue in browser
+    
+    # CI/CD Monitoring
+    ghrl = "gh run list";               # List workflow runs
+    ghrw = "gh run watch";              # Watch workflow run
+    
+    # Search Operations
+    ghrs = "gh repo search";            # Search repositories
+    ghis = "gh issue search";           # Search issues
+    ghps = "gh pr search";              # Search PRs
+  };
+
 in
-commonAliases // macAliases // linuxAliases
+commonAliases // macAliases // linuxAliases // gitAliases // githubAliases
