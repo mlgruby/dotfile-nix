@@ -57,18 +57,6 @@
     
     # Homebrew management
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
-    homebrew-core = {
-      url = "github:homebrew/homebrew-core";
-      flake = false;
-    };
-    homebrew-cask = {
-      url = "github:homebrew/homebrew-cask";
-      flake = false;
-    };
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
   };
 
   outputs = { self, darwin, nixpkgs, home-manager, nix-homebrew, ... }@inputs:
@@ -109,7 +97,7 @@
     # Main system definition for MacBook Pro
     darwinConfigurations."${validatedHostname}" = darwin.lib.darwinSystem {
       inherit system;
-      specialArgs = { inherit userConfig; };
+      specialArgs = { inherit userConfig nixpkgsConfig self; };
       modules = [
         # Core System Modules
         # Base darwin configuration
@@ -148,75 +136,11 @@
         nix-homebrew.darwinModules.nix-homebrew
         ./darwin/homebrew.nix
 
-        # System Configuration
-        # Core system settings and defaults
-        ({ config, pkgs, ... }: {
-          # Nix Settings
-          # Package manager configuration
-          nix.settings = {
-            trusted-users = [ "root" userConfig.username ];    # Trust specific users
-            keep-derivations = true;               # Keep build dependencies
-            keep-outputs = true;                   # Keep build outputs
-            experimental-features = [ "nix-command" "flakes" ];  # Enable modern features
-          };
-
-          # Homebrew Setup
-          # Pre-activation script for Homebrew
-          system.activationScripts.preUserActivation.text = ''
-            export INSTALLING_HOMEBREW=1
-          '';
-
-          # macOS System Defaults
-          # Finder and UI preferences
-          system.defaults = {
-            finder = {
-              FXPreferredViewStyle = "clmv";        # Column view
-              AppleShowAllFiles = true;             # Show hidden files
-              ShowPathbar = true;                   # Show path bar
-              ShowStatusBar = true;                 # Show status bar
-              _FXShowPosixPathInTitle = true;       # Show full path
-              CreateDesktop = true;                 # Show desktop icons
-            };
-            
-            # Login Window Settings
-            loginwindow = {
-              GuestEnabled = false;                 # Disable guest login
-            };
-            
-            # Global System Settings
-            NSGlobalDomain = {
-              AppleICUForce24HourTime = true;      # Use 24-hour time
-              AppleInterfaceStyle = "Dark";        # Dark mode
-              KeyRepeat = 2;                       # Fast key repeat
-            };
-          };
-
-          # System Version Management
-          system.configurationRevision = self.rev or self.dirtyRev or null;
-          system.stateVersion = 5;
-          nixpkgs = nixpkgsConfig // {
-            hostPlatform = "aarch64-darwin";
-          };
-          # Security Settings
-
-          # Shell Configuration
-          # ZSH setup and environment
-          programs.zsh = {
-            enable = true;
-            enableCompletion = true;
-            promptInit = "";
-            interactiveShellInit = ''
-              export PATH="$HOME/Library/Application Support/pypoetry/venv/bin:$PATH"
-              export PATH="$HOME/.local/bin:$PATH"
-            '';
-          };
-
-          # User Account Setup
-          users.users.${userConfig.username} = {
-            home = "/Users/${userConfig.username}";
-            shell = "${pkgs.zsh}/bin/zsh";
-          };
-        })
+        # System Configuration Modules (Refactored from inline)
+        ./darwin/nix-settings.nix
+        ./darwin/activation-scripts.nix
+        ./darwin/macos-defaults.nix
+        ./darwin/misc-system.nix
       ];
     };
 

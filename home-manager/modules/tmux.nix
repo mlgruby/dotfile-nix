@@ -111,7 +111,7 @@
 
       # Configuration Management
       # Easy config reload
-      bind r source-file ~/.tmux.conf \; display "Config reloaded!"
+      bind r source-file $HOME/.config/tmux/tmux.conf \; display "Config reloaded!"
 
       # Plugin Management
       # Core plugins for enhanced functionality
@@ -142,13 +142,6 @@
       run '~/.tmux/plugins/tpm/tpm'
     '';
   };
-
-  # Configuration File Management
-  # Creates a symlink to the tmux configuration file
-  # This allows the config to be managed by Home Manager while
-  # keeping it in the expected location for tmux
-  home.file.".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink 
-    "${config.home.homeDirectory}/.config/tmux/tmux.conf";
 
   # Plugin Manager Installation
   # Automatically installs Tmux Plugin Manager (TPM)
