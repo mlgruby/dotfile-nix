@@ -83,7 +83,10 @@
     user = userConfig.username;
 
     # Handle existing Homebrew installations
-    autoMigrate = true;
+    autoMigrate = false;
+
+    # Ensure taps are managed only by Nix
+    mutableTaps = true;
   };
 
   # Homebrew packages configuration
@@ -92,7 +95,6 @@
     
     # Configure taps
     taps = [
-      "homebrew/bundle"     # For Brewfile support
       "warrensbox/tap"      # For tfswitch
     ];
     
@@ -118,10 +120,8 @@
       
       # Python Development Environment
       # Managed via Homebrew for better macOS integration
-      "pyenv"                       # Python version manager
       "uv"                          # Python package manager
-      "pipx"                        # Python package manager
-      
+
       # Development Tools
       # These versions are preferred over Nix for various reasons
       "cmake"                       # Build system
@@ -161,13 +161,18 @@
 
     # GUI Applications (Casks)
     casks = [
+      # Development Tools - JDKs
+      "temurin@8"                   # Eclipse Temurin JDK 8 LTS
+      "temurin@11"                  # Eclipse Temurin JDK 11 LTS
+      "temurin@17"                  # Eclipse Temurin JDK 17 LTS
+      
       # Cloud Storage
-      "google-drive"        # Google Drive client
+      "google-drive"                # Google Drive client
       
       # Communication
       "discord"             # Move from configuration.nix
       
-      # Development Tools
+      # Development Tools (Other)
       "cursor"
       "docker"
       "jetbrains-toolbox"   # JetBrains IDE manager
