@@ -74,37 +74,20 @@
       PATH = "$HOME/.local/bin:$HOME/Library/Application Support/pypoetry/venv/bin:$PATH";
       NIX_PATH = "$HOME/.nix-defexpr/channels:$NIX_PATH";
       FPATH = "$HOME/.zsh/completion:$FPATH";
+      # AWS Region Defaults
+      AWS_DEFAULT_REGION = "us-west-2";
+      AWS_REGION = "us-west-2";
     };
 
     initExtra = ''
       # Starship prompt configured via starship.nix
       
-      # Development Tools Setup
-      # Initialize SDKMAN if installed
-      if [ -d "$HOME/.sdkman" ]; then
-        export SDKMAN_DIR="$HOME/.sdkman"
-        [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-      fi
+      # Development Tools Setup (Cleaned)
 
-      # Initialize pyenv
-      if command -v pyenv &> /dev/null; then
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init -)"
-        eval "$(pyenv init --path)"
-      fi
+      # PATH additions are now handled primarily by sessionVariables
 
-      # Ensure UV is in PATH
-      if [ -d "$HOME/.local/bin" ]; then
-        export PATH="$HOME/.local/bin:$PATH"
-      fi
-
-      if [ -d "$HOME/Library/Application Support/pypoetry/venv/bin" ]; then
-        export PATH="$HOME/Library/Application Support/pypoetry/venv/bin:$PATH"
-      fi
-
-      # Initialize zoxide
-      eval "$(zoxide init zsh)"
+      # Initialize zoxide (Replaced by declarative option)
+      # eval "$(zoxide init zsh)"
       
       # FZF Integration Widgets
       # Interactive git status with file preview
@@ -205,6 +188,56 @@
       bindkey "^[d" fzf-cd-with-hidden
       # CTRL-G for git status
       bindkey '^G' fzf-git-status
+
+      # Function to determine default git branch (Moved from git.nix)
+      function gitdefaultbranch() {
+        git remote show origin | grep 'HEAD' | cut -d':' -f2 | sed -e 's/^ *//g' -e 's/ *$//g'
+      }
+
+      # Custom GitHub Workflow Functions (Moved from github.nix)
+      # Basic PR listing with state filter
+      function ghpr() {
+        gh pr list --state "$1" --limit 1000 | fzf
+      }
+      # Comprehensive PR listing functions
+      function ghprall() {
+        gh pr list --state all --limit 1000 | fzf
+      }
+      # Shows only open PRs for active work
+      function ghpropen() {
+        gh pr list --state open --limit 1000 | fzf
+      }
+      # Open selected PR in browser
+      function ghopr() {
+        id="$(ghprall | cut -f1)"
+        [ -n "$id" ] && gh pr view "$id" --web
+      }
+      # Check CI status for selected PR
+      function ghprcheck() {
+        id="$(ghpropen | cut -f1)"
+        [ -n "$id" ] && gh pr checks "$id"
+      }
+      # Enhanced PR checkout function
+      function ghprco() {
+        if [ $# -eq 0 ]; then
+          PR_NUM=$(gh pr list --state open | fzf | cut -f1)
+          if [ -n "$PR_NUM" ]; then
+            gh pr checkout "$PR_NUM"
+          fi
+        else
+          case "$1" in
+            -f|--force)
+              gh pr checkout "$2" --force
+              ;;
+            -d|--detach)
+              gh pr checkout "$2" --detach
+              ;;
+            *)
+              gh pr checkout "$1"
+              ;;
+          esac
+        fi
+      }
     '';
 
     oh-my-zsh = {
@@ -245,6 +278,22 @@
         };
       }
     ];
+  };
+
+  # FZF Configuration (Moved from shell.nix)
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    # Note: Further FZF settings (defaultCommand, defaultOptions)
+    # seem to be defined in home-manager/default.nix currently.
+    # Consider moving them here or removing the block from default.nix
+    # if this is intended to be the primary fzf config location.
+  };
+
+  # Zoxide Configuration
+  programs.zoxide = {
+      enable = true;
+      enableZshIntegration = true;
   };
 
   # Explicitly enable home-manager to manage zsh

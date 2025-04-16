@@ -115,7 +115,6 @@
       "eza"                         # Modern ls replacement
       "fd"                          # Simple find alternative
       "mas"                         # Mac App Store CLI
-      "stow"                        # Symlink farm manager
       "zoxide"                      # Smarter cd command
       
       # Python Development Environment
