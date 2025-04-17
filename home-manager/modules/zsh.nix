@@ -8,11 +8,6 @@
 # - Manages history
 #
 # Manages:
-# - Shell environment setup
-# - PATH management
-#   - pipx binaries ($HOME/.local/bin)
-#   - poetry ($HOME/Library/Application Support/pypoetry/venv/bin)
-#   - pyenv initialization
 #
 # Tool initializations:
 # - SDKMAN for Java version management
