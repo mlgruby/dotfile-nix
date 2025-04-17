@@ -79,6 +79,11 @@
 
   # List of packages managed by Home Manager
   home.packages = with pkgs; [
+    # Add direnv for automatic environment switching
+    direnv
+    # Add pipx package itself
+    pipx
+
     # Cloud SDKs (Managed via Homebrew now)
     
     # Core packages required for basic functionality (Example: oh-my-zsh)
@@ -95,6 +100,12 @@
     };
     # FZF settings moved to zsh.nix
     home-manager.enable = true;
+
+    # Direnv Configuration for Flake Integration
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true; # Important for 'use flake'
+    };
   };
 
   # Enable font configuration
