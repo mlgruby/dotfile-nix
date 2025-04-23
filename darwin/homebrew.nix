@@ -174,6 +174,7 @@
       # Development Tools (Other)
       "cursor"
       "docker"
+      "google-cloud-sdk"    # Google Cloud SDK
       "jetbrains-toolbox"   # JetBrains IDE manager
       "postman"             # API testing tool
       "visual-studio-code"  # Code editor
