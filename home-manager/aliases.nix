@@ -450,6 +450,11 @@
     gcan = "git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit -v -a --no-edit --amend";  # Amend changes
     gfa = "git fetch --all";                        # Fetch all remotes
     gfap = "git fetch --all --prune";               # Fetch and clean
+    gfu = "git fetch upstream";                     # Fetch upstream
+    gud = "git fetch upstream develop && git push origin refs/remotes/upstream/develop:refs/heads/develop"; # Update develop from upstream and push to origin without checkout
+    gum = "git fetch upstream main && git push origin refs/remotes/upstream/main:refs/heads/main";       # Update main from upstream and push to origin without checkout
+    grbd = "git rebase develop";                    # Rebase current branch onto develop
+    grbud = "git fetch upstream develop && git push origin refs/remotes/upstream/develop:refs/heads/develop && git rebase develop"; # Fetch upstream develop, update local and origin develop, then rebase current branch
 
     # Alias for LazyGit
     lg = "lazygit"; # Preferred alias for lazygit
