@@ -74,7 +74,7 @@
       AWS_REGION = "us-west-2";
     };
 
-    initExtra = ''
+    initContent = ''
       # Starship prompt configured via starship.nix
       
       # Development Tools Setup (Cleaned)
@@ -152,12 +152,6 @@
       bindkey "^[[1;3B" dirhistory_zle_dirhistory_down
       
       # FZF Enhanced Functions
-      # Directory navigation with preview
-      fzf-cd-with-hidden() {
-        local dir
-        dir=$(find "''${1:-$PWD}" -type d 2> /dev/null | fzf +m) && cd "$dir"
-      }
-      
       # Git status with preview
       fzf-git-status() {
         local selections=$(
@@ -275,14 +269,10 @@
     ];
   };
 
-  # FZF Configuration (Moved from shell.nix)
+  # FZF Configuration
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
-    # Note: Further FZF settings (defaultCommand, defaultOptions)
-    # seem to be defined in home-manager/default.nix currently.
-    # Consider moving them here or removing the block from default.nix
-    # if this is intended to be the primary fzf config location.
   };
 
   # Zoxide Configuration
@@ -291,7 +281,6 @@
       enableZshIntegration = true;
   };
 
-  # Explicitly enable home-manager to manage zsh
+  # Disable Nixpkgs release check for compatibility
   home.enableNixpkgsReleaseCheck = false;
-  programs.home-manager.enable = true;
 }
