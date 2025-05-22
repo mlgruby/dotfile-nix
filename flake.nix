@@ -138,7 +138,6 @@
 
         # System Configuration Modules (Refactored from inline)
         ./darwin/nix-settings.nix
-        ./darwin/activation-scripts.nix
         ./darwin/macos-defaults.nix
         ./darwin/misc-system.nix
       ];

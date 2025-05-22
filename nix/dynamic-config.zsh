@@ -113,10 +113,8 @@ function drm() {
 # Git Workflow Functions
 # Enhanced Git operations and utilities
 # Interactive PR listing
-# Usage: ghpr [state]
-function ghpr() {
-  gh pr list --state "$1" --limit 1000 | fzf
-}
+# NOTE: These functions are now managed by Home Manager in home-manager/modules/zsh.nix
+# Keeping minimal versions here only for bootstrap compatibility
 
 # AWS Credential Management
 # Credential switching with clipboard clearing
@@ -128,10 +126,8 @@ function aws-switch() {
 
 # Git Branch Management
 # Branch name detection utilities
-# Get default branch name
-function gitdefaultbranch(){
-  git remote show origin | grep 'HEAD' | cut -d':' -f2 | sed -e 's/^ *//g' -e 's/ *$//g'
-}
+# NOTE: gitdefaultbranch function is now managed by Home Manager in home-manager/modules/zsh.nix
+# Keeping gitcurrentbranch here for bootstrap compatibility
 
 # Get current branch name
 function gitcurrentbranch() {

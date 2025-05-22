@@ -20,9 +20,7 @@
   home.file."Library/Application Support/Rectangle/RectangleConfig.json" = {
     text = ''
       {
-        # Application Identity
         "bundleId": "com.knollsoft.Rectangle",
-        # Application Settings
         "defaults": {
           "SUEnableAutomaticChecks": {
             "bool": false
@@ -43,96 +41,88 @@
             "int": 1
           }
         },
-        # Keyboard Shortcuts Configuration
         "shortcuts": {
-          # Basic Window Positions
           "bottomHalf": {
-            "keyCode": 125,              # Down Arrow
-            "modifierFlags": 786432      # Command + Option
+            "keyCode": 125,
+            "modifierFlags": 786432
           },
           "bottomLeft": {
-            "keyCode": 38,               # J key
+            "keyCode": 38,
             "modifierFlags": 786432
           },
           "bottomRight": {
-            "keyCode": 40,               # K key
+            "keyCode": 40,
             "modifierFlags": 786432
           },
           "center": {
-            "keyCode": 8,                # C key
+            "keyCode": 8,
             "modifierFlags": 786432
           },
-          # Thirds Management
           "centerThird": {
-            "keyCode": 3,                # 2 key
+            "keyCode": 3,
             "modifierFlags": 786432
           },
           "firstThird": {
-            "keyCode": 2,                # 1 key
+            "keyCode": 2,
             "modifierFlags": 786432
           },
           "firstTwoThirds": {
-            "keyCode": 14,               # Q key
+            "keyCode": 14,
             "modifierFlags": 786432
           },
-          # Window Sizing
           "larger": {
-            "keyCode": 24,               # = key
+            "keyCode": 24,
             "modifierFlags": 786432
           },
           "lastThird": {
-            "keyCode": 5,                # 3 key
+            "keyCode": 5,
             "modifierFlags": 786432
           },
           "lastTwoThirds": {
-            "keyCode": 17,               # W key
+            "keyCode": 17,
             "modifierFlags": 786432
           },
-          # Basic Halves
           "leftHalf": {
-            "keyCode": 123,              # Left Arrow
+            "keyCode": 123,
             "modifierFlags": 786432
           },
-          # Full Window Controls
           "maximize": {
-            "keyCode": 36,               # Return key
+            "keyCode": 36,
             "modifierFlags": 786432
           },
           "maximizeHeight": {
-            "keyCode": 126,              # Up Arrow
-            "modifierFlags": 917504      # Command + Option + Shift
+            "keyCode": 126,
+            "modifierFlags": 917504
           },
-          # Multi-Display Controls
           "nextDisplay": {
-            "keyCode": 124,              # Right Arrow
-            "modifierFlags": 1835008     # Command + Control + Option
+            "keyCode": 124,
+            "modifierFlags": 1835008
           },
           "previousDisplay": {
-            "keyCode": 123,              # Left Arrow
-            "modifierFlags": 1835008     # Command + Control + Option
+            "keyCode": 123,
+            "modifierFlags": 1835008
           },
           "rightHalf": {
-            "keyCode": 124,              # Right Arrow
+            "keyCode": 124,
             "modifierFlags": 786432
           },
           "smaller": {
-            "keyCode": 27,               # - key
+            "keyCode": 27,
             "modifierFlags": 786432
           },
           "topHalf": {
-            "keyCode": 126,              # Up Arrow
+            "keyCode": 126,
             "modifierFlags": 786432
           },
           "topLeft": {
-            "keyCode": 32,               # U key
+            "keyCode": 32,
             "modifierFlags": 786432
           },
           "topRight": {
-            "keyCode": 34,               # I key
+            "keyCode": 34,
             "modifierFlags": 786432
           }
         },
-        # Configuration Version
         "version": "92"
       }
     '';
