@@ -145,9 +145,12 @@ After the script completes and the first build is successful, **open a new termi
 After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/Documents/dotfile` directory:
 
 ```bash
-darwin-rebuild switch --flake .#$(hostname)
-# Or use the 'rebuild' alias if available in your configured shell
+sudo darwin-rebuild switch --flake .#$(hostname)
+# Or use the 'rebuild' alias (which includes sudo automatically)
+rebuild
 ```
+
+**Note:** The `sudo` is required due to recent nix-darwin updates that require system activation to run as root for security reasons.
 
 ## Directory Structure
 
@@ -155,33 +158,36 @@ darwin-rebuild switch --flake .#$(hostname)
 .
 ├── darwin/                      # macOS system configuration
 │   ├── configuration.nix        # Core system settings
-│   └── homebrew.nix             # Homebrew package management
+│   ├── homebrew.nix             # Homebrew package management
+│   ├── nix-settings.nix         # Nix daemon configuration
+│   ├── macos-defaults.nix       # macOS system defaults
+│   └── misc-system.nix          # Miscellaneous system settings
 ├── flake.lock                   # Lock file for dependencies
 ├── flake.nix                    # System definition
 ├── home-manager/                # User environment
 │   ├── aliases.nix              # Shell aliases
 │   ├── default.nix              # Main user configuration
-│   ├── modules/                 # Configuration modules
-│   │   ├── alacritty/           # Terminal emulator
-│   │   │   ├── config.toml      # Alacritty configuration
-│   │   │   └── default.nix      # Module definition
-│   │   ├── aws-cred.nix         # AWS credentials management
-│   │   ├── aws.nix              # AWS CLI configuration
-│   │   ├── gcloud.nix           # Google Cloud SDK setup
-│   │   ├── git.nix              # Git configuration
-│   │   ├── github.nix           # GitHub CLI setup
-│   │   ├── karabiner/           # Keyboard customization
-│   │   │   └── default.nix      # Module definition
-│   │   ├── lazygit.nix          # Git TUI configuration
-│   │   ├── rectangle.nix        # Window management
-│   │   ├── starship.nix         # Shell prompt
-│   │   ├── tmux.nix             # Terminal multiplexer
-│   │   └── zsh.nix              # Shell configuration
-│   └── shell.nix                # Shell environment
+│   ├── neovim.nix               # Neovim configuration
+│   └── modules/                 # Configuration modules
+│       ├── alacritty/           # Terminal emulator
+│       │   ├── config.toml      # Alacritty configuration
+│       │   └── default.nix      # Module definition
+│       ├── aws-cred.nix         # AWS credentials management
+│       ├── aws.nix              # AWS CLI configuration
+│       ├── git.nix              # Git configuration
+│       ├── github.nix           # GitHub CLI setup
+│       ├── karabiner/           # Keyboard customization
+│       │   └── default.nix      # Module definition
+│       ├── lazygit.nix          # Git TUI configuration
+│       ├── rectangle.nix        # Window management
+│       ├── starship.nix         # Shell prompt
+│       ├── tmux.nix             # Terminal multiplexer
+│       └── zsh.nix              # Shell configuration
 ├── nix/                         # Nix configuration
 │   ├── dynamic-config.zsh       # Dynamic shell config
 │   ├── nix.conf                 # Nix settings
 │   └── zshrc                    # ZSH configuration
+├── docs/                        # Documentation
 ├── pre-nix-installation.sh      # Installation script
 ├── uninstall.sh                 # Uninstallation script
 ├── user-config.nix              # User settings (Created from template)
@@ -195,7 +201,7 @@ darwin-rebuild switch --flake .#$(hostname)
 ### System Commands
 
 ```bash
-rebuild   # Alias for darwin-rebuild switch --flake .#$(hostname)
+rebuild   # Alias for sudo darwin-rebuild switch --flake .#$(hostname)
 update    # Update flake inputs and rebuild
 cleanup   # Clean old Nix generations
 ```
