@@ -58,53 +58,49 @@
 { config, pkgs, lib, username, fullName, email, githubUsername, userConfig, ... }: {
   imports = [
     # Shell Environment
-    # ./shell.nix # Removed - Contents merged into zsh.nix / starship.nix
     ./modules/tmux.nix
+    ./modules/zsh.nix
+    ./modules/starship.nix
+    
     # Cloud Platform Tools
     ./modules/aws.nix
     ./modules/aws-cred.nix
-    # ./modules/gcloud.nix # Deleted
-    # Development Toolswok
+    
+    # Development Tools
     ./modules/git.nix
     ./modules/github.nix
-    # Core Environment
-    ./modules/zsh.nix
+    ./modules/lazygit.nix
+    
+    # Terminal & UI
     ./modules/alacritty
     ./modules/karabiner
-    ./modules/lazygit.nix
-    ./modules/starship.nix
     ./modules/rectangle.nix
+    
+    # Editor
     ./neovim.nix
   ];
 
   # List of packages managed by Home Manager
   home.packages = with pkgs; [
-    # Add direnv for automatic environment switching
-    direnv
-    # Add pipx package itself
-    pipx
-
-    # Cloud SDKs (Managed via Homebrew now)
-    
-    # Core packages required for basic functionality (Example: oh-my-zsh)
-    # oh-my-zsh # Managed via programs.zsh.oh-my-zsh.enable
-    # Other non-migrated packages if any were here...
+    # Development Environment
+    direnv  # Automatic environment switching
+    pipx    # Python package manager
   ];
 
   programs = {
     # Shell Configuration
     zsh = {
       enable = true;
-      # Import aliases from central location
       shellAliases = import ./aliases.nix { inherit pkgs config userConfig; };
     };
-    # FZF settings moved to zsh.nix
+    
+    # Home Manager
     home-manager.enable = true;
 
     # Direnv Configuration for Flake Integration
     direnv = {
       enable = true;
-      nix-direnv.enable = true; # Important for 'use flake'
+      nix-direnv.enable = true;
     };
   };
 

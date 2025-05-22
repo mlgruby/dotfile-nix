@@ -68,11 +68,6 @@
   # Set correct GID for nixbld group
   ids.gids.nixbld = 350;
 
-  # Required for proper Homebrew installation
-  system.activationScripts.preUserActivation.text = ''
-    export INSTALLING_HOMEBREW=1
-  '';
-
   # Allow installation of non-free packages
   nixpkgs = {
     config = {
@@ -82,11 +77,11 @@
 
   # System-wide packages installed via Nix
   environment.systemPackages = [
-    # macOS Integration
-    # Required for proper system integration
-    pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
-    pkgs.darwin.apple_sdk.frameworks.CoreServices
-    pkgs.darwin.apple_sdk.frameworks.Security
+    # macOS Integration - REMOVED deprecated Apple SDK frameworks
+    # These stubs do nothing and will be removed in Nixpkgs 25.11
+    # pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
+    # pkgs.darwin.apple_sdk.frameworks.CoreServices
+    # pkgs.darwin.apple_sdk.frameworks.Security
     pkgs.darwin.cctools
 
     # Core Utilities
@@ -156,6 +151,9 @@
   # System state version
   system.stateVersion = lib.mkForce 4;
 
+  # Set the primary user for nix-darwin
+  system.primaryUser = "satyasheel";
+
   # AWS Credential Management
   # Sets up scripts and configuration for AWS authentication
   system.activationScripts.aws-cred-setup.text = ''
@@ -172,15 +170,18 @@
     backupFileExtension = lib.mkForce "bak";
   };
 
-  system.activationScripts.postUserActivation.text = ''
-    echo "Setting up development tools..."
+  # Moved from postUserActivation as it now runs as root
+  system.activationScripts.xcodeCheck.text = ''
+    echo "Setting up development tools (Xcode Check)..."
     
     # Xcode Command Line Tools Check
     # Required for many development tools
     if ! xcode-select -p &> /dev/null; then
       echo "⚠️  Xcode Command Line Tools not found"
       echo "Please install them using: xcode-select --install"
-      exit 1
+      # Consider if exiting with 1 is appropriate here, or just a warning.
+      # For now, let's keep it as an error that halts activation.
+      exit 1 
     else
       echo "✓ Xcode Command Line Tools installed"
     fi
