@@ -12,8 +12,8 @@
 
 { config, pkgs, ... }: {
   programs.zsh = {
-    # Use initExtra for manual completion setup
-    initExtra = ''
+    # Use initContent for manual completion setup
+    initContent = ''
       # Enable AWS CLI command completion
       # Uses aws_completer from awscli2 package
       if command -v aws_completer &> /dev/null; then

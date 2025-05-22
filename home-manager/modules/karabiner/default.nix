@@ -168,27 +168,21 @@
       mkdir -p "$HOME/.config/karabiner"
       cat > "$HOME/.config/karabiner/karabiner.json" << 'EOF'
       {
-        # Global Settings
         "global": {
           "check_for_updates_on_startup": true,
           "show_in_menu_bar": true,
           "show_profile_name_in_menu_bar": false
         },
-        # Keyboard Preferences
         "preferences": {
           "keyboard_type_if_empty": "iso"
         },
-        # Profile Configuration
         "profiles": [
           {
             "name": "Default",
             "selected": true,
-            # Basic key remapping
             "simple_modifications": [],
-            # Advanced modifications
             "complex_modifications": {
               "parameters": {
-                # Timing for simultaneous key presses
                 "basic.simultaneous_threshold_milliseconds": 50
               },
               "rules": []

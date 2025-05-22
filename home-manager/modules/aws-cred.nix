@@ -12,7 +12,7 @@
 
   programs.zsh = {
     # Function definition added to Zsh initialization
-    initExtra = ''
+    initContent = ''
       # Function to write ENV credentials to ~/.aws/credentials profile
       set_aws_profile() {
         local profile_name="''${1:-default}"
@@ -58,7 +58,7 @@
           return 1
         fi
       }
-    ''; # End of initExtra
+    ''; # End of initContent
 
     # Aliases now call the function defined above
     shellAliases = {
