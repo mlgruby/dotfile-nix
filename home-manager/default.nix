@@ -1,4 +1,4 @@
-# home/default.nix
+# home/default.nix - Optimized Home Manager Configuration
 #
 # Main Home Manager configuration
 #
@@ -55,63 +55,54 @@
 # - Check module docs for details
 # - Configuration is declarative
 # - Changes require rebuild
-{ config, pkgs, lib, username, fullName, email, githubUsername, userConfig, ... }: {
+{
+  config,
+  pkgs,
+  username,
+  userConfig,
+  ...
+}: {
   imports = [
-    # Shell Environment
+    # Core modules
     ./modules/tmux.nix
     ./modules/zsh.nix
     ./modules/starship.nix
-    
-    # Cloud Platform Tools
     ./modules/aws.nix
-    ./modules/aws-cred.nix
-    
-    # Development Tools
+    ./modules/aws-sso.nix
     ./modules/git.nix
     ./modules/github.nix
     ./modules/lazygit.nix
-    
-    # Terminal & UI
     ./modules/alacritty
     ./modules/karabiner
     ./modules/rectangle.nix
-    
-    # Editor
     ./neovim.nix
   ];
 
-  # List of packages managed by Home Manager
-  home.packages = with pkgs; [
-    # Development Environment
-    direnv  # Automatic environment switching
-    pipx    # Python package manager
-  ];
+  home = {
+    inherit username;
+    homeDirectory = "/Users/${username}";
+    stateVersion = "23.11";
+
+    packages = with pkgs; [
+      direnv
+      pipx
+      markdownlint-cli
+    ];
+  };
 
   programs = {
-    # Shell Configuration
     zsh = {
       enable = true;
-      shellAliases = import ./aliases.nix { inherit pkgs config userConfig; };
+      shellAliases = import ./aliases.nix {inherit pkgs config userConfig;};
     };
-    
-    # Home Manager
+
     home-manager.enable = true;
 
-    # Direnv Configuration for Flake Integration
     direnv = {
       enable = true;
       nix-direnv.enable = true;
     };
   };
 
-  # Enable font configuration
   fonts.fontconfig.enable = true;
-
-  # User Environment Settings
-  home = {
-    username = username;
-    homeDirectory = "/Users/${username}";
-    # Version for home-manager
-    stateVersion = "23.11";
-  };
 }

@@ -1,6 +1,10 @@
-{ config, pkgs, lib, userConfig, nixpkgsConfig, self, ... }:
-
 {
+  pkgs,
+  userConfig,
+  nixpkgsConfig,
+  self,
+  ...
+}: {
   # Miscellaneous System Settings extracted from flake.nix inline module
 
   # System Version Management
@@ -9,10 +13,12 @@
 
   # Nixpkgs Override (already partially defined in flake let block)
   # Consider merging this logic fully if needed.
-  nixpkgs = nixpkgsConfig // {
-    hostPlatform = "aarch64-darwin";
-  };
-  
+  nixpkgs =
+    nixpkgsConfig
+    // {
+      hostPlatform = "aarch64-darwin";
+    };
+
   # Security Settings (Placeholder if needed later)
 
   # Shell Configuration (System-level ZSH enablement)
@@ -28,4 +34,4 @@
     home = "/Users/${userConfig.username}"; # Standard home dir
     shell = "${pkgs.zsh}/bin/zsh"; # Set default shell to Nix Zsh
   };
-} 
+}

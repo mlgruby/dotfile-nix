@@ -8,9 +8,8 @@
 #
 # Integration:
 # - AWS CLI installed via Homebrew (homebrew.nix)
-# - Credentials managed by aws-cred.nix
-
-{ config, pkgs, ... }: {
+# - Credentials managed by aws-sso.nix
+{pkgs, ...}: {
   programs.zsh = {
     # Use initContent for manual completion setup
     initContent = ''
