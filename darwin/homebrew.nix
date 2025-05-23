@@ -73,8 +73,7 @@
 # - Brewfile is auto-generated for backup/replication
 # - Packages are organized by category for better maintenance
 # - Comments explain package purposes and dependencies
-
-{ config, pkgs, lib, userConfig, ... }: {
+{userConfig, ...}: {
   nix-homebrew = {
     # Install Homebrew under the default prefix
     enable = true;
@@ -92,116 +91,118 @@
   # Homebrew packages configuration
   homebrew = {
     enable = true;
-    
+
     # Configure taps
     taps = [
-      "warrensbox/tap"      # For tfswitch
+      "warrensbox/tap" # For tfswitch
     ];
-    
+
     onActivation = {
       autoUpdate = true;
       upgrade = true;
       # Remove old versions
-      cleanup = "zap";      # More aggressive cleanup
+      cleanup = "zap"; # More aggressive cleanup
     };
 
     # CLI Tools
     brews = [
       # Core System Utilities
       # These are installed via Homebrew for macOS-specific optimizations
-      "coreutils"                   # GNU core utilities
-      "duf"                         # Disk usage/free utility
-      "dust"                        # More intuitive du
-      "eza"                         # Modern ls replacement
-      "fd"                          # Simple find alternative
-      "mas"                         # Mac App Store CLI
-      "zoxide"                      # Smarter cd command
-      
+      "coreutils" # GNU core utilities
+      "duf" # Disk usage/free utility
+      "dust" # More intuitive du
+      "eza" # Modern ls replacement
+      "fd" # Simple find alternative
+      "mas" # Mac App Store CLI
+      "zoxide" # Smarter cd command
+
       # Python Development Environment
       # Managed via Homebrew for better macOS integration
-      "uv"                          # Python package manager
+      "uv" # Python package manager
 
       # Development Tools
       # These versions are preferred over Nix for various reasons
-      "cmake"                       # Build system
-      "neovim"                      # Modern vim implementation
-      "pkg-config"                  # Development tool
-      "git"                         # Version control
-      "gh"                          # GitHub CLI
-      "git-lfs"                     # Git large file storage
-      "lazygit"                     # Terminal UI for git
-      "node"                        # Node.js (includes npm and npx)
-      
+      "cmake" # Build system
+      "neovim" # Modern vim implementation
+      "pkg-config" # Development tool
+      "git" # Version control
+      "gh" # GitHub CLI
+      "git-lfs" # Git large file storage
+      "lazygit" # Terminal UI for git
+      "node" # Node.js (includes npm and npx)
+
       # Text Processing and Search
-      "bat"                         # Modern cat with syntax highlighting
-      "fzf"                         # Fuzzy finder
-      "jq"                          # JSON processor
-      "ripgrep"                     # Fast grep alternative
-      "yq"                          # YAML processor
-      
+      "bat" # Modern cat with syntax highlighting
+      "fzf" # Fuzzy finder
+      "jq" # JSON processor
+      "ripgrep" # Fast grep alternative
+      "yq" # YAML processor
+
       # Terminal Utilities
-      "bottom"                      # System/Process monitor
-      "btop"                        # Modern resource monitor (replaces htop)
-      "glow"                        # Markdown viewer
-      "neofetch"                    # System information tool
-      "starship"                    # Cross-shell prompt
-      "tldr"                        # Simplified man pages
-      "tmux"                        # Terminal multiplexer
-      
-      # Security
-      "gnupg"                       # OpenPGP implementation
-      
+      "bottom" # System/Process monitor
+      "btop" # Modern resource monitor (replaces htop)
+      "glow" # Markdown viewer
+      "neofetch" # System information tool
+      "starship" # Cross-shell prompt
+      "tldr" # Simplified man pages
+      "tmux" # Terminal multiplexer
+
+      # Security and Secrets Management
+      "gnupg" # OpenPGP implementation
+      "sops" # Secrets OPerationS (encryption)
+      "age" # Modern encryption tool
+
       # Cloud and Infrastructure Tools
-      "awscli"                      # AWS CLI
-      "terraform-docs"              # Terraform documentation
-      "tflint"                      # Terraform linter
-      "warrensbox/tap/tfswitch"     # Terraform version manager
+      "awscli" # AWS CLI
+      "terraform-docs" # Terraform documentation
+      "tflint" # Terraform linter
+      "warrensbox/tap/tfswitch" # Terraform version manager
     ];
 
     # GUI Applications (Casks)
     casks = [
       # Development Tools - JDKs
-      "temurin@8"                   # Eclipse Temurin JDK 8 LTS
-      "temurin@11"                  # Eclipse Temurin JDK 11 LTS
-      "temurin@17"                  # Eclipse Temurin JDK 17 LTS
-      
+      "temurin@8" # Eclipse Temurin JDK 8 LTS
+      "temurin@11" # Eclipse Temurin JDK 11 LTS
+      "temurin@17" # Eclipse Temurin JDK 17 LTS
+
       # Cloud Storage
-      "google-drive"                # Google Drive client
-      
+      "google-drive" # Google Drive client
+
       # Communication
-      "discord"             # Move from configuration.nix
-      
+      "discord" # Move from configuration.nix
+
       # Development Tools (Other)
       "cursor"
       "docker"
-      "google-cloud-sdk"    # Google Cloud SDK
-      "jetbrains-toolbox"   # JetBrains IDE manager
-      "postman"             # API testing tool
-      "visual-studio-code"  # Code editor
-      
+      "google-cloud-sdk" # Google Cloud SDK
+      "jetbrains-toolbox" # JetBrains IDE manager
+      "postman" # API testing tool
+      "visual-studio-code" # Code editor
+
       # Terminal and System Tools
-      "alacritty"           # GPU-accelerated terminal
-      "karabiner-elements"  # Keyboard customization
-      "rectangle"           # Window management
-      "the-unarchiver"      # Archive extraction
-      
+      "alacritty" # GPU-accelerated terminal
+      "karabiner-elements" # Keyboard customization
+      "rectangle" # Window management
+      "the-unarchiver" # Archive extraction
+
       # Productivity and Communication
-      "bitwarden"           # Password manager
-      "brave-browser"       # Privacy-focused browser
-      "claude"              # Claude AI desktop app
-      "insync"              # Google Drive client
-      "obsidian"            # Knowledge base and note-taking
-      "spotify"             # Music streaming
-      "whatsapp"            # Messaging
-      
+      "bitwarden" # Password manager
+      "brave-browser" # Privacy-focused browser
+      "claude" # Claude AI desktop app
+      "insync" # Google Drive client
+      "obsidian" # Knowledge base and note-taking
+      "spotify" # Music streaming
+      "whatsapp" # Messaging
+
       # Media
-      "vlc"                 # Media player
-      
+      "vlc" # Media player
+
       # Fonts
-      "font-fira-code-nerd-font"      # Alternative with ligatures
-      "font-hack-nerd-font"           # Clean monospace
+      "font-fira-code-nerd-font" # Alternative with ligatures
+      "font-hack-nerd-font" # Clean monospace
       "font-jetbrains-mono-nerd-font" # Primary coding font
-      "font-meslo-lg-nerd-font"       # Terminal font
+      "font-meslo-lg-nerd-font" # Terminal font
     ];
 
     # Global options

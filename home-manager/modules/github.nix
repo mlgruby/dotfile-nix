@@ -19,8 +19,7 @@
 # Note:
 # - Auth via 'gh auth login'
 # - Additional git config in git.nix
-
-{ config, pkgs, ... }: {
+{...}: {
   programs.gh = {
     enable = true;
     settings = {
