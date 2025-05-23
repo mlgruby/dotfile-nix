@@ -134,7 +134,7 @@
           [ -n "$pr" ] && echo "$pr" | awk '{print $1}' | xargs gh pr checkout
         }
         function ghprcr() {
-          gh pr create --fill
+          gh pr create --web --fill
         }
         function ghprcheck() {
           local pr=$(gh pr list --state open | fzf) &&
