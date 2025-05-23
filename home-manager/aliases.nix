@@ -205,6 +205,24 @@
     fstash = "git stash list | fzf --preview 'echo {} | cut -d: -f1 | xargs -I % sh -c \"git stash show --color=always %\"' | cut -d: -f1 | xargs -I % sh -c 'git stash apply %'";
   };
 
+  # GitHub CLI aliases that were accidentally removed
+  githubAliases = {
+    # PR Management
+    ghprl = "gh pr list --limit 1000";
+    ghpro = "gh pr list --state open --limit 1000";
+    ghprch = "gh pr checks";
+
+    # Repository Management
+    ghrv = "gh repo view --web";
+    ghrc = "gh repo clone";
+    ghrf = "gh repo fork";
+
+    # Issue Management
+    ghil = "gh issue list --limit 1000";
+    ghic = "gh issue create";
+    ghiv = "gh issue view";
+  };
+
   fzfAliases = {
     fe = "fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}' | xargs -r nano";
     ffp = "fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}'";
@@ -308,7 +326,8 @@
     // gitAliases
     // fzfAliases
     // dockerAliases
-    // terraformAliases;
+    // terraformAliases
+    // githubAliases;
 
   macAliases =
     if isMacOS
