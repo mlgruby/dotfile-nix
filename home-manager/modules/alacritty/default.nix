@@ -12,10 +12,11 @@
 #
 # Note:
 # - Package from Homebrew
-
-{ config, lib, pkgs, ... }:
-
 {
+  lib,
+  pkgs,
+  ...
+}: {
   programs.alacritty = {
     enable = true;
     # Read settings directly from the TOML file

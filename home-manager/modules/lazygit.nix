@@ -9,10 +9,7 @@
 # Integration:
 # - Works with git.nix
 # - Used by shell aliases
-
-{ config, pkgs, ... }:
-
-{
+{...}: {
   programs.lazygit = {
     enable = true;
     settings = {
@@ -22,9 +19,12 @@
         showRandomTip = false;
         theme = {
           lightTheme = false;
-          activeBorderColor = [ "green" "bold" ];
-          inactiveBorderColor = [ "white" ];
-          selectedLineBgColor = [ "blue" ];
+          activeBorderColor = [
+            "green"
+            "bold"
+          ];
+          inactiveBorderColor = ["white"];
+          selectedLineBgColor = ["blue"];
         };
       };
       git = {

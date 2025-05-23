@@ -1,4 +1,4 @@
-# flake.nix
+# flake.nix - Optimized Nix Flake Configuration
 #
 # Nix Flake configuration for macOS system
 #
@@ -34,7 +34,6 @@
 # - Requires Nix with flakes enabled
 # - System-specific configuration
 # - Supports M1/M2 Macs (aarch64-darwin)
-
 {
   description = "Nix-darwin system configuration";
 
@@ -42,67 +41,74 @@
     # Package Sources
     # Core nixpkgs repository
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    
+
     # Home Manager for user environment management
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # nix-darwin for macOS system configuration
     darwin = {
       url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Homebrew management
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
   };
 
-  outputs = { self, darwin, nixpkgs, home-manager, nix-homebrew, ... }@inputs:
-  let
+  outputs = {
+    self,
+    darwin,
+    nixpkgs,
+    home-manager,
+    nix-homebrew,
+    ...
+  }: let
     system = "aarch64-darwin";
-    # Validate hostname format
-    validateHostname = hostname: 
-      let
-        # Nix allows only letters, numbers, and hyphens as valid characters for hostnames
-        validFormat = builtins.match "[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*" hostname != null;
-      in
-      if hostname == null || hostname == "" 
-      then throw "Hostname must be defined in user-config.nix"
-      else if !validFormat 
-      then throw "Invalid hostname format: ${hostname}. Use only letters, numbers, and hyphens." 
-      else hostname;
 
-    # Import user configuration
-    userConfig = if builtins.pathExists ./user-config.nix
+    # User configuration validation
+    userConfig =
+      if builtins.pathExists ./user-config.nix
       then import ./user-config.nix
       else import ./user-config.default.nix;
-    # Ensure required attributes exist
-    requiredAttrs = ["username" "hostname" "email" "fullName" "githubUsername"];
+
+    requiredAttrs = [
+      "username"
+      "hostname"
+      "email"
+      "fullName"
+      "githubUsername"
+    ];
     missingAttrs = builtins.filter (attr: !(builtins.hasAttr attr userConfig)) requiredAttrs;
-    _ = if builtins.length missingAttrs > 0
-        then throw "Missing required attributes in user-config.nix: ${builtins.toString missingAttrs}"
-        else null;
-    # Validate the hostname
-    validatedHostname = validateHostname userConfig.hostname;
-    nixpkgsConfig = {
-      config = {
-        allowUnfree = true;
-      };
-    };
-  in
-  {
+
+    validateConfig = config: let
+      hostname = config.hostname or "";
+      validFormat = builtins.match "[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*" hostname != null;
+    in
+      if builtins.length missingAttrs > 0
+      then throw "Missing required attributes in user-config.nix: ${builtins.toString missingAttrs}"
+      else if hostname == "" || !validFormat
+      then throw "Invalid hostname format: ${hostname}. Use only letters, numbers, and hyphens."
+      else config;
+
+    validatedConfig = validateConfig userConfig;
+    nixpkgsConfig.config.allowUnfree = true;
+  in {
     # Darwin System Configuration
     # Main system definition for MacBook Pro
-    darwinConfigurations."${validatedHostname}" = darwin.lib.darwinSystem {
+    darwinConfigurations."${validatedConfig.hostname}" = darwin.lib.darwinSystem {
       inherit system;
-      specialArgs = { inherit userConfig nixpkgsConfig self; };
+      specialArgs = {
+        userConfig = validatedConfig;
+        inherit nixpkgsConfig self;
+      };
       modules = [
         # Core System Modules
         # Base darwin configuration
         ./darwin/configuration.nix
-        
+
         # User Environment
         # Home manager configuration
         home-manager.darwinModules.home-manager
@@ -110,27 +116,34 @@
           nixpkgs = nixpkgsConfig;
           home-manager = {
             # Global Settings
-            useGlobalPkgs = true;          # Use global package set
-            useUserPackages = true;        # Enable user packages
-            backupFileExtension = "bak";   # Backup extension
+            useGlobalPkgs = true; # Use global package set
+            useUserPackages = true; # Enable user packages
+            backupFileExtension = "bak"; # Backup extension
             # User-specific Arguments
             extraSpecialArgs = {
-              inherit userConfig;
-              inherit (userConfig) username fullName email githubUsername hostname;
+              userConfig = validatedConfig;
+              inherit
+                (validatedConfig)
+                username
+                fullName
+                email
+                githubUsername
+                hostname
+                ;
             };
             # User Configuration
-            users.${userConfig.username} = { pkgs, lib, ... }: {
-              imports = [ ./home-manager/default.nix ];
+            users.${validatedConfig.username} = {lib, ...}: {
+              imports = [./home-manager/default.nix];
               home = {
-                username = lib.mkForce userConfig.username;
-                homeDirectory = lib.mkForce "/Users/${userConfig.username}";
+                username = lib.mkForce validatedConfig.username;
+                homeDirectory = lib.mkForce "/Users/${validatedConfig.username}";
                 stateVersion = "23.11";
               };
               programs.home-manager.enable = true;
             };
           };
         }
-        
+
         # Package Management
         # Homebrew configuration
         nix-homebrew.darwinModules.nix-homebrew
@@ -140,11 +153,18 @@
         ./darwin/nix-settings.nix
         ./darwin/macos-defaults.nix
         ./darwin/misc-system.nix
+
+        # Secrets Management (disabled - using AWS SSO instead)
+        # sops-nix.darwinModules.sops
+        # ./darwin/secrets.nix
       ];
     };
 
+    # Formatters
+    # Nix code formatter using nixfmt-rfc-style
+    formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
+
     # Package Exports
-    darwinPackages = self.darwinConfigurations.${validatedHostname}.pkgs;
+    darwinPackages = self.darwinConfigurations.${validatedConfig.hostname}.pkgs;
   };
 }
-  

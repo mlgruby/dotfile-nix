@@ -70,17 +70,23 @@ Each component serves a specific purpose in creating a reproducible system:
     - Rollback capability
     - Consistent state management
 
+4. **Performance Optimized**
+    - Lazy loading for heavy functions
+    - Streamlined configuration files
+    - Fast shell startup times
+
 ### File Structure
 
-The repository is organized into logical components:
+The repository is organized into logical, optimized components:
 
 - `darwin/` - System configuration
   - Separates macOS-specific settings
   - Manages system-wide packages
   - Controls security policies
 
-- `home-manager/` - User environment
-  - Modular program configurations
+- `home-manager/` - User environment (Optimized)
+  - Modular program configurations with helper functions
+  - Lazy-loaded AWS SSO functions for fast startup
   - Personal preferences and tools
   - Shell and terminal setup
 
@@ -165,14 +171,14 @@ rebuild
 ├── flake.lock                   # Lock file for dependencies
 ├── flake.nix                    # System definition
 ├── home-manager/                # User environment
-│   ├── aliases.nix              # Shell aliases
+│   ├── aliases.nix              # Shell aliases (optimized with helper functions)
 │   ├── default.nix              # Main user configuration
 │   ├── neovim.nix               # Neovim configuration
 │   └── modules/                 # Configuration modules
 │       ├── alacritty/           # Terminal emulator
 │       │   ├── config.toml      # Alacritty configuration
 │       │   └── default.nix      # Module definition
-│       ├── aws-cred.nix         # AWS credentials management
+│       ├── aws-sso.nix          # AWS SSO with lazy loading
 │       ├── aws.nix              # AWS CLI configuration
 │       ├── git.nix              # Git configuration
 │       ├── github.nix           # GitHub CLI setup
@@ -180,7 +186,7 @@ rebuild
 │       │   └── default.nix      # Module definition
 │       ├── lazygit.nix          # Git TUI configuration
 │       ├── rectangle.nix        # Window management
-│       ├── starship.nix         # Shell prompt
+│       ├── starship.nix         # Shell prompt (optimized)
 │       ├── tmux.nix             # Terminal multiplexer
 │       └── zsh.nix              # Shell configuration
 ├── nix/                         # Nix configuration
@@ -197,6 +203,8 @@ rebuild
 **Note on `nix/` Directory:** The files `nix/zshrc` and `nix/dynamic-config.zsh` are symlinked directly into `~/` by the `pre-nix-installation.sh` script. They provide a minimal, temporary shell environment immediately after the script finishes, before you open a new terminal. The full, robust shell environment is declaratively configured by Home Manager (`home-manager/modules/zsh.nix`) and takes effect in new terminal sessions after the first build.
 
 ## Quick Reference
+
+**⚡ Performance Optimized**: Fast shell startup with lazy-loaded functions and streamlined configurations.
 
 ### System Commands
 
@@ -219,9 +227,9 @@ lg        # LazyGit TUI
 ghprc     # Checkout PR
 ghprl     # List PRs
 
-# Cloud
+# Cloud (lazy-loaded for fast startup)
 awsp      # Switch AWS profile
-gcs       # Switch GCloud config
+awsf      # Ultimate AWS workflow
 ```
 
 ## Documentation
