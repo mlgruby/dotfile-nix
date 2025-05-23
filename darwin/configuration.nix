@@ -58,8 +58,13 @@
 # - Check activation script output for status
 # - System configuration is validated during build
 # - Hostname must be valid (letters, numbers, hyphens only)
-
-{ config, pkgs, lib, userConfig, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  userConfig,
+  ...
+}: {
   # Nix package manager settings
 
   # Enable Nix daemon
@@ -86,59 +91,85 @@
 
     # Core Utilities
     # Essential command-line tools
-    pkgs.curl                  # URL data transfer
-    pkgs.wget                  # File retrieval
-    pkgs.gnutls                # TLS/SSL support
-    pkgs.tree                  # Directory visualization
+    pkgs.curl # URL data transfer
+    pkgs.wget # File retrieval
+    pkgs.gnutls # TLS/SSL support
+    pkgs.tree # Directory visualization
 
     # Build Environment
     # Required for compiling Python and other software
-    pkgs.openssl              # Cryptography
-    pkgs.readline             # Line editing
-    pkgs.sqlite               # Database
-    pkgs.zlib                 # Compression
+    pkgs.openssl # Cryptography
+    pkgs.readline # Line editing
+    pkgs.sqlite # Database
+    pkgs.zlib # Compression
   ];
 
-  # Application Management
+  # Application Management & System Configuration
   # Creates aliases in /Applications/Nix Apps for GUI applications
   # This makes apps appear in Spotlight and Finder
-  system.activationScripts.applications.text = let
-    env = pkgs.buildEnv {
-      name = "system-applications";
-      paths = config.environment.systemPackages;
-      pathsToLink = "/Applications";
-    };
-  in
-    pkgs.lib.mkForce ''
-      # Clean up and recreate Nix Apps directory
-      echo "setting up /Applications..." >&2
-      rm -rf /Applications/Nix\ Apps
-      mkdir -p /Applications/Nix\ Apps
-      # Create aliases for all Nix-installed applications
-      find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
-      while read -r src; do
-          app_name=$(basename "$src")
-          echo "copying $src" >&2
-          ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
-      done
-    '';
+  system = {
+    activationScripts = {
+      applications.text = let
+        env = pkgs.buildEnv {
+          name = "system-applications";
+          paths = config.environment.systemPackages;
+          pathsToLink = "/Applications";
+        };
+      in
+        pkgs.lib.mkForce ''
+          # Clean up and recreate Nix Apps directory
+          echo "setting up /Applications..." >&2
+          rm -rf /Applications/Nix\ Apps
+          mkdir -p /Applications/Nix\ Apps
+          # Create aliases for all Nix-installed applications
+          find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
+          while read -r src; do
+              app_name=$(basename "$src")
+              echo "copying $src" >&2
+              ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
+          done
+        '';
 
-  # macOS System Preferences
-  # Configure system-wide settings and defaults
-  system.defaults = {
-    # Finder preferences
-    finder.FXPreferredViewStyle = "clmv";    # Column view by default
-    # Login window settings
-    loginwindow.GuestEnabled = false;        # Disable guest account
-    # Global system settings
-    NSGlobalDomain = {
-      AppleICUForce24HourTime = true;        # Use 24-hour time
-      AppleInterfaceStyle = "Dark";          # Enable dark mode
-      KeyRepeat = 2;                         # Faster key repeat
+      xcodeCheck.text = ''
+        echo "Setting up development tools (Xcode Check)..."
+
+        # Xcode Command Line Tools Check
+        # Required for many development tools
+        if ! xcode-select -p &> /dev/null; then
+          echo "⚠️  Xcode Command Line Tools not found"
+          echo "Please install them using: xcode-select --install"
+          # Consider if exiting with 1 is appropriate here, or just a warning.
+          # For now, let's keep it as an error that halts activation.
+          exit 1
+        else
+          echo "✓ Xcode Command Line Tools installed"
+        fi
+      '';
     };
-    dock = {
-      # ... your existing settings ...
+
+    # macOS System Preferences
+    # Configure system-wide settings and defaults
+    defaults = {
+      # Finder preferences
+      finder.FXPreferredViewStyle = "clmv"; # Column view by default
+      # Login window settings
+      loginwindow.GuestEnabled = false; # Disable guest account
+      # Global system settings
+      NSGlobalDomain = {
+        AppleICUForce24HourTime = true; # Use 24-hour time
+        AppleInterfaceStyle = "Dark"; # Enable dark mode
+        KeyRepeat = 2; # Faster key repeat
+      };
+      dock = {
+        # ... your existing settings ...
+      };
     };
+
+    # System state version
+    stateVersion = lib.mkForce 4;
+
+    # Set the primary user for nix-darwin
+    primaryUser = "satyasheel";
   };
 
   # Platform architecture
@@ -147,45 +178,6 @@
   # Security Configuration
   # Enable TouchID for sudo authentication
   security.pam.services.sudo_local.touchIdAuth = true;
-
-  # System state version
-  system.stateVersion = lib.mkForce 4;
-
-  # Set the primary user for nix-darwin
-  system.primaryUser = "satyasheel";
-
-  # AWS Credential Management
-  # Sets up scripts and configuration for AWS authentication
-  system.activationScripts.aws-cred-setup.text = ''
-    # Set up directory structure
-    # Create AWS credential management directory
-    mkdir -p /opt/aws_cred_copy
-    mkdir -p $HOME/.aws
-  '';
-
-  home-manager = {
-    useGlobalPkgs = true;      # Use system-level packages
-    useUserPackages = true;     # Enable user-specific packages
-    users.${userConfig.username} = import ../home-manager;
-    backupFileExtension = lib.mkForce "bak";
-  };
-
-  # Moved from postUserActivation as it now runs as root
-  system.activationScripts.xcodeCheck.text = ''
-    echo "Setting up development tools (Xcode Check)..."
-    
-    # Xcode Command Line Tools Check
-    # Required for many development tools
-    if ! xcode-select -p &> /dev/null; then
-      echo "⚠️  Xcode Command Line Tools not found"
-      echo "Please install them using: xcode-select --install"
-      # Consider if exiting with 1 is appropriate here, or just a warning.
-      # For now, let's keep it as an error that halts activation.
-      exit 1 
-    else
-      echo "✓ Xcode Command Line Tools installed"
-    fi
-  '';
 
   # System Configuration Validation
   # Ensure critical components are properly set up
@@ -212,4 +204,11 @@
     # Python environment note
     "Use 'poetry' for project dependencies and 'pyenv' for Python versions"
   ];
+
+  home-manager = {
+    useGlobalPkgs = true; # Use system-level packages
+    useUserPackages = true; # Enable user-specific packages
+    users.${userConfig.username} = import ../home-manager;
+    backupFileExtension = lib.mkForce "bak";
+  };
 }
