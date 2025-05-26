@@ -84,14 +84,19 @@
     missingAttrs = builtins.filter (attr: !(builtins.hasAttr attr userConfig)) requiredAttrs;
 
     validateConfig = config: let
-      hostname = config.hostname or "";
-      validFormat = builtins.match "[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*" hostname != null;
+      hostnameFromConfig = config.hostname;
     in
       if builtins.length missingAttrs > 0
       then throw "Missing required attributes in user-config.nix: ${builtins.toString missingAttrs}"
-      else if hostname == "" || !validFormat
-      then throw "Invalid hostname format: ${hostname}. Use only letters, numbers, and hyphens."
-      else config;
+      else if builtins.typeOf hostnameFromConfig != "string"
+      then throw "Hostname must be a non-empty string. Please provide a valid string value in user-config.nix."
+      else let
+        hostname = hostnameFromConfig;
+        validFormat = builtins.match "[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*" hostname != null;
+      in
+        if hostname == "" || !validFormat
+        then throw "Invalid hostname format: ${hostname}. Use only letters, numbers, and hyphens."
+        else config;
 
     validatedConfig = validateConfig userConfig;
     nixpkgsConfig.config.allowUnfree = true;
