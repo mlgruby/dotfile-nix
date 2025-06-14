@@ -213,6 +213,8 @@
     };
 
     # Mac App Store apps
-    masApps = {};
+    masApps = {
+      "Amazon Kindle" = 302584613; # Kindle app from Mac App Store
+    };
   };
 }
