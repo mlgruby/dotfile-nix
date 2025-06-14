@@ -371,7 +371,8 @@
         command -v uv &> /dev/null && ${homeDir}/.local/bin/uv cache clean 2>/dev/null || true && \
         echo "🧹 Optimizing Nix store..." && \
         nix store optimise --option max-jobs 6 --cores 2 && \
-        echo "✨ Cleanup complete!"
+        echo "✨ Cleanup complete!" && \
+        rl
       '';
 
       # Finder & macOS specific

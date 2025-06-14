@@ -28,5 +28,3 @@ build/
 /private/var/folders/
 # User Configuration
 user-config.nix
-
-# AWS SSO handles authentication automatically - no secrets needed!
