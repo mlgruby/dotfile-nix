@@ -130,6 +130,7 @@
       "git-lfs" # Git large file storage
       "lazygit" # Terminal UI for git
       "node" # Node.js (includes npm and npx)
+      "shellcheck" # Shell script analysis tool
 
       # Text Processing and Search
       "bat" # Modern cat with syntax highlighting
@@ -174,7 +175,7 @@
 
       # Development Tools (Other)
       "cursor"
-      "docker"
+      "docker-desktop" # Docker Desktop for macOS
       "google-cloud-sdk" # Google Cloud SDK
       "jetbrains-toolbox" # JetBrains IDE manager
       "postman" # API testing tool

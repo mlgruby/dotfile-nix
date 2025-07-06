@@ -60,6 +60,8 @@
     shortcut = "a"; # Prefix: Ctrl-a
     baseIndex = 1; # Start windows at 1
     escapeTime = 0; # Remove delay
+    
+
 
     extraConfig = ''
       # Core Settings
@@ -95,7 +97,7 @@
       # Config reload
       bind r source-file $HOME/.config/tmux/tmux.conf \; display "Config reloaded!"
 
-      # Plugins
+      # Plugins - using TPM (tmux plugin manager)
       set -g @plugin 'tmux-plugins/tpm'
       set -g @plugin 'tmux-plugins/tmux-sensible'
       set -g @plugin 'tmux-plugins/tmux-yank'
@@ -113,16 +115,23 @@
       set -g @tmux2k-git-display-status true
       set -g @tmux2k-refresh-rate 5
 
-      # Initialize TPM
+      # Initialize TPM (keep this line at the very bottom)
       run '~/.tmux/plugins/tpm/tpm'
     '';
   };
 
-  # Auto-install TPM
+  # Auto-install TPM and plugins
   home.activation.tmuxPlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Ensure TPM is installed
     if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
       mkdir -p "$HOME/.tmux/plugins"
       ${pkgs.git}/bin/git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+    fi
+    
+    # Ensure tmux2k plugin is available (since it was manually installed before)
+    if [ ! -d "$HOME/.tmux/plugins/tmux2k" ]; then
+      mkdir -p "$HOME/.tmux/plugins"
+      ${pkgs.git}/bin/git clone https://github.com/2kabhishek/tmux2k "$HOME/.tmux/plugins/tmux2k"
     fi
   '';
 }
