@@ -63,7 +63,6 @@
       syntaxHighlighting.enable = true;
 
       sessionVariables = {
-        PATH = "$HOME/.local/bin:$HOME/Library/Application Support/pypoetry/venv/bin:$PATH";
         NIX_PATH = "$HOME/.nix-defexpr/channels:$NIX_PATH";
         FPATH = "$HOME/.zsh/completion:$FPATH";
         AWS_DEFAULT_REGION = "us-west-2";
@@ -71,6 +70,13 @@
       };
 
       initContent = ''
+        # Python Environment Management
+        # Initialize pyenv (managed via Nix)
+        if command -v pyenv >/dev/null 2>&1; then
+          export PYENV_ROOT="$HOME/.pyenv"
+          eval "$(pyenv init -)"
+        fi
+
         # FZF Integration Widgets
         function fzf-git-status() {
           local selections=$(
