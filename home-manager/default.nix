@@ -87,6 +87,9 @@
       direnv
       pipx
       markdownlint-cli
+      # Python Development Environment
+      pyenv
+      poetry
     ];
   };
 
