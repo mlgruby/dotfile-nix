@@ -43,7 +43,7 @@
     LESSHISTFILE = "$XDG_CACHE_HOME/less/history";
     HISTFILE = "$XDG_STATE_HOME/zsh/history";
     INPUTRC = "$XDG_CONFIG_HOME/readline/inputrc";
-    GNUPGHOME = "$XDG_DATA_HOME/gnupg";
+    # GNUPGHOME managed by tool-configs.nix for Homebrew GPG
     
     # Development tools
     CARGO_HOME = "$XDG_DATA_HOME/cargo";
