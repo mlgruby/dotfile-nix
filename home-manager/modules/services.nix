@@ -16,36 +16,22 @@
 # - Works with shell environment
 # - Complements system configuration
 {...}: {
+  # Services configuration
+  # Note: Many Home Manager services are Linux-only
+  # macOS services are typically managed via system preferences or launchd
+  
+  # Most services like SSH Agent, Redshift, etc. are handled by macOS natively:
+  # - SSH Agent: Managed by macOS Keychain automatically
+  # - Blue light filtering: Use macOS Night Shift in System Preferences
+  # - File sync: Managed via iCloud, Dropbox, etc.
+  # - GPG Agent: Configured via tool-configs.nix for Homebrew GPG installation
+  
+  # Home Manager services on macOS are limited, so we rely on:
+  # 1. System Preferences for system-level settings
+  # 2. Homebrew for service management where needed
+  # 3. LaunchAgents for custom background tasks
+  
   services = {
-    # SSH Agent for key management
-    ssh-agent = {
-      enable = true;
-    };
-
-    # Redshift for blue light filtering
-    redshift = {
-      enable = true;
-      latitude = 37.7749; # San Francisco coordinates (adjust for your location)
-      longitude = -122.4194;
-      temperature = {
-        day = 6500;
-        night = 3500;
-      };
-      brightness = {
-        day = "1.0";
-        night = "0.8";
-      };
-    };
-
-    # Syncthing for file synchronization (optional)
-    syncthing = {
-      enable = false; # Enable if you want file sync
-      tray = {
-        enable = false; # Set to true if you want system tray
-      };
-    };
-
-    # Note: GPG Agent is managed via Homebrew installation
-    # Configuration is handled in tool-configs.nix
+    # Most services disabled on macOS - use system alternatives
   };
 }

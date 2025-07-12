@@ -80,6 +80,8 @@
     ./modules/xdg.nix
     ./modules/fonts.nix
     ./modules/tool-configs.nix
+    ./modules/development.nix
+    ./modules/session-management.nix
     ./neovim.nix
   ];
 

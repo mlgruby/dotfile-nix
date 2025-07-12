@@ -30,18 +30,6 @@
     fontconfig = {
       enable = true;
       
-      # Font rendering settings optimized for macOS
-      antialias = true;
-      hinting = {
-        enable = true;
-        style = "slight"; # Better for macOS displays
-        autohint = false; # Use native hints
-      };
-      subpixel = {
-        rgba = "rgb"; # Standard RGB layout
-        lcdfilter = "default"; # Optimal LCD filtering
-      };
-      
       # Default font families (prioritize Homebrew-installed fonts)
       defaultFonts = {
         sansSerif = [ 
@@ -100,19 +88,15 @@
     liberation_ttf        # LibreOffice fonts
     dejavu_fonts          # Comprehensive Unicode
     noto-fonts            # Google's Unicode fonts
-    noto-fonts-cjk        # Chinese, Japanese, Korean
+    noto-fonts-cjk-sans   # Chinese, Japanese, Korean
     noto-fonts-emoji      # Emoji fallback
     
     # Additional Nerd Fonts (not in Homebrew or as backup)
-    (nerdfonts.override { 
-      fonts = [ 
-        "SourceCodePro"       # Adobe's monospace
-        "UbuntuMono"         # Ubuntu monospace
-        "DejaVuSansMono"     # DejaVu monospace
-        "Inconsolata"        # Google's monospace
-        # Note: JetBrainsMono, FiraCode, Hack, Meslo already via Homebrew
-      ]; 
-    })
+    nerd-fonts.sauce-code-pro    # Adobe's Source Code Pro (Nerd Font)
+    nerd-fonts.ubuntu-mono       # Ubuntu monospace
+    nerd-fonts.dejavu-sans-mono  # DejaVu monospace
+    nerd-fonts.inconsolata       # Google's monospace
+    # Note: JetBrainsMono, FiraCode, Hack, Meslo already via Homebrew
   ];
 
   # Font-related environment variables
@@ -334,7 +318,7 @@
       echo "💻 Programming Symbols:"
       echo "  Operators: == != <= >= && || ?? ?. ?:"
       echo "  Brackets: () [] {} <>"
-      echo "  Quotes: '' \"\" \`\`"
+      echo "  Quotes: single, double, backtick"
       echo "  Comments: // /* */ # <!-- -->"
       echo
       
