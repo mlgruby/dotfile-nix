@@ -19,25 +19,13 @@
   
   xdg = {
     enable = true;
-    
-    # Configure XDG directories (basic support)
-    # Note: userDirs, desktopEntries, and mimeApps are Linux-only
-    # macOS handles these through Finder preferences and Launch Services
-    
-    # Environment variables for XDG compliance (works on macOS)
-    configHome = "/Users/${config.home.username}/.config";
-    dataHome = "/Users/${config.home.username}/.local/share";  
-    stateHome = "/Users/${config.home.username}/.local/state";
-    cacheHome = "/Users/${config.home.username}/.cache";
+    # Use Home Manager's built-in XDG configuration
+    # No need to override the defaults as they're already correct
   };
 
-  # Environment variables for XDG compliance
+  # Environment variables for XDG compliance (only application-specific ones)
   home.sessionVariables = {
-    # XDG Base Directory
-    XDG_CONFIG_HOME = "$HOME/.config";
-    XDG_DATA_HOME = "$HOME/.local/share";
-    XDG_STATE_HOME = "$HOME/.local/state";
-    XDG_CACHE_HOME = "$HOME/.cache";
+    # Note: Base XDG variables managed by Home Manager's built-in xdg module
     
     # Application-specific XDG compliance
     LESSHISTFILE = "$XDG_CACHE_HOME/less/history";
