@@ -86,32 +86,7 @@
       };
     };
 
-    # Enhanced GPG configuration
-    gpg = {
-      enable = true;
-      settings = {
-        # Key server settings
-        keyserver = "hkps://keys.openpgp.org";
-        
-        # Default key preferences
-        personal-cipher-preferences = "AES256 AES192 AES";
-        personal-digest-preferences = "SHA512 SHA384 SHA256";
-        personal-compress-preferences = "ZLIB BZIP2 ZIP Uncompressed";
-        
-        # Security settings
-        cert-digest-algo = "SHA512";
-        s2k-digest-algo = "SHA512";
-        s2k-cipher-algo = "AES256";
-        
-        # Display settings
-        charset = "utf-8";
-        fixed-list-mode = true;
-        no-comments = true;
-        no-emit-version = true;
-        keyid-format = "0xlong";
-        with-fingerprint = true;
-      };
-    };
+    # GPG configuration managed via tool-configs.nix for Homebrew GPG
 
     # Tealdeer (tldr) configuration
     tealdeer = {
