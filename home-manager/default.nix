@@ -75,6 +75,11 @@
     ./modules/alacritty
     ./modules/karabiner
     ./modules/rectangle.nix
+    # ./modules/services.nix  # Temporarily disabled
+    # ./modules/programs.nix  # Temporarily disabled
+    # ./modules/xdg.nix  # Temporarily disabled
+    # ./modules/fonts.nix  # Temporarily disabled
+    # ./modules/tool-configs.nix  # Temporarily disabled
     ./neovim.nix
   ];
 
@@ -90,6 +95,8 @@
       # Python Development Environment
       pyenv
       poetry
+      # Scala Build Tool
+      sbt
     ];
   };
 
@@ -107,5 +114,5 @@
     };
   };
 
-  fonts.fontconfig.enable = true;
+
 }

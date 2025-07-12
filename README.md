@@ -146,6 +146,73 @@ This script automates the initial setup: installs Xcode tools (if needed), Homeb
 
 After the script completes and the first build is successful, **open a new terminal window** for the fully configured environment managed by Home Manager to take effect.
 
+## GPG Setup for GitHub (Optional but Recommended)
+
+For enhanced security and verified commits on GitHub, you can automatically set up GPG signing:
+
+```bash
+./setup-gpg-github.sh
+```
+
+This script will:
+
+- ✅ Check if a GPG key already exists for your email
+- ✅ Generate a new GPG key if needed (using secure defaults)
+- ✅ Authenticate with GitHub (if not already done)
+- ✅ Upload your public key to GitHub automatically
+- ✅ Update your `user-config.nix` with the key ID
+- ✅ Rebuild your configuration
+- ✅ Test GPG signing functionality
+
+**Prerequisites:**
+- `user-config.nix` must be configured with your email
+- GitHub CLI authentication (script will prompt if needed)
+
+**After setup:**
+- All your commits will be automatically signed
+- GitHub will show "Verified" badges on your commits
+- Your GPG key ID will be saved in `user-config.nix`
+
+**Manual GitHub Authentication (if needed):**
+```bash
+gh auth login
+```
+
+**Example Output:**
+```
+=== Automated GPG Setup for GitHub ===
+
+[INFO] Checking prerequisites...
+[SUCCESS] Prerequisites check passed
+[INFO] Extracting user information from user-config.nix...
+[SUCCESS] User info extracted: John Doe <john@example.com>
+[INFO] Checking for existing GPG keys...
+[WARNING] No existing GPG key found for john@example.com
+[INFO] Generating new GPG key for john@example.com...
+[SUCCESS] GPG key generated successfully: ABC123DEF456789
+[INFO] Checking GitHub authentication...
+[SUCCESS] GitHub authentication confirmed
+[INFO] Checking if GPG key already exists on GitHub...
+[WARNING] GPG key not found on GitHub
+[INFO] Uploading GPG key to GitHub...
+[SUCCESS] GPG key uploaded to GitHub successfully
+[INFO] Updating user-config.nix with GPG key ID...
+[SUCCESS] Updated user-config.nix with GPG key ID: ABC123DEF456789
+[INFO] Rebuilding Darwin configuration...
+[SUCCESS] Darwin configuration rebuilt successfully
+[INFO] Testing GPG signing...
+[SUCCESS] GPG signing test passed
+[SUCCESS] Git signing is enabled
+
+[SUCCESS] GPG setup completed successfully!
+
+Next steps:
+1. Make a test commit: git commit -m 'Test GPG signing'
+2. Push to GitHub: git push origin main
+3. Check GitHub for the 'Verified' badge
+4. Your GPG key ID is: ABC123DEF456789
+```
+
 ## Applying Changes
 
 After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/Documents/dotfile` directory:
