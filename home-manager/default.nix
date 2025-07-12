@@ -75,11 +75,11 @@
     ./modules/alacritty
     ./modules/karabiner
     ./modules/rectangle.nix
-    # ./modules/services.nix  # Temporarily disabled
-    # ./modules/programs.nix  # Temporarily disabled
-    # ./modules/xdg.nix  # Temporarily disabled
-    # ./modules/fonts.nix  # Temporarily disabled
-    # ./modules/tool-configs.nix  # Temporarily disabled
+    ./modules/services.nix
+    ./modules/programs.nix
+    ./modules/xdg.nix
+    ./modules/fonts.nix
+    ./modules/tool-configs.nix
     ./neovim.nix
   ];
 
