@@ -12,124 +12,23 @@
 # - Desktop entries for applications
 # - File associations and MIME types
 # - User directories configuration
-{pkgs, ...}: {
+{pkgs, config, ...}: {
+  # XDG configuration for macOS
+  # Note: Many XDG features are Linux-specific
+  # macOS uses different conventions and file associations
+  
   xdg = {
     enable = true;
     
-    # Configure XDG directories
-    userDirs = {
-      enable = true;
-      createDirectories = true;
-      desktop = "$HOME/Desktop";
-      documents = "$HOME/Documents";
-      download = "$HOME/Downloads";
-      music = "$HOME/Music";
-      pictures = "$HOME/Pictures";
-      publicShare = "$HOME/Public";
-      templates = "$HOME/Templates";
-      videos = "$HOME/Videos";
-    };
-
-    # Configure common directories
-    configHome = "$HOME/.config";
-    dataHome = "$HOME/.local/share";
-    stateHome = "$HOME/.local/state";
-    cacheHome = "$HOME/.cache";
-
-    # Desktop entries for custom applications
-    desktopEntries = {
-      # Custom desktop entry for Alacritty with tmux
-      alacritty-tmux = {
-        name = "Terminal (Tmux)";
-        comment = "Fast, cross-platform, OpenGL terminal emulator with tmux";
-        exec = "alacritty -e tmux new-session -A -s main";
-        icon = "alacritty";
-        terminal = false;
-        categories = [ "System" "TerminalEmulator" ];
-        keywords = [ "terminal" "tmux" "shell" ];
-      };
-      
-      # Custom entry for code workspace
-      code-workspace = {
-        name = "Code Workspace";
-        comment = "Open VS Code in workspace mode";
-        exec = "code ~/Documents/workspace";
-        icon = "code";
-        terminal = false;
-        categories = [ "Development" "IDE" ];
-        keywords = [ "code" "editor" "workspace" ];
-      };
-    };
-
-    # MIME type associations
-    mimeApps = {
-      enable = true;
-      
-      defaultApplications = {
-        # Web browser
-        "text/html" = [ "safari.desktop" ];
-        "application/xhtml+xml" = [ "safari.desktop" ];
-        "x-scheme-handler/http" = [ "safari.desktop" ];
-        "x-scheme-handler/https" = [ "safari.desktop" ];
-        
-        # Text files
-        "text/plain" = [ "code.desktop" ];
-        "text/markdown" = [ "code.desktop" ];
-        "text/x-python" = [ "code.desktop" ];
-        "text/x-shellscript" = [ "code.desktop" ];
-        "application/json" = [ "code.desktop" ];
-        "application/x-yaml" = [ "code.desktop" ];
-        
-        # Images
-        "image/png" = [ "preview.desktop" ];
-        "image/jpeg" = [ "preview.desktop" ];
-        "image/gif" = [ "preview.desktop" ];
-        "image/svg+xml" = [ "code.desktop" ];
-        
-        # Documents
-        "application/pdf" = [ "preview.desktop" ];
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = [ "pages.desktop" ];
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = [ "numbers.desktop" ];
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation" = [ "keynote.desktop" ];
-        
-        # Archives
-        "application/zip" = [ "the-unarchiver.desktop" ];
-        "application/x-tar" = [ "the-unarchiver.desktop" ];
-        "application/x-gzip" = [ "the-unarchiver.desktop" ];
-        "application/x-7z-compressed" = [ "the-unarchiver.desktop" ];
-        
-        # Video
-        "video/mp4" = [ "iina.desktop" ];
-        "video/x-matroska" = [ "iina.desktop" ];
-        "video/webm" = [ "iina.desktop" ];
-        
-        # Audio
-        "audio/mpeg" = [ "music.desktop" ];
-        "audio/mp4" = [ "music.desktop" ];
-        "audio/flac" = [ "music.desktop" ];
-      };
-      
-      associations = {
-        added = {
-          # Development files
-          "application/x-nix" = [ "code.desktop" ];
-          "text/x-toml" = [ "code.desktop" ];
-          "text/x-rust" = [ "code.desktop" ];
-          "text/x-scala" = [ "intellij-idea.desktop" ];
-          "text/x-java" = [ "intellij-idea.desktop" ];
-          "application/x-sql" = [ "code.desktop" ];
-          
-          # Configuration files
-          "application/x-desktop" = [ "code.desktop" ];
-          "text/x-ini" = [ "code.desktop" ];
-          "text/x-systemd-unit" = [ "code.desktop" ];
-          
-          # Log files
-          "text/x-log" = [ "code.desktop" ];
-          "application/x-log" = [ "code.desktop" ];
-        };
-      };
-    };
+    # Configure XDG directories (basic support)
+    # Note: userDirs, desktopEntries, and mimeApps are Linux-only
+    # macOS handles these through Finder preferences and Launch Services
+    
+    # Environment variables for XDG compliance (works on macOS)
+    configHome = "/Users/${config.home.username}/.config";
+    dataHome = "/Users/${config.home.username}/.local/share";  
+    stateHome = "/Users/${config.home.username}/.local/state";
+    cacheHome = "/Users/${config.home.username}/.cache";
   };
 
   # Environment variables for XDG compliance
