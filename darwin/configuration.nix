@@ -145,6 +145,12 @@
           echo "✓ Xcode Command Line Tools installed"
         fi
       '';
+
+      cleanupOldBackups.text = ''
+        echo "🧹 Cleaning up old .bak files to prevent conflicts..."
+        find /Users/${userConfig.username}/.config -name "*.bak" -type f -delete 2>/dev/null || true
+        echo "✓ Old backup files cleaned up"
+      '';
     };
 
     # macOS System Preferences
@@ -209,6 +215,6 @@
     useGlobalPkgs = true; # Use system-level packages
     useUserPackages = true; # Enable user-specific packages
     users.${userConfig.username} = import ../home-manager;
-    backupFileExtension = lib.mkForce "bak";
+    backupFileExtension = lib.mkForce "hm-backup";
   };
 }

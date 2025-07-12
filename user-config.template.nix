@@ -7,4 +7,5 @@
   email = "your.email@example.com";
   githubUsername = "your-github-username";
   hostname = "your-hostname"; # Only use letters, numbers, and hyphens (e.g., macbook-pro)
+  signingKey = ""; # GPG key ID for signing commits (leave empty initially)
 }
