@@ -353,11 +353,11 @@
     
     # System tools
     lsof        # List open files
-    pstree      # Process tree
+    # pstree      # Process tree (Linux-only)
     
     # Network utilities
-    bandwhich   # Network utilization by process
-    dog         # Modern dig alternative
+    # bandwhich   # Network utilization by process (Linux-only)
+    # dog         # Modern dig alternative (might have Linux dependencies)
     
     # File utilities
     file        # File type detection
@@ -367,8 +367,8 @@
     ripgrep-all # Ripgrep with more file types
     
     # Productivity tools
-    remind      # Calendar/reminder system
-    taskwarrior # Task management
+    # remind      # Calendar/reminder system (might have compatibility issues)
+    # taskwarrior # Task management (replaced by taskwarrior3, requires migration)
     
     # Terminal utilities
     tmux        # Terminal multiplexer (fallback)
