@@ -295,15 +295,29 @@ if gh auth status >/dev/null 2>&1; then
     echo -e "${GREEN}✓ Already authenticated with GitHub CLI${NC}"
     gh auth status
 else
-    echo -e "${BLUE}Authenticating with GitHub CLI...${NC}"
-    echo -e "${BLUE}This will open your browser. Please:${NC}"
-    echo -e "  1. Complete GitHub OAuth in browser"
-    echo -e "  2. Choose SSH when prompted for protocol"
-    
-    if gh auth login --hostname github.com --git-protocol ssh --web; then
-        echo -e "${GREEN}✓ GitHub CLI authentication successful${NC}"
+    # Check if we're in a piped context (no interactive terminal)
+    if [[ ! -t 0 ]]; then
+        echo -e "${YELLOW}⚠ Cannot authenticate with GitHub CLI in piped mode${NC}"
+        echo -e "${BLUE}GitHub CLI authentication is required for SSH key upload.${NC}"
+        echo -e "${BLUE}After this script completes, please:${NC}"
+        echo -e "  1. Run: ${YELLOW}gh auth login --hostname github.com --git-protocol ssh --web${NC}"
+        echo -e "  2. Upload your SSH key: ${YELLOW}gh ssh-key add ~/.ssh/github.pub${NC}"
+        echo -e "  3. Test connection: ${YELLOW}ssh -T git@github.com${NC}"
+        echo ""
+        echo -e "${BLUE}Continuing without GitHub authentication...${NC}"
+        SKIP_GITHUB_AUTH=true
     else
-        handle_error "GitHub CLI authentication failed"
+        echo -e "${BLUE}Authenticating with GitHub CLI...${NC}"
+        echo -e "${BLUE}This will open your browser. Please:${NC}"
+        echo -e "  1. Complete GitHub OAuth in browser"
+        echo -e "  2. Choose SSH when prompted for protocol"
+        
+        if gh auth login --hostname github.com --git-protocol ssh --web; then
+            echo -e "${GREEN}✓ GitHub CLI authentication successful${NC}"
+            SKIP_GITHUB_AUTH=false
+        else
+            handle_error "GitHub CLI authentication failed"
+        fi
     fi
 fi
 
@@ -371,11 +385,17 @@ fi
 eval "$(ssh-agent -s)"
 ssh-add "$ssh_key_path"
 
-# Upload SSH key via GitHub CLI
-if gh ssh-key add "$ssh_key_path.pub" --title "$(hostname)-$(date +%Y%m%d)"; then
-    echo -e "${GREEN}✓ SSH key uploaded to GitHub${NC}"
+# Upload SSH key via GitHub CLI (skip if not authenticated)
+if [[ "${SKIP_GITHUB_AUTH:-false}" == "true" ]]; then
+    echo -e "${YELLOW}⚠ Skipping SSH key upload (GitHub CLI not authenticated)${NC}"
+    echo -e "${BLUE}Remember to upload your SSH key manually later:${NC}"
+    echo -e "  ${YELLOW}gh ssh-key add $ssh_key_path.pub --title \"$(hostname)-$(date +%Y%m%d)\"${NC}"
 else
-    echo -e "${BLUE}SSH key might already exist, continuing...${NC}"
+    if gh ssh-key add "$ssh_key_path.pub" --title "$(hostname)-$(date +%Y%m%d)"; then
+        echo -e "${GREEN}✓ SSH key uploaded to GitHub${NC}"
+    else
+        echo -e "${BLUE}SSH key might already exist, continuing...${NC}"
+    fi
 fi
 
 # Configure git
@@ -619,16 +639,33 @@ echo -e "${BLUE}What was installed:${NC}"
 echo -e "  ✓ Xcode Command Line Tools"
 echo -e "  ✓ Homebrew package manager"
 echo -e "  ✓ Essential CLI tools (git, gh, tree, stow)"
-echo -e "  ✓ GitHub CLI authentication"
-echo -e "  ✓ SSH keys generated and uploaded"
+if [[ "${SKIP_GITHUB_AUTH:-false}" == "true" ]]; then
+    echo -e "  ⚠ GitHub CLI authentication (skipped - requires manual setup)"
+    echo -e "  ⚠ SSH key upload (skipped - requires manual upload)"
+else
+    echo -e "  ✓ GitHub CLI authentication"
+    echo -e "  ✓ SSH keys generated and uploaded"
+fi
 echo -e "  ✓ Nix package manager"
 echo -e "  ✓ nix-darwin system configuration"
 echo -e "  ✓ Configuration symlinks"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
-echo -e "  1. ${YELLOW}Restart your terminal${NC} to load all changes"
-echo -e "  2. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
-echo -e "  3. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
+if [[ "${SKIP_GITHUB_AUTH:-false}" == "true" ]]; then
+    echo -e "  1. ${YELLOW}Authenticate with GitHub CLI:${NC}"
+    echo -e "     ${YELLOW}gh auth login --hostname github.com --git-protocol ssh --web${NC}"
+    echo -e "  2. ${YELLOW}Upload your SSH key:${NC}"
+    echo -e "     ${YELLOW}gh ssh-key add ~/.ssh/github.pub --title \"$(hostname)-$(date +%Y%m%d)\"${NC}"
+    echo -e "  3. ${YELLOW}Test SSH connection:${NC}"
+    echo -e "     ${YELLOW}ssh -T git@github.com${NC}"
+    echo -e "  4. ${YELLOW}Restart your terminal${NC} to load all changes"
+    echo -e "  5. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
+    echo -e "  6. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
+else
+    echo -e "  1. ${YELLOW}Restart your terminal${NC} to load all changes"
+    echo -e "  2. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
+    echo -e "  3. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
+fi
 echo ""
 echo -e "${BLUE}Useful commands:${NC}"
 echo -e "  • Update system: ${YELLOW}sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
@@ -636,4 +673,3 @@ echo -e "  • Update packages: ${YELLOW}cd $DOTFILES_PATH && nix flake update${
 echo -e "  • Check system info: ${YELLOW}nix-shell -p nix-info --run 'nix-info -m'${NC}"
 echo ""
 echo -e "${GREEN}Enjoy your declaratively configured Mac! 🚀${NC}"
-
