@@ -103,13 +103,17 @@ The repository is organized into logical, optimized components:
 
 ## Quick Start
 
-The simplest way to get started is with our one-command setup:
+### Option 1: One-Command Setup (Automatic)
+
+For a quick setup that proceeds automatically after 5 seconds:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh | bash
 ```
 
-Or if you prefer to download and inspect first:
+### Option 2: Download and Run (Interactive)
+
+For full interactive control with confirmation prompts:
 
 ```bash
 curl -o setup.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh
