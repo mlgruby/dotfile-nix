@@ -155,9 +155,6 @@ check_github_auth() {
 check_github_gpg_key() {
     log_info "Checking if GPG key already exists on GitHub..."
     
-    # Get the key fingerprint
-    GPG_FINGERPRINT=$(gpg --list-keys --keyid-format LONG "$GPG_KEY_ID" | grep -A 1 "pub.*/$GPG_KEY_ID" | tail -1 | tr -d ' ')
-    
     # Check if key exists on GitHub
     if gh api user/gpg_keys | jq -r '.[].key_id' | grep -q "$GPG_KEY_ID"; then
         log_success "GPG key already exists on GitHub"

@@ -6,5 +6,5 @@
   email = "satyasheel@lightricks.com";
   githubUsername = "mlgruby";
   hostname = "satyasheel-MBP";
-  signingKey = "9660E7A9C08AF92A";
+  signingKey = "";
 }

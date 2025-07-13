@@ -75,7 +75,6 @@
     ./modules/alacritty
     ./modules/karabiner
     ./modules/rectangle.nix
-    ./modules/services.nix
     ./modules/programs.nix
     ./modules/xdg.nix
     ./modules/fonts.nix
@@ -93,8 +92,8 @@
       pipx
       markdownlint-cli
       # Python Development Environment
-      pyenv
-      poetry
+      # System-wide Python 3.12 via Homebrew
+      # Project-specific versions via uv
       # Scala Build Tool
       sbt
     ];
