@@ -165,20 +165,24 @@ This script will:
 - ✅ Test GPG signing functionality
 
 **Prerequisites:**
+
 - `user-config.nix` must be configured with your email
 - GitHub CLI authentication (script will prompt if needed)
 
 **After setup:**
+
 - All your commits will be automatically signed
 - GitHub will show "Verified" badges on your commits
 - Your GPG key ID will be saved in `user-config.nix`
 
 **Manual GitHub Authentication (if needed):**
+
 ```bash
 gh auth login
 ```
 
 **Example Output:**
+
 ```
 === Automated GPG Setup for GitHub ===
 

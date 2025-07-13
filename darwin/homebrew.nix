@@ -117,8 +117,9 @@
       "zoxide" # Smarter cd command
 
       # Python Development Environment
-      # Managed via Homebrew for better macOS integration
-      "uv" # Python package manager
+      # System-wide Python 3.12 and uv for project management
+      "uv" # Python package and version manager
+      "python@3.12" # System-wide Python 3.12
 
       # Development Tools
       # These versions are preferred over Nix for various reasons
@@ -190,6 +191,7 @@
       # Productivity and Communication
       "bitwarden" # Password manager
       "brave-browser" # Privacy-focused browser
+      "google-chrome" # Google Chrome browser
       "claude" # Claude AI desktop app
       "insync" # Google Drive client
       "obsidian" # Knowledge base and note-taking
