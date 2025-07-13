@@ -101,7 +101,32 @@ The repository is organized into logical, optimized components:
 - Administrative access
 - Basic terminal knowledge
 
-## Initial Setup
+## Quick Start
+
+The simplest way to get started is with our one-command setup:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh | bash
+```
+
+Or if you prefer to download and inspect first:
+
+```bash
+curl -o setup.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh
+chmod +x setup.sh
+./setup.sh
+```
+
+This will automatically:
+
+- Download the full installation script
+- Perform system checks
+- Ask for your preferred directory name (defaults to `dotfile`)
+- Guide you through the complete setup process
+
+## Manual Installation
+
+If you prefer to do the setup manually:
 
 1. **Install Command Line Tools**
 
@@ -114,7 +139,7 @@ xcode-select --install
 ```bash
 mkdir -p ~/Documents
 cd ~/Documents
-git clone <your-repo-url> dotfile
+git clone https://github.com/mlgruby/dotfile-nix.git dotfile
 cd dotfile
 ```
 
@@ -145,6 +170,28 @@ This script automates the initial setup: installs Xcode tools (if needed), Homeb
 ```
 
 After the script completes and the first build is successful, **open a new terminal window** for the fully configured environment managed by Home Manager to take effect.
+
+## SSH Setup & Validation
+
+The installation script includes intelligent SSH key management:
+
+- **Detects existing SSH keys** and lets you choose which to use
+- **Creates GitHub-specific key** at `~/.ssh/github` (via symlink or new key)
+- **Automatically uploads** your public key to GitHub
+- **Configures SSH properly** for seamless GitHub authentication
+
+**Validate your SSH setup anytime:**
+
+```bash
+./validate-ssh.sh
+```
+
+This will check:
+- SSH key existence and type
+- SSH agent configuration
+- GitHub connection status
+- Home-manager SSH configuration
+- Provide troubleshooting guidance
 
 ## GPG Setup for GitHub (Optional but Recommended)
 
