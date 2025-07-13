@@ -75,6 +75,10 @@
     ./modules/alacritty
     ./modules/karabiner
     ./modules/rectangle.nix
+    ./modules/programs.nix
+    ./modules/xdg.nix
+    ./modules/fonts.nix
+    ./modules/tool-configs.nix
     ./neovim.nix
   ];
 
@@ -88,8 +92,10 @@
       pipx
       markdownlint-cli
       # Python Development Environment
-      pyenv
-      poetry
+      # System-wide Python 3.12 via Homebrew
+      # Project-specific versions via uv
+      # Scala Build Tool
+      sbt
     ];
   };
 
@@ -107,5 +113,5 @@
     };
   };
 
-  fonts.fontconfig.enable = true;
+
 }

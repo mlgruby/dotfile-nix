@@ -11,7 +11,7 @@
 #
 # Tool initializations:
 # - SDKMAN for Java version management
-# - pyenv for Python version management
+# - uv for Python version management
 # - Starship prompt with Gruvbox theme
 #
 # Features:
@@ -67,14 +67,21 @@
         FPATH = "$HOME/.zsh/completion:$FPATH";
         AWS_DEFAULT_REGION = "us-west-2";
         AWS_REGION = "us-west-2";
+        # Python environment
+        PYTHON_CONFIGURE_OPTS = "--enable-framework";
+        UV_PYTHON_PREFERENCE = "system";
+        # Add Python 3.12 generic symlinks to PATH
+        PATH = "/opt/homebrew/opt/python@3.12/libexec/bin:$PATH";
       };
 
       initContent = ''
         # Python Environment Management
-        # Initialize pyenv (managed via Nix)
-        if command -v pyenv >/dev/null 2>&1; then
-          export PYENV_ROOT="$HOME/.pyenv"
-          eval "$(pyenv init -)"
+        # System-wide Python 3.12 via Homebrew
+        # Project-specific Python versions via uv
+        # UV environment initialization
+        if command -v uv >/dev/null 2>&1; then
+          # UV completions
+          eval "$(uv generate-shell-completion zsh)"
         fi
 
         # FZF Integration Widgets

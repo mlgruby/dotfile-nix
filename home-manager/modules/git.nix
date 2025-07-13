@@ -21,7 +21,7 @@
 # - Identity from user-config
 # - Additional aliases in aliases.nix
 {...} @ args: let
-  inherit (args) fullName email;
+  inherit (args) fullName email signingKey;
 in {
   programs.git = {
     enable = true;
@@ -46,7 +46,12 @@ in {
       };
       # UI Configuration
       color.ui = true; # Colorized output
-    };
+      # GPG Configuration
+      commit.gpgsign = true; # Automatically sign commits
+      gpg.program = "gpg"; # GPG program to use
+    } // (if signingKey != "" then {
+      user.signingkey = signingKey; # GPG key ID for signing commits
+    } else {});
 
     # Built-in Git Aliases
     # Shorter versions of common commands
