@@ -53,7 +53,7 @@
 # ------
 # 1. Basic Installation:
 #    ```bash
-#    curl -o pre-nix-installation.sh https://raw.githubusercontent.com/your-repo/pre-nix-installation.sh
+#    curl -o pre-nix-installation.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/pre-nix-installation.sh
 #    chmod +x pre-nix-installation.sh
 #    ./pre-nix-installation.sh
 #    ```
@@ -117,7 +117,7 @@ set -e
 # This script is designed to be run on a completely fresh Mac with nothing installed.
 # Download and run with:
 # 
-#   curl -o pre-nix-installation.sh https://raw.githubusercontent.com/user/repo/pre-nix-installation.sh
+#   curl -o pre-nix-installation.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/pre-nix-installation.sh
 #   chmod +x pre-nix-installation.sh
 #   ./pre-nix-installation.sh
 #
@@ -234,12 +234,21 @@ echo ""
 echo -e "${BLUE}2.1 Setting up user configuration...${NC}"
 
 # Create directories
-mkdir -p "$HOME/.config" "$HOME/Documents/dotfile"
+mkdir -p "$HOME/.config"
+
+# Check for existing dotfiles in common locations
+EXISTING_CONFIG=""
+for possible_dir in "dotfile" "dotfiles" "nix-config" "nix-darwin" ".dotfiles"; do
+    if [ -f "$HOME/Documents/$possible_dir/user-config.nix" ]; then
+        EXISTING_CONFIG="$HOME/Documents/$possible_dir"
+        break
+    fi
+done
 
 # Check if we already have a dotfiles repo
-if [ -f "$HOME/Documents/dotfile/user-config.nix" ]; then
-    echo -e "${GREEN}✓ Found existing user-config.nix${NC}"
-    cd "$HOME/Documents/dotfile"
+if [ -n "$EXISTING_CONFIG" ]; then
+    echo -e "${GREEN}✓ Found existing user-config.nix in $EXISTING_CONFIG${NC}"
+    cd "$EXISTING_CONFIG"
     
     USERNAME=$(grep -E '^\s*username\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
     FULLNAME=$(grep -E '^\s*fullName\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
@@ -251,6 +260,13 @@ if [ -f "$HOME/Documents/dotfile/user-config.nix" ]; then
     echo -e "  Username: $USERNAME"
     echo -e "  GitHub: $GITHUB_USERNAME"
     echo -e "  Email: $EMAIL"
+    
+    # Set the dotfiles directory for later use
+    DOTFILES_PATH="$EXISTING_CONFIG"
+    dotfiles_dir=$(basename "$EXISTING_CONFIG")
+    
+    # Skip the repository cloning section since we already have it
+    SKIP_CLONE=true
 else
     echo -e "${BLUE}Setting up new user configuration...${NC}"
     echo -e "${BLUE}Enter your macOS username ($(whoami)):${NC}"
@@ -268,6 +284,8 @@ else
     
     HOSTNAME=$(hostname)
     echo -e "${BLUE}Using hostname: $HOSTNAME${NC}"
+    
+    SKIP_CLONE=false
 fi
 
 # 2.2: GitHub CLI Authentication
@@ -294,23 +312,59 @@ echo -e "${BLUE}2.3 Setting up SSH keys...${NC}"
 
 ssh_key_path="$HOME/.ssh/github"
 
+# Check if the specific github key exists
 if [ -f "$ssh_key_path" ] && [ -f "$ssh_key_path.pub" ]; then
-    echo -e "${GREEN}✓ Found existing SSH key${NC}"
-    echo -e "${BLUE}Do you want to use existing key? (y/n)${NC}"
+    echo -e "${GREEN}✓ Found existing GitHub SSH key${NC}"
+    echo -e "${BLUE}Do you want to use existing GitHub key? (y/n)${NC}"
     read -r use_existing
     
     if [[ ! $use_existing =~ ^[Yy]$ ]]; then
         timestamp=$(date +%Y%m%d_%H%M%S)
         mv "$ssh_key_path" "$ssh_key_path.backup.$timestamp"
         mv "$ssh_key_path.pub" "$ssh_key_path.pub.backup.$timestamp"
-        echo -e "${GREEN}✓ Backed up existing keys${NC}"
+        echo -e "${GREEN}✓ Backed up existing GitHub keys${NC}"
         
         ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
         echo -e "${GREEN}✓ New SSH key generated${NC}"
     fi
 else
-    ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
-    echo -e "${GREEN}✓ SSH key generated${NC}"
+    # Check if other SSH keys exist
+    if ls ~/.ssh/*.pub > /dev/null 2>&1; then
+        echo -e "${BLUE}🔍 Found existing SSH keys:${NC}"
+        ls -la ~/.ssh/*.pub
+        echo ""
+        echo -e "${BLUE}Do you want to use one of these existing keys for GitHub? (y/n)${NC}"
+        read -r use_existing_key
+        
+        if [[ $use_existing_key =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}Available SSH keys:${NC}"
+            ls ~/.ssh/*.pub | sed 's/.*\///' | sed 's/\.pub$//' | nl
+            echo ""
+            echo -e "${BLUE}Enter the number of the key you want to use:${NC}"
+            read -r key_number
+            
+            selected_key=$(ls ~/.ssh/*.pub | sed 's/.*\///' | sed 's/\.pub$//' | sed -n "${key_number}p")
+            
+            if [ -n "$selected_key" ] && [ -f "$HOME/.ssh/$selected_key" ]; then
+                echo -e "${BLUE}🔗 Creating symlink to use $selected_key for GitHub...${NC}"
+                ln -sf "$HOME/.ssh/$selected_key" "$ssh_key_path"
+                ln -sf "$HOME/.ssh/$selected_key.pub" "$ssh_key_path.pub"
+                echo -e "${GREEN}✓ Using existing SSH key: $selected_key${NC}"
+            else
+                echo -e "${YELLOW}❌ Invalid selection. Creating new SSH key...${NC}"
+                ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
+                echo -e "${GREEN}✓ New SSH key generated${NC}"
+            fi
+        else
+            echo -e "${BLUE}Creating new SSH key for GitHub...${NC}"
+            ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
+            echo -e "${GREEN}✓ New SSH key generated${NC}"
+        fi
+    else
+        echo -e "${BLUE}No existing SSH keys found. Creating new SSH key for GitHub...${NC}"
+        ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
+        echo -e "${GREEN}✓ SSH key generated${NC}"
+    fi
 fi
 
 # Add to ssh-agent and upload to GitHub
@@ -343,29 +397,48 @@ fi
 # 2.4: Clone Dotfiles Repository
 echo -e "${BLUE}2.4 Setting up dotfiles repository...${NC}"
 
-if [ ! -d "$HOME/Documents/dotfile/.git" ]; then
-    echo -e "${BLUE}Enter your dotfiles repository URL:${NC}"
-    read -r dotfiles_url
-    
-    if [[ -n "$dotfiles_url" ]]; then
-        git clone "$dotfiles_url" "$HOME/Documents/dotfile"
-        echo -e "${GREEN}✓ Dotfiles repository cloned${NC}"
-    else
-        echo -e "${BLUE}No repository URL provided, creating minimal config...${NC}"
-        mkdir -p "$HOME/Documents/dotfile"
-    fi
+if [ "$SKIP_CLONE" = true ]; then
+    echo -e "${GREEN}✓ Using existing dotfiles repository at $DOTFILES_PATH${NC}"
 else
-    echo -e "${GREEN}✓ Dotfiles repository already exists${NC}"
-    echo -e "${BLUE}Pull latest changes? (y/n)${NC}"
-    read -r pull_changes
-    if [[ $pull_changes =~ ^[Yy]$ ]]; then
-        cd "$HOME/Documents/dotfile"
-        git pull
-        echo -e "${GREEN}✓ Repository updated${NC}"
+    # Ask for directory name
+    echo -e "${BLUE}What directory name do you want for your dotfiles? (default: dotfile)${NC}"
+    read -r dotfiles_dir
+    dotfiles_dir=${dotfiles_dir:-dotfile}
+
+    # Validate directory name (no spaces, special characters, etc.)
+    while [[ ! "$dotfiles_dir" =~ ^[a-zA-Z0-9_-]+$ ]]; do
+        echo -e "${YELLOW}⚠ Directory name should only contain letters, numbers, hyphens, and underscores${NC}"
+        echo -e "${BLUE}Please enter a valid directory name:${NC}"
+        read -r dotfiles_dir
+        dotfiles_dir=${dotfiles_dir:-dotfile}
+    done
+
+    DOTFILES_PATH="$HOME/Documents/$dotfiles_dir"
+
+    if [ ! -d "$DOTFILES_PATH/.git" ]; then
+        echo -e "${BLUE}Enter your dotfiles repository URL:${NC}"
+        read -r dotfiles_url
+        
+        if [[ -n "$dotfiles_url" ]]; then
+            git clone "$dotfiles_url" "$DOTFILES_PATH"
+            echo -e "${GREEN}✓ Dotfiles repository cloned to ~/Documents/$dotfiles_dir${NC}"
+        else
+            echo -e "${BLUE}No repository URL provided, creating minimal config...${NC}"
+            mkdir -p "$DOTFILES_PATH"
+        fi
+    else
+        echo -e "${GREEN}✓ Dotfiles repository already exists at ~/Documents/$dotfiles_dir${NC}"
+        echo -e "${BLUE}Pull latest changes? (y/n)${NC}"
+        read -r pull_changes
+        if [[ $pull_changes =~ ^[Yy]$ ]]; then
+            cd "$DOTFILES_PATH"
+            git pull
+            echo -e "${GREEN}✓ Repository updated${NC}"
+        fi
     fi
 fi
 
-cd "$HOME/Documents/dotfile"
+cd "$DOTFILES_PATH"
 
 # 2.5: Create/Update user-config.nix
 echo -e "${BLUE}2.5 Creating user configuration file...${NC}"
@@ -440,12 +513,12 @@ fi
 echo -e "${BLUE}Creating configuration symlinks...${NC}"
 for dir in nix darwin home-manager; do
     if [ -d "$dir" ]; then
-        ln -sfn "$HOME/Documents/dotfile/$dir" "$HOME/.config/$dir"
+        ln -sfn "$DOTFILES_PATH/$dir" "$HOME/.config/$dir"
         echo -e "${GREEN}✓ Linked $dir${NC}"
     else
         echo -e "${YELLOW}⚠ Directory $dir not found, creating minimal structure${NC}"
         mkdir -p "$dir"
-        ln -sfn "$HOME/Documents/dotfile/$dir" "$HOME/.config/$dir"
+        ln -sfn "$DOTFILES_PATH/$dir" "$HOME/.config/$dir"
     fi
 done
 
@@ -501,12 +574,12 @@ fi
 
 # Create shell config symlinks if they exist
 if [ -f "nix/zshrc" ]; then
-    ln -sf "$HOME/Documents/dotfile/nix/zshrc" "$HOME/.zshrc"
+    ln -sf "$DOTFILES_PATH/nix/zshrc" "$HOME/.zshrc"
     echo -e "${GREEN}✓ Linked .zshrc${NC}"
 fi
 
 if [ -f "nix/dynamic-config.zsh" ]; then
-    ln -sf "$HOME/Documents/dotfile/nix/dynamic-config.zsh" "$HOME/.dynamic-config.zsh"
+    ln -sf "$DOTFILES_PATH/nix/dynamic-config.zsh" "$HOME/.dynamic-config.zsh"
     echo -e "${GREEN}✓ Linked dynamic-config.zsh${NC}"
 fi
 
@@ -554,12 +627,12 @@ echo -e "  ✓ Configuration symlinks"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
 echo -e "  1. ${YELLOW}Restart your terminal${NC} to load all changes"
-echo -e "  2. Run: ${YELLOW}cd ~/Documents/dotfile && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
-echo -e "  3. Customize your configuration in ${YELLOW}~/Documents/dotfile/${NC}"
+echo -e "  2. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
+echo -e "  3. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
 echo ""
 echo -e "${BLUE}Useful commands:${NC}"
 echo -e "  • Update system: ${YELLOW}sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
-echo -e "  • Update packages: ${YELLOW}cd ~/Documents/dotfile && nix flake update${NC}"
+echo -e "  • Update packages: ${YELLOW}cd $DOTFILES_PATH && nix flake update${NC}"
 echo -e "  • Check system info: ${YELLOW}nix-shell -p nix-info --run 'nix-info -m'${NC}"
 echo ""
 echo -e "${GREEN}Enjoy your declaratively configured Mac! 🚀${NC}"

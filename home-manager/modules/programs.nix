@@ -36,15 +36,9 @@
         "github.com" = {
           hostname = "github.com";
           user = "git";
-          identityFile = "~/.ssh/id_rsa";
+          identityFile = "~/.ssh/github";
           identitiesOnly = true;
-        };
-        
-        "gitlab.com" = {
-          hostname = "gitlab.com";
-          user = "git";
-          identityFile = "~/.ssh/id_rsa";
-          identitiesOnly = true;
+          addKeysToAgent = "yes";
         };
         
         # Add more hosts as needed
