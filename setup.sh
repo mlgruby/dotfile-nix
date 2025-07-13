@@ -125,6 +125,17 @@ main() {
     # Interactive confirmation unless running in CI or with --yes flag
     if [[ "${CI:-false}" == "true" ]] || [[ "$1" == "--yes" ]] || [[ "$1" == "-y" ]]; then
         log_info "Running in non-interactive mode, proceeding automatically..."
+    elif [[ ! -t 0 ]]; then
+        # Script is being piped, can't read from stdin
+        log_warning "Script is being piped, cannot read user input"
+        echo -e "${BLUE}To run interactively, download and run locally:${NC}"
+        echo -e "${BLUE}  curl -o setup.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh${NC}"
+        echo -e "${BLUE}  chmod +x setup.sh${NC}"
+        echo -e "${BLUE}  ./setup.sh${NC}"
+        echo ""
+        echo -e "${BLUE}Or continue automatically in 5 seconds (press Ctrl+C to cancel)...${NC}"
+        sleep 5
+        log_info "Proceeding automatically..."
     else
         echo -e "${BLUE}Do you want to proceed with the installation? (y/N)${NC}"
         read -r response
