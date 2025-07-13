@@ -37,8 +37,8 @@
 #   - Installs Java 8, 11, 17 (Amazon Corretto)
 #   - Sets Java 11 as default
 # - Python environment setup
-#   - Poetry installation and management
-#   - pyenv Python version management
+#   - System-wide Python 3.12 via Homebrew
+#   - uv for project Python version management
 # - AWS credential management
 #
 # 5. Security:
@@ -145,6 +145,35 @@
           echo "✓ Xcode Command Line Tools installed"
         fi
       '';
+
+      cleanupOldBackups.text = ''
+        echo "🧹 Cleaning up old .bak files to prevent conflicts..."
+        find /Users/${userConfig.username}/.config -name "*.bak" -type f -delete 2>/dev/null || true
+        echo "✓ Old backup files cleaned up"
+      '';
+
+      setDefaultBrowser.text = ''
+        echo "🌐 Setting Google Chrome as default browser..."
+        
+        # Check if Chrome is installed
+        if [ -d "/Applications/Google Chrome.app" ]; then
+          # Set Chrome as default browser using defaultbrowser
+          # Install defaultbrowser if not present
+          if ! command -v defaultbrowser >/dev/null 2>&1; then
+            echo "Installing defaultbrowser utility..."
+            ${pkgs.curl}/bin/curl -L "https://github.com/kerma/defaultbrowser/releases/latest/download/defaultbrowser" -o /tmp/defaultbrowser
+            chmod +x /tmp/defaultbrowser
+            sudo mv /tmp/defaultbrowser /usr/local/bin/defaultbrowser
+          fi
+          
+          # Set Chrome as default
+          /usr/local/bin/defaultbrowser chrome
+          echo "✓ Google Chrome set as default browser"
+        else
+          echo "⚠️  Google Chrome not found, skipping default browser setup"
+          echo "   Chrome will be installed via Homebrew on next rebuild"
+        fi
+      '';
     };
 
     # macOS System Preferences
@@ -201,14 +230,14 @@
     "Remember to run 'xcode-select --install' if building fails"
     # Note about credential management
     "AWS credentials should be managed via the provided scripts"
-    # Python environment note
-    "Use 'poetry' for project dependencies and 'pyenv' for Python versions"
+          # Python environment note
+      "Use 'uv' for project dependencies and Python version management"
   ];
 
   home-manager = {
     useGlobalPkgs = true; # Use system-level packages
     useUserPackages = true; # Enable user-specific packages
     users.${userConfig.username} = import ../home-manager;
-    backupFileExtension = lib.mkForce "bak";
+    backupFileExtension = lib.mkForce "hm-backup";
   };
 }

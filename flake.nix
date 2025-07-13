@@ -118,7 +118,7 @@
             # Global Settings
             useGlobalPkgs = true; # Use global package set
             useUserPackages = true; # Enable user packages
-            backupFileExtension = "bak"; # Backup extension
+            backupFileExtension = "hm-backup"; # Home Manager backup extension
             # User-specific Arguments
             extraSpecialArgs = {
               userConfig = validatedConfig;
@@ -129,6 +129,7 @@
                 email
                 githubUsername
                 hostname
+                signingKey
                 ;
             };
             # User Configuration
