@@ -60,12 +60,17 @@
 # - Mac App Store integration
 #
 # Note:
-# - Some packages are installed via Homebrew instead of Nix because:
+# - Packages are installed via Homebrew instead of Nix because:
 #   1. They require frequent updates (e.g., browsers)
 #   2. They integrate better with macOS when installed via Homebrew
 #   3. The Homebrew version is more up-to-date
 #   4. They need system-level integration
 #   5. They handle auto-updates better
+#
+# - Tools with Home Manager programs.* modules are handled there:
+#   - git, gh, lazygit (managed by programs.git, programs.gh, programs.lazygit)
+#   - tmux, starship (managed by programs.tmux, programs.starship)
+#   - This follows Home Manager best practices: one source per tool
 #
 # Usage:
 # - New packages can be added to appropriate sections (brews/casks)
@@ -111,7 +116,7 @@
       "coreutils" # GNU core utilities
       "duf" # Disk usage/free utility
       "dust" # More intuitive du
-      "eza" # Modern ls replacement
+      # eza - MOVED to Home Manager programs.eza (includes package + config)
       "fd" # Simple find alternative
       "mas" # Mac App Store CLI
       "zoxide" # Smarter cd command
@@ -126,28 +131,28 @@
       "cmake" # Build system
       "neovim" # Modern vim implementation
       "pkg-config" # Development tool
-      "git" # Version control
-      "gh" # GitHub CLI
+      # git - MOVED to Home Manager programs.git (includes package + config)
+      # gh - MOVED to Home Manager programs.gh (includes package + config)
       "git-lfs" # Git large file storage
-      "lazygit" # Terminal UI for git
+      # lazygit - MOVED to Home Manager programs.lazygit (includes package + config)
       "node" # Node.js (includes npm and npx)
       "shellcheck" # Shell script analysis tool
 
       # Text Processing and Search
-      "bat" # Modern cat with syntax highlighting
+      # bat - MOVED to Home Manager programs.bat (includes package + config)
       "fzf" # Fuzzy finder
-      "jq" # JSON processor
-      "ripgrep" # Fast grep alternative
+      # jq - MOVED to Home Manager programs.jq (includes package + config)
+      # ripgrep - MOVED to Home Manager programs.ripgrep (includes package + config)
       "yq" # YAML processor
 
       # Terminal Utilities
-      "bottom" # System/Process monitor
-      "btop" # Modern resource monitor (replaces htop)
+      # bottom - MOVED to Home Manager programs.bottom (includes package + config)
+      # btop - MOVED to Home Manager programs.btop (includes package + config)
       "glow" # Markdown viewer
       "neofetch" # System information tool
-      "starship" # Cross-shell prompt
+      # starship - MOVED to Home Manager programs.starship (includes package + config)
       "tldr" # Simplified man pages
-      "tmux" # Terminal multiplexer
+      # tmux - MOVED to Home Manager programs.tmux (includes package + config)
 
       # Security and Secrets Management
       "gnupg" # OpenPGP implementation
@@ -201,11 +206,23 @@
       # Media
       "vlc" # Media player
 
-      # Fonts
+      # Fonts - Comprehensive font collection via Homebrew
+      # Primary Nerd Fonts (for terminal/coding)
+      "font-jetbrains-mono-nerd-font" # Primary coding font
       "font-fira-code-nerd-font" # Alternative with ligatures
       "font-hack-nerd-font" # Clean monospace
-      "font-jetbrains-mono-nerd-font" # Primary coding font
       "font-meslo-lg-nerd-font" # Terminal font
+      
+      # System UI Fonts
+      "font-inter" # Modern UI font (for Stylix sansSerif)
+      "font-source-serif-4" # Adobe serif font (for Stylix serif)
+      "font-source-sans-3" # Adobe sans font (backup)
+      
+      # Additional Nerd Fonts (consolidated from Nix)
+      "font-sauce-code-pro-nerd-font" # Adobe Source Code Pro
+      "font-ubuntu-mono-nerd-font" # Ubuntu monospace
+      "font-dejavu-sans-mono-nerd-font" # DejaVu monospace
+      "font-inconsolata-nerd-font" # Google Inconsolata
     ];
 
     # Global options

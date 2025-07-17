@@ -5,18 +5,21 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - AWS CLI v2 installed
 - Access to Lightricks AWS SSO portal
 
 ### Installation
 
 1. **Download and run the setup script:**
+
    ```bash
-   chmod +x setup-aws-sso-cross-shell.sh
-   ./setup-aws-sso-cross-shell.sh
+   chmod +x scripts/setup/aws-sso.sh
+   ./scripts/setup/aws-sso.sh
    ```
 
 2. **Reload your shell:**
+
    ```bash
    source ~/.zshrc    # for zsh users
    source ~/.bashrc   # for bash users (Linux)
@@ -24,11 +27,13 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
    ```
 
 3. **Login to AWS SSO:**
+
    ```bash
    awsl  # Short alias for aws_sso_login
    ```
 
 4. **Verify setup:**
+
    ```bash
    awsw  # Shows your current AWS identity
    ```
@@ -79,11 +84,13 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
 ## 📋 Available Profiles
 
 ### SSO Profiles (Recommended)
+
 - **`default-sso`** - Development account (588736812464) with AdministratorAccess
 - **`production-sso`** - Production account (384822754266) with DataPlatformTeam role
 - **`staging-sso`** - Staging account (588736812464) with AdministratorAccess
 
 ### Traditional Profiles
+
 - **`default`**, **`production`**, **`staging`**, **`prod`**, **`dev`** - For applications that don't support SSO
 
 ## 🛠 Detailed Usage
@@ -91,6 +98,7 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
 ### Basic Workflow
 
 1. **Login to AWS SSO:**
+
    ```bash
    awsl                    # Login to default profile
    # or
@@ -100,6 +108,7 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
    ```
 
 2. **Check your identity:**
+
    ```bash
    awsw
    # Output:
@@ -112,6 +121,7 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
    ```
 
 3. **Use AWS CLI normally:**
+
    ```bash
    aws s3 ls
    aws ec2 describe-instances
@@ -121,6 +131,7 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
 ### Advanced Credential Export
 
 #### 1. Export to Environment Variables
+
 ```bash
 awse
 # Exports AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
@@ -128,6 +139,7 @@ awse
 ```
 
 #### 2. Export to File
+
 ```bash
 awsef production-sso ~/.aws/prod-creds.env
 # Creates a file you can source later:
@@ -135,6 +147,7 @@ source ~/.aws/prod-creds.env
 ```
 
 #### 3. Generate .env File for Applications
+
 ```bash
 awsgen myapp.env
 # Creates myapp.env with:
@@ -146,6 +159,7 @@ awsgen myapp.env
 ```
 
 #### 4. Get Copy-Paste Commands
+
 ```bash
 awsenv production-sso
 # Output:
@@ -160,6 +174,7 @@ awsenv production-sso
 ### Profile Management
 
 #### Switch Between Profiles
+
 ```bash
 awsp default-sso        # Switch to development
 awsp production-sso     # Switch to production
@@ -167,12 +182,14 @@ awsp staging-sso        # Switch to staging
 ```
 
 #### Quick Profile Switches
+
 ```bash
 awspp                   # Quick switch to production
 awspd                   # Quick switch to default/dev
 ```
 
 #### List Available Profiles
+
 ```bash
 awsls
 # Output:
@@ -187,12 +204,14 @@ awsls
 ### Troubleshooting
 
 #### Clear All Credentials
+
 ```bash
 awsc
 # Clears all AWS environment variables
 ```
 
 #### Check Current Status
+
 ```bash
 awsw                    # Detailed identity information
 awsid                   # Quick identity check
@@ -200,6 +219,7 @@ awsr                    # Current configuration
 ```
 
 #### Re-login if Credentials Expire
+
 ```bash
 awsl                    # Re-login to current/default profile
 awslp                   # Re-login to production
@@ -239,6 +259,7 @@ The script automatically detects your shell and uses the appropriate configurati
 ## 🤝 Integration with Applications
 
 ### For Docker/Docker Compose
+
 ```bash
 awsgen .env
 docker-compose up
@@ -246,6 +267,7 @@ docker-compose up
 ```
 
 ### For Node.js/Python Applications
+
 ```bash
 awsgen .env
 # Add to your application:
@@ -254,6 +276,7 @@ awsgen .env
 ```
 
 ### For Shell Scripts
+
 ```bash
 awsef ~/.aws/script-creds.env
 # In your script:
@@ -306,4 +329,4 @@ This setup script is provided as-is for internal use. Modify as needed for your 
 
 ---
 
-**🎉 Enjoy your streamlined AWS SSO experience!** 
+**🎉 Enjoy your streamlined AWS SSO experience!**
