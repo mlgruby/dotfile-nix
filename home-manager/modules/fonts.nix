@@ -1,125 +1,94 @@
 # home-manager/modules/fonts.nix
 #
-# Comprehensive Font Configuration & Management
+# Font Configuration & Management (Homebrew-Consolidated)
 #
 # Purpose:
-# - Centralizes ALL font-related configurations
-# - Manages font installation, rendering, and application-specific settings
-# - Ensures consistent typography across the entire system
+# - Configures font rendering and fallbacks for Homebrew-installed fonts
+# - Provides font aliases and substitutions
+# - Manages font-related environment variables
 #
-# Features:
-# - Font installation (non-Homebrew fonts only)
-# - Font rendering optimization
-# - Default font families configuration
-# - Nerd Font support for icons and terminal
-# - Application-specific font configurations
-# - Font-related environment variables
+# Philosophy:
+# - ALL fonts installed via Homebrew for better macOS integration
+# - This module only handles configuration, not installation
+# - Focuses on font rendering optimization and fallbacks
+#
+# Homebrew Fonts Managed:
+# - JetBrains Mono Nerd Font (primary coding)
+# - Fira Code Nerd Font (ligatures)
+# - Hack Nerd Font (clean)
+# - Inter (UI font)
+# - Source Serif Pro (documents)
+# - Additional Nerd Fonts for compatibility
 #
 # Integration:
-# - Works with Homebrew-installed fonts (JetBrains Mono, Fira Code, etc.)
-# - Configures Alacritty terminal fonts
+# - Works with Stylix (uses system fonts)
+# - Optimized for Alacritty terminal
 # - Supports Starship prompt icons
-# - Provides system-wide font consistency
 #
 # Note:
-# - Primary fonts (JetBrains Mono, Fira Code, Hack, Meslo) installed via Homebrew
-# - This module handles configuration and additional fonts
-{pkgs, ...}: {
+# - No packages installed here (all via Homebrew)
+# - Focus on configuration and optimization
+
+{ config, lib, pkgs, ... }:
+
+{
   # Home Manager font configuration
   fonts = {
     fontconfig = {
       enable = true;
       
-      # Default font families (prioritize Homebrew-installed fonts)
+      # Default font families (all fonts installed via Homebrew)
       defaultFonts = {
-        sansSerif = [ 
-          "Inter" 
-          "SF Pro Display" 
-          "Helvetica Neue" 
-          "Source Sans Pro"
-          "Ubuntu"
-          "DejaVu Sans"
-          "Arial" 
-        ];
-        serif = [ 
-          "Iowan Old Style" 
-          "Source Serif Pro"
-          "Georgia" 
-          "DejaVu Serif"
-          "Times New Roman" 
-        ];
+                  sansSerif = [ 
+            "Inter"                    # Primary UI font (via Homebrew)
+            "Source Sans 3"            # Adobe sans-serif (via Homebrew)
+            "SF Pro Display"           # macOS system font
+            "Helvetica Neue"           # macOS fallback
+            "Arial"                    # Universal fallback
+          ];
+          serif = [ 
+            "Source Serif 4"           # Primary serif (via Homebrew)
+            "Iowan Old Style"          # macOS serif
+            "Georgia"                  # Universal serif
+            "Times New Roman"          # Universal fallback
+          ];
         monospace = [ 
-          "JetBrains Mono"           # Primary (via Homebrew)
-          "JetBrainsMono Nerd Font"  # With icons (via Homebrew)
-          "Fira Code"                # Alternative (via Homebrew)
-          "FiraCode Nerd Font"       # With icons (via Homebrew)
+          "JetBrainsMono Nerd Font"  # Primary coding (via Homebrew)
+          "FiraCode Nerd Font"       # Alternative with ligatures (via Homebrew)
           "Hack Nerd Font"           # Clean option (via Homebrew)
-          "SF Mono" 
-          "Menlo" 
-          "Monaco" 
-          "Consolas"
-          "Source Code Pro"
-          "Ubuntu Mono"
+          "SauceCodePro Nerd Font"   # Adobe Source Code Pro (via Homebrew)
+          "SF Mono"                  # macOS system mono
+          "Menlo"                    # macOS fallback mono
+          "Monaco"                   # Classic macOS mono
         ];
         emoji = [ 
-          "Apple Color Emoji"  # macOS native
-          "Noto Color Emoji"   # Cross-platform fallback
-          "Segoe UI Emoji"     # Windows compatibility
+          "Apple Color Emoji"        # macOS native emoji
+          "Noto Color Emoji"         # Cross-platform fallback
         ];
       };
     };
   };
 
-  # Install fonts NOT already available via Homebrew
-  # Note: JetBrains Mono, Fira Code, Hack, and Meslo Nerd Fonts are via Homebrew
-  home.packages = with pkgs; [
-    # System fonts (not available via Homebrew)
-    inter                 # Modern UI font
-    source-sans-pro       # Adobe's sans-serif
-    source-serif-pro      # Adobe's serif
-    ubuntu_font_family    # Ubuntu system fonts
-    
-    # Icon fonts (for applications that need them)
-    font-awesome          # Web icons
-    material-icons        # Google Material icons
-    material-design-icons # Extended Material icons
-    
-    # International and fallback fonts
-    liberation_ttf        # LibreOffice fonts
-    dejavu_fonts          # Comprehensive Unicode
-    noto-fonts            # Google's Unicode fonts
-    noto-fonts-cjk-sans   # Chinese, Japanese, Korean
-    noto-fonts-emoji      # Emoji fallback
-    
-    # Additional Nerd Fonts (not in Homebrew or as backup)
-    nerd-fonts.sauce-code-pro    # Adobe's Source Code Pro (Nerd Font)
-    nerd-fonts.ubuntu-mono       # Ubuntu monospace
-    nerd-fonts.dejavu-sans-mono  # DejaVu monospace
-    nerd-fonts.inconsolata       # Google's monospace
-    # Note: JetBrainsMono, FiraCode, Hack, Meslo already via Homebrew
-  ];
-
   # Font-related environment variables
   home.sessionVariables = {
-    # Font paths and configuration
+    # Font configuration paths
     FONTCONFIG_PATH = "$HOME/.nix-profile/etc/fonts";
-    FONTCONFIG_FILE = "$HOME/.config/fontconfig/fonts.conf";
     
-    # Application font preferences
+    # Application font preferences (using Homebrew fonts)
     TERMINAL_FONT = "JetBrainsMono Nerd Font";
-    EDITOR_FONT = "JetBrains Mono";
+    EDITOR_FONT = "JetBrainsMono Nerd Font";
     UI_FONT = "Inter";
     
-    # Font rendering hints
+    # Font rendering optimization
     FREETYPE_PROPERTIES = "truetype:interpreter-version=40";
   };
 
-  # Comprehensive fontconfig configuration
+  # Optimized fontconfig configuration
   home.file.".config/fontconfig/fonts.conf".text = ''
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
     <fontconfig>
-      <!-- Global font rendering settings -->
+      <!-- Font rendering optimization for macOS -->
       <match target="font">
         <edit name="antialias" mode="assign">
           <bool>true</bool>
@@ -141,55 +110,45 @@
         </edit>
       </match>
 
-      <!-- Monospace font preferences (for terminals, code editors) -->
+      <!-- Monospace font preferences (Homebrew Nerd Fonts) -->
       <alias>
         <family>monospace</family>
         <prefer>
-          <family>JetBrains Mono</family>
           <family>JetBrainsMono Nerd Font</family>
-          <family>Fira Code</family>
           <family>FiraCode Nerd Font</family>
           <family>Hack Nerd Font</family>
+          <family>SauceCodePro Nerd Font</family>
+          <family>UbuntuMono Nerd Font</family>
           <family>SF Mono</family>
           <family>Menlo</family>
-          <family>Source Code Pro</family>
-          <family>Ubuntu Mono</family>
           <family>Monaco</family>
-          <family>Consolas</family>
-          <family>DejaVu Sans Mono</family>
         </prefer>
       </alias>
 
-      <!-- Sans-serif font preferences (for UI, web) -->
-      <alias>
-        <family>sans-serif</family>
-        <prefer>
-          <family>Inter</family>
-          <family>SF Pro Display</family>
-          <family>Helvetica Neue</family>
-          <family>Source Sans Pro</family>
-          <family>Ubuntu</family>
-          <family>DejaVu Sans</family>
-          <family>Liberation Sans</family>
-          <family>Arial</family>
-        </prefer>
-      </alias>
+      <!-- Sans-serif font preferences (Homebrew + system) -->
+              <alias>
+          <family>sans-serif</family>
+          <prefer>
+            <family>Inter</family>
+            <family>Source Sans 3</family>
+            <family>SF Pro Display</family>
+            <family>Helvetica Neue</family>
+            <family>Arial</family>
+          </prefer>
+        </alias>
 
-      <!-- Serif font preferences (for documents) -->
-      <alias>
-        <family>serif</family>
-        <prefer>
-          <family>Iowan Old Style</family>
-          <family>Source Serif Pro</family>
-          <family>Georgia</family>
-          <family>DejaVu Serif</family>
-          <family>Liberation Serif</family>
-          <family>Times New Roman</family>
-        </prefer>
-      </alias>
+        <!-- Serif font preferences (Homebrew + system) -->
+        <alias>
+          <family>serif</family>
+          <prefer>
+            <family>Source Serif 4</family>
+            <family>Iowan Old Style</family>
+            <family>Georgia</family>
+            <family>Times New Roman</family>
+          </prefer>
+        </alias>
 
       <!-- Font substitutions for better compatibility -->
-      <!-- Common font name mappings -->
       <match target="pattern">
         <test qual="any" name="family"><string>Helvetica</string></test>
         <edit name="family" mode="assign" binding="same"><string>Inter</string></edit>
@@ -202,17 +161,12 @@
 
       <match target="pattern">
         <test qual="any" name="family"><string>Consolas</string></test>
-        <edit name="family" mode="assign" binding="same"><string>JetBrains Mono</string></edit>
+        <edit name="family" mode="assign" binding="same"><string>JetBrainsMono Nerd Font</string></edit>
       </match>
 
       <match target="pattern">
         <test qual="any" name="family"><string>Monaco</string></test>
-        <edit name="family" mode="assign" binding="same"><string>JetBrains Mono</string></edit>
-      </match>
-
-      <match target="pattern">
-        <test qual="any" name="family"><string>Courier New</string></test>
-        <edit name="family" mode="assign" binding="same"><string>JetBrains Mono</string></edit>
+        <edit name="family" mode="assign" binding="same"><string>JetBrainsMono Nerd Font</string></edit>
       </match>
 
       <!-- System font mappings -->
@@ -225,113 +179,62 @@
         <test qual="any" name="family"><string>-apple-system</string></test>
         <edit name="family" mode="assign" binding="same"><string>SF Pro Display</string></edit>
       </match>
-
-      <!-- Emoji font configuration -->
-      <match target="pattern">
-        <test name="family"><string>Apple Color Emoji</string></test>
-        <edit name="family" mode="prepend" binding="strong">
-          <string>Noto Color Emoji</string>
-        </edit>
-      </match>
-
-      <!-- Disable bitmap fonts for better quality -->
-      <selectfont>
-        <rejectfont>
-          <pattern>
-            <patelt name="scalable"><bool>false</bool></patelt>
-          </pattern>
-        </rejectfont>
-      </selectfont>
-
-      <!-- Improve font loading performance -->
-      <match target="scan">
-        <test name="family">
-          <string>JetBrains Mono</string>
-        </test>
-        <edit name="charset" mode="assign">
-          <charset>
-            <int>0x0020</int>
-            <int>0x007E</int>
-          </charset>
-        </edit>
-      </match>
     </fontconfig>
   '';
 
-  # Application-specific font configurations
+  # Font documentation and testing utilities
   home.file = {
-    # Alacritty font configuration (reference)
-    # Note: Actual configuration is in alacritty/config.toml
-    # Font settings: JetBrainsMono NF, size 16.0, all variants
-    ".config/fonts/alacritty-fonts.md".text = ''
-      # Alacritty Font Configuration
+    # Font reference documentation
+    ".config/fonts/homebrew-fonts.md".text = ''
+      # Homebrew Font Collection
       
-      Current font settings in alacritty/config.toml:
-      - Family: JetBrainsMono NF (Nerd Font variant)
-      - Size: 16.0
-      - Variants: Regular, Bold, Italic, Bold Italic
-      - Source: Installed via Homebrew (font-jetbrains-mono-nerd-font)
+      All fonts managed via Homebrew for optimal macOS integration.
       
-      Alternative fonts available:
+             ## Primary Fonts:
+       - JetBrainsMono Nerd Font (coding/terminal)
+       - Inter (UI/sans-serif)  
+       - Source Serif 4 (documents)
+      
+      ## Alternative Coding Fonts:
       - FiraCode Nerd Font (ligatures)
       - Hack Nerd Font (clean)
-      - SF Mono (system font)
-      - Menlo (system font)
+      - SauceCodePro Nerd Font
+      - UbuntuMono Nerd Font
+      
+      ## Installation:
+      All fonts installed automatically via darwin-rebuild through Homebrew casks.
+      
+      ## Configuration:
+      - Stylix: Uses system fonts (package = null)
+      - Fontconfig: Optimized for macOS rendering
+      - Applications: Reference fonts by name
     '';
 
-    # Starship font requirements (reference)
-    ".config/fonts/starship-fonts.md".text = ''
-      # Starship Prompt Font Requirements
-      
-      Starship uses Nerd Font icons for:
-      - OS symbols (e.g., 󰀵 for macOS)
-      - Git branch symbols ()
-      - Language symbols (, , , etc.)
-      - Directory symbols (󰈙, , etc.)
-      
-      Required fonts (installed via Homebrew):
-      - JetBrainsMono Nerd Font (primary terminal font)
-      - FiraCode Nerd Font (alternative with ligatures)
-      - Hack Nerd Font (clean alternative)
-      
-      Fallback fonts (installed via Nix):
-      - Source Code Pro Nerd Font
-      - Ubuntu Mono Nerd Font
-      - DejaVu Sans Mono Nerd Font
-    '';
-
-    # Font testing utilities
+    # Font testing script
     ".config/fonts/test-fonts.sh".text = ''
       #!/usr/bin/env bash
-      # Font testing utilities
+      # Font testing for Homebrew-installed fonts
       
-      echo "=== Font Configuration Test ==="
-      echo
-      
-      echo "🔤 Unicode Coverage Test:"
-      echo "  Basic: Hello, World! 123"
-      echo "  Symbols: → ← ↑ ↓ ✓ ✗ ★ ♠ ♥ ♦ ♣"
-      echo "  Math: ∀ ∃ ∅ ∈ ∉ ∩ ∪ ⊂ ⊃ ≤ ≥ ≠ ≈ ∞"
-      echo "  Arrows: ⇒ ⇐ ⇑ ⇓ ⇔ ↗ ↘ ↙ ↖"
-      echo
-      
-      echo "💻 Programming Symbols:"
-      echo "  Operators: == != <= >= && || ?? ?. ?:"
-      echo "  Brackets: () [] {} <>"
-      echo "  Quotes: single, double, backtick"
-      echo "  Comments: // /* */ # <!-- -->"
-      echo
-      
+      echo "=== Homebrew Font Test ==="
       echo "🎨 Nerd Font Icons:"
       echo "  Files:     "
-      echo "  Folders:   "
       echo "  Git:      "
       echo "  Languages:       "
-      echo "  OS:       "
       echo
       
-      echo "Available Fonts:"
-      fc-list : family | grep -E "(JetBrains|Fira|Hack|Inter|Source)" | sort | uniq
+      echo "💻 Coding Symbols:"
+      echo "  Operators: == != <= >= && || ??"
+      echo "  Arrows: → ← ↑ ↓ ⇒ ⇐"
+      echo
+      
+             echo "📝 Typography:"
+       echo "  Sans: Inter font sample (UI)"
+       echo "  Serif: Source Serif 4 sample (documents)"
+       echo "  Mono: JetBrainsMono Nerd Font sample (code)"
+      echo
+      
+      echo "Available Homebrew Fonts:"
+      ls /opt/homebrew/Caskroom/ | grep font | head -10
     '';
 
     # Make test script executable

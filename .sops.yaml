@@ -1,0 +1,36 @@
+# .sops.yaml
+#
+# SOPS Configuration File
+#
+# Purpose:
+# - Defines encryption/decryption rules for secrets
+# - Specifies which keys can decrypt which files
+# - Sets up file patterns and encryption methods
+#
+# Setup:
+# - Uses your existing GPG key for encryption
+# - Allows you to add team members later
+# - Flexible file-based secret organization
+#
+# Usage:
+# - Run: sops secrets.yaml (to edit)
+# - Run: sops -e -i secrets.yaml (to encrypt in-place)
+# - Files are automatically decrypted during Nix builds
+
+# Creation rules - define how new files are encrypted
+creation_rules:
+  # Default rule for all secrets files
+  - path_regex: secrets\.ya?ml$
+    # Encryption methods to use
+    pgp: >-
+      B7394BFB258839CE
+    # File format
+    encrypted_regex: '^(data|stringData)$'
+
+  # Alternative rule for specific patterns
+  - path_regex: secrets/.*\.ya?ml$
+    pgp: >-
+      B7394BFB258839CE
+
+# Global settings
+mac_only_encrypted: false
