@@ -49,9 +49,5 @@
     
     # Docker
     DOCKER_CONFIG = "$XDG_CONFIG_HOME/docker";
-    
-    # AWS
-    AWS_SHARED_CREDENTIALS_FILE = "$XDG_CONFIG_HOME/aws/credentials";
-    AWS_CONFIG_FILE = "$XDG_CONFIG_HOME/aws/config";
   };
 }

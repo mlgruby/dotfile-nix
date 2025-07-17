@@ -56,6 +56,18 @@
 
     # Homebrew management
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+
+    # Stylix for system-wide theming
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # SOPS-Nix for secrets management (disabled for now)
+    # sops-nix = {
+    #   url = "github:Mic92/sops-nix";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = {
@@ -64,16 +76,19 @@
     nixpkgs,
     home-manager,
     nix-homebrew,
+    stylix,
+    # sops-nix,
     ...
   }: let
     system = "aarch64-darwin";
 
-    # User configuration validation
+    # User configuration validation with enhanced directory support
     userConfig =
       if builtins.pathExists ./user-config.nix
       then import ./user-config.nix
       else import ./user-config.default.nix;
 
+    # Required basic attributes for user configuration
     requiredAttrs = [
       "username"
       "hostname"
@@ -83,17 +98,44 @@
     ];
     missingAttrs = builtins.filter (attr: !(builtins.hasAttr attr userConfig)) requiredAttrs;
 
+    # Enhanced user configuration with directory defaults
+    enhancedUserConfig = userConfig // {
+      directories = (userConfig.directories or {}) // {
+        # Provide sensible defaults for directories if not specified
+        dotfiles = userConfig.directories.dotfiles or "Documents/dotfile";
+        workspace = userConfig.directories.workspace or "Development";
+        downloads = userConfig.directories.downloads or "Downloads";
+        documents = userConfig.directories.documents or "Documents";
+      };
+    };
+
     validateConfig = config: let
       hostname = config.hostname or "";
       validFormat = builtins.match "[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*" hostname != null;
+      
+      # Validate directory paths don't contain dangerous characters
+      validatePath = path: 
+        if builtins.match ".*[;&|$`\"'\\\\].*" path != null
+        then throw "Invalid characters in directory path: ${path}"
+        else true;
+      
+      # Validate all directory paths
+      dirValidation = builtins.all validatePath [
+        config.directories.dotfiles
+        config.directories.workspace
+        config.directories.downloads
+        config.directories.documents
+      ];
     in
       if builtins.length missingAttrs > 0
       then throw "Missing required attributes in user-config.nix: ${builtins.toString missingAttrs}"
       else if hostname == "" || !validFormat
       then throw "Invalid hostname format: ${hostname}. Use only letters, numbers, and hyphens."
+      else if !dirValidation
+      then throw "Directory path validation failed"
       else config;
 
-    validatedConfig = validateConfig userConfig;
+    validatedConfig = validateConfig enhancedUserConfig;
     nixpkgsConfig.config.allowUnfree = true;
   in {
     # Darwin System Configuration
@@ -154,8 +196,13 @@
         ./darwin/nix-settings.nix
         ./darwin/macos-defaults.nix
         ./darwin/misc-system.nix
+        ./darwin/system-monitoring.nix
 
-        # Secrets Management (disabled - using AWS SSO instead)
+        # Theming
+        # Stylix for system-wide theming
+        stylix.darwinModules.stylix
+
+        # Secrets Management (disabled for now)
         # sops-nix.darwinModules.sops
         # ./darwin/secrets.nix
       ];

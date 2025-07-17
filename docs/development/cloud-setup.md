@@ -2,6 +2,8 @@
 
 Configuration and utilities for AWS and Google Cloud Platform.
 
+> 💡 **For comprehensive AWS SSO setup**: See the [AWS SSO Setup Guide](../guides/aws-sso-setup.md) for detailed SSO configuration with cross-shell compatibility.
+
 ## AWS CLI
 
 ### Profile Management

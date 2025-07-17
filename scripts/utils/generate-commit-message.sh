@@ -47,7 +47,7 @@ if [ -z "$staged_diff" ]; then
     echo "1) Generate a commit message for unstaged changes (won't be committed)"
     echo "2) Stage all changes and then generate a commit message"
     echo "3) Exit"
-    read -p "Enter your choice (1-3): " choice
+    read -r -p "Enter your choice (1-3): " choice
     
     case $choice in
       1)
@@ -79,7 +79,7 @@ fi
 changed_files=$(git diff --staged --name-only)
 
 # Get repository name
-repo_name=$(basename $(git rev-parse --show-toplevel))
+repo_name=$(basename "$(git rev-parse --show-toplevel)")
 
 # Prepare the prompt for the API
 prompt="You are a helpful assistant that generates concise, descriptive git commit messages based on code changes. 
@@ -140,7 +140,7 @@ echo "1) Commit with this message"
 echo "2) Edit the message before committing"
 echo "3) Copy to clipboard only (won't commit)"
 echo "4) Exit without committing"
-read -p "Enter your choice (1-4): " commit_choice
+read -r -p "Enter your choice (1-4): " commit_choice
 
 case $commit_choice in
   1)

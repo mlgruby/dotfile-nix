@@ -1,13 +1,15 @@
 # home-manager/modules/aws-sso.nix
 #
-# AWS SSO Configuration for Lightricks
+# AWS Configuration (Consolidated)
 #
 # Purpose:
 # - Configures AWS CLI for SSO authentication
 # - Manages multiple AWS accounts through SSO
 # - Provides convenient profile switching functions
+# - Sets up AWS CLI command completion
 #
 # Features:
+# - AWS CLI command completion
 # - Automatic SSO authentication flow
 # - Credential auto-refresh
 # - Easy account switching
@@ -16,7 +18,7 @@
 # Accounts:
 # - Lightricks Production (384822754266)
 # - Lightricks Dev (588736812464)
-{...}: {
+{pkgs, ...}: {
   # AWS SSO Configuration
   home.file.".aws/config".text = ''
     # Traditional profiles for Java/Scala applications (no SSO properties)
@@ -68,6 +70,14 @@
 
   programs.zsh = {
     initContent = ''
+            # Enable AWS CLI command completion
+            # Uses aws_completer from awscli2 package
+            if command -v aws_completer &> /dev/null; then
+               complete -C aws_completer aws
+            elif [ -x "${pkgs.awscli2}/bin/aws_completer" ]; then # Check Nix pkg path
+               complete -C "${pkgs.awscli2}/bin/aws_completer" aws
+            fi
+
             # Set AWS default regions
             export AWS_DEFAULT_REGION="us-west-2"
             export AWS_REGION="us-west-2"

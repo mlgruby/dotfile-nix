@@ -174,7 +174,7 @@ Solution:
 source ~/.zshrc
 
 # Reinstall if needed
-./pre-nix-installation.sh
+./scripts/install/pre-nix-installation.sh
 ```
 
 ## Getting Help
