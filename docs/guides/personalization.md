@@ -18,6 +18,7 @@ stylix = {
 ```
 
 **Available Themes**:
+
 - `gruvbox-dark-hard` (current)
 - `gruvbox-dark-medium`
 - `gruvbox-light-hard`
@@ -29,6 +30,7 @@ stylix = {
 - `solarized-light`
 
 **To Change Theme**:
+
 1. Edit `darwin/configuration.nix`
 2. Update the `base16Scheme` path
 3. Run `rebuild`
@@ -36,6 +38,7 @@ stylix = {
 ### Terminal Customization
 
 **Alacritty Configuration**:
+
 ```toml
 # In home-manager/modules/alacritty/config.toml
 [colors.primary]
@@ -48,6 +51,7 @@ normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
 ```
 
 **Starship Prompt**:
+
 ```toml
 # Customize your shell prompt
 format = """
@@ -85,6 +89,7 @@ directories = {
 ```
 
 **Benefits**:
+
 - Auto-generated shell aliases (`personal`, `work`, `learning`)
 - Consistent navigation commands
 - Easy to reorganize your workspace
@@ -92,6 +97,7 @@ directories = {
 ### Shell Aliases and Functions
 
 **Current Aliases**:
+
 ```bash
 # Navigation
 dotfile    # → ~/Documents/dotfile
@@ -109,6 +115,7 @@ health-check # → system health monitoring
 ```
 
 **Adding Custom Aliases**:
+
 ```nix
 # In home-manager/aliases.nix
 programs.zsh.shellAliases = {
@@ -141,8 +148,9 @@ programs.karabiner-elements = {
 ```
 
 **Common Customizations**:
+
 - Caps Lock as Escape (Vim users)
-- Right Command as Control 
+- Right Command as Control
 - Function keys for IDE shortcuts
 - Media key remapping
 
@@ -165,6 +173,7 @@ homebrew.casks = [ "rectangle" ];
 ### Editor Configuration
 
 **Neovim Setup**:
+
 ```nix
 # In home-manager/neovim.nix
 programs.neovim = {
@@ -216,6 +225,7 @@ programs.git = {
 ### Adding Your Favorite Apps
 
 **GUI Applications via Homebrew**:
+
 ```nix
 # In darwin/homebrew.nix
 homebrew.casks = [
@@ -234,6 +244,7 @@ homebrew.casks = [
 ```
 
 **CLI Tools via Nix**:
+
 ```nix
 # In home-manager/default.nix
 home.packages = with pkgs; [
@@ -324,6 +335,7 @@ programs.zsh.sessionVariables = {
 ### Fonts and Typography
 
 **Adding Custom Fonts**:
+
 ```nix
 # In home-manager/modules/fonts.nix
 fonts.fontconfig.enable = true;
@@ -358,7 +370,7 @@ home.packages = with pkgs; [
 ### Optional Enhancements
 
 - [ ] **Custom Neovim configuration** with your plugins
-- [ ] **Starship prompt customization** 
+- [ ] **Starship prompt customization**
 - [ ] **Terminal color scheme** tweaks
 - [ ] **macOS dock and finder** preferences
 - [ ] **Custom environment variables**
@@ -406,9 +418,10 @@ system.defaults.dock = {
 4. **Document**: Keep notes on what works well for your workflow
 
 **Ready to dive deeper?**
+
 - [Stylix Documentation](../customization/stylix-optimization.md)
 - [Directory Configuration](../customization/paths.md)
 - [Development Templates](../development/environment-templates.md)
 - [System Configuration](../guides/configuration-basics.md)
 
-Remember: Your dotfiles should reflect YOUR workflow. Start with the basics and evolve your configuration over time based on your actual usage patterns. 
+Remember: Your dotfiles should reflect YOUR workflow. Start with the basics and evolve your configuration over time based on your actual usage patterns.

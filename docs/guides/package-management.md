@@ -36,6 +36,7 @@ environment.systemPackages = with pkgs; [
 ```
 
 **Best for**:
+
 - CLI development tools
 - System utilities
 - Language runtimes
@@ -65,6 +66,7 @@ home.packages = with pkgs; [
 ```
 
 **Best for**:
+
 - Personal productivity tools
 - User-specific utilities
 - Development environments
@@ -160,6 +162,7 @@ homebrew.casks = [
 ### Homebrew Best Practices
 
 **Use Homebrew for**:
+
 - GUI applications
 - Tools requiring frequent updates
 - macOS-specific utilities
@@ -167,6 +170,7 @@ homebrew.casks = [
 - Tools not available in nixpkgs
 
 **Managing Homebrew**:
+
 ```bash
 # Update all packages
 brew update && brew upgrade
@@ -200,6 +204,7 @@ setup-dev-env rust
 ```
 
 **Generated `.envrc` example**:
+
 ```bash
 # .envrc for Python project
 use flake .#python-dev
@@ -214,6 +219,7 @@ use flake .#python-dev
 ### Language-Specific Management
 
 **Python**:
+
 ```bash
 # System Python via Homebrew
 python3 --version  # → Python 3.12.x
@@ -225,6 +231,7 @@ uv pip install requirements.txt
 ```
 
 **Node.js**:
+
 ```bash
 # System Node via Homebrew
 node --version  # → v20.x.x
@@ -235,6 +242,7 @@ npm install
 ```
 
 **Rust**:
+
 ```bash
 # Rust via Nix or rustup
 rustc --version
@@ -248,6 +256,7 @@ cargo new my-project
 #### 1. Determine the Right Source
 
 **Decision Tree**:
+
 ```text
 Is it a GUI app? → Homebrew Cask
     ↓ No
@@ -263,6 +272,7 @@ Consider Homebrew or build from source
 #### 2. Add to Configuration
 
 **For Nix packages**:
+
 ```nix
 # Add to home-manager/default.nix
 home.packages = with pkgs; [
@@ -272,6 +282,7 @@ home.packages = with pkgs; [
 ```
 
 **For Homebrew**:
+
 ```nix
 # Add to darwin/homebrew.nix
 homebrew.brews = [
@@ -298,6 +309,7 @@ brew install new-package
 ### Removing Software
 
 #### Nix Packages
+
 ```nix
 # Remove from configuration file
 # home.packages = with pkgs; [
@@ -312,6 +324,7 @@ cleanup
 ```
 
 #### Homebrew Packages
+
 ```nix
 # Remove from homebrew.nix
 # homebrew.brews = [
@@ -326,12 +339,14 @@ brew uninstall --cask unwanted-app
 ### Updating Packages
 
 #### Update All (Recommended)
+
 ```bash
 # Update everything together
 update  # → nix flake update && rebuild
 ```
 
 #### Selective Updates
+
 ```bash
 # Update only Nix packages
 nix flake update && rebuild
@@ -348,6 +363,7 @@ brew upgrade specific-package
 ### Finding the Right Package
 
 **Search Commands**:
+
 ```bash
 # Nix packages
 nix search nixpkgs keyword
@@ -361,6 +377,7 @@ brew search --casks keyword
 ```
 
 **Online Resources**:
+
 - [Nix Package Search](https://search.nixos.org/packages)
 - [Homebrew Formulae](https://formulae.brew.sh/)
 - [Homebrew Casks](https://formulae.brew.sh/cask/)
@@ -388,6 +405,7 @@ brew list --cask
 **Problem**: Different tools need different versions
 
 **Solutions**:
+
 1. **Use development templates** for project isolation
 2. **Pin specific versions** in Nix
 3. **Use version managers** (nvm, pyenv, etc.)
@@ -405,6 +423,7 @@ home.packages = with pkgs; [
 **Problem**: Same package installed via both
 
 **Solutions**:
+
 1. **Check your PATH**: `echo $PATH`
 2. **Prefer Nix over Homebrew** for CLI tools
 3. **Remove duplicates**:
@@ -421,6 +440,7 @@ brew uninstall conflicting-package
 **Problem**: Updates take too long
 
 **Solutions**:
+
 1. **Use binary caches** (already configured)
 2. **Update incrementally**:
 
@@ -519,6 +539,7 @@ direnv allow               # Activate project environment
 - **Development templates**: `scripts/setup/dev-env.sh`
 
 **Next Steps**:
+
 - [Development Environment Templates](../development/environment-templates.md)
 - [System Configuration Guide](configuration-basics.md)
-- [Performance Optimization](../performance/rebuild-optimization.md) 
+- [Performance Optimization](../performance/rebuild-optimization.md)

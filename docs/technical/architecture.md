@@ -37,12 +37,14 @@ The system is built on a layered architecture where each layer has specific resp
 **Purpose**: Provides the foundation for reproducible package management
 
 **Technical Details**:
+
 - **Store Path**: `/nix/store/` - Immutable package storage
 - **Hash-based naming**: Each package has a unique cryptographic hash
 - **Functional paradigm**: Same inputs always produce same outputs
 - **Isolation**: Packages cannot interfere with each other
 
 **Key Features**:
+
 ```bash
 # All packages stored with hashes
 /nix/store/abc123-git-2.41.0/
@@ -58,6 +60,7 @@ The system is built on a layered architecture where each layer has specific resp
 **Purpose**: Manages macOS system-level configuration declaratively
 
 **Architecture**:
+
 ```text
 darwin/
 ├── configuration.nix      # Main system config entry point
@@ -69,6 +72,7 @@ darwin/
 ```
 
 **Responsibilities**:
+
 - System-wide package installation
 - macOS defaults and preferences
 - Security settings (TouchID, sudo)
@@ -80,6 +84,7 @@ darwin/
 **Purpose**: Manages user-level environment and dotfiles
 
 **Modular Architecture**:
+
 ```text
 home-manager/
 ├── default.nix           # Main entry point
@@ -106,6 +111,7 @@ home-manager/
 **Purpose**: Defines the entire system as code with reproducible inputs
 
 **Structure**:
+
 ```nix
 {
   description = "Nix-darwin system configuration";
@@ -133,18 +139,21 @@ The system uses a **hybrid approach** for optimal compatibility and performance:
 ### Nix Packages (Primary)
 
 **Use Cases**:
+
 - CLI development tools
 - Libraries and dependencies
 - Language runtimes
 - System utilities
 
 **Benefits**:
+
 - Reproducible builds
 - Atomic updates
 - Rollback capability
 - Isolation between packages
 
 **Example**:
+
 ```nix
 environment.systemPackages = with pkgs; [
   git curl wget jq       # Development tools
@@ -156,17 +165,20 @@ environment.systemPackages = with pkgs; [
 ### Homebrew (Compatibility Layer)
 
 **Use Cases**:
+
 - GUI applications
 - macOS-specific tools
 - Packages requiring frequent updates
 - Proprietary software
 
 **Benefits**:
+
 - Native macOS integration
 - Faster updates for GUI apps
 - Access to macOS-specific packages
 
 **Example**:
+
 ```nix
 homebrew = {
   brews = [ "mas" "mackup" ];
@@ -177,11 +189,13 @@ homebrew = {
 ### Development Templates (Project-Specific)
 
 **Use Cases**:
+
 - Project-specific environments
 - Language-specific tooling
 - Temporary development setups
 
 **Benefits**:
+
 - Project isolation
 - Consistent team environments
 - Easy environment switching
@@ -273,6 +287,7 @@ in
 ### Performance Optimizations
 
 **Nix Settings**:
+
 ```nix
 nix.settings = {
   max-jobs = "auto";              # Optimal CPU utilization
@@ -285,6 +300,7 @@ nix.settings = {
 ```
 
 **Binary Caches**:
+
 - `cache.nixos.org` - Official Nix cache
 - `nix-community.cachix.org` - Community packages
 - `nixpkgs-unfree.cachix.org` - Unfree packages
@@ -333,6 +349,7 @@ Each component is designed to be modular and reusable:
 **Goal**: Same configuration always produces same result
 
 **Implementation**:
+
 - Pinned input versions in `flake.lock`
 - Deterministic build processes
 - Immutable package store
@@ -342,6 +359,7 @@ Each component is designed to be modular and reusable:
 **Goal**: Easy to maintain and extend
 
 **Implementation**:
+
 - Separated concerns (system vs user)
 - Modular component design
 - Clear interfaces between modules
@@ -351,6 +369,7 @@ Each component is designed to be modular and reusable:
 **Goal**: Describe desired state, not procedures
 
 **Implementation**:
+
 - Configuration as code
 - Idempotent operations
 - State managed by Nix, not scripts
@@ -360,6 +379,7 @@ Each component is designed to be modular and reusable:
 **Goal**: Always recoverable from changes
 
 **Implementation**:
+
 - Generation-based system
 - Atomic updates
 - Previous generations always available
@@ -373,4 +393,4 @@ The architecture supports easy extension:
 3. **Package Sources**: Add new binary caches or overlays
 4. **Development Environments**: Create project-specific templates
 
-This architecture ensures that the system remains maintainable, secure, and performant while providing the flexibility needed for a modern development environment. 
+This architecture ensures that the system remains maintainable, secure, and performant while providing the flexibility needed for a modern development environment.
