@@ -120,18 +120,63 @@
     '';
   };
 
-  # Auto-install TPM and plugins
+  # Optimized TPM and Plugin Management
   home.activation.tmuxPlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    # Ensure TPM is installed
-    if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-      mkdir -p "$HOME/.tmux/plugins"
-      ${pkgs.git}/bin/git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
-    fi
+    # Enhanced tmux plugin management with error handling and updates
+    manage_tmux_plugins() {
+      local plugins_dir="$HOME/.tmux/plugins"
+      local tpm_dir="$plugins_dir/tpm"
+      local tmux2k_dir="$plugins_dir/tmux2k"
+      
+      # Ensure plugins directory exists
+      mkdir -p "$plugins_dir"
+      
+      # TPM (Tmux Plugin Manager) installation/update
+      if [ ! -d "$tpm_dir" ]; then
+        echo "🔌 Installing TPM (Tmux Plugin Manager)..."
+        if ${pkgs.git}/bin/git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"; then
+          echo "✅ TPM installed successfully!"
+        else
+          echo "❌ Failed to install TPM"
+          return 1
+        fi
+      else
+        echo "🔄 Updating TPM..."
+        if cd "$tpm_dir" && ${pkgs.git}/bin/git pull --ff-only > /dev/null 2>&1; then
+          echo "✅ TPM updated successfully!"
+        else
+          echo "⚠️  TPM update skipped (no changes or conflicts)"
+        fi
+      fi
+      
+      # tmux2k theme installation/update
+      if [ ! -d "$tmux2k_dir" ]; then
+        echo "🎨 Installing tmux2k theme..."
+        if ${pkgs.git}/bin/git clone --depth 1 https://github.com/2kabhishek/tmux2k "$tmux2k_dir"; then
+          echo "✅ tmux2k theme installed successfully!"
+        else
+          echo "❌ Failed to install tmux2k theme"
+          return 1
+        fi
+      else
+        echo "🔄 Updating tmux2k theme..."
+        if cd "$tmux2k_dir" && ${pkgs.git}/bin/git pull --ff-only > /dev/null 2>&1; then
+          echo "✅ tmux2k theme updated successfully!"
+        else
+          echo "⚠️  tmux2k update skipped (no changes or conflicts)"
+        fi
+      fi
+      
+      # Make TPM scripts executable
+      if [ -f "$tpm_dir/tpm" ]; then
+        chmod +x "$tpm_dir/tpm"
+        chmod +x "$tpm_dir/scripts"/* 2>/dev/null || true
+      fi
+      
+      echo "🎯 Run 'tmux' and press 'prefix + I' to install/update all plugins"
+    }
     
-    # Ensure tmux2k plugin is available (since it was manually installed before)
-    if [ ! -d "$HOME/.tmux/plugins/tmux2k" ]; then
-      mkdir -p "$HOME/.tmux/plugins"
-      ${pkgs.git}/bin/git clone https://github.com/2kabhishek/tmux2k "$HOME/.tmux/plugins/tmux2k"
-    fi
+    # Run plugin management with error handling  
+    manage_tmux_plugins || echo "⚠️  Tmux plugin management encountered issues"
   '';
 }

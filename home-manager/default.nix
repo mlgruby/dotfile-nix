@@ -67,18 +67,26 @@
     ./modules/tmux.nix
     ./modules/zsh.nix
     ./modules/starship.nix
-    ./modules/aws.nix
     ./modules/aws-sso.nix
     ./modules/git.nix
     ./modules/github.nix
+    ./modules/gpg.nix
+    ./modules/programs/btop.nix
+    ./modules/programs/eza.nix
+    ./modules/programs/bat.nix
+    ./modules/programs/ripgrep.nix
+    ./modules/programs/jq.nix
+    ./modules/programs/bottom.nix
     ./modules/lazygit.nix
     ./modules/alacritty
     ./modules/karabiner
     ./modules/rectangle.nix
-    ./modules/programs.nix
+    ./modules/ssh.nix
+    ./modules/programs/terminal-tools.nix
+    ./modules/directory-tools.nix
+    ./modules/utility-packages.nix
     ./modules/xdg.nix
     ./modules/fonts.nix
-    ./modules/tool-configs.nix
     ./neovim.nix
   ];
 
@@ -113,5 +121,41 @@
     };
   };
 
-
+  # Optimized Stylix Target Configuration
+  # Conservative approach using only confirmed working targets
+  # Based on applications we have configured and Stylix documentation
+  stylix.targets = {
+    # Terminal Applications - Carefully managed due to custom configs
+    alacritty.enable = false;        # DISABLED: Complex custom config conflicts with Stylix
+    
+    # Development Tools - Core supported targets
+    neovim = {
+      enable = true;                 # ENABLED: Well-supported by Stylix
+      plugin = "mini.base16";        # Use recommended plugin
+      transparentBackground = {
+        main = false;                # Keep solid backgrounds for readability
+        signColumn = false;
+        numberLine = false;
+      };
+    };
+    
+    # System Monitoring - Confirmed supported
+    btop.enable = true;              # ENABLED: Stylix has native btop support
+    
+    # Shell and Prompt - Manual configuration preferred
+    starship.enable = false;         # DISABLED: Manual color configuration with Stylix integration
+    
+    # Text Tools - Core supported targets
+    bat.enable = true;               # ENABLED: Native Stylix support
+    
+    # VCS Tools - Confirmed supported
+    lazygit.enable = true;           # ENABLED: Good Stylix integration
+    
+    # Terminal Multiplexer - Core supported target
+    tmux.enable = true;              # ENABLED: Native Stylix support
+    
+    # Disable unsupported or conflicting targets
+    vim.enable = false;              # DISABLED: Using Neovim instead
+    firefox.enable = false;          # DISABLED: Not our primary browser
+  };
 }

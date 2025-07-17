@@ -198,7 +198,7 @@
     stateVersion = lib.mkForce 4;
 
     # Set the primary user for nix-darwin
-    primaryUser = "satyasheel";
+    primaryUser = userConfig.username;
   };
 
   # Platform architecture
@@ -239,5 +239,34 @@
     useUserPackages = true; # Enable user-specific packages
     users.${userConfig.username} = import ../home-manager;
     backupFileExtension = lib.mkForce "hm-backup";
+  };
+
+  # Stylix System-wide Theming
+  # Replaces manual theme configurations across applications
+  stylix = {
+    enable = true;
+    
+    # Gruvbox Dark theme (matches your current manual configs)
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+    
+    # Generate a simple dark wallpaper from theme colors
+    image = config.lib.stylix.pixel "base00";
+    
+    # Font configuration (Homebrew fonts with minimal Nix packages for Stylix)
+    fonts = {
+      monospace = {
+        # Use minimal Nix package for Stylix compatibility, but rely on Homebrew for actual fonts
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font";
+      };
+      sansSerif = {
+        package = pkgs.inter;
+        name = "Inter";
+      };
+      serif = {
+        package = pkgs.source-serif;
+        name = "Source Serif 4";
+      };
+    };
   };
 }
