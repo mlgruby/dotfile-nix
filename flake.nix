@@ -63,11 +63,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # SOPS-Nix for secrets management
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # SOPS-Nix for secrets management (disabled for now)
+    # sops-nix = {
+    #   url = "github:Mic92/sops-nix";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = {
@@ -77,7 +77,7 @@
     home-manager,
     nix-homebrew,
     stylix,
-    sops-nix,
+    # sops-nix,
     ...
   }: let
     system = "aarch64-darwin";
@@ -201,9 +201,9 @@
         # Stylix for system-wide theming
         stylix.darwinModules.stylix
 
-        # Secrets Management 
-        sops-nix.darwinModules.sops
-        ./darwin/secrets.nix
+        # Secrets Management (disabled for now)
+        # sops-nix.darwinModules.sops
+        # ./darwin/secrets.nix
       ];
     };
 
