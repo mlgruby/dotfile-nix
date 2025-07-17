@@ -64,8 +64,8 @@
     build-timeout = 86400; # 24 hours build timeout (generous for large builds)
     stalled-download-timeout = 300; # 5 minutes for stalled downloads
     
-    # Auto-optimize store for better performance
-    auto-optimise-store = true; # Automatically deduplicate store paths
+    # Automatic store optimization
+    # auto-optimise-store = true; # Deprecated - use nix.optimise.automatic instead
   };
   
   # Garbage collection optimization
