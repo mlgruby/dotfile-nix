@@ -25,7 +25,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 REPO_URL="https://raw.githubusercontent.com/mlgruby/dotfile-nix/main"
-SCRIPT_NAME="pre-nix-installation.sh"
+SCRIPT_NAME="scripts/install/pre-nix-installation.sh"
 TEMP_DIR="/tmp/nix-darwin-setup"
 
 # Utility functions

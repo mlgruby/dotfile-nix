@@ -46,7 +46,7 @@
   dotfileDir = "${homeDir}/${userConfig.directories.dotfiles}";
 
   # Enhanced Helper Functions for Alias Generation
-  
+
   # Enhanced mkAliases with validation and optional descriptions
   mkAliases = prefix: cmd: options:
     builtins.listToAttrs (
@@ -204,13 +204,13 @@
     ghpro = "gh pr list --state open --limit 1000";
     ghprch = "gh pr checks";
     ghprf = "gh pr list --state open | fzf --preview 'echo {} | awk \"{print \\$1}\" | xargs gh pr view' | awk '{print $1}' | xargs gh pr view --web";
-    
+
     # Repository Management
     ghrv = "gh repo view --web";
     ghrc = "gh repo clone";
     ghrf = "gh repo fork";
     ghrs = "gh repo sync";
-    
+
     # Issue Management
     ghil = "gh issue list --limit 1000";
     ghic = "gh issue create";
@@ -283,66 +283,66 @@
   # Core system and navigation aliases
   coreAliases = {
     # System & Shell management
-    reload = "source ${homeDir}/.zshrc && clear";
-    rl = "reload";
-    restart = "exec zsh";
-    re = "restart";
+      reload = "source ${homeDir}/.zshrc && clear";
+      rl = "reload";
+      restart = "exec zsh";
+      re = "restart";
 
     # Smart navigation with configurable path helpers
     # Note: Directory aliases generated dynamically below
     dev = "cd ${homeDir}/${userConfig.directories.workspace}";  # Alternative dev alias
-    cdf = "cd $(ls -d */ | fzf)";
+      cdf = "cd $(ls -d */ | fzf)";
     cd = "z";  # zoxide integration
 
     # Modern CLI replacements with fallbacks
-    cat = "bat";
-    ls = "eza -l";
-    find = "fd";
-    top = "btop";
-    htop = "btop";
-    df = "duf";
+      cat = "bat";
+      ls = "eza -l";
+      find = "fd";
+      top = "btop";
+      htop = "btop";
+      df = "duf";
 
     # File operations (safe by default)
-    mkdir = "mkdir -p";
-    rm = "rm -rf";
-    cp = "cp -r";
-    mv = "mv -i";
+      mkdir = "mkdir -p";
+      rm = "rm -rf";
+      cp = "cp -r";
+      mv = "mv -i";
 
     # Editor shortcuts
-    v = "nvim";
-    vim = "nvim";
-    c = "code .";
-    ce = "code . && exit";
+      v = "nvim";
+      vim = "nvim";
+      c = "code .";
+      ce = "code . && exit";
 
     # System monitoring shortcuts
-    cpu = "btm --basic --cpu_left_legend";
-    mem = "btm --basic --memory_legend none";
-    net = "btm --basic --network_legend none";
-    sys = "neofetch";
-    sysinfo = "neofetch";
-    fetch = "neofetch";
+      cpu = "btm --basic --cpu_left_legend";
+      mem = "btm --basic --memory_legend none";
+      net = "btm --basic --network_legend none";
+      sys = "neofetch";
+      sysinfo = "neofetch";
+      fetch = "neofetch";
 
     # Documentation and help
-    h = "tldr";
-    help = "tldr";
-    rtfm = "tldr";
-    cheat = "tldr";
-    tldr-update = "tldr --update";
-    md = "glow";
-    readme = "glow README.md";
-    changes = "glow CHANGELOG.md";
+      h = "tldr";
+      help = "tldr";
+      rtfm = "tldr";
+      cheat = "tldr";
+      tldr-update = "tldr --update";
+      md = "glow";
+      readme = "glow README.md";
+      changes = "glow CHANGELOG.md";
 
     # Network utilities
-    ipp = "curl https://ipecho.net/plain; echo";
+      ipp = "curl https://ipecho.net/plain; echo";
     myip = "curl https://ipecho.net/plain; echo";
 
     # Smart editor for dotfiles with cursor/code detection
     codedot = mkTemplateAlias ''
-      if command -v cursor &> /dev/null; then
+        if command -v cursor &> /dev/null; then
         cursor "@dotfileDir@"
-      else
+        else
         code "@dotfileDir@"
-      fi
+        fi
     '' [
       { name = "dotfileDir"; value = dotfileDir; }
     ];
@@ -350,11 +350,11 @@
 
   # Platform-specific aliases using helper functions
   macAliases = mkPlatformAliases "darwin" {
-    # Enhanced system management with progress indicators
+    # Enhanced system management with performance optimizations
     rebuild = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      echo "🔄 Building system configuration..." && \
-      sudo darwin-rebuild switch --flake .#"$(hostname)" --option max-jobs auto && \
+      echo "🔄 Building system configuration with performance optimizations..." && \
+      sudo darwin-rebuild switch --flake .#"$(hostname)" --option max-jobs auto --option cores 0 --option keep-outputs true && \
       cd - && \
       echo "✅ System rebuild complete!" && \
       rl
@@ -365,57 +365,147 @@
     # Interactive rollback with preview
     rollback = mkTemplateAlias ''
       generation=$(darwin-rebuild list-generations | \
-        fzf --header "Select a generation to roll back to" \
-            --preview "echo {} | grep -o '[0-9]\\+' | xargs -I % sh -c 'nix-store -q --references /nix/var/nix/profiles/system-%'" \
-            --preview-window "right:60%" \
+          fzf --header "Select a generation to roll back to" \
+              --preview "echo {} | grep -o '[0-9]\\+' | xargs -I % sh -c 'nix-store -q --references /nix/var/nix/profiles/system-%'" \
+              --preview-window "right:60%" \
             --layout=reverse) && \
       if [ -n "$generation" ]; then \
         generation_number=$(echo $generation | grep -o '[0-9]\\+' | head -1) && \
         echo "🔄 Rolling back to generation $generation_number..." && \
         darwin-rebuild switch --switch-generation $generation_number && \
         echo "✅ Rollback complete!" \
-      fi
+        fi
     '' [];
 
-    # Comprehensive system update workflow
+    # Comprehensive system update workflow with performance optimizations
     update = mkTemplateAlias ''
-      echo "🔄 Starting system update..." && \
+      echo "🔄 Starting optimized system update..." && \
       cd @dotfileDir@ && \
       echo "📦 Updating Nix flake..." && \
-      nix --option max-jobs auto flake update && \
-      echo "🔧 Rebuilding system..." && \
+      nix --option max-jobs auto --option cores 0 flake update && \
+      echo "🔧 Rebuilding system with optimizations..." && \
       rebuild && \
-      echo "✨ System update complete!"
+        echo "✨ System update complete!"
     '' [
       { name = "dotfileDir"; value = dotfileDir; }
     ];
 
-    # Enhanced cleanup with detailed progress
+    # Enhanced cleanup with detailed progress and performance optimizations
     cleanup = mkTemplateAlias ''
       echo "🧹 Starting comprehensive system cleanup..." && \
-      echo "🗑️  Running Nix garbage collection..." && \
-      nix-collect-garbage -d --option max-jobs 6 --cores 2 && \
-      echo "✓ Nix garbage collection complete" && \
+        echo "🗑️  Running Nix garbage collection..." && \
+      nix-collect-garbage -d --option max-jobs auto --option cores 0 && \
+        echo "✓ Nix garbage collection complete" && \
       echo "🧹 Cleaning macOS system files..." && \
       find @homeDir@ -type f -name '.DS_Store' -delete 2>/dev/null || true && \
       find @homeDir@ -type f -name '._*' -delete 2>/dev/null || true && \
       echo "🧹 Cleaning package caches..." && \
-      command -v npm &> /dev/null && npm cache clean --force 2>/dev/null || true && \
-      command -v brew &> /dev/null && brew cleanup 2>/dev/null || true && \
+        command -v npm &> /dev/null && npm cache clean --force 2>/dev/null || true && \
+        command -v brew &> /dev/null && brew cleanup 2>/dev/null || true && \
       command -v uv &> /dev/null && @homeDir@/.local/bin/uv cache clean 2>/dev/null || true && \
-      echo "🧹 Optimizing Nix store..." && \
-      nix store optimise --option max-jobs 6 --cores 2 && \
-      echo "✨ Cleanup complete!" && \
-      rl
+        echo "🧹 Optimizing Nix store..." && \
+      nix store optimise --option max-jobs auto --option cores 0 && \
+        echo "✨ Cleanup complete!" && \
+        rl
     '' [
       { name = "homeDir"; value = homeDir; }
     ];
 
+    # Performance-focused build commands
+    rebuild-fast = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      echo "🚀 Fast rebuild with maximum performance..." && \
+      sudo darwin-rebuild switch --flake .#"$(hostname)" --option max-jobs auto --option cores 0 --option keep-outputs true --option keep-derivations true && \
+      cd - && \
+      echo "⚡ Fast rebuild complete!" && \
+      rl
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    rebuild-check = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      echo "🔍 Checking what will be built..." && \
+      darwin-rebuild build --flake .#"$(hostname)" --dry-run --option max-jobs auto && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    # Performance analysis commands
+    perf-analyze = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/analyze-build-performance.sh --report && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    perf-profile = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/analyze-build-performance.sh --profile && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    perf-optimize = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/analyze-build-performance.sh --optimize && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    # System health monitoring commands
+    health-check = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/system-health-monitor.sh --check && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    health-report = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/system-health-monitor.sh --report && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    health-maintain = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/system-health-monitor.sh --maintain && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    health-alert = mkTemplateAlias ''
+      cd @dotfileDir@ && \
+      ./scripts/system-health-monitor.sh --alert && \
+      cd -
+    '' [
+      { name = "dotfileDir"; value = dotfileDir; }
+    ];
+
+    # Log viewing commands for monitoring
+    logs-health = "tail -f ~/.local/var/log/system-health-check.log";
+    logs-maintenance = "tail -f ~/.local/var/log/system-maintenance.log";
+    logs-performance = "tail -f ~/.local/var/log/performance-monitor.log";
+    logs-alerts = "tail -f ~/.local/var/log/critical-alerts.log";
+
+    # Service management commands
+    monitor-status = "launchctl list | grep system-";
+    monitor-load = "launchctl load ~/Library/LaunchAgents/system-*.plist";
+    monitor-unload = "launchctl unload ~/Library/LaunchAgents/system-*.plist";
+
     # macOS-specific Finder utilities
-    showhidden = "defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder";
-    hidehidden = "defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder";
-    showdesktop = "defaults write com.apple.finder CreateDesktop -bool true && killall Finder";
-    hidedesktop = "defaults write com.apple.finder CreateDesktop -bool false && killall Finder";
+      showhidden = "defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder";
+      hidehidden = "defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder";
+      showdesktop = "defaults write com.apple.finder CreateDesktop -bool true && killall Finder";
+      hidedesktop = "defaults write com.apple.finder CreateDesktop -bool false && killall Finder";
     
     # Additional macOS utilities
     flushdns = "sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder";
@@ -425,23 +515,23 @@
 
   # Linux-specific aliases
   linuxAliases = mkPlatformAliases "linux" {
-    rebuild = "sudo nixos-rebuild switch --flake ${dotfileDir}#$(hostname)";
+      rebuild = "sudo nixos-rebuild switch --flake ${dotfileDir}#$(hostname)";
     
     update = mkTemplateAlias ''
       echo "🔄 Starting system update..." && \
       cd @dotfileDir@ && \
       echo "📦 Updating Nix flake..." && \
-      sudo nix flake update && \
+        sudo nix flake update && \
       echo "🔧 Rebuilding system..." && \
       rebuild && \
-      echo "✨ System update complete!"
+        echo "✨ System update complete!"
     '' [
       { name = "dotfileDir"; value = dotfileDir; }
     ];
 
-    # Package management
-    install = "nix-env -iA";
-    search = "nix search nixpkgs";
+      # Package management
+      install = "nix-env -iA";
+      search = "nix search nixpkgs";
     
     # System utilities
     services = "systemctl list-units --type=service";

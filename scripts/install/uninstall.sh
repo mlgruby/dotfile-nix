@@ -90,7 +90,8 @@ handle_error() {
 # Configuration Backup
 # Creates timestamped backups of important directories
 backup_configs() {
-    local backup_dir="$HOME/dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
+    local backup_dir
+    backup_dir="$HOME/dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
     echo -e "${BLUE}Creating backup in $backup_dir...${NC}"
     mkdir -p "$backup_dir"
     

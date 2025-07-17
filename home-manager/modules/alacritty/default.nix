@@ -33,7 +33,7 @@
       # Ensure config directory exists
       mkdir -p "$config_dir"
       
-      # Clone or update alacritty-theme repository
+    # Clone or update alacritty-theme repository
       if [ ! -d "$themes_dir" ]; then
         echo "🎨 Installing Alacritty themes repository..."
         if ${pkgs.git}/bin/git clone --depth 1 https://github.com/alacritty/alacritty-theme "$themes_dir"; then

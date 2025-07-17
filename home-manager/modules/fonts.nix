@@ -39,19 +39,19 @@
       
       # Default font families (all fonts installed via Homebrew)
       defaultFonts = {
-                  sansSerif = [ 
+        sansSerif = [ 
             "Inter"                    # Primary UI font (via Homebrew)
             "Source Sans 3"            # Adobe sans-serif (via Homebrew)
             "SF Pro Display"           # macOS system font
             "Helvetica Neue"           # macOS fallback
             "Arial"                    # Universal fallback
-          ];
-          serif = [ 
+        ];
+        serif = [ 
             "Source Serif 4"           # Primary serif (via Homebrew)
             "Iowan Old Style"          # macOS serif
             "Georgia"                  # Universal serif
             "Times New Roman"          # Universal fallback
-          ];
+        ];
         monospace = [ 
           "JetBrainsMono Nerd Font"  # Primary coding (via Homebrew)
           "FiraCode Nerd Font"       # Alternative with ligatures (via Homebrew)
@@ -126,27 +126,27 @@
       </alias>
 
       <!-- Sans-serif font preferences (Homebrew + system) -->
-              <alias>
-          <family>sans-serif</family>
-          <prefer>
-            <family>Inter</family>
+      <alias>
+        <family>sans-serif</family>
+        <prefer>
+          <family>Inter</family>
             <family>Source Sans 3</family>
-            <family>SF Pro Display</family>
-            <family>Helvetica Neue</family>
-            <family>Arial</family>
-          </prefer>
-        </alias>
+          <family>SF Pro Display</family>
+          <family>Helvetica Neue</family>
+          <family>Arial</family>
+        </prefer>
+      </alias>
 
         <!-- Serif font preferences (Homebrew + system) -->
-        <alias>
-          <family>serif</family>
-          <prefer>
+      <alias>
+        <family>serif</family>
+        <prefer>
             <family>Source Serif 4</family>
-            <family>Iowan Old Style</family>
-            <family>Georgia</family>
-            <family>Times New Roman</family>
-          </prefer>
-        </alias>
+          <family>Iowan Old Style</family>
+          <family>Georgia</family>
+          <family>Times New Roman</family>
+        </prefer>
+      </alias>
 
       <!-- Font substitutions for better compatibility -->
       <match target="pattern">
