@@ -141,8 +141,9 @@
   # System packages for monitoring
   environment.systemPackages = with pkgs; [
     # Basic monitoring tools
-    htop # Enhanced top
-    iotop # I/O monitoring
+    htop # Interactive process viewer
+    # iotop # I/O monitoring - not available on macOS ARM64
+    # iostat # I/O statistics - built-in macOS command
     lsof # List open files
     
     # Network monitoring

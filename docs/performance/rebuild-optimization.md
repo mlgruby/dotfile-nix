@@ -34,8 +34,8 @@ Enhanced settings in `darwin/nix-settings.nix`:
       "https://nixpkgs-unfree.cachix.org"
     ];
     
-    # Auto-optimization
-    auto-optimise-store = true; # Automatically deduplicate store paths
+    # Auto-optimization (use nix.optimise.automatic instead of deprecated auto-optimise-store)
+    # auto-optimise-store = true; # DEPRECATED - use nix.optimise.automatic instead
   };
 }
 ```
@@ -53,10 +53,10 @@ Daily automated tasks for optimal performance:
     options = "--delete-older-than 7d";
   };
   
-  # Store optimization
+  # Store optimization for better performance
   nix.optimise = {
     automatic = true;
-    interval = { Day = 1; };
+    interval = { Day = 1; }; # Daily store optimization
   };
 }
 ```
