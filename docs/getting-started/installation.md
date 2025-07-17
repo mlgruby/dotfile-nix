@@ -84,11 +84,10 @@ Personalize the configuration for your use:
 Now we'll run the installation script that sets up Nix and all required components:
 
 ```bash
-# Make script executable
-chmod +x pre-nix-installation.sh
+chmod +x scripts/install/pre-nix-installation.sh
 
 # Run installation
-./pre-nix-installation.sh
+./scripts/install/pre-nix-installation.sh
 ```
 
 ## Post-Installation

@@ -14,8 +14,8 @@ A comprehensive setup script that provides AWS SSO functionality equivalent to N
 1. **Download and run the setup script:**
 
    ```bash
-   chmod +x setup-aws-sso-cross-shell.sh
-   ./setup-aws-sso-cross-shell.sh
+   chmod +x scripts/setup/aws-sso.sh
+   ./scripts/setup/aws-sso.sh
    ```
 
 2. **Reload your shell:**

@@ -4,7 +4,7 @@
 
 This configuration provides a clean Python development environment using:
 
-- **System-wide Python 3.12** via Homebrew for consistent base 
+- **System-wide Python 3.12** via Homebrew for consistent base
 environment
 - **uv** for fast project-specific Python version and package management
 - **No pyenv** to avoid PATH conflicts and complexity
@@ -59,7 +59,7 @@ uv tool install black  # Global tool installation
 
 ## Migration from pyenv/poetry
 
-### Old workflow:
+### Old workflow
 
 ```bash
 pyenv install 3.11.0
@@ -69,7 +69,7 @@ poetry add requests
 poetry shell
 ```
 
-### New workflow:
+### New workflow
 
 ```bash
 uv init --python 3.11 my-project

@@ -164,7 +164,7 @@
           echo "✅ tmux2k theme updated successfully!"
         else
           echo "⚠️  tmux2k update skipped (no changes or conflicts)"
-        fi
+    fi
       fi
       
       # Make TPM scripts executable

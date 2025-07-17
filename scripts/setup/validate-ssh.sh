@@ -37,7 +37,7 @@ else
     echo -e "${BLUE}  Available SSH keys:${NC}"
     ls -la ~/.ssh/*.pub 2>/dev/null || echo -e "${YELLOW}  No SSH keys found${NC}"
     echo ""
-    echo -e "${BLUE}  To fix this, run the pre-nix-installation.sh script${NC}"
+    echo -e "${BLUE}  To fix this, run the scripts/install/pre-nix-installation.sh script${NC}"
     echo -e "${BLUE}  Or create a symlink to an existing key:${NC}"
     echo -e "${BLUE}    ln -sf ~/.ssh/your-key ~/.ssh/github${NC}"
     echo -e "${BLUE}    ln -sf ~/.ssh/your-key.pub ~/.ssh/github.pub${NC}"
@@ -141,4 +141,4 @@ else
 fi
 
 echo ""
-echo -e "${BLUE}For more help, check the documentation or run the pre-nix-installation.sh script${NC}" 
+echo -e "${BLUE}For more help, check the documentation or run the scripts/install/pre-nix-installation.sh script${NC}" 

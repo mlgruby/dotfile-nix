@@ -2,6 +2,14 @@
 
 A modular, reproducible system configuration for macOS using Nix, nix-darwin, and home-manager.
 
+## 🚀 Quick Start
+
+**New to this system?** → [**📖 Complete Documentation Guide**](docs/README.md)
+
+**Just want it working?** → [⚡ Installation Guide](docs/getting-started/installation.md)
+
+**Already installed?** → [📋 Quick Reference](docs/getting-started/quick-reference.md)
+
 ## What is Nix?
 
 Nix is a powerful package manager and system configuration tool that takes a unique approach to package management and system configuration. It ensures that installing or upgrading one package cannot break other packages, enables multiple versions of a package to coexist, and makes it easy to roll back to previous versions.
@@ -138,7 +146,7 @@ If you prefer to do the setup manually:
 xcode-select --install
 ```
 
-2. **Clone Configuration**
+1. **Clone Configuration**
 
 ```bash
 mkdir -p ~/Documents
@@ -147,13 +155,13 @@ git clone https://github.com/mlgruby/dotfile-nix.git dotfile
 cd dotfile
 ```
 
-3. **Configure User Settings**
+1. **Configure User Settings**
 
 ```bash
 cp user-config.template.nix user-config.nix
 ```
 
-     Edit `user-config.nix` with your information:
+Edit `user-config.nix` with your information:
 
 ```nix
 {
@@ -165,12 +173,12 @@ cp user-config.template.nix user-config.nix
 }
 ```
 
-4. **Run Installation**
+1. **Run Installation**
 
 This script automates the initial setup: installs Xcode tools (if needed), Homebrew, Nix, clones this repository if needed, sets up initial symlinks (including for a temporary shell environment from `nix/`), and performs the first system build using `nix-darwin`.
 
 ```bash
-./pre-nix-installation.sh
+./scripts/install/pre-nix-installation.sh
 ```
 
 After the script completes and the first build is successful, **open a new terminal window** for the fully configured environment managed by Home Manager to take effect.
@@ -191,6 +199,7 @@ The installation script includes intelligent SSH key management:
 ```
 
 This will check:
+
 - SSH key existence and type
 - SSH agent configuration
 - GitHub connection status
@@ -202,7 +211,7 @@ This will check:
 For enhanced security and verified commits on GitHub, you can automatically set up GPG signing:
 
 ```bash
-./setup-gpg-github.sh
+./scripts/setup/gpg-github.sh
 ```
 
 This script will:
@@ -234,7 +243,7 @@ gh auth login
 
 **Example Output:**
 
-```
+```text
 === Automated GPG Setup for GitHub ===
 
 [INFO] Checking prerequisites...
@@ -283,43 +292,18 @@ rebuild
 ## Directory Structure
 
 ```bash
-.
-├── darwin/                      # macOS system configuration
-│   ├── configuration.nix        # Core system settings
-│   ├── homebrew.nix             # Homebrew package management
-│   ├── nix-settings.nix         # Nix daemon configuration
-│   ├── macos-defaults.nix       # macOS system defaults
-│   └── misc-system.nix          # Miscellaneous system settings
-├── flake.lock                   # Lock file for dependencies
-├── flake.nix                    # System definition
-├── home-manager/                # User environment
-│   ├── aliases.nix              # Shell aliases (optimized with helper functions)
-│   ├── default.nix              # Main user configuration
-│   ├── neovim.nix               # Neovim configuration
-│   └── modules/                 # Configuration modules
-│       ├── alacritty/           # Terminal emulator
-│       │   ├── config.toml      # Alacritty configuration
-│       │   └── default.nix      # Module definition
-│       ├── aws-sso.nix          # AWS SSO with lazy loading
-│       ├── aws.nix              # AWS CLI configuration
-│       ├── git.nix              # Git configuration
-│       ├── github.nix           # GitHub CLI setup
-│       ├── karabiner/           # Keyboard customization
-│       │   └── default.nix      # Module definition
-│       ├── lazygit.nix          # Git TUI configuration
-│       ├── rectangle.nix        # Window management
-│       ├── starship.nix         # Shell prompt (optimized)
-│       ├── tmux.nix             # Terminal multiplexer
-│       └── zsh.nix              # Shell configuration
-├── nix/                         # Nix configuration
-│   ├── dynamic-config.zsh       # Dynamic shell config
-│   ├── nix.conf                 # Nix settings
-│   └── zshrc                    # ZSH configuration
-├── docs/                        # Documentation
-├── pre-nix-installation.sh      # Installation script
-├── uninstall.sh                 # Uninstallation script
-├── user-config.nix              # User settings (Created from template)
-└── user-config.template.nix     # Template for user settings
+dotfile/
+├── flake.nix                   # Main configuration
+├── flake.lock                  # Dependency lock file
+├── user-config.template.nix    # User configuration template
+├── setup.sh                    # Quick setup script
+├── scripts/                    # Organized scripts
+│   ├── install/
+│   │   ├── pre-nix-installation.sh    # Installation script
+│   │   └── uninstall.sh              # Uninstallation script
+│   ├── setup/                        # Setup utilities
+│   ├── monitoring/                   # System monitoring
+│   └── utils/                        # Utility scripts
 ```
 
 **Note on `nix/` Directory:** The files `nix/zshrc` and `nix/dynamic-config.zsh` are symlinked directly into `~/` by the `pre-nix-installation.sh` script. They provide a minimal, temporary shell environment immediately after the script finishes, before you open a new terminal. The full, robust shell environment is declaratively configured by Home Manager (`home-manager/modules/zsh.nix`) and takes effect in new terminal sessions after the first build.
