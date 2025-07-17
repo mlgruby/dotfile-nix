@@ -203,7 +203,7 @@
 
         # Secrets Management 
         sops-nix.darwinModules.sops
-        # ./darwin/secrets.nix  # Temporarily disabled for testing
+        ./darwin/secrets.nix
       ];
     };
 
