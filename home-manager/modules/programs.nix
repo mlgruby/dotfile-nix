@@ -38,7 +38,6 @@
           user = "git";
           identityFile = "~/.ssh/github";
           identitiesOnly = true;
-          addKeysToAgent = "yes";
         };
         
         # Add more hosts as needed
