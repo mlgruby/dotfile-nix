@@ -87,7 +87,7 @@
     user = userConfig.username;
 
     # Handle existing Homebrew installations
-    autoMigrate = false;
+    autoMigrate = true;
 
     # Ensure taps are managed only by Nix
     mutableTaps = true;
