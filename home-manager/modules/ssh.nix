@@ -55,6 +55,25 @@
         serverAliveInterval = 60;
       };
       
+      # NUC homelab servers
+      "pve1" = {
+        hostname = "192.168.10.12";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "pve2" = {
+        hostname = "192.168.10.13";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "pve3" = {
+        hostname = "192.168.10.14";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
       # Add more host configurations as needed
       # Example for development servers:
       # "dev.example.com" = {
