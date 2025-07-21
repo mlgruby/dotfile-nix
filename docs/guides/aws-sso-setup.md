@@ -24,7 +24,7 @@ validation, and support for both CLI and application usage.
 
 ## 🛠️ **Initial AWS SSO Setup**
 
-Before using AWS SSO, you need to set up AWS SSO access and configure the AWS CLI. 
+Before using AWS SSO, you need to set up AWS SSO access and configure the AWS CLI.
 This is a one-time setup process.
 
 ### **Prerequisites**
