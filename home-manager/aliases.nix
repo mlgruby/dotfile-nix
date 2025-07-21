@@ -184,6 +184,7 @@
     # LazyGit integration
     lgc = "lazygit -w $(pwd)";
     lgf = "lazygit -f $(find . -type d -name '.git' -exec dirname {} \\; | fzf)";
+    lgs = "lazygit status"; # Quick status view
     
     # Enhanced log and stash browsing
     fshow = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr' | fzf --ansi --preview 'echo {} | grep -o \"[a-f0-9]\\{7\\}\" | head -1 | xargs -I % sh -c \"git show --color=always %\"'";
@@ -195,6 +196,117 @@
     gcm = "git commit -m";
     gp = "git push";
     gl = "git pull";
+    
+    # Advanced workflow aliases
+    gco = "git checkout";
+    gcob = "git checkout -b"; # Create and checkout new branch
+    gcom = "git checkout main || git checkout master"; # Smart main branch checkout
+    gcod = "git checkout develop"; # Checkout develop
+    
+    # Commit operations
+    gca = "git commit --amend"; # Amend last commit
+    gcan = "git commit --amend --no-edit"; # Amend without editing message
+    gcane = "git commit --amend --no-edit"; # Duplicate for muscle memory
+    gwip = "git add -A && git commit -m 'WIP'"; # Quick work in progress commit
+    gunwip = "git log -1 --pretty=%s | grep -q 'WIP' && git reset HEAD~1"; # Undo WIP commit
+    
+    # Branch management
+    gbd = "git branch -d"; # Delete branch (safe)
+    gbD = "git branch -D"; # Force delete branch
+    gbl = "git branch -l"; # List local branches
+    gbr = "git branch -r"; # List remote branches
+    gba = "git branch -a"; # List all branches
+    gbn = "git checkout -b"; # New branch (alias for gcob)
+    
+    # Remote operations
+    gf = "git fetch";
+    gfa = "git fetch --all";
+    gfo = "git fetch origin";
+    gps = "git push";
+    gpsf = "git push --force-with-lease"; # Safe force push
+    gpsu = "git push -u origin HEAD"; # Push and set upstream
+    gpl = "git pull";
+    gplr = "git pull --rebase"; # Pull with rebase
+    
+    # Stash operations
+    gst = "git stash";
+    gsta = "git stash push -m"; # Stash with message
+    gstp = "git stash pop";
+    gstl = "git stash list";
+    gsts = "git stash show";
+    gstd = "git stash drop";
+    gstc = "git stash clear";
+    
+    # Log operations
+    glog = "git log --oneline --decorate --graph";
+    gloga = "git log --oneline --decorate --graph --all";
+    glogp = "git log --pretty=format:'%h -%d %s (%cr) <%an>' --abbrev-commit";
+    glast = "git log -1 HEAD"; # Show last commit
+    
+    # Diff operations
+    gd = "git diff";
+    gdc = "git diff --cached"; # Diff staged changes
+    gdh = "git diff HEAD"; # Diff against HEAD
+    gdt = "git diff-tree --no-commit-id --name-only -r"; # Show files in commit
+    
+    # Reset operations
+    grh = "git reset HEAD"; # Unstage files
+    grhh = "git reset HEAD --hard"; # Hard reset to HEAD
+    groh = "git reset origin/HEAD --hard"; # Reset to remote HEAD
+    
+    # Rebase operations
+    grb = "git rebase";
+    grbi = "git rebase -i"; # Interactive rebase
+    grbc = "git rebase --continue";
+    grba = "git rebase --abort";
+    grbs = "git rebase --skip";
+    
+    # Tag operations
+    gt = "git tag";
+    gta = "git tag -a"; # Annotated tag
+    gtd = "git tag -d"; # Delete tag
+    gtl = "git tag -l"; # List tags
+    
+    # Worktree operations (advanced)
+    gwt = "git worktree";
+    gwta = "git worktree add";
+    gwtl = "git worktree list";
+    gwtr = "git worktree remove";
+    
+    # Bisect operations
+    gbs = "git bisect start";
+    gbsg = "git bisect good";
+    gbsb = "git bisect bad";
+    gbsr = "git bisect reset";
+    
+    # Clean operations
+    gclean = "git clean -fd"; # Remove untracked files and directories
+    gcleann = "git clean -fdn"; # Dry run clean
+    
+    # Shortcuts for common workflows
+    gsync = "git fetch origin && git checkout main && git pull origin main"; # Sync with main
+    gup = "git fetch && git rebase origin/main"; # Update current branch
+    gnuke = "git reset --hard && git clean -fd"; # Nuclear option - lose all local changes
+    
+    # Search operations  
+    ggrep = "git grep";
+    glog-search = "git log --grep"; # Search commit messages
+    glog-author = "git log --author"; # Search by author
+    
+    # GitHub CLI integration (if available)
+    ghpr = "gh pr create --fill"; # Create PR with auto-filled info
+    ghprs = "gh pr status"; # PR status
+    ghprv = "gh pr view --web"; # View PR in browser
+    ghprm = "gh pr merge"; # Merge PR
+    
+    # Conventional commits helpers
+    feat = "git commit -m 'feat: '"; # Feature commit template
+    fix = "git commit -m 'fix: '"; # Fix commit template
+    docs = "git commit -m 'docs: '"; # Docs commit template
+    style = "git commit -m 'style: '"; # Style commit template
+    refactor = "git commit -m 'refactor: '"; # Refactor commit template
+    test = "git commit -m 'test: '"; # Test commit template
+    chore = "git commit -m 'chore: '"; # Chore commit template
   };
 
   # Enhanced GitHub CLI workflow aliases
@@ -280,6 +392,66 @@
     tfst = "terraform state list";
   };
 
+  # Enhanced kubectl/Kubernetes workflow aliases
+  k8sAliases = {
+    # Basic kubectl shortcuts
+    k = "kubectl";
+    kgp = "kubectl get pods";
+    kgs = "kubectl get services";
+    kgn = "kubectl get nodes";
+    kgd = "kubectl get deployments";
+    kgns = "kubectl get namespaces";
+    kgi = "kubectl get ingress";
+    kgpv = "kubectl get pv";
+    kgpvc = "kubectl get pvc";
+    
+    # Describe resources
+    kdp = "kubectl describe pod";
+    kds = "kubectl describe service";
+    kdd = "kubectl describe deployment";
+    kdn = "kubectl describe node";
+    
+    # Logs and monitoring
+    klog = "kubectl logs";
+    klogf = "kubectl logs -f";
+    klogtail = "kubectl logs --tail=100";
+    
+    # Pod management
+    kexec = "kubectl exec -it";
+    kshell = "kubectl exec -it";
+    kdel = "kubectl delete";
+    kdelp = "kubectl delete pod";
+    
+    # Apply and create
+    ka = "kubectl apply -f";
+    kc = "kubectl create";
+    
+    # Port forwarding
+    kpf = "kubectl port-forward";
+    
+    # Interactive selectors with fzf
+    kpod = "kubectl get pods | fzf --header-lines=1 | awk '{print $1}'";
+    ksvc = "kubectl get services | fzf --header-lines=1 | awk '{print $1}'";
+    
+    # Regular kubectl (redundant but explicit)
+    kctl = "kubectl";
+    kget = "kubectl get";
+    kdesc = "kubectl describe";
+    klogs = "kubectl logs";
+    kapply = "kubectl apply -f";
+    
+    # Context and namespace management
+    kctx = "kubectl config current-context";
+    kns = "kubectl config set-context --current --namespace";
+    kctxs = "kubectl config get-contexts";
+    
+    # Quick cluster info
+    kinfo = "kubectl cluster-info";
+    kversion = "kubectl version";
+    ktop = "kubectl top nodes";
+    ktoppods = "kubectl top pods";
+  };
+
   # Core system and navigation aliases
   coreAliases = {
     # System & Shell management
@@ -346,6 +518,50 @@
     '' [
       { name = "dotfileDir"; value = dotfileDir; }
     ];
+
+    # Additional productivity aliases
+    work = "cd ${homeDir}/${userConfig.directories.workspace}"; # Quick workspace navigation
+    recent = "ls -lt | head -20"; # Show recently modified files
+    size = "du -sh"; # Show directory size
+    ports = "lsof -iTCP -sTCP:LISTEN -n -P"; # Show listening ports
+    path = "echo $PATH | tr ':' '\n'"; # Pretty print PATH
+    
+    # Quick file operations
+    backup = "cp -R"; # Quick backup with rename
+    extract = "tar -xzvf"; # Quick tar extract
+    compress = "tar -czvf"; # Quick tar compress
+    
+    # Time and date helpers
+    now = "date '+%Y-%m-%d %H:%M:%S'"; # Current timestamp
+    today = "date '+%Y-%m-%d'"; # Today's date
+    week = "date '+%Y-W%U'"; # Current week
+    
+    # Process management
+    psg = "ps aux | grep"; # Process search
+    killall = "pkill -f"; # Kill by process name
+    
+    # Network helpers
+    ping1 = "ping -c 1"; # Single ping
+    ping10 = "ping -c 10"; # 10 pings
+    ports-open = "netstat -tuln"; # Show open ports
+    
+    # Clipboard integration (macOS)
+    copy = "pbcopy"; # Copy to clipboard
+    paste = "pbpaste"; # Paste from clipboard
+    
+    # Quick git status in any directory
+    s = "git status"; # Very short git status
+    
+    # LazyGit super shortcuts
+    lg = "lazygit"; # Just 'lg' for lazygit
+    lazydot = "cd ${dotfileDir} && lazygit"; # LazyGit in dotfiles
+    
+    # FZF powered file editing
+    edit = "fzf --preview 'bat --color=always {}' | xargs nvim"; # Edit with preview
+    
+    # JSON/YAML pretty printing
+    json = "python3 -m json.tool"; # Pretty print JSON
+    yaml = "yq eval '.' -"; # Pretty print YAML (if yq installed);
   };
 
   # Platform-specific aliases using helper functions
@@ -555,6 +771,7 @@
     fzfAliases //
     dockerAliases //
     terraformAliases //
+    k8sAliases //          # k3s/Kubernetes management aliases
     githubAliases //
     macAliases //
     linuxAliases;
