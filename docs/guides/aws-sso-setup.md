@@ -1,332 +1,313 @@
-# AWS SSO Setup for Non-Nix Users
+# AWS SSO User Guide
 
-A comprehensive setup script that provides AWS SSO functionality equivalent to Nix-based configurations, with cross-shell compatibility and convenient aliases.
+Complete guide to using the AWS SSO configuration for seamless multi-account development.
 
-## 🚀 Quick Start
+## 🎯 **What This Module Provides**
 
-### Prerequisites
+Your AWS SSO configuration automates authentication and credential management across multiple AWS accounts with intelligent profile switching, credential validation, and support for both CLI and application usage.
 
-- AWS CLI v2 installed
-- Access to Lightricks AWS SSO portal
+### **Key Features**
+- ✅ **Automated SSO Authentication** - One-command login to multiple accounts
+- ✅ **Smart Profile Switching** - Automatic credential validation and account verification  
+- ✅ **Dual Configuration** - Both SSO profiles (CLI) and traditional profiles (applications)
+- ✅ **Lazy Loading** - Fast shell startup with on-demand function loading
+- ✅ **Credential Export** - Environment variables and file-based credentials
+- ✅ **Java/Scala Support** - Traditional credential files for legacy applications
+- ✅ **Workflow Shortcuts** - Common operations simplified to single commands
 
-### Installation
+## 🏢 **Configured AWS Accounts**
 
-1. **Download and run the setup script:**
+### **Production Account**
+- **Account ID**: `384822754266` 
+- **Role**: `DataPlatformTeam`
+- **SSO Profile**: `production-sso`
+- **Traditional Profile**: `production`
 
-   ```bash
-   chmod +x scripts/setup/aws-sso.sh
-   ./scripts/setup/aws-sso.sh
-   ```
+### **Development Account** 
+- **Account ID**: `588736812464`
+- **Role**: `AdministratorAccess`
+- **SSO Profile**: `default-sso` / `staging-sso`
+- **Traditional Profile**: `default` / `staging`
 
-2. **Reload your shell:**
+## 🚀 **Quick Start Commands**
 
-   ```bash
-   source ~/.zshrc    # for zsh users
-   source ~/.bashrc   # for bash users (Linux)
-   source ~/.bash_profile  # for bash users (macOS)
-   ```
-
-3. **Login to AWS SSO:**
-
-   ```bash
-   awsl  # Short alias for aws_sso_login
-   ```
-
-4. **Verify setup:**
-
-   ```bash
-   awsw  # Shows your current AWS identity
-   ```
-
-## ✨ Features
-
-- **🔄 Cross-Shell Compatible**: Works with both bash and zsh
-- **🎯 Auto-Detection**: Automatically detects your shell and config files
-- **⚡ Short Aliases**: Super convenient 2-4 character commands
-- **🔑 Multiple Export Options**: Environment variables, files, copy-paste commands
-- **🏢 Multi-Account Support**: Production, staging, and development profiles
-- **🧹 Easy Cleanup**: Clear credentials and switch profiles easily
-
-## 🎯 Quick Reference
-
-### 📱 Login & Profile Management
-
-| Command | Full Command | Description |
-|---------|-------------|-------------|
-| `awsl` | `aws_sso_login` | Login to default SSO profile |
-| `awslp` | `aws_sso_login production-sso` | Login to production |
-| `awsld` | `aws_sso_login default-sso` | Login to default/dev |
-| `awslb` | `aws_sso_login both` | Login to both profiles |
-| `awsp <profile>` | `aws_profile <profile>` | Switch to specific profile |
-| `awspp` | `aws_profile production-sso` | Switch to production |
-| `awspd` | `aws_profile default-sso` | Switch to default/dev |
-
-### 🔑 Credential Export
-
-| Command | Description | Use Case |
-|---------|-------------|----------|
-| `awse` | Export to environment variables | Current shell session |
-| `awsec` | Export + show identity | Quick export with verification |
-| `awsef <profile>` | Export profile to file | Save for later use |
-| `awsenv` | Show copy-paste commands | Share with others/scripts |
-| `awsgen` | Generate .env file | Application development |
-
-### 🔍 Utilities
-
-| Command | Description |
-|---------|-------------|
-| `awsw` | Who am I? (current identity) |
-| `awsc` | Clear all AWS credentials |
-| `awsls` | List all available profiles |
-| `awsid` | Quick identity check |
-| `awsr` | Show current AWS configuration |
-
-## 📋 Available Profiles
-
-### SSO Profiles (Recommended)
-
-- **`default-sso`** - Development account (588736812464) with AdministratorAccess
-- **`production-sso`** - Production account (384822754266) with DataPlatformTeam role
-- **`staging-sso`** - Staging account (588736812464) with AdministratorAccess
-
-### Traditional Profiles
-
-- **`default`**, **`production`**, **`staging`**, **`prod`**, **`dev`** - For applications that don't support SSO
-
-## 🛠 Detailed Usage
-
-### Basic Workflow
-
-1. **Login to AWS SSO:**
-
-   ```bash
-   awsl                    # Login to default profile
-   # or
-   awslp                   # Login to production
-   # or  
-   awslb                   # Login to both profiles
-   ```
-
-2. **Check your identity:**
-
-   ```bash
-   awsw
-   # Output:
-   # 🔍 Current AWS Configuration:
-   # Profile: default-sso
-   # Region: us-west-2
-   # ✅ Account: 588736812464
-   # 👤 User ID: AIDACKCEVSQ6C2EXAMPLE
-   # 🎭 ARN: arn:aws:sts::588736812464:assumed-role/...
-   ```
-
-3. **Use AWS CLI normally:**
-
-   ```bash
-   aws s3 ls
-   aws ec2 describe-instances
-   # All commands use your current profile automatically
-   ```
-
-### Advanced Credential Export
-
-#### 1. Export to Environment Variables
-
+### **Essential Daily Commands**
 ```bash
-awse
-# Exports AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
-# to your current shell session
+# Login to both AWS accounts (most common)
+awsl                    # Login to both SSO profiles
+
+# Switch to specific profile
+awsprod                 # Switch to production
+awsdefault              # Switch to development/default
+
+# Export credentials for applications
+awse                    # Export current profile to environment variables
+awsb                    # Export both profiles to ~/.aws/credentials
+
+# Super workflow (login + export everything)
+awsall                  # Complete setup for development work
+
+# Check current status
+aws_status              # Show current profile and credentials
 ```
 
-#### 2. Export to File
-
+### **Profile Management**
 ```bash
-awsef production-sso ~/.aws/prod-creds.env
-# Creates a file you can source later:
-source ~/.aws/prod-creds.env
+# Switch profiles
+aws_profile production-sso       # Switch to production SSO
+aws_profile default-sso         # Switch to default SSO
+aws_profile production          # Switch to traditional production
+
+# Login to specific profiles
+aws_sso_login production-sso    # Login to production only
+aws_sso_login default-sso       # Login to development only
+aws_sso_login both              # Login to both (same as awsl)
 ```
 
-#### 3. Generate .env File for Applications
+## 📚 **Complete Command Reference**
 
+### **🔐 Authentication Commands**
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `awsl` | Login to both SSO profiles | `awsl` |
+| `aws_sso_login [profile]` | Login to specific profile | `aws_sso_login production-sso` |
+| `awsrp` | Refresh production login | `awsrp` |
+| `awsrd` | Refresh default/dev login | `awsrd` |
+| `awsc` / `aws_clear` | Clear all credentials | `awsc` |
+
+### **🎯 Profile Switching**
+
+| Command | Purpose | Target Profile |
+|---------|---------|---------------|
+| `awsprod` | Switch to production SSO | `production-sso` |
+| `awsdefault` | Switch to default SSO | `default-sso` |
+| `awsprod-trad` | Switch to production traditional | `production` |
+| `awsdefault-trad` | Switch to default traditional | `default` |
+| `aws_profile [name]` | Switch to any profile | Custom profile |
+
+### **📤 Credential Export**
+
+| Command | Purpose | Output |
+|---------|---------|---------|
+| `awse` / `aws_export_creds` | Export to environment variables | `AWS_ACCESS_KEY_ID`, etc. |
+| `awsw` / `aws_export_to_file` | Export current to file | `~/.aws/credentials` |
+| `awsb` / `aws_export_both_to_file` | Export both profiles to file | Both profiles in credentials |
+| `awsp` / `aws_prod_env` | Production profile + export | Full production setup |
+| `awsd` / `aws_default_env` | Default profile + export | Full default setup |
+
+### **🔍 Status & Utilities**
+
+| Command | Purpose | Information Shown |
+|---------|---------|------------------|
+| `aws_status` | Show current AWS state | Profile, region, account, identity |
+| `aws configure list-profiles` | List all available profiles | All configured profiles |
+| `aws sts get-caller-identity` | Show current AWS identity | Account ID, user ARN |
+
+### **🚀 Workflow Shortcuts**
+
+| Command | Purpose | What It Does |
+|---------|---------|-------------|
+| `awsall` / `aws_super_workflow` | Complete AWS setup | Login both + export both to file |
+| `awsf` | Super workflow (alias) | Same as `awsall` |
+
+## 🎯 **Common Workflows**
+
+### **1. Daily Development Start**
 ```bash
-awsgen myapp.env
-# Creates myapp.env with:
-# AWS_ACCESS_KEY_ID=AKIA...
-# AWS_SECRET_ACCESS_KEY=...
-# AWS_SESSION_TOKEN=...
-# AWS_REGION=us-west-2
-# AWS_DEFAULT_REGION=us-west-2
+# Complete setup for development work
+awsall
+# ✅ Logs into both SSO profiles
+# ✅ Exports both to ~/.aws/credentials 
+# ✅ Ready for CLI, Java, Scala, and other tools
 ```
 
-#### 4. Get Copy-Paste Commands
-
+### **2. Switch to Production Work**
 ```bash
-awsenv production-sso
-# Output:
-# 📋 Copy and paste these commands to export credentials:
-# # ===== AWS Credentials for production-sso =====
-# export AWS_ACCESS_KEY_ID=AKIA...
-# export AWS_SECRET_ACCESS_KEY=...
-# export AWS_SESSION_TOKEN=...
-# # ===== End AWS Credentials =====
+# Switch to production and set up environment
+awsp
+# ✅ Switches to production-sso profile
+# ✅ Exports credentials to environment variables
+# ✅ Exports to ~/.aws/credentials as [production]
+# ✅ Ready for production operations
 ```
 
-### Profile Management
-
-#### Switch Between Profiles
-
+### **3. CLI-Only Quick Switch**
 ```bash
-awsp default-sso        # Switch to development
-awsp production-sso     # Switch to production
-awsp staging-sso        # Switch to staging
+# Just switch profiles for AWS CLI usage
+awsprod                 # Switch to production
+aws s3 ls              # Use production credentials
+
+awsdefault             # Switch back to default
+aws ec2 describe-instances  # Use default credentials
 ```
 
-#### Quick Profile Switches
-
+### **4. Application Development Setup**
 ```bash
-awspp                   # Quick switch to production
-awspd                   # Quick switch to default/dev
+# For Java/Scala applications that read ~/.aws/credentials
+awsb                   # Export both profiles to credentials file
+# ✅ [production] and [default] profiles available
+# ✅ Applications can use standard credential resolution
 ```
 
-#### List Available Profiles
-
+### **5. Credential Refresh**
 ```bash
-awsls
-# Output:
-# 📋 Available AWS profiles:
-#   default
-#   default-sso
-#   production
-#   production-sso
-#   staging-sso
+# When credentials expire (typically after 8-12 hours)
+awsl                   # Re-login to both profiles
+awsb                   # Re-export to credentials file
 ```
 
-### Troubleshooting
-
-#### Clear All Credentials
-
+### **6. Troubleshooting**
 ```bash
-awsc
-# Clears all AWS environment variables
+# Check current status
+aws_status             # See active profile and credentials
+
+# Clear everything and start fresh
+awsc                   # Clear all credentials and sessions
+awsall                 # Set up everything again
 ```
 
-#### Check Current Status
+## 🔧 **Configuration Details**
 
+### **SSO Configuration**
+- **SSO Start URL**: `https://d-90670ca891.awsapps.com/start`
+- **SSO Region**: `us-east-1`
+- **Default Region**: `us-west-2`
+- **Output Format**: `json`
+
+### **Profile Types**
+
+**SSO Profiles** (for AWS CLI):
+- `production-sso` → DataPlatformTeam role
+- `default-sso` → AdministratorAccess role  
+- `staging-sso` → AdministratorAccess role
+
+**Traditional Profiles** (for applications):
+- `production` → No SSO properties, works with static credentials
+- `default` → No SSO properties, works with static credentials
+- `staging` → No SSO properties, works with static credentials
+
+### **File Locations**
+- **AWS Config**: `~/.aws/config` (managed by Home Manager)
+- **AWS Credentials**: `~/.aws/credentials` (generated by export commands)
+- **Backups**: `~/.aws/credentials.backup.YYYYMMDD_HHMMSS`
+
+## 🚨 **Troubleshooting**
+
+### **Common Issues**
+
+**"Profile not found" errors:**
 ```bash
-awsw                    # Detailed identity information
-awsid                   # Quick identity check
-awsr                    # Current configuration
+aws configure list-profiles  # Check available profiles
+aws_status                  # Check current state
 ```
 
-#### Re-login if Credentials Expire
-
+**"Credentials expired" errors:**
 ```bash
-awsl                    # Re-login to current/default profile
-awslp                   # Re-login to production
+awsl                        # Re-login to SSO
+aws_status                  # Verify credentials are working
 ```
 
-## 🔧 Technical Details
-
-### What the Script Does
-
-1. **Installs AWS Configuration**: Creates `~/.aws/config` with SSO profiles
-2. **Adds Shell Functions**: Installs helper functions in your shell config
-3. **Creates Aliases**: Sets up convenient short commands
-4. **Enables Completion**: Configures AWS CLI tab completion
-
-### Files Modified
-
-- **`~/.aws/config`** - AWS CLI configuration with SSO profiles
-- **`~/.zshrc`** or **`~/.bashrc`/`~/.bash_profile`** - Shell functions and aliases
-
-### Shell Compatibility
-
-| Shell | Config File | Platform |
-|-------|-------------|----------|
-| Zsh | `~/.zshrc` | All |
-| Bash | `~/.bashrc` | Linux |
-| Bash | `~/.bash_profile` | macOS |
-
-The script automatically detects your shell and uses the appropriate configuration file.
-
-## 🚨 Security Notes
-
-- **Temporary Credentials**: All exported credentials are temporary (typically 1-12 hours)
-- **SSO Integration**: Uses AWS SSO for secure authentication
-- **No Stored Secrets**: No long-term credentials are stored locally
-- **Session Management**: SSO sessions need periodic re-authentication
-
-## 🤝 Integration with Applications
-
-### For Docker/Docker Compose
-
+**"SSO session expired":**
 ```bash
-awsgen .env
-docker-compose up
-# Your containers will have AWS credentials
+awsc                        # Clear all sessions
+awsall                      # Complete fresh setup
 ```
 
-### For Node.js/Python Applications
-
+**Applications can't find credentials:**
 ```bash
-awsgen .env
-# Add to your application:
-# require('dotenv').config() // Node.js
-# from dotenv import load_dotenv; load_dotenv() // Python
+awsb                        # Export both profiles to ~/.aws/credentials
+ls -la ~/.aws/credentials   # Verify file exists
 ```
 
-### For Shell Scripts
+### **Credential Lifecycle**
 
+1. **SSO Login** → Temporary SSO credentials (8-12 hours)
+2. **Profile Switch** → Active profile set in environment
+3. **Export to Environment** → `AWS_ACCESS_KEY_ID`, etc. set
+4. **Export to File** → Traditional credentials written to `~/.aws/credentials`
+
+### **Environment Variables**
+
+The module sets these automatically:
 ```bash
-awsef ~/.aws/script-creds.env
-# In your script:
-source ~/.aws/script-creds.env
+AWS_DEFAULT_REGION=us-west-2
+AWS_REGION=us-west-2
+AWS_PROFILE=<current-profile>
 ```
 
-## 📞 Support
+When using `awse` or credential export:
+```bash
+AWS_ACCESS_KEY_ID=<temporary-key>
+AWS_SECRET_ACCESS_KEY=<temporary-secret>
+AWS_SESSION_TOKEN=<temporary-token>
+```
 
-### Common Issues
+## 💡 **Tips & Best Practices**
 
-1. **"aws command not found"**
-   - Install AWS CLI v2: `brew install awscli` (macOS) or follow AWS documentation
+### **Recommended Daily Workflow**
+1. **Morning**: `awsall` (complete setup)
+2. **Switch contexts**: `awsprod` or `awsdefault` as needed
+3. **Before important operations**: `aws_status` (verify credentials)
+4. **End of day**: No cleanup needed (credentials auto-expire)
 
-2. **"Profile not found"**
-   - Run `awsls` to see available profiles
-   - Make sure you've run the setup script
+### **For Different Use Cases**
 
-3. **"Credentials expired"**
-   - Run `awsl` to re-authenticate
-   - SSO sessions expire periodically
+**AWS CLI Only:**
+```bash
+awsprod    # or awsdefault
+# Just use AWS CLI commands
+```
 
-4. **Functions not available after installation**
-   - Reload your shell: `source ~/.zshrc` or `source ~/.bashrc`
-   - Make sure the setup script completed successfully
+**Development Applications:**
+```bash
+awsall     # Sets up everything including ~/.aws/credentials
+# Applications can now use standard credential resolution
+```
 
-### Getting Help
+**Production Operations:**
+```bash
+awsp       # Switch to production with full environment setup
+aws_status # Double-check you're in the right account
+# Proceed with production operations
+```
 
-- Run `awsw` to check current status
-- Run `awsls` to see available profiles  
-- Check AWS SSO portal access with your administrator
+### **Security Notes**
+- ✅ Credentials are temporary (8-12 hours)
+- ✅ SSO provides audit logging
+- ✅ No long-term credentials stored
+- ✅ Role-based access control
+- ✅ Automatic credential backup before overwriting
 
-## 🔄 Comparison with Nix Setup
+## 🎓 **Advanced Usage**
 
-This setup provides equivalent functionality to Nix-based AWS SSO configurations:
+### **Custom Profile Switching**
+```bash
+# Switch to any configured profile
+aws_profile staging-sso
+aws_profile production
 
-| Feature | Nix Setup | This Setup |
-|---------|-----------|------------|
-| SSO Login | ✅ | ✅ |
-| Profile Switching | ✅ | ✅ |
-| Credential Export | ✅ | ✅ |
-| Shell Integration | ✅ | ✅ |
-| Auto-completion | ✅ | ✅ |
-| Cross-shell Support | ✅ | ✅ |
-| Easy Installation | ✅ | ✅ |
-| No Dependencies | ❌ | ✅ |
+# Export specific profile to file with custom name
+aws_export_to_file production-sso my-prod-profile
+```
 
-## 📄 License
+### **Credential Validation**
+```bash
+# Test specific profile credentials
+AWS_PROFILE=production-sso aws sts get-caller-identity
 
-This setup script is provided as-is for internal use. Modify as needed for your organization.
+# Use internal validation function
+_aws_test_creds production-sso
+```
 
----
+### **Manual SSO Operations**
+```bash
+# Individual SSO logins
+aws sso login --profile production-sso
+aws sso login --profile default-sso
 
-**🎉 Enjoy your streamlined AWS SSO experience!**
+# Manual logout
+aws sso logout
+```
+
+This comprehensive AWS SSO setup streamlines multi-account development and ensures secure, efficient credential management across all your AWS operations! 🚀
