@@ -74,6 +74,24 @@
         identityFile = "~/.ssh/nuc_homelab_id_ed25519";
       };
       
+      "pi1" = {
+        hostname = "192.168.10.5";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "pi2" = {
+        hostname = "192.168.10.6";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "pi3" = {
+        hostname = "192.168.10.7";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
       # Add more host configurations as needed
       # Example for development servers:
       # "dev.example.com" = {

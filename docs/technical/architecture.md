@@ -1,6 +1,7 @@
 # System Architecture
 
-This document provides a comprehensive technical overview of the Nix Darwin dotfiles system architecture, explaining how all components work together to create a reproducible, maintainable macOS development environment.
+This document provides a comprehensive technical overview of the Nix Darwin dotfiles system architecture, explaining how all components work together
+ to create a reproducible, maintainable macOS development environment.
 
 ## 🏗️ High-Level Architecture
 
@@ -393,4 +394,5 @@ The architecture supports easy extension:
 3. **Package Sources**: Add new binary caches or overlays
 4. **Development Environments**: Create project-specific templates
 
-This architecture ensures that the system remains maintainable, secure, and performant while providing the flexibility needed for a modern development environment.
+This architecture ensures that the system remains maintainable, secure, and performant while providing the flexibility needed for a modern development
+ environment.
