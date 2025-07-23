@@ -528,7 +528,7 @@
 
     # Quick file operations
     backup = "cp -R"; # Quick backup with rename
-    extract = "tar -xzvf"; # Quick tar extract
+    xtract = "tar -xzvf"; # Quick tar extract (renamed to avoid Oh My Zsh conflict)
     compress = "tar -czvf"; # Quick tar compress
 
     # Time and date helpers
