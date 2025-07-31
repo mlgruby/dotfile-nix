@@ -197,6 +197,7 @@
       "bitwarden" # Password manager
       "brave-browser" # Privacy-focused browser
       "google-chrome" # Google Chrome browser
+      "chatgpt" # ChatGPT AI desktop app
       "claude" # Claude AI desktop app
       "insync" # Google Drive client
       "obsidian" # Knowledge base and note-taking
