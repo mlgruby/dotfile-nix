@@ -129,6 +129,7 @@
       # Development Tools
       # These versions are preferred over Nix for various reasons
       "cmake" # Build system
+      "duckdb" # In-process SQL OLAP database
       "neovim" # Modern vim implementation
       "pkg-config" # Development tool
       # git - MOVED to Home Manager programs.git (includes package + config)
@@ -199,6 +200,7 @@
       "google-chrome" # Google Chrome browser
       "chatgpt" # ChatGPT AI desktop app
       "claude" # Claude AI desktop app
+      "lm-studio" # Local language model runner
       "insync" # Google Drive client
       "obsidian" # Knowledge base and note-taking
       "spotify" # Music streaming
