@@ -567,16 +567,7 @@
   # Platform-specific aliases using helper functions
   macAliases = mkPlatformAliases "darwin" {
     # Enhanced system management with performance optimizations
-    rebuild = mkTemplateAlias ''
-      cd @dotfileDir@ && \
-      echo "🔄 Building system configuration with performance optimizations..." && \
-      sudo darwin-rebuild switch --flake .#"$(hostname)" --option max-jobs auto --option cores 0 --option keep-outputs true && \
-      cd - && \
-      echo "✅ System rebuild complete!" && \
-      rl
-    '' [
-      { name = "dotfileDir"; value = dotfileDir; }
-    ];
+    rebuild = "cd ${dotfileDir} && echo '🔄 Building system configuration...' && sudo darwin-rebuild switch --flake .#\"$(hostname)\" && cd - && echo '✅ System rebuild complete!' && rl";
 
     # Interactive rollback with preview
     rollback = mkTemplateAlias ''
@@ -593,18 +584,8 @@
         fi
     '' [];
 
-    # Comprehensive system update workflow with performance optimizations
-    update = mkTemplateAlias ''
-      echo "🔄 Starting optimized system update..." && \
-      cd @dotfileDir@ && \
-      echo "📦 Updating Nix flake..." && \
-      nix --option max-jobs auto --option cores 0 flake update && \
-      echo "🔧 Rebuilding system with optimizations..." && \
-      rebuild && \
-        echo "✨ System update complete!"
-    '' [
-      { name = "dotfileDir"; value = dotfileDir; }
-    ];
+    # Simplified system update workflow 
+    update = "echo '🔄 Starting system update...' && cd ${dotfileDir} && nix flake update && rebuild && echo '✨ System update complete!'";
 
     # Enhanced cleanup with detailed progress and performance optimizations
     cleanup = mkTemplateAlias ''
@@ -733,17 +714,7 @@
   linuxAliases = mkPlatformAliases "linux" {
       rebuild = "sudo nixos-rebuild switch --flake ${dotfileDir}#$(hostname)";
     
-    update = mkTemplateAlias ''
-      echo "🔄 Starting system update..." && \
-      cd @dotfileDir@ && \
-      echo "📦 Updating Nix flake..." && \
-        sudo nix flake update && \
-      echo "🔧 Rebuilding system..." && \
-      rebuild && \
-        echo "✨ System update complete!"
-    '' [
-      { name = "dotfileDir"; value = dotfileDir; }
-    ];
+    # update alias removed - defined in darwinAliases instead
 
       # Package management
       install = "nix-env -iA";

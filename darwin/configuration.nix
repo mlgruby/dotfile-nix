@@ -68,7 +68,40 @@
   # Nix package manager settings
 
   # Enable Nix daemon
-  nix.enable = true;
+  nix = {
+    enable = true;
+    
+    # Nix daemon settings following best practices
+    settings = {
+      # Enable flakes and nix command
+      experimental-features = ["nix-command" "flakes"];
+      
+      # Trusted users for additional rights
+      trusted-users = ["${userConfig.username}" "root"];
+      
+      # Note: auto-optimise-store is disabled as it can corrupt the Nix Store on nix-darwin
+      # Using nix.optimise.automatic instead (configured below)
+      
+      # Build settings for optimal performance
+      max-jobs = "auto"; # Use all available logical cores
+      cores = 0; # Use all available cores for each job
+      
+      # Improve build performance with more substituters
+      substituters = [
+        "https://cache.nixos.org/"
+        "https://nix-community.cachix.org"
+      ];
+      
+      # Trust public keys for binary caches
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
+    };
+    
+    # Store optimization (nix-darwin safe alternative to auto-optimise-store)
+    optimise.automatic = true;
+  };
 
   # Set correct GID for nixbld group
   ids.gids.nixbld = 350;
@@ -150,6 +183,33 @@
         echo "🧹 Cleaning up old .bak files to prevent conflicts..."
         find /Users/${userConfig.username}/.config -name "*.bak" -type f -delete 2>/dev/null || true
         echo "✓ Old backup files cleaned up"
+      '';
+
+      nixDaemonSetup.text = ''
+        echo "🔧 Ensuring Nix daemon is properly configured..."
+        
+        # Check if daemon plist exists
+        if [ -f "/Library/LaunchDaemons/org.nixos.nix-daemon.plist" ]; then
+          echo "✓ Nix daemon plist found"
+          
+          # Load the daemon if not already loaded
+          if ! sudo launchctl list | grep -q "org.nixos.nix-daemon"; then
+            echo "Loading Nix daemon..."
+            sudo launchctl load /Library/LaunchDaemons/org.nixos.nix-daemon.plist
+          fi
+          
+          # Enable daemon for automatic startup
+          sudo launchctl enable system/org.nixos.nix-daemon 2>/dev/null || true
+          
+          # Verify daemon is running
+          if sudo launchctl list | grep -q "org.nixos.nix-daemon"; then
+            echo "✅ Nix daemon is running and configured for auto-start"
+          else
+            echo "⚠️  Warning: Nix daemon may not be properly configured"
+          fi
+        else
+          echo "⚠️  Warning: Nix daemon plist not found"
+        fi
       '';
 
       setDefaultBrowser.text = ''

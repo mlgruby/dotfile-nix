@@ -27,6 +27,18 @@
 }: {
   # System health monitoring with launchd
   launchd.user.agents = {
+    # Nix daemon startup check - runs at login to ensure daemon is working
+    nix-daemon-startup = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${pkgs.bash}/bin/bash"
+          "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/scripts/utils/nix-daemon-startup.sh"
+        ];
+        RunAtLoad = true; # Run when user logs in
+        StandardOutPath = "/Users/${userConfig.username}/.local/var/log/nix-daemon-startup.out.log";
+        StandardErrorPath = "/Users/${userConfig.username}/.local/var/log/nix-daemon-startup.error.log";
+      };
+    };
     # Daily health check service
     system-health-check = {
       serviceConfig = {
@@ -53,7 +65,7 @@
         ProgramArguments = [
           "${pkgs.bash}/bin/bash"
           "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/system-health-monitor.sh --maintain"
+          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/monitoring/system-health-monitor.sh --maintain"
         ];
         StartCalendarInterval = [
           {
@@ -74,7 +86,7 @@
         ProgramArguments = [
           "${pkgs.bash}/bin/bash"
           "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/analyze-build-performance.sh --profile"
+          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/monitoring/analyze-build-performance.sh --profile"
         ];
         StartCalendarInterval = [
           {
@@ -94,7 +106,7 @@
         ProgramArguments = [
           "${pkgs.bash}/bin/bash"
           "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/system-health-monitor.sh --alert"
+          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/monitoring/system-health-monitor.sh --alert"
         ];
         StartCalendarInterval = [
           {
