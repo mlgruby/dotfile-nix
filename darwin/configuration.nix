@@ -68,7 +68,40 @@
   # Nix package manager settings
 
   # Enable Nix daemon
-  nix.enable = true;
+  nix = {
+    enable = true;
+    
+    # Nix daemon settings following best practices
+    settings = {
+      # Enable flakes and nix command
+      experimental-features = ["nix-command" "flakes"];
+      
+      # Trusted users for additional rights
+      trusted-users = ["${userConfig.username}" "root"];
+      
+      # Note: auto-optimise-store is disabled as it can corrupt the Nix Store on nix-darwin
+      # Using nix.optimise.automatic instead (configured below)
+      
+      # Build settings for optimal performance
+      max-jobs = "auto"; # Use all available logical cores
+      cores = 0; # Use all available cores for each job
+      
+      # Improve build performance with more substituters
+      substituters = [
+        "https://cache.nixos.org/"
+        "https://nix-community.cachix.org"
+      ];
+      
+      # Trust public keys for binary caches
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
+    };
+    
+    # Store optimization (nix-darwin safe alternative to auto-optimise-store)
+    optimise.automatic = true;
+  };
 
   # Set correct GID for nixbld group
   ids.gids.nixbld = 350;

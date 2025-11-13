@@ -180,7 +180,7 @@
               home = {
                 username = lib.mkForce validatedConfig.username;
                 homeDirectory = lib.mkForce "/Users/${validatedConfig.username}";
-                stateVersion = "23.11";
+                stateVersion = "24.05";
               };
               programs.home-manager.enable = true;
             };

@@ -493,13 +493,83 @@ AWS_SECRET_ACCESS_KEY=<temporary-secret>
 AWS_SESSION_TOKEN=<temporary-token>
 ```
 
+## 🔧 **Custom Aliases & Functions**
+
+The workflows in this guide use custom aliases and functions provided by this dotfiles configuration.
+These are **not** standard AWS CLI commands, but convenient shortcuts defined in your shell configuration.
+
+### **Available Custom Aliases**
+
+#### **Core Workflow Commands**
+
+| Alias | Function | Description |
+|-------|----------|-------------|
+| `awsall` | Complete AWS setup | Login to both SSO profiles + export credentials |
+| `awsprod` | Switch to production | Set production-sso profile |
+| `awsdefault` | Switch to default | Set default-sso profile |
+| `awsp` | Production environment | Switch to production + export credentials |
+| `awsd` | Default environment | Switch to default + export credentials |
+
+#### **SSO Login Commands**
+
+| Alias | Function | Description |
+|-------|----------|-------------|
+| `awsl` | Quick SSO login | Login to both SSO profiles |
+| `awslp` | Login production | Login to production-sso only |
+| `awsld` | Login default | Login to default-sso only |
+| `awslb` | Login both | Login to both profiles |
+
+#### **Credential Management**
+
+| Alias | Function | Description |
+|-------|----------|-------------|
+| `awse` | Export credentials | Export current profile to environment variables |
+| `awsef` | Export to file | Export credentials to ~/.aws/credentials |
+| `awsb` | Export both profiles | Export both profiles to credentials file |
+| `awsc` | Clear credentials | Clear all AWS credentials and sessions |
+
+#### **Utility Commands**
+
+| Alias | Function | Description |
+|-------|----------|-------------|
+| `awsw` | Who am I? | Show current AWS identity |
+| `awsid` | Identity check | Quick `aws sts get-caller-identity` |
+| `awsr` | Show config | Display current AWS configuration |
+| `awsls` | List profiles | Show all available AWS profiles |
+
+### **How to Get These Aliases**
+
+Run the AWS SSO setup script to install the aliases:
+
+```bash
+# Run the setup script
+./scripts/setup/aws-sso.sh
+
+# Or manually source it
+source ./scripts/setup/aws-sso.sh
+```
+
+The script will add the aliases to your shell configuration file (`.bashrc` or `.zshrc`) automatically.
+
+### **Standard AWS CLI Equivalents**
+
+If you prefer using standard AWS CLI commands instead of aliases:
+
+| Alias | Standard AWS CLI Equivalent |
+|-------|----------------------------|
+| `awsall` | `aws sso login --profile default-sso && aws sso login --profile production-sso` |
+| `awsprod` | `export AWS_PROFILE=production-sso` |
+| `awsdefault` | `export AWS_PROFILE=default-sso` |
+| `awsw` | `aws sts get-caller-identity` |
+| `awsl` | `aws sso login --profile default-sso && aws sso login --profile production-sso` |
+
 ## 💡 **Tips & Best Practices**
 
 ### **Recommended Daily Workflow**
 
 1. **Morning**: `awsall` (complete setup)
 2. **Switch contexts**: `awsprod` or `awsdefault` as needed
-3. **Before important operations**: `aws_status` (verify credentials)
+3. **Before important operations**: `awsw` (verify credentials)
 4. **End of day**: No cleanup needed (credentials auto-expire)
 
 ### **For Different Use Cases**
@@ -522,7 +592,7 @@ awsall     # Sets up everything including ~/.aws/credentials
 
 ```bash
 awsp       # Switch to production with full environment setup
-aws_status # Double-check you're in the right account
+awsw       # Double-check you're in the right account
 # Proceed with production operations
 ```
 
