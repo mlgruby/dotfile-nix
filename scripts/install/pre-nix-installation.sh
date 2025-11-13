@@ -205,29 +205,27 @@ fi
 
 # 1.3: Essential CLI Tools
 echo -e "${BLUE}1.3 Installing essential CLI tools...${NC}"
-echo -e "${BLUE}Installing: git, gh (GitHub CLI), tree, stow${NC}"
+echo -e "${BLUE}Installing: git, tree, stow${NC}"
 
 # Install essential tools that we'll need in later phases
-brew install git gh tree stow
+brew install git tree stow
 
 echo -e "${GREEN}✓ Essential tools installed:${NC}"
 echo -e "  • git: $(git --version 2>/dev/null || echo 'not found')"
-echo -e "  • gh: $(gh --version 2>/dev/null | head -1 || echo 'not found')"
 echo -e "  • tree: $(tree --version 2>/dev/null | head -1 || echo 'not found')"
 echo -e "  • stow: $(stow --version 2>/dev/null | head -1 || echo 'not found')"
 
 echo -e "${GREEN}✓ Phase 1 Complete: Bootstrap tools are ready!${NC}"
 
 # ================================================================================================
-# PHASE 2: AUTHENTICATION & DOTFILES SETUP (Now we can use git and gh)
+# PHASE 2: USER CONFIGURATION & DOTFILES SETUP
 # ================================================================================================
-print_phase "2" "AUTHENTICATION & DOTFILES SETUP"
+print_phase "2" "USER CONFIGURATION & DOTFILES SETUP"
 
-echo -e "${BLUE}Phase 2 sets up GitHub authentication and clones your dotfiles:${NC}"
-echo -e "  • GitHub CLI authentication (automated)"
-echo -e "  • SSH key generation and upload"  
-echo -e "  • Clone dotfiles repository"
+echo -e "${BLUE}Phase 2 sets up user configuration and dotfiles:${NC}"
 echo -e "  • User configuration setup"
+echo -e "  • Git configuration"
+echo -e "  • Dotfiles repository setup"
 echo ""
 
 # 2.1: Get user configuration first (before any git operations)
@@ -279,8 +277,7 @@ else
     echo -e "${BLUE}Enter your email:${NC}"
     read -r EMAIL
     
-    echo -e "${BLUE}Enter your GitHub username:${NC}"
-    read -r GITHUB_USERNAME
+    GITHUB_USERNAME="satyasheel"  # Default GitHub username
     
     HOSTNAME=$(hostname)
     echo -e "${BLUE}Using hostname: $HOSTNAME${NC}"
@@ -288,134 +285,17 @@ else
     SKIP_CLONE=false
 fi
 
-# 2.2: GitHub CLI Authentication
-echo -e "${BLUE}2.2 Setting up GitHub authentication...${NC}"
-
-if gh auth status >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ Already authenticated with GitHub CLI${NC}"
-    gh auth status
-else
-    # Check if we're in a piped context (no interactive terminal)
-    if [[ ! -t 0 ]]; then
-        echo -e "${YELLOW}⚠ Cannot authenticate with GitHub CLI in piped mode${NC}"
-        echo -e "${BLUE}GitHub CLI authentication is required for SSH key upload.${NC}"
-        echo -e "${BLUE}After this script completes, please:${NC}"
-        echo -e "  1. Run: ${YELLOW}gh auth login --hostname github.com --git-protocol ssh --web${NC}"
-        echo -e "  2. Upload your SSH key: ${YELLOW}gh ssh-key add ~/.ssh/github.pub${NC}"
-        echo -e "  3. Test connection: ${YELLOW}ssh -T git@github.com${NC}"
-        echo ""
-        echo -e "${BLUE}Continuing without GitHub authentication...${NC}"
-        SKIP_GITHUB_AUTH=true
-    else
-        echo -e "${BLUE}Authenticating with GitHub CLI...${NC}"
-        echo -e "${BLUE}This will open your browser. Please:${NC}"
-        echo -e "  1. Complete GitHub OAuth in browser"
-        echo -e "  2. Choose SSH when prompted for protocol"
-        
-        if gh auth login --hostname github.com --git-protocol ssh --web; then
-            echo -e "${GREEN}✓ GitHub CLI authentication successful${NC}"
-            SKIP_GITHUB_AUTH=false
-        else
-            handle_error "GitHub CLI authentication failed"
-        fi
-    fi
-fi
-
-# 2.3: SSH Key Setup
-echo -e "${BLUE}2.3 Setting up SSH keys...${NC}"
-
-ssh_key_path="$HOME/.ssh/github"
-
-# Check if the specific github key exists
-if [ -f "$ssh_key_path" ] && [ -f "$ssh_key_path.pub" ]; then
-    echo -e "${GREEN}✓ Found existing GitHub SSH key${NC}"
-    echo -e "${BLUE}Do you want to use existing GitHub key? (y/n)${NC}"
-    read -r use_existing
-    
-    if [[ ! $use_existing =~ ^[Yy]$ ]]; then
-        timestamp=$(date +%Y%m%d_%H%M%S)
-        mv "$ssh_key_path" "$ssh_key_path.backup.$timestamp"
-        mv "$ssh_key_path.pub" "$ssh_key_path.pub.backup.$timestamp"
-        echo -e "${GREEN}✓ Backed up existing GitHub keys${NC}"
-        
-        ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
-        echo -e "${GREEN}✓ New SSH key generated${NC}"
-    fi
-else
-    # Check if other SSH keys exist
-    if ls ~/.ssh/*.pub > /dev/null 2>&1; then
-        echo -e "${BLUE}🔍 Found existing SSH keys:${NC}"
-        ls -la ~/.ssh/*.pub
-        echo ""
-        echo -e "${BLUE}Do you want to use one of these existing keys for GitHub? (y/n)${NC}"
-        read -r use_existing_key
-        
-        if [[ $use_existing_key =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}Available SSH keys:${NC}"
-            ls ~/.ssh/*.pub | sed 's/.*\///' | sed 's/\.pub$//' | nl
-            echo ""
-            echo -e "${BLUE}Enter the number of the key you want to use:${NC}"
-            read -r key_number
-            
-            selected_key=$(ls ~/.ssh/*.pub | sed 's/.*\///' | sed 's/\.pub$//' | sed -n "${key_number}p")
-            
-            if [ -n "$selected_key" ] && [ -f "$HOME/.ssh/$selected_key" ]; then
-                echo -e "${BLUE}🔗 Creating symlink to use $selected_key for GitHub...${NC}"
-                ln -sf "$HOME/.ssh/$selected_key" "$ssh_key_path"
-                ln -sf "$HOME/.ssh/$selected_key.pub" "$ssh_key_path.pub"
-                echo -e "${GREEN}✓ Using existing SSH key: $selected_key${NC}"
-            else
-                echo -e "${YELLOW}❌ Invalid selection. Creating new SSH key...${NC}"
-                ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
-                echo -e "${GREEN}✓ New SSH key generated${NC}"
-            fi
-        else
-            echo -e "${BLUE}Creating new SSH key for GitHub...${NC}"
-            ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
-            echo -e "${GREEN}✓ New SSH key generated${NC}"
-        fi
-    else
-        echo -e "${BLUE}No existing SSH keys found. Creating new SSH key for GitHub...${NC}"
-        ssh-keygen -t ed25519 -C "$EMAIL" -f "$ssh_key_path" -N ""
-        echo -e "${GREEN}✓ SSH key generated${NC}"
-    fi
-fi
-
-# Add to ssh-agent and upload to GitHub
-eval "$(ssh-agent -s)"
-ssh-add "$ssh_key_path"
-
-# Upload SSH key via GitHub CLI (skip if not authenticated)
-if [[ "${SKIP_GITHUB_AUTH:-false}" == "true" ]]; then
-    echo -e "${YELLOW}⚠ Skipping SSH key upload (GitHub CLI not authenticated)${NC}"
-    echo -e "${BLUE}Remember to upload your SSH key manually later:${NC}"
-    echo -e "  ${YELLOW}gh ssh-key add $ssh_key_path.pub --title \"$(hostname)-$(date +%Y%m%d)\"${NC}"
-else
-    if gh ssh-key add "$ssh_key_path.pub" --title "$(hostname)-$(date +%Y%m%d)"; then
-        echo -e "${GREEN}✓ SSH key uploaded to GitHub${NC}"
-    else
-        echo -e "${BLUE}SSH key might already exist, continuing...${NC}"
-    fi
-fi
+# 2.2: Git Configuration
+echo -e "${BLUE}2.2 Setting up Git configuration...${NC}"
 
 # Configure git
 git config --global user.name "$FULLNAME"
 git config --global user.email "$EMAIL"
 
-# Setup SSH config
-mkdir -p "$HOME/.ssh"
-if ! grep -q "Host github.com" "$HOME/.ssh/config" 2>/dev/null; then
-    cat >> "$HOME/.ssh/config" << EOF
-Host github.com
-  AddKeysToAgent yes
-  UseKeychain yes
-  IdentityFile $ssh_key_path
-EOF
-    echo -e "${GREEN}✓ SSH config updated${NC}"
-fi
+echo -e "${GREEN}✓ Git configured${NC}"
 
-# 2.4: Clone Dotfiles Repository
-echo -e "${BLUE}2.4 Setting up dotfiles repository...${NC}"
+# 2.3: Setup Dotfiles Repository
+echo -e "${BLUE}2.3 Setting up dotfiles repository...${NC}"
 
 if [ "$SKIP_CLONE" = true ]; then
     echo -e "${GREEN}✓ Using existing dotfiles repository at $DOTFILES_PATH${NC}"
@@ -443,8 +323,7 @@ else
             git clone "$dotfiles_url" "$DOTFILES_PATH"
             echo -e "${GREEN}✓ Dotfiles repository cloned to ~/Documents/$dotfiles_dir${NC}"
         else
-            echo -e "${BLUE}No repository URL provided, creating minimal config...${NC}"
-            mkdir -p "$DOTFILES_PATH"
+            echo -e "${GREEN}✓ Using existing dotfiles directory${NC}"
         fi
     else
         echo -e "${GREEN}✓ Dotfiles repository already exists at ~/Documents/$dotfiles_dir${NC}"
@@ -460,8 +339,8 @@ fi
 
 cd "$DOTFILES_PATH"
 
-# 2.5: Create/Update user-config.nix
-echo -e "${BLUE}2.5 Creating user configuration file...${NC}"
+# 2.4: Create/Update user-config.nix
+echo -e "${BLUE}2.4 Creating user configuration file...${NC}"
 
 cat > user-config.nix << EOF
 {
@@ -475,7 +354,7 @@ cat > user-config.nix << EOF
 EOF
 
 echo -e "${GREEN}✓ User configuration saved to user-config.nix${NC}"
-echo -e "${GREEN}✓ Phase 2 Complete: Authentication and dotfiles ready!${NC}"
+echo -e "${GREEN}✓ Phase 2 Complete: User configuration and dotfiles ready!${NC}"
 
 # ================================================================================================
 # PHASE 3: NIX INSTALLATION & SYSTEM SETUP
@@ -619,11 +498,11 @@ else
     echo -e "${YELLOW}⚠ Nix test failed, but installation may still be successful${NC}"
 fi
 
-# Test SSH to GitHub
-if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
-    echo -e "${GREEN}✓ GitHub SSH connection working${NC}"
+# Test git configuration
+if git config --global user.name >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ Git configuration working${NC}"
 else
-    echo -e "${YELLOW}⚠ GitHub SSH connection test inconclusive (this is often normal)${NC}"
+    echo -e "${YELLOW}⚠ Git configuration may need adjustment${NC}"
 fi
 
 echo -e "${GREEN}✓ Phase 4 Complete: Setup finished!${NC}"
@@ -638,34 +517,16 @@ echo ""
 echo -e "${BLUE}What was installed:${NC}"
 echo -e "  ✓ Xcode Command Line Tools"
 echo -e "  ✓ Homebrew package manager"
-echo -e "  ✓ Essential CLI tools (git, gh, tree, stow)"
-if [[ "${SKIP_GITHUB_AUTH:-false}" == "true" ]]; then
-    echo -e "  ⚠ GitHub CLI authentication (skipped - requires manual setup)"
-    echo -e "  ⚠ SSH key upload (skipped - requires manual upload)"
-else
-    echo -e "  ✓ GitHub CLI authentication"
-    echo -e "  ✓ SSH keys generated and uploaded"
-fi
+echo -e "  ✓ Essential CLI tools (git, tree, stow)"
+echo -e "  ✓ Git configuration"
 echo -e "  ✓ Nix package manager"
 echo -e "  ✓ nix-darwin system configuration"
 echo -e "  ✓ Configuration symlinks"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
-if [[ "${SKIP_GITHUB_AUTH:-false}" == "true" ]]; then
-    echo -e "  1. ${YELLOW}Authenticate with GitHub CLI:${NC}"
-    echo -e "     ${YELLOW}gh auth login --hostname github.com --git-protocol ssh --web${NC}"
-    echo -e "  2. ${YELLOW}Upload your SSH key:${NC}"
-    echo -e "     ${YELLOW}gh ssh-key add ~/.ssh/github.pub --title \"$(hostname)-$(date +%Y%m%d)\"${NC}"
-    echo -e "  3. ${YELLOW}Test SSH connection:${NC}"
-    echo -e "     ${YELLOW}ssh -T git@github.com${NC}"
-    echo -e "  4. ${YELLOW}Restart your terminal${NC} to load all changes"
-    echo -e "  5. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
-    echo -e "  6. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
-else
-    echo -e "  1. ${YELLOW}Restart your terminal${NC} to load all changes"
-    echo -e "  2. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
-    echo -e "  3. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
-fi
+echo -e "  1. ${YELLOW}Restart your terminal${NC} to load all changes"
+echo -e "  2. Run: ${YELLOW}cd $DOTFILES_PATH && sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
+echo -e "  3. Customize your configuration in ${YELLOW}$DOTFILES_PATH/${NC}"
 echo ""
 echo -e "${BLUE}Useful commands:${NC}"
 echo -e "  • Update system: ${YELLOW}sudo darwin-rebuild switch --flake .#$HOSTNAME${NC}"
