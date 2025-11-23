@@ -72,8 +72,3 @@ bindings = [
 # Generous scroll history with faster multiplier
 history = 10000
 multiplier = 3
-
-# Auto-start with tmux session
-[terminal.shell]
-program = "zsh"
-args = ["-l", "-c", "tmux new-session -A -s main"]  # Auto-attach to 'main' session

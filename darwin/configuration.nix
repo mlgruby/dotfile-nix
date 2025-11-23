@@ -137,6 +137,13 @@
     pkgs.zlib # Compression
   ];
 
+  # Networking Configuration
+  networking = {
+    hostName = userConfig.hostname;
+    computerName = userConfig.hostname;
+    localHostName = userConfig.hostname;
+  };
+
   # Application Management & System Configuration
   # Creates aliases in /Applications/Nix Apps for GUI applications
   # This makes apps appear in Spotlight and Finder
