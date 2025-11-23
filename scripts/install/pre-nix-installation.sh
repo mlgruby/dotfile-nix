@@ -371,20 +371,40 @@ echo ""
 echo -e "${BLUE}3.1 Installing Nix package manager...${NC}"
 
 if ! command_exists nix; then
-    echo -e "${BLUE}Installing Nix (this will modify shell configurations)...${NC}"
-    
-    # Backup shell configs
-    for file in ~/.zshrc ~/.bashrc; do
-        if [ -f "$file" ]; then
-            cp "$file" "$file.backup-before-nix"
+    # Check if /nix exists - if so, try to source it
+    if [ -d "/nix" ]; then
+        echo -e "${YELLOW}⚠ Nix command not found, but /nix directory exists.${NC}"
+        echo -e "${BLUE}Attempting to source Nix profile...${NC}"
+        
+        if [ -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+            . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+        elif [ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+            . "$HOME/.nix-profile/etc/profile.d/nix.sh"
         fi
-    done
-    
-    sh <(curl -L https://nixos.org/nix/install)
-    
-    echo -e "${GREEN}✓ Nix installed${NC}"
-    echo -e "${BLUE}Please restart your terminal and run this script again to continue${NC}"
-    exit 0
+    fi
+fi
+
+if ! command_exists nix; then
+    if [ -d "/nix" ]; then
+        echo -e "${YELLOW}⚠ /nix directory exists but could not activate nix command.${NC}"
+        echo -e "${YELLOW}Assuming Nix is installed but not in PATH. Skipping installation to avoid conflicts.${NC}"
+        echo -e "${GREEN}✓ Nix assumed installed (found /nix)${NC}"
+    else
+        echo -e "${BLUE}Installing Nix (this will modify shell configurations)...${NC}"
+        
+        # Backup shell configs
+        for file in ~/.zshrc ~/.bashrc; do
+            if [ -f "$file" ]; then
+                cp "$file" "$file.backup-before-nix"
+            fi
+        done
+        
+        sh <(curl -L https://nixos.org/nix/install)
+        
+        echo -e "${GREEN}✓ Nix installed${NC}"
+        echo -e "${BLUE}Please restart your terminal and run this script again to continue${NC}"
+        exit 0
+    fi
 else
     echo -e "${GREEN}✓ Nix already installed${NC}"
 fi
@@ -440,13 +460,29 @@ if [ ! -f "flake.nix" ]; then
 fi
 
 # Install nix-darwin
-export NIX_CONFIG="experimental-features = nix-command flakes"
-echo -e "${BLUE}Running nix-darwin installation (this may take several minutes)...${NC}"
+if ! command_exists darwin-rebuild; then
+    export NIX_CONFIG="experimental-features = nix-command flakes"
+    echo -e "${BLUE}Running nix-darwin installation (this may take several minutes)...${NC}"
 
-if sudo nix run nix-darwin -- switch --flake ".#$HOSTNAME"; then
-    echo -e "${GREEN}✓ nix-darwin installed successfully${NC}"
+    # Handle /etc/bashrc conflict
+    if [ -f "/etc/bashrc" ]; then
+        echo -e "${YELLOW}⚠ Found existing /etc/bashrc. Backing up to /etc/bashrc.before-nix-darwin...${NC}"
+        sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
+    fi
+
+    # Ensure /etc/synthetic.conf exists
+    if [ ! -f "/etc/synthetic.conf" ]; then
+        echo -e "${BLUE}Creating empty /etc/synthetic.conf...${NC}"
+        sudo touch /etc/synthetic.conf
+    fi
+
+    if sudo nix run --extra-experimental-features 'nix-command flakes' nix-darwin -- switch --flake ".#$HOSTNAME"; then
+        echo -e "${GREEN}✓ nix-darwin installed successfully${NC}"
+    else
+        handle_error "nix-darwin installation failed"
+    fi
 else
-    handle_error "nix-darwin installation failed"
+    echo -e "${GREEN}✓ nix-darwin already installed${NC}"
 fi
 
 echo -e "${GREEN}✓ Phase 3 Complete: Nix system is configured!${NC}"
@@ -485,8 +521,19 @@ fi
 # 4.2: System Services
 echo -e "${BLUE}4.2 Starting system services...${NC}"
 
-sudo launchctl kickstart -k system/org.nixos.nix-daemon
-echo -e "${GREEN}✓ Nix daemon restarted${NC}"
+if sudo launchctl list | grep -q "org.nixos.nix-daemon"; then
+    echo -e "${BLUE}Restarting Nix daemon...${NC}"
+    sudo launchctl kickstart -k system/org.nixos.nix-daemon || true
+    echo -e "${GREEN}✓ Nix daemon restarted${NC}"
+else
+    echo -e "${YELLOW}⚠ Nix daemon not running, attempting to load...${NC}"
+    if [ -f "/Library/LaunchDaemons/org.nixos.nix-daemon.plist" ]; then
+        sudo launchctl load -w /Library/LaunchDaemons/org.nixos.nix-daemon.plist || true
+        echo -e "${GREEN}✓ Nix daemon loaded${NC}"
+    else
+        echo -e "${YELLOW}⚠ Nix daemon plist not found, skipping service start${NC}"
+    fi
+fi
 
 # 4.3: Final Verification & Information
 echo -e "${BLUE}4.3 Final verification...${NC}"

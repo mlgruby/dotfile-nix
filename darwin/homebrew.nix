@@ -170,12 +170,9 @@
     # GUI Applications (Casks)
     casks = [
       # Development Tools - JDKs
-      "temurin@8" # Eclipse Temurin JDK 8 LTS
+      # "temurin@8" # Eclipse Temurin JDK 8 LTS
       "temurin@11" # Eclipse Temurin JDK 11 LTS
       "temurin@17" # Eclipse Temurin JDK 17 LTS
-
-      # Cloud Storage
-      "google-drive" # Google Drive client
 
       # Communication
       "discord" # Move from configuration.nix
@@ -183,7 +180,7 @@
       # Development Tools (Other)
       "cursor"
       "docker-desktop" # Docker Desktop for macOS
-      "google-cloud-sdk" # Google Cloud SDK
+      # "google-cloud-sdk" # Google Cloud SDK
       "jetbrains-toolbox" # JetBrains IDE manager
       "postman" # API testing tool
       "visual-studio-code" # Code editor
@@ -237,7 +234,6 @@
 
     # Mac App Store apps
     masApps = {
-      "Amazon Kindle" = 302584613; # Kindle app from Mac App Store
     };
   };
 }
