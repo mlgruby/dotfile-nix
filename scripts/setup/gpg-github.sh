@@ -177,7 +177,7 @@ upload_gpg_key() {
     echo "$PUBLIC_KEY" > "$TEMP_KEY_FILE"
     
     # Upload to GitHub
-    if gh api user/gpg_keys --method POST --input "$TEMP_KEY_FILE" --field name="Auto-generated GPG key" > /dev/null; then
+    if gh api user/gpg_keys --method POST -F armored_public_key=@"$TEMP_KEY_FILE" -f name="Auto-generated GPG key" > /dev/null; then
         log_success "GPG key uploaded to GitHub successfully"
     else
         log_error "Failed to upload GPG key to GitHub"
