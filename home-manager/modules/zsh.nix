@@ -70,8 +70,8 @@
         # Python environment
         PYTHON_CONFIGURE_OPTS = "--enable-framework";
         UV_PYTHON_PREFERENCE = "system";
-        # Add Python 3.12 generic symlinks to PATH
-        PATH = "/opt/homebrew/opt/python@3.12/libexec/bin:$PATH";
+        # Add Python 3.12 generic symlinks and TeX binaries to PATH
+        PATH = "/Library/TeX/texbin:/opt/homebrew/opt/python@3.12/libexec/bin:$PATH";
       };
 
       initContent = ''
