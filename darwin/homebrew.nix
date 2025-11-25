@@ -138,6 +138,8 @@
       # lazygit - MOVED to Home Manager programs.lazygit (includes package + config)
       "node" # Node.js (includes npm and npx)
       "shellcheck" # Shell script analysis tool
+      "yamlresume" # Resume editor
+      "tectonic" # PDFLaTeX
 
       # Text Processing and Search
       # bat - MOVED to Home Manager programs.bat (includes package + config)
