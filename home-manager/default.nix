@@ -88,6 +88,7 @@
     ./modules/xdg.nix
     ./modules/fonts.nix
     ./neovim.nix
+    ./modules/lazywarden.nix
   ];
 
   home = {
