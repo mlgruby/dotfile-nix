@@ -110,6 +110,12 @@
         identityFile = "~/.ssh/nuc_homelab_id_ed25519";
       };
       
+      "lazywarden" = {
+        hostname = "192.168.10.28";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
       # Add more host configurations as needed
       # Example for development servers:
       # "dev.example.com" = {

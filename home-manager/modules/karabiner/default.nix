@@ -99,14 +99,14 @@
                 ];
               }
               {
-                description = "Open PyCharm with Command + Shift + P";
+                description = "Open PyCharm with Command + Option + P";
                 manipulators = [
                   {
                     type = "basic";
                     from = {
                       key_code = "p";
                       modifiers = {
-                        mandatory = ["command" "shift"];
+                        mandatory = ["command" "option"];
                         optional = ["any"];
                       };
                     };
