@@ -100,6 +100,8 @@
     # Configure taps
     taps = [
       "warrensbox/tap" # For tfswitch
+      "localstack/tap" # For localstack-cli
+      "nguyenphutrong/tap" # For quotio
     ];
 
     onActivation = {
@@ -124,6 +126,7 @@
       # Python Development Environment
       # System-wide Python 3.12 and uv for project management
       "uv" # Python package and version manager
+      "poetry" # Python dependency management and packaging tool
       "python@3.12" # System-wide Python 3.12
 
       # Development Tools
@@ -136,10 +139,12 @@
       # gh - MOVED to Home Manager programs.gh (includes package + config)
       "git-lfs" # Git large file storage
       # lazygit - MOVED to Home Manager programs.lazygit (includes package + config)
+      "go" # Go programming language
+      "rustup" # Rust toolchain installer
       "node" # Node.js (includes npm and npx)
       "shellcheck" # Shell script analysis tool
       "yamlresume" # Resume editor
-      "tectonic" # PDFLaTeX
+      # "tectonic" # PDFLaTeX
 
       # Text Processing and Search
       # bat - MOVED to Home Manager programs.bat (includes package + config)
@@ -164,6 +169,7 @@
 
       # Cloud and Infrastructure Tools
       "awscli" # AWS CLI
+      "localstack/tap/localstack-cli" # LocalStack CLI for local AWS development
       "terraform-docs" # Terraform documentation
       "tflint" # Terraform linter
       "warrensbox/tap/tfswitch" # Terraform version manager
@@ -177,10 +183,15 @@
       "temurin@17" # Eclipse Temurin JDK 17 LTS
 
       # Communication
-      "discord" # Move from configuration.nix
+      "slack" # Slack
+      "discord" # Discord
+
+      # Office tools
+      "microsoft-office" # Microsoft Office
 
       # Development Tools (Other)
       "cursor"
+      "antigravity"
       "docker-desktop" # Docker Desktop for macOS
       # "google-cloud-sdk" # Google Cloud SDK
       "jetbrains-toolbox" # JetBrains IDE manager
@@ -197,11 +208,13 @@
       "bitwarden" # Password manager
       "brave-browser" # Privacy-focused browser
       "google-chrome" # Google Chrome browser
-      "chatgpt" # ChatGPT AI desktop app
+      # "chatgpt" # ChatGPT AI desktop app
       "claude" # Claude AI desktop app
       "lm-studio" # Local language model runner
       "insync" # Google Drive client
       "obsidian" # Knowledge base and note-taking
+      "quotio" # AI subscription & quota tracker
+
       "spotify" # Music streaming
       "whatsapp" # Messaging
 
@@ -225,6 +238,9 @@
       "font-ubuntu-mono-nerd-font" # Ubuntu monospace
       "font-dejavu-sans-mono-nerd-font" # DejaVu monospace
       "font-inconsolata-nerd-font" # Google Inconsolata
+
+      # Cloud tools/vpn
+      "tailscale-app" # Tailscale
     ];
 
     # Global options

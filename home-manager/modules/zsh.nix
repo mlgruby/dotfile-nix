@@ -54,7 +54,11 @@
 # - History sharing on
 # - Auto-completion enabled
 # - Syntax highlighting active
-{...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   programs = {
     zsh = {
       enable = true;
@@ -70,8 +74,11 @@
         # Python environment
         PYTHON_CONFIGURE_OPTS = "--enable-framework";
         UV_PYTHON_PREFERENCE = "system";
-        # Add Python 3.12 generic symlinks and TeX binaries to PATH
-        PATH = "/Library/TeX/texbin:/opt/homebrew/opt/python@3.12/libexec/bin:$PATH";
+        # Rust environment - override Nix's read-only defaults
+        CARGO_HOME = "$HOME/.cargo";
+        RUSTUP_HOME = "$HOME/.rustup";
+        # Add Rust, Python 3.12 generic symlinks and TeX binaries to PATH
+        PATH = "$HOME/.docker/bin:$HOME/.cargo/bin:/Library/TeX/texbin:/opt/homebrew/opt/python@3.12/libexec/bin:$HOME/bin:$PATH";
       };
 
       initContent = ''
@@ -79,9 +86,19 @@
         # System-wide Python 3.12 via Homebrew
         # Project-specific Python versions via uv
         # UV environment initialization
-        if command -v uv >/dev/null 2>&1; then
+        if command -v uv > /dev/null 2>&1; then
           # UV completions
           eval "$(uv generate-shell-completion zsh)"
+        fi
+
+        # Tmux Auto-start
+        # Auto-attach to existing session or create new one
+        if command -v tmux > /dev/null 2>&1; then
+          # Only auto-start if not already in tmux and not in VSCode terminal
+          if [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ]; then
+            # Try to attach to existing session, or create new one
+            tmux attach-session -t main 2>/dev/null || tmux new-session -s main
+          fi
         fi
 
         # FZF Integration Widgets
@@ -192,6 +209,18 @@
       enableZshIntegration = true;
     };
   };
+
+  # Rust toolchain initialization
+  # Automatically runs rustup-init on first install
+  home.activation.installRust = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if [ ! -d "$HOME/.rustup" ]; then
+      $DRY_RUN_CMD echo "🦀 Initializing Rust toolchain..."
+      $DRY_RUN_CMD CARGO_HOME="$HOME/.cargo" RUSTUP_HOME="$HOME/.rustup" ${pkgs.rustup}/bin/rustup-init -y --no-modify-path
+      $DRY_RUN_CMD echo "✅ Rust toolchain installed successfully!"
+    else
+      $DRY_RUN_CMD echo "✨ Rust toolchain is already installed"
+    fi
+  '';
 
   # Disable Nixpkgs release check for compatibility
   home.enableNixpkgsReleaseCheck = false;

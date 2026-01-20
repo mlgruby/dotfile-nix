@@ -116,6 +116,42 @@
         identityFile = "~/.ssh/nuc_homelab_id_ed25519";
       };
       
+      "ha" = {
+        hostname = "192.168.10.24";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "linkwarden" = {
+        hostname = "192.168.10.29";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "metric-exporter" = {
+        hostname = "192.168.10.32";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "prometheus" = {
+        hostname = "192.168.10.17";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "warracker" = {
+        hostname = "192.168.10.19";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
+      "netspeed" = {
+        hostname = "192.168.10.25";
+        user = "root";
+        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
+      };
+      
       # Add more host configurations as needed
       # Example for development servers:
       # "dev.example.com" = {
