@@ -1,8 +1,8 @@
 {
-  username = "satya";
+  username = "satyasheel";
   fullName = "Satyasheel Satyasheel";
-  email = "satyasheel@lightricks.com";
+  email = "satyasheel@vortexa.com";
   githubUsername = "mlgruby";
   hostname = "satya-mbp";
-  signingKey = "A4079973043B6454"; # Will be set up later if needed
+  signingKey = ""; # Will be set up later if needed
 }

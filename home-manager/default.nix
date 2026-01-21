@@ -71,6 +71,7 @@
     ./modules/git.nix
     ./modules/github.nix
     ./modules/gpg.nix
+    ./modules/claude-code.nix
     ./modules/programs/btop.nix
     ./modules/programs/eza.nix
     ./modules/programs/bat.nix
@@ -111,7 +112,7 @@
   programs = {
     zsh = {
       enable = true;
-      shellAliases = import ./aliases.nix {inherit pkgs config userConfig;};
+      shellAliases = import ./aliases {inherit pkgs config userConfig;};
     };
 
     home-manager.enable = true;
@@ -158,5 +159,29 @@
     # Disable unsupported or conflicting targets
     vim.enable = false;              # DISABLED: Using Neovim instead
     firefox.enable = false;          # DISABLED: Not our primary browser
+  };
+
+  # Install shell helper scripts
+  home.file = {
+    ".config/home-manager/scripts/git-fuzzy-checkout.sh" = {
+      source = ./scripts/git-fuzzy-checkout.sh;
+      executable = true;
+    };
+    ".config/home-manager/scripts/git-fuzzy-log.sh" = {
+      source = ./scripts/git-fuzzy-log.sh;
+      executable = true;
+    };
+    ".config/home-manager/scripts/git-fuzzy-stash.sh" = {
+      source = ./scripts/git-fuzzy-stash.sh;
+      executable = true;
+    };
+    ".config/home-manager/scripts/system-rollback.sh" = {
+      source = ./scripts/system-rollback.sh;
+      executable = true;
+    };
+    ".config/home-manager/scripts/alias-cheatsheet.sh" = {
+      source = ./scripts/alias-cheatsheet.sh;
+      executable = true;
+    };
   };
 }

@@ -16,55 +16,59 @@
 # - Integration with existing aliases
 #
 # Accounts:
-# - Lightricks Production (384822754266)
-# - Lightricks Dev (588736812464)
-{pkgs, ...}: {
+# - Vortexa Production (501857513371)
+# - Vortexa Development (045251666112)
+{pkgs, ...}: let
+  defaults = import ../config.nix;
+  inherit (defaults.aws) region ssoStartUrl ssoRoleName;
+  inherit (defaults.aws.accounts) production staging;
+in {
   # AWS SSO Configuration
   home.file.".aws/config".text = ''
     # Traditional profiles for Java/Scala applications (no SSO properties)
     [default]
-    region = us-west-2
+    region = ${region}
     output = json
 
     [profile production]
-    region = us-west-2
+    region = ${region}
     output = json
 
     [profile staging]
-    region = us-west-2
+    region = ${region}
     output = json
 
     [profile prod]
-    region = us-west-2
+    region = ${region}
     output = json
 
     [profile dev]
-    region = us-west-2
+    region = ${region}
     output = json
 
     # SSO profiles for CLI usage
     [profile production-sso]
-    sso_start_url = https://d-90670ca891.awsapps.com/start
-    sso_region = us-east-1
-    sso_account_id = 384822754266
-    sso_role_name = DataPlatformTeam
-    region = us-west-2
+    sso_start_url = ${ssoStartUrl}
+    sso_region = ${region}
+    sso_account_id = ${production}
+    sso_role_name = ${ssoRoleName}
+    region = ${region}
     output = json
 
     [profile staging-sso]
-    sso_start_url = https://d-90670ca891.awsapps.com/start
-    sso_region = us-east-1
-    sso_account_id = 588736812464
-    sso_role_name = AdministratorAccess
-    region = us-west-2
+    sso_start_url = ${ssoStartUrl}
+    sso_region = ${region}
+    sso_account_id = ${staging}
+    sso_role_name = ${ssoRoleName}
+    region = ${region}
     output = json
 
     [profile default-sso]
-    sso_start_url = https://d-90670ca891.awsapps.com/start
-    sso_region = us-east-1
-    sso_account_id = 588736812464
-    sso_role_name = AdministratorAccess
-    region = us-west-2
+    sso_start_url = ${ssoStartUrl}
+    sso_region = ${region}
+    sso_account_id = ${staging}
+    sso_role_name = ${ssoRoleName}
+    region = ${region}
     output = json
   '';
 
@@ -79,8 +83,8 @@
             fi
 
             # Set AWS default regions
-            export AWS_DEFAULT_REGION="us-west-2"
-            export AWS_REGION="us-west-2"
+            export AWS_DEFAULT_REGION="${region}"
+            export AWS_REGION="${region}"
 
             # Lazy load AWS SSO functions to speed up shell startup
             _aws_sso_loaded=false
@@ -90,6 +94,16 @@
               _aws_sso_loaded=true
 
               # AWS SSO Helper Functions - Optimized & Streamlined
+
+              # Helper: Parse credentials from env format output
+              # Usage: eval "$(_parse_creds "$creds_env" "varprefix")"
+              # Sets: varprefix_access, varprefix_secret, varprefix_token
+              _parse_creds() {
+                local creds="$1" prefix="$2"
+                echo "''${prefix}_access=$(echo "$creds" | grep 'AWS_ACCESS_KEY_ID=' | cut -d'=' -f2-)"
+                echo "''${prefix}_secret=$(echo "$creds" | grep 'AWS_SECRET_ACCESS_KEY=' | cut -d'=' -f2-)"
+                echo "''${prefix}_token=$(echo "$creds" | grep 'AWS_SESSION_TOKEN=' | cut -d'=' -f2-)"
+              }
 
               # Helper: Test AWS credentials and return account info
               _aws_test_creds() {
@@ -204,9 +218,9 @@
                   return 1
                 fi
 
-                local access_key=$(echo "$temp_creds_env" | grep "AWS_ACCESS_KEY_ID=" | cut -d'=' -f2-)
-                local secret_key=$(echo "$temp_creds_env" | grep "AWS_SECRET_ACCESS_KEY=" | cut -d'=' -f2-)
-                local session_token=$(echo "$temp_creds_env" | grep "AWS_SESSION_TOKEN=" | cut -d'=' -f2-)
+                # Parse credentials using helper
+                eval "$(_parse_creds "$temp_creds_env" "cred")"
+                local access_key="$cred_access" secret_key="$cred_secret" session_token="$cred_token"
 
                 [ -z "$access_key" ] || [ -z "$secret_key" ] || [ -z "$session_token" ] && {
                   echo "❌ Failed to parse credentials"; return 1;
@@ -247,14 +261,9 @@
                 [ -z "$prod_creds" ] && { echo "❌ Failed to get production credentials"; return 1; }
                 [ -z "$default_creds" ] && { echo "❌ Failed to get default credentials"; return 1; }
 
-                # Parse credentials
-                local prod_access=$(echo "$prod_creds" | grep "AWS_ACCESS_KEY_ID=" | cut -d'=' -f2-)
-                local prod_secret=$(echo "$prod_creds" | grep "AWS_SECRET_ACCESS_KEY=" | cut -d'=' -f2-)
-                local prod_token=$(echo "$prod_creds" | grep "AWS_SESSION_TOKEN=" | cut -d'=' -f2-)
-
-                local default_access=$(echo "$default_creds" | grep "AWS_ACCESS_KEY_ID=" | cut -d'=' -f2-)
-                local default_secret=$(echo "$default_creds" | grep "AWS_SECRET_ACCESS_KEY=" | cut -d'=' -f2-)
-                local default_token=$(echo "$default_creds" | grep "AWS_SESSION_TOKEN=" | cut -d'=' -f2-)
+                # Parse credentials using helper
+                eval "$(_parse_creds "$prod_creds" "prod")"
+                eval "$(_parse_creds "$default_creds" "default")"
 
                 # Write both profiles
                 mkdir -p "$HOME/.aws"
@@ -285,7 +294,7 @@
               aws_status() {
                 echo "📊 AWS SSO Configuration Status:"
                 echo "  Current Profile: ''${AWS_PROFILE:-none}"
-                echo "  Region: ''${AWS_DEFAULT_REGION:-us-west-2}"
+                echo "  Region: ''${AWS_DEFAULT_REGION:-eu-west-1}"
                 [ -n "$AWS_ACCESS_KEY_ID" ] && echo "  Access Key: Set (***''${AWS_ACCESS_KEY_ID: -4})"
 
                 if [ -n "$AWS_PROFILE" ] && local account_id=$(_aws_test_creds "$AWS_PROFILE"); then
@@ -360,8 +369,8 @@
 
     sessionVariables = {
       # AWS defaults
-      AWS_DEFAULT_REGION = "us-west-2";
-      AWS_REGION = "us-west-2";
+      AWS_DEFAULT_REGION = region;
+      AWS_REGION = region;
     };
   };
 }

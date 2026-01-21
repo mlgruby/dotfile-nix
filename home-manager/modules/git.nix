@@ -26,42 +26,47 @@ in {
   programs.git = {
     enable = true;
 
-    # User Identity
-    # Used for commit authorship
-    userName = fullName;
-    userEmail = email;
+    # Git Configuration using new settings structure
+    # All configuration now under 'settings' namespace
+    settings = {
+      # User Identity
+      user = {
+        name = fullName;
+        email = email;
+      } // (if signingKey != "" then {
+        signingkey = signingKey; # GPG key ID for signing commits
+      } else {});
 
-    # Git Core Configuration
-    # Global settings for all repositories
-    extraConfig = {
+      # Built-in Git Aliases
+      alias = {
+        st = "status";   # Quick status check
+        ci = "commit";   # Shorter commit command
+        br = "branch";   # Branch management
+        co = "checkout"; # Branch switching
+        df = "diff";     # Change viewing
+      };
+
       # Branch Configuration
       init.defaultBranch = "develop"; # Default for new repositories
+
       # Pull/Push Behavior
-      pull.rebase = true; # Avoid merge commits on pull
-      push.autoSetupRemote = true; # Auto-configure upstream
+      pull.rebase = true;           # Avoid merge commits on pull
+      push.autoSetupRemote = true;  # Auto-configure upstream
+
       # Editor and File Handling
       core = {
-        editor = "vim"; # Default editor for commits
-        autocrlf = "input"; # Line ending management
+        editor = "vim";        # Default editor for commits
+        autocrlf = "input";    # Line ending management
       };
+
       # UI Configuration
       color.ui = true; # Colorized output
-      # GPG Configuration
-      commit.gpgsign = true; # Automatically sign commits
-      gpg.program = "gpg"; # GPG program to use
-    } // (if signingKey != "" then {
-      user.signingkey = signingKey; # GPG key ID for signing commits
-    } else {});
 
-    # Built-in Git Aliases
-    # Shorter versions of common commands
-    aliases = {
-      st = "status"; # Quick status check
-      ci = "commit"; # Shorter commit command
-      br = "branch"; # Branch management
-      co = "checkout"; # Branch switching
-      df = "diff"; # Change viewing
-    };
+      # GPG Configuration (only enabled if signingKey is set)
+      gpg.program = "gpg";   # GPG program to use
+    } // (if signingKey != "" then {
+      commit.gpgsign = true; # Automatically sign commits
+    } else {});
 
     # Global Ignores
     # Files to ignore in all repositories

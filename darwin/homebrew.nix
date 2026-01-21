@@ -192,6 +192,7 @@
       # Development Tools (Other)
       "cursor"
       "antigravity"
+      "claude-code" # Claude Code CLI tool
       "docker-desktop" # Docker Desktop for macOS
       # "google-cloud-sdk" # Google Cloud SDK
       "jetbrains-toolbox" # JetBrains IDE manager
