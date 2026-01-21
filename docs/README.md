@@ -22,17 +22,17 @@ Follow this sequence to master your dotfiles configuration:
 - **[Configuration Basics](guides/configuration-basics.md)** - How to modify settings
 - **[Package Management](guides/package-management.md)** - Adding/removing software
 
-### Level 2: Customization  
+### Level 2: Customization
 
 - **[Personalizing Your Setup](guides/personalization.md)** - Themes, fonts, shortcuts
-- **[Development Environment](guides/development-setup.md)** - Programming tools
+- **[Development Environment](development/environment-templates.md)** - Programming tools
 - **[Terminal Mastery](guides/terminal-setup.md)** - Shell, aliases, productivity
 
 ### Level 3: Advanced Topics
 
-- **[Performance Optimization](guides/performance.md)** - Speed up your system
-- **[System Monitoring](guides/monitoring.md)** - Health checks and maintenance
-- **[Security & Secrets](guides/security.md)** - Managing sensitive data
+- **[Performance Optimization](performance/rebuild-optimization.md)** - Speed up your system
+- **[System Monitoring](monitoring/system-health.md)** - Health checks and maintenance
+- **[Alias System](../home-manager/aliases/README.md)** - Complete alias reference (~220 total)
 
 ## 🎯 By Use Case
 
@@ -58,8 +58,8 @@ Start Here → Personalization → Themes → Advanced Customization
 
 - [Themes & Styling](customization/themes.md)
 - [Custom Paths & Directories](customization/paths.md)
-- [Keyboard Shortcuts](customization/shortcuts.md)
-- [Window Management](customization/window-management.md)
+- [Alias System](../home-manager/aliases/README.md) - Shell shortcuts and workflows
+- [Scripts](../home-manager/scripts/README.md) - Helper scripts
 
 ### ⚡ I Want Performance
 
@@ -69,7 +69,7 @@ Start Here → System Overview → Performance → Monitoring
 
 - [Rebuild Optimization](performance/rebuild-optimization.md)
 - [System Health Monitoring](monitoring/system-health.md)
-- [Resource Management](performance/resource-management.md)
+- [Refactoring Analysis](../REFACTORING_ANALYSIS.md) - Code optimization opportunities
 
 ### 🔧 I Want to Understand How It Works
 
@@ -78,24 +78,30 @@ Start Here → Architecture → Configuration → Advanced Topics
 ```
 
 - [System Architecture](technical/architecture.md)
-- [Nix Darwin Concepts](technical/nix-concepts.md)
-- [Home Manager Deep Dive](technical/home-manager.md)
 - [Troubleshooting](technical/troubleshooting.md)
+- [Alias System Improvements](../home-manager/aliases/IMPROVEMENTS.md) - How aliases evolved
 
 ## 📚 Reference Documentation
 
+### Quick Access
+
+- **[Alias System](../home-manager/aliases/README.md)** - Complete alias reference (~220 total)
+- **[Scripts Guide](../home-manager/scripts/README.md)** - Helper scripts documentation
+- **[Quick Start](../SCRIPTS_QUICKSTART.md)** - Get started with aliases in 5 minutes
+- **[Refactoring Analysis](../REFACTORING_ANALYSIS.md)** - Code improvement opportunities
+
 ### Configuration Files
 
-- **[flake.nix](reference/flake-structure.md)** - Main system definition
-- **[user-config.nix](reference/user-config.md)** - Personal settings
-- **[Darwin Modules](reference/darwin-modules.md)** - System-level config
-- **[Home Manager Modules](reference/home-manager-modules.md)** - User config
+- **[flake.nix](../flake.nix)** - Main system definition
+- **[user-config.nix](../user-config.nix)** - Personal settings template
+- **[Darwin Configuration](../darwin/configuration.nix)** - System-level config
+- **[Home Manager](../home-manager/default.nix)** - User environment config
 
-### Tools & Commands  
+### Tools & Commands
 
-- **[Aliases Reference](reference/aliases.md)** - All available shortcuts
-- **[Scripts Reference](reference/scripts.md)** - Automation tools
-- **[Health Commands](reference/health-commands.md)** - System monitoring
+- **[Alias Discovery](#alias-discovery)** - Find and learn aliases
+- **[Interactive Scripts](#interactive-scripts)** - FZF-powered helpers
+- **[Workflow Shortcuts](#workflow-shortcuts)** - Quick git/docker/k8s operations
 
 ### Advanced Topics
 
@@ -103,19 +109,51 @@ Start Here → Architecture → Configuration → Advanced Topics
 - **[NUR Integration Analysis](advanced/nur-integration-analysis.md)**
 - **[Secrets Management](advanced/secrets-management-analysis.md)**
 
+### Alias Discovery
+
+Learn your aliases interactively:
+
+```bash
+alias-quick         # Quick reference (most-used)
+alias-find          # Interactive fuzzy search
+alias-help git      # Git aliases only
+alias-search docker # Search by keyword
+```
+
+See: [Alias System README](../home-manager/aliases/README.md) | [Quick Start](../SCRIPTS_QUICKSTART.md)
+
+### Interactive Scripts
+
+FZF-powered helpers:
+
+```bash
+gcb                 # Checkout branch with preview
+fshow               # Browse commits with diffs
+fstash              # Apply stash interactively
+rollback            # System rollback
+```
+
+See: [Scripts README](../home-manager/scripts/README.md)
+
+### Workflow Shortcuts
+
+Multi-step operations in one command:
+
+```bash
+quickcommit "msg"   # Stage + commit
+quickpush "msg"     # Stage + commit + push
+quickamend          # Stage + amend
+```
+
+See: [Workflow Aliases](../home-manager/aliases/README.md#workflow-shortcuts)
+
 ## 🆘 Need Help?
 
 ### Common Issues
 
 - **[Troubleshooting Guide](help/troubleshooting.md)** - Fix common problems
 - **[FAQ](help/faq.md)** - Frequently asked questions
-- **[Error Messages](help/error-messages.md)** - Decode error messages
-
-### Getting Support
-
-- **[Community Resources](help/community.md)** - Where to get help
-- **[Contributing](help/contributing.md)** - How to improve this configuration
-- **[Reporting Issues](help/issues.md)** - Bug reports and features
+- **[Technical Troubleshooting](technical/troubleshooting.md)** - Deep technical issues
 
 ## 📋 Documentation Map
 
