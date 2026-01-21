@@ -28,3 +28,7 @@ build/
 /private/var/folders/
 # User Configuration
 user-config.nix
+# Claude Code settings
+.claude/
+# intelij
+.idea
