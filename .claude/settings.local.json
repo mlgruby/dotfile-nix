@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(nix flake check:*)",
+      "Bash(wc:*)",
+      "Bash(chmod:*)",
+      "Bash(/Users/satyasheel/Documents/dotfile/home-manager/scripts/alias-cheatsheet.sh:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(grep:*)",
+      "Bash(fd:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit:*)",
+      "Bash(file:*)"
+    ]
+  }
+}
