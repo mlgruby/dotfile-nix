@@ -133,6 +133,7 @@
       # These versions are preferred over Nix for various reasons
       "cmake" # Build system
       "duckdb" # In-process SQL OLAP database
+      "maven" # Java build tool
       "neovim" # Modern vim implementation
       "pkg-config" # Development tool
       # git - MOVED to Home Manager programs.git (includes package + config)
