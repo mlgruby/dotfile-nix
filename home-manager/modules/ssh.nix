@@ -25,141 +25,58 @@
 
 { config, lib, ... }:
 
+let
+  defaults = import ../config.nix;
+
+  # Helper function to create homelab SSH host config
+  mkHomelabHost = name: ip: {
+    inherit name;
+    value = {
+      hostname = ip;
+      user = defaults.ssh.homelabUser;
+      identityFile = defaults.ssh.homelabIdentityFile;
+    };
+  };
+
+  # Generate all homelab hosts from defaults
+  homelabMatchBlocks = builtins.listToAttrs (
+    lib.mapAttrsToList mkHomelabHost defaults.homelabHosts
+  );
+in
 {
   programs.ssh = {
     enable = true;
-    
-    # Connection optimization and security
-    addKeysToAgent = "yes";      # Automatically add keys to agent
-    compression = true;          # Enable compression for faster transfers
-    controlMaster = "auto";      # Enable connection multiplexing
-    controlPersist = "10m";      # Keep connections alive for 10 minutes
-    forwardAgent = false;        # Disable agent forwarding for security
-    serverAliveInterval = 60;    # Send keep-alive packets every 60 seconds
-    serverAliveCountMax = 3;     # Disconnect after 3 failed keep-alives
-    
+
+    # Disable default config to use explicit settings
+    enableDefaultConfig = false;
+
     # Host-specific configurations
     matchBlocks = {
+      # Global defaults for all hosts
+      "*" = {
+        addKeysToAgent = "yes";
+        compression = true;
+        controlMaster = "auto";
+        controlPersist = "10m";
+        forwardAgent = false;
+        serverAliveInterval = 60;
+        serverAliveCountMax = 3;
+      };
+
       # GitHub configuration for development
       "github.com" = {
         hostname = "github.com";
         user = "git";
         identityFile = "~/.ssh/github";
-        identitiesOnly = true;    # Only use specified identity file
+        identitiesOnly = true;
       };
-      
+
       # Internal/private network hosts
       "*.internal" = {
         user = "admin";
         compression = true;
         serverAliveInterval = 60;
       };
-      
-      # NUC homelab servers
-      "pve1" = {
-        hostname = "192.168.10.12";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "pve2" = {
-        hostname = "192.168.10.13";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "pve3" = {
-        hostname = "192.168.10.14";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "pi1" = {
-        hostname = "192.168.10.5";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "pi2" = {
-        hostname = "192.168.10.6";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "pi3" = {
-        hostname = "192.168.10.7";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "servarr" = {
-        hostname = "192.168.10.21";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "glance" = {
-        hostname = "192.168.10.22";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "audiobookshelf" = {
-        hostname = "192.168.10.26";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "lazywarden" = {
-        hostname = "192.168.10.28";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "ha" = {
-        hostname = "192.168.10.24";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "linkwarden" = {
-        hostname = "192.168.10.29";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "metric-exporter" = {
-        hostname = "192.168.10.32";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "prometheus" = {
-        hostname = "192.168.10.17";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "warracker" = {
-        hostname = "192.168.10.19";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      "netspeed" = {
-        hostname = "192.168.10.25";
-        user = "root";
-        identityFile = "~/.ssh/nuc_homelab_id_ed25519";
-      };
-      
-      # Add more host configurations as needed
-      # Example for development servers:
-      # "dev.example.com" = {
-      #   hostname = "development.example.com";
-      #   user = "developer";
-      #   port = 2222;
-      #   identityFile = "~/.ssh/dev_key";
-      # };
-    };
+    } // homelabMatchBlocks;  # Merge in all homelab hosts
   };
 }

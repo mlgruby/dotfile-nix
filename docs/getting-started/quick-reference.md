@@ -104,6 +104,34 @@ work        # ~/Development/Work
 opensource  # ~/Development/OpenSource
 ```
 
+## 🔍 Discovering Aliases
+
+**NEW!** Interactive tools to learn your ~220 aliases:
+
+```bash
+# Quick reference (most-used aliases)
+alias-quick
+
+# Interactive fuzzy search
+alias-find
+
+# Category-specific help
+alias-help git      # Git aliases only
+alias-help docker   # Docker aliases only
+alias-help k8s      # Kubernetes aliases only
+
+# Search by keyword
+alias-search docker # Find docker-related aliases
+
+# List all aliases alphabetically
+alias-list
+
+# Count total aliases
+alias-count
+```
+
+See: [Complete Alias Guide](../../home-manager/aliases/README.md) | [Quick Start](../../SCRIPTS_QUICKSTART.md)
+
 ## 🔄 Git & GitHub
 
 ### Git Shortcuts
@@ -121,6 +149,35 @@ gp
 
 # Pull with rebase
 gl
+```
+
+### Quick Workflows (NEW!)
+
+```bash
+# Stage all + commit
+quickcommit "feat: add feature"
+
+# Stage + commit + push
+quickpush "fix: bug fix"
+
+# Stage + amend last commit
+quickamend
+
+# Quick WIP commit
+quicksave
+```
+
+### Interactive Git (NEW!)
+
+```bash
+# Checkout branch with fuzzy search & preview
+gcb
+
+# Browse commits with diff preview
+fshow
+
+# Select and apply stash interactively
+fstash
 ```
 
 ### GitHub CLI
@@ -192,7 +249,8 @@ vim ~/.config/alacritty/config.toml
 | **Personal Info** | `user-config.nix` |
 | **System Settings** | `darwin/configuration.nix` |
 | **Packages** | `darwin/homebrew.nix` |
-| **Shell Aliases** | `home-manager/aliases.nix` |
+| **Shell Aliases** | `home-manager/aliases/` (organized by category) |
+| **Helper Scripts** | `home-manager/scripts/` (standalone scripts) |
 | **Terminal** | `home-manager/modules/alacritty/` |
 
 ## 🔍 Troubleshooting
@@ -270,11 +328,12 @@ perf-monitor
 
 ## 💡 Pro Tips
 
-1. **Bookmark this page** - Keep it handy for daily reference
-2. **Use tab completion** - Most commands support autocompletion
-3. **Check aliases** - Run `alias` to see all available shortcuts
-4. **Read the status** - Many commands show helpful status information
-5. **When in doubt, rebuild** - It's safe and fixes most issues
+1. **Start with `alias-quick`** - Learn the most-used aliases first
+2. **Use `alias-find`** - Discover aliases interactively with fuzzy search
+3. **Try interactive scripts** - `gcb`, `fshow`, `fstash` with previews
+4. **Use workflow shortcuts** - `quickcommit`, `quickpush` save time
+5. **Tab completion works** - Most commands support autocompletion
+6. **When in doubt, rebuild** - It's safe and fixes most issues
 
 ## 🔗 Quick Links
 

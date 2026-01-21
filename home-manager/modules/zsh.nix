@@ -57,6 +57,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: {
   programs = {
@@ -66,11 +67,14 @@
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
+      # Explicitly set dotDir to lock in current behavior (home directory)
+      # This silences the warning about future default changes
+      dotDir = "/Users/${config.home.username}";
+
       sessionVariables = {
         NIX_PATH = "$HOME/.nix-defexpr/channels:$NIX_PATH";
         FPATH = "$HOME/.zsh/completion:$FPATH";
-        AWS_DEFAULT_REGION = "us-west-2";
-        AWS_REGION = "us-west-2";
+        # Note: AWS_DEFAULT_REGION and AWS_REGION are set in aws-sso.nix
         # Python environment
         PYTHON_CONFIGURE_OPTS = "--enable-framework";
         UV_PYTHON_PREFERENCE = "system";
@@ -93,9 +97,10 @@
 
         # Tmux Auto-start
         # Auto-attach to existing session or create new one
+        # Skip in IDE terminals (VSCode, IntelliJ, Antigravity) to keep sessions separate
         if command -v tmux > /dev/null 2>&1; then
-          # Only auto-start if not already in tmux and not in VSCode terminal
-          if [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ]; then
+          # Only auto-start if not already in tmux and not in any IDE terminal
+          if [ -z "$TMUX" ] && [ -z "$VSCODE_INJECTION" ] && [ -z "$ANTIGRAVITY_TERMINAL" ] && [ -z "$TERMINAL_EMULATOR" ] && [ -z "$INTELLIJ_ENVIRONMENT_READER" ]; then
             # Try to attach to existing session, or create new one
             tmux attach-session -t main 2>/dev/null || tmux new-session -s main
           fi
@@ -209,18 +214,6 @@
       enableZshIntegration = true;
     };
   };
-
-  # Rust toolchain initialization
-  # Automatically runs rustup-init on first install
-  home.activation.installRust = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if [ ! -d "$HOME/.rustup" ]; then
-      $DRY_RUN_CMD echo "🦀 Initializing Rust toolchain..."
-      $DRY_RUN_CMD CARGO_HOME="$HOME/.cargo" RUSTUP_HOME="$HOME/.rustup" ${pkgs.rustup}/bin/rustup-init -y --no-modify-path
-      $DRY_RUN_CMD echo "✅ Rust toolchain installed successfully!"
-    else
-      $DRY_RUN_CMD echo "✨ Rust toolchain is already installed"
-    fi
-  '';
 
   # Disable Nixpkgs release check for compatibility
   home.enableNixpkgsReleaseCheck = false;

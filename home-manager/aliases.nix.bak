@@ -553,7 +553,7 @@
     s = "git status"; # Very short git status
 
     # LazyGit super shortcuts
-    lg = "lazygit"; # Just 'lg' for lazygit
+    # Note: 'lg' is provided by programs.lazygit Home Manager module
     lazydot = "cd ${dotfileDir} && lazygit"; # LazyGit in dotfiles
 
     # FZF powered file editing
