@@ -32,6 +32,16 @@
     # Development Tools
     # HTTP and API development
     httpie                    # Modern HTTP client (alternative to curl)
+
+    # Language Servers (for Claude Code LSP plugins)
+    kotlin-language-server    # Kotlin LSP for code intelligence
+    rust-analyzer             # Rust LSP for code intelligence
+
+    # Rust Development
+    rustc                     # Rust compiler
+    cargo                     # Rust package manager and build tool
+    rustfmt                   # Rust code formatter
+    clippy                    # Rust linter
     
     # Text Processing and Documentation
     pandoc                    # Universal document converter

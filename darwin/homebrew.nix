@@ -118,6 +118,7 @@
       "coreutils" # GNU core utilities
       "duf" # Disk usage/free utility
       "dust" # More intuitive du
+      "gnu-getopt" # GNU implementation of getopt
       # eza - MOVED to Home Manager programs.eza (includes package + config)
       "fd" # Simple find alternative
       "mas" # Mac App Store CLI
@@ -141,7 +142,7 @@
       "git-lfs" # Git large file storage
       # lazygit - MOVED to Home Manager programs.lazygit (includes package + config)
       "go" # Go programming language
-      "rustup" # Rust toolchain installer
+      # rustup - MOVED to Nix (using rustc + cargo directly)
       "node" # Node.js (includes npm and npx)
       "shellcheck" # Shell script analysis tool
       "yamlresume" # Resume editor
@@ -170,6 +171,7 @@
 
       # Cloud and Infrastructure Tools
       "awscli" # AWS CLI
+      "helm" # Kubernetes package manager
       "localstack/tap/localstack-cli" # LocalStack CLI for local AWS development
       "terraform-docs" # Terraform documentation
       "tflint" # Terraform linter
