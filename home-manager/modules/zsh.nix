@@ -82,7 +82,7 @@
         CARGO_HOME = "$HOME/.cargo";
         RUSTUP_HOME = "$HOME/.rustup";
         # Add Rust, Python 3.12 generic symlinks and TeX binaries to PATH
-        PATH = "$HOME/.docker/bin:$HOME/.cargo/bin:/Library/TeX/texbin:/opt/homebrew/opt/python@3.12/libexec/bin:$HOME/bin:$PATH";
+        PATH = "$HOME/.docker/bin:$HOME/.cargo/bin:/Library/TeX/texbin:/opt/homebrew/opt/gnu-getopt/bin:/opt/homebrew/opt/python@3.12/libexec/bin:$HOME/bin:$PATH";
       };
 
       initContent = ''
