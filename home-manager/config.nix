@@ -98,6 +98,7 @@
     lazywarden = "192.168.10.28";       # Bitwarden backup
     ha = "192.168.10.24";               # Home Assistant
     linkwarden = "192.168.10.29";       # Bookmark manager
+    wazuh = "192.168.10.27";            # Wazuh
 
     # Monitoring stack
     metric-exporter = "192.168.10.32";

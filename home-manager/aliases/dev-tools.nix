@@ -158,6 +158,8 @@ in {
   # Context and namespace
   kctx = "kubectl config get-contexts";                          # List contexts
   kns = "kubectl config set-context --current --namespace";      # Switch namespace - usage: kns namespace-name
+  ksd = "kubectl config use-context vortexa-develop";            # Switch to Develop context
+  ksp = "kubectl config use-context vortexa-production";         # Switch to Production context
 
   # Apply and delete
   kaf = "kubectl apply -f";              # Apply configuration file - usage: kaf deployment.yaml
