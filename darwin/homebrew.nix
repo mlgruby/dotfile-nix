@@ -171,6 +171,7 @@
 
       # Cloud and Infrastructure Tools
       "awscli" # AWS CLI
+      "aws-iam-authenticator" # AWS IAM Authenticator for Kubernetes
       "helm" # Kubernetes package manager
       "localstack/tap/localstack-cli" # LocalStack CLI for local AWS development
       "terraform-docs" # Terraform documentation

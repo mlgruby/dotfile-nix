@@ -2,12 +2,53 @@
 
 Summary of documentation updates to reflect current code state.
 
-**Date**: 2026-01-21
-**Status**: ✅ Core updates complete
+**Date**: 2026-01-21 (Initial updates) | 2026-01-31 (Refactor branch updates)
+**Status**: ✅ Core updates complete | ✅ Refactor branch documented
 
 ---
 
-## 🎯 What Was Updated
+## 🆕 Latest Updates - January 31, 2026
+
+### Refactor Branch Documentation
+
+**New Features Documented**:
+
+1. **Language Server Protocol (LSP) Support** ✅
+   - Added `rust-analyzer` for Rust LSP support
+   - Added `kotlin-language-server` for Kotlin/JVM development
+   - Documented Claude Code LSP integration
+   - Updated `docs/development/environment-templates.md` with LSP section
+
+2. **New CLI Tools** ✅
+   - `gnu-getopt` - GNU implementation of getopt (macOS compatibility)
+   - `helm` - Kubernetes package manager (already in example, now documented)
+   - Updated `docs/guides/package-management.md` with new tools
+
+3. **Rust Toolchain** ✅
+   - Documented Rust compiler and cargo setup
+   - PATH configuration for `~/.cargo/bin`
+   - Updated environment template documentation
+
+4. **Homelab Infrastructure** (pending commit)
+   - `wazuh` host added to homelab configuration (192.168.10.27)
+   - Security monitoring service
+
+**Files Updated**:
+- ✅ `docs/guides/package-management.md` - Added language servers and gnu-getopt
+- ✅ `docs/development/environment-templates.md` - Added LSP support section
+- ✅ `docs/DOCUMENTATION_UPDATES.md` - This file
+
+**Changes Summary**:
+```diff
++ Language servers: rust-analyzer, kotlin-language-server
++ CLI tools: gnu-getopt, helm
++ LSP integration documentation for Claude Code
++ Kotlin support in Java/Scala template section
+```
+
+---
+
+## 🎯 What Was Updated (January 21, 2026)
 
 ### 1. Fixed `docs/README.md` ✅
 
