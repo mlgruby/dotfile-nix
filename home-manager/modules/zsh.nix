@@ -175,6 +175,26 @@
           local pr=$(gh pr list --state open | fzf) &&
           [ -n "$pr" ] && echo "$pr" | awk '{print $1}' | xargs gh pr checks
         }
+
+        # Kubernetes Context Setup
+        function setup-vortexa-kube() {
+          echo "Setting up Vortexa Kubernetes contexts..."
+          
+          # Unset env vars that might override the profile
+          unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+
+          # Develop
+          echo "Configuring Develop cluster..."
+          export AWS_PROFILE=default-sso
+          aws eks --region eu-west-1 update-kubeconfig --name KubeCluster --role-arn arn:aws:iam::045251666112:role/EKSUserRole --alias vortexa-develop
+
+          # Production
+          echo "Configuring Production cluster..."
+          export AWS_PROFILE=production-sso
+          aws eks --region eu-west-1 update-kubeconfig --name KubeCluster --role-arn arn:aws:iam::501857513371:role/EKSUserRole --alias vortexa-production
+
+          echo "Done! Use ksd/ksp to switch contexts."
+        }
       '';
 
       oh-my-zsh = {
