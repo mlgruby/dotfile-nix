@@ -128,8 +128,9 @@ direnv allow
 
 **What you get:**
 
-- Rust stable toolchain
-- Development tools: clippy, rustfmt, rust-analyzer
+- Rust stable toolchain (rustc, cargo)
+- Development tools: clippy, rustfmt
+- LSP support: rust-analyzer (for Claude Code and IDEs)
 - Benchmark setup with criterion
 - Performance optimization flags
 - Cross-compilation configuration
@@ -180,11 +181,12 @@ air                      # Live reload
 golangci-lint run        # Lint code
 ```
 
-### ☕ Java/Scala Template
+### ☕ Java/Kotlin/Scala Template
 
 **Features:**
 
 - Java version management with SDKMAN
+- Kotlin language server for LSP support
 - Scala and SBT support
 - Maven/Gradle build tools
 - Auto-detection of project type
@@ -201,8 +203,9 @@ direnv allow
 **What you get:**
 
 - Java version management via SDKMAN
+- Kotlin language server (for Claude Code and IDEs)
 - Scala and SBT for Scala projects
-- Maven setup for Java projects
+- Maven/Gradle setup for Java/Kotlin projects
 - Memory optimization settings
 - Project structure initialization
 
@@ -292,6 +295,37 @@ The templates work seamlessly with:
 - **IntelliJ IDEA** with direnv plugin
 - **Neovim** with direnv integration
 - **Emacs** with direnv-mode
+- **Claude Code** with LSP plugins
+
+### Language Server Protocol (LSP) Support
+
+Your dotfiles include language servers for enhanced IDE and Claude Code integration:
+
+**Available Language Servers:**
+
+- **Rust**: `rust-analyzer` - Provides code completion, go-to-definition, type information
+- **Kotlin**: `kotlin-language-server` - JVM language support for Kotlin projects
+- **Python**: Built into most Python distributions and IDEs
+- **TypeScript/JavaScript**: Included with Node.js installations
+
+**Configuration:**
+
+Language servers are installed system-wide via Nix and work automatically with:
+
+```bash
+# Claude Code uses these automatically when available
+# Check if LSP servers are installed:
+which rust-analyzer          # → /nix/store/.../bin/rust-analyzer
+which kotlin-language-server # → /nix/store/.../bin/kotlin-language-server
+```
+
+**Benefits:**
+
+- Real-time syntax checking and error detection
+- Intelligent code completion
+- Go-to-definition and find references
+- Refactoring support
+- Works across all editors and Claude Code
 
 ## Team Collaboration
 

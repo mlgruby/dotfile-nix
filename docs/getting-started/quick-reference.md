@@ -53,6 +53,10 @@ setup-dev-env nodejs
 
 # Auto-detect and set up environment
 setup-dev-env --auto
+
+# Check language server availability (for Claude Code & IDEs)
+which rust-analyzer           # Rust LSP
+which kotlin-language-server  # Kotlin LSP
 ```
 
 ## 🔧 Package Management

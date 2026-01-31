@@ -50,16 +50,20 @@ environment.systemPackages = with pkgs; [
 home.packages = with pkgs; [
   # Enhanced CLI Tools
   ripgrep   # Better grep
-  fd        # Better find  
+  fd        # Better find
   eza       # Better ls
   bat       # Better cat
   btop      # Better top
-  
+
   # Development Tools
   direnv    # Environment management
   pipx      # Python tool isolation
   sbt       # Scala build tool
-  
+
+  # Language Servers (for Claude Code and IDEs)
+  rust-analyzer           # Rust LSP server
+  kotlin-language-server  # Kotlin LSP server
+
   # Documentation
   markdownlint-cli
 ];
@@ -111,17 +115,18 @@ homebrew = {
     # macOS-Specific Tools
     "mas"              # Mac App Store CLI
     "mackup"           # Application settings sync
-    
+
     # Cloud Tools (frequent updates)
     "awscli"
-    "google-cloud-sdk" 
+    "google-cloud-sdk"
     "azure-cli"
-    
+
     # Development Tools
     "terraform"
     "kubectl"
-    "helm"
-    
+    "helm"             # Kubernetes package manager
+    "gnu-getopt"       # GNU implementation of getopt
+
     # System Utilities
     "duf"              # Disk usage
     "dust"             # Directory sizes
