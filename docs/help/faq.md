@@ -89,7 +89,7 @@ sudo darwin-rebuild rollback
 
 # Or list all generations and pick one
 sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
-sudo darwin-rebuild switch --flake .#$(hostname) --rollback
+sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix> --rollback
 ```
 
 ### Q: Updates are slow, how can I speed them up?
@@ -138,13 +138,13 @@ brew list > homebrew-list.txt
 
 ### Q: How do I add custom shell aliases?
 
-**A:** Edit `home-manager/aliases.nix`:
+**A:** Edit one of the files under `home-manager/aliases/` (for example `home-manager/aliases/core.nix`):
 
 ```nix
 shellAliases = {
   # Your custom aliases
   myproject = "cd ~/Development/my-project";
-  deploy = "./scripts/deploy.sh";
+  hm-switch = "home-manager switch";
 };
 ```
 
@@ -229,6 +229,6 @@ See: [Contributing Guidelines](contributing.md)
 ## 📚 Still Have Questions?
 
 - **Documentation**: [Complete Guide Index](../README.md)
-- **Issues**: Check [GitHub Issues](https://github.com/mlgruby/dotfile-nix/issues)
+- **Issues**: Open an issue in your fork/repository
 - **Troubleshooting**: [Technical Guide](../technical/troubleshooting.md)
 - **Community**: [Nix Community Resources](community.md)

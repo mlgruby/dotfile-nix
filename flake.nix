@@ -86,7 +86,11 @@
     userConfig =
       if builtins.pathExists ./user-config.nix
       then import ./user-config.nix
-      else import ./user-config.default.nix;
+      else throw ''
+        user-config.nix not found.
+        Create it from user-config.template.nix:
+          cp user-config.template.nix user-config.nix
+      '';
 
     # Required basic attributes for user configuration
     requiredAttrs = [
@@ -209,10 +213,7 @@
     };
 
     # Formatters
-    # Nix code formatter using nixfmt-rfc-style
-    formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
-
-    # Package Exports
-    darwinPackages = self.darwinConfigurations.${validatedConfig.hostname}.pkgs;
+    # Use nixfmt directly (nixfmt-rfc-style is an alias).
+    formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt;
   };
 }

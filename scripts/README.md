@@ -9,6 +9,7 @@ scripts/
 ├── install/          # Installation and removal scripts
 ├── setup/           # Configuration and setup utilities  
 ├── monitoring/      # System monitoring and maintenance
+├── testing/         # Onboarding and quality gate checks
 └── utils/          # General utility scripts
 ```
 
@@ -101,6 +102,27 @@ scripts/
 - **Prerequisites**: Set `OPENAI_API_KEY` environment variable
 - **Usage**: `./scripts/utils/generate-commit-message.sh`
 
+## ✅ Testing Scripts
+
+### `testing/onboarding-smoke.sh`
+
+**Purpose**: Fast onboarding reliability checks
+
+- Runs `nix flake check --no-build`
+- Checks shell script syntax and shellcheck warnings
+- Validates docs script-path references
+- Detects stale onboarding command patterns
+- **Usage**: `./scripts/testing/onboarding-smoke.sh [--strict-shellcheck]`
+
+### `testing/onboarding-full-checklist.sh`
+
+**Purpose**: Full onboarding checklist + VM validation guidance
+
+- Validates key onboarding guardrails in config/scripts
+- Runs smoke checks in strict mode (unless `--print-only`)
+- Prints manual VM validation checklist
+- **Usage**: `./scripts/testing/onboarding-full-checklist.sh [--print-only]`
+
 ## Quick Access
 
 From the repository root, you can run any script using:
@@ -116,6 +138,10 @@ From the repository root, you can run any script using:
 
 # Monitoring
 ./scripts/monitoring/system-health-monitor.sh --check
+
+# Testing
+./scripts/testing/onboarding-smoke.sh --strict-shellcheck
+./scripts/testing/onboarding-full-checklist.sh --print-only
 
 # Utilities
 ./scripts/utils/generate-commit-message.sh

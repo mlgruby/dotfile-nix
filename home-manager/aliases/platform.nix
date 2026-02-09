@@ -28,12 +28,12 @@ in
     # --------------------------------------------------------------------------
     # System Rebuild
     # --------------------------------------------------------------------------
-    rebuild = "cd ${dotfileDir} && echo '🔄 Building system configuration...' && sudo darwin-rebuild switch --flake .#\"$(hostname)\" && cd - && echo '✅ System rebuild complete!' && rl";  # Rebuild and activate system configuration
+    rebuild = "cd ${dotfileDir} && echo '🔄 Building system configuration...' && sudo darwin-rebuild switch --flake .#\"${userConfig.hostname}\" && cd - && echo '✅ System rebuild complete!' && rl";  # Rebuild and activate system configuration
 
     rebuild-fast = mkTemplateAlias ''
       cd @dotfileDir@ && \
       echo "🚀 Fast rebuild with maximum performance..." && \
-      sudo darwin-rebuild switch --flake .#"$(hostname)" --option max-jobs auto --option cores 0 --option keep-outputs true --option keep-derivations true && \
+      sudo darwin-rebuild switch --flake .#"${userConfig.hostname}" --option max-jobs auto --option cores 0 --option keep-outputs true --option keep-derivations true && \
       cd - && \
       echo "⚡ Fast rebuild complete!" && \
       rl
@@ -44,7 +44,7 @@ in
     rebuild-check = mkTemplateAlias ''
       cd @dotfileDir@ && \
       echo "🔍 Checking what will be built..." && \
-      darwin-rebuild build --flake .#"$(hostname)" --dry-run --option max-jobs auto && \
+      darwin-rebuild build --flake .#"${userConfig.hostname}" --dry-run --option max-jobs auto && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -88,7 +88,7 @@ in
     # --------------------------------------------------------------------------
     perf-analyze = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/analyze-build-performance.sh --report && \
+      ./scripts/monitoring/analyze-build-performance.sh --report && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -96,7 +96,7 @@ in
 
     perf-profile = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/analyze-build-performance.sh --profile && \
+      ./scripts/monitoring/analyze-build-performance.sh --profile && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -104,7 +104,7 @@ in
 
     perf-optimize = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/analyze-build-performance.sh --optimize && \
+      ./scripts/monitoring/analyze-build-performance.sh --optimize && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -115,7 +115,7 @@ in
     # --------------------------------------------------------------------------
     health-check = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/system-health-monitor.sh --check && \
+      ./scripts/monitoring/system-health-monitor.sh --check && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -123,7 +123,7 @@ in
 
     health-report = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/system-health-monitor.sh --report && \
+      ./scripts/monitoring/system-health-monitor.sh --report && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -131,7 +131,7 @@ in
 
     health-maintain = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/system-health-monitor.sh --maintain && \
+      ./scripts/monitoring/system-health-monitor.sh --maintain && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}
@@ -139,7 +139,7 @@ in
 
     health-alert = mkTemplateAlias ''
       cd @dotfileDir@ && \
-      ./scripts/system-health-monitor.sh --alert && \
+      ./scripts/monitoring/system-health-monitor.sh --alert && \
       cd -
     '' [
       {name = "dotfileDir"; value = dotfileDir;}

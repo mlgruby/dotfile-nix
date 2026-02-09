@@ -64,7 +64,7 @@
       # Fast model for simple tasks (lower latency, lower cost)
       fast = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
       # Most capable model for complex reasoning
-      opus = "eu.anthropic.claude-opus-4-5-20251101-v1:0";
+      opus = "global.anthropic.claude-opus-4-6-v1";
     };
   };
 
@@ -99,6 +99,7 @@
     ha = "192.168.10.24";               # Home Assistant
     linkwarden = "192.168.10.29";       # Bookmark manager
     wazuh = "192.168.10.27";            # Wazuh
+    windmill = "192.168.10.30";         # Windmill
 
     # Monitoring stack
     metric-exporter = "192.168.10.32";

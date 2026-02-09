@@ -209,8 +209,12 @@ dotfile/
 │   ├── aliases.nix       # Shell shortcuts
 │   └── modules/          # Tool-specific configs
 ├── scripts/               # Automation scripts
-│   ├── system-health-monitor.sh
-│   └── analyze-build-performance.sh
+│   ├── monitoring/
+│   │   ├── system-health-monitor.sh
+│   │   └── analyze-build-performance.sh
+│   ├── install/
+│   ├── setup/
+│   └── utils/
 └── docs/                 # Documentation
 ```
 
