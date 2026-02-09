@@ -100,7 +100,7 @@
     # Configure taps
     taps = [
       "warrensbox/tap" # For tfswitch
-      "localstack/tap" # For localstack-cli
+      # "localstack/tap" # For localstack-cli
       "nguyenphutrong/tap" # For quotio
     ];
 
@@ -173,7 +173,7 @@
       "awscli" # AWS CLI
       "aws-iam-authenticator" # AWS IAM Authenticator for Kubernetes
       "helm" # Kubernetes package manager
-      "localstack/tap/localstack-cli" # LocalStack CLI for local AWS development
+      # "localstack/tap/localstack-cli" # LocalStack CLI for local AWS development
       "terraform-docs" # Terraform documentation
       "tflint" # Terraform linter
       "warrensbox/tap/tfswitch" # Terraform version manager

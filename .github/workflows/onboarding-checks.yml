@@ -1,0 +1,64 @@
+#name: Onboarding Checks
+#
+#on:
+#  pull_request:
+#    paths:
+#      - '**/*.nix'
+#      - 'flake.nix'
+#      - 'flake.lock'
+#      - '.github/workflows/onboarding-checks.yml'
+#      - 'scripts/testing/**'
+#      - 'scripts/install/**'
+#      - 'scripts/setup/**'
+#      - 'setup.sh'
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - '**/*.nix'
+#      - 'flake.nix'
+#      - 'flake.lock'
+#      - '.github/workflows/onboarding-checks.yml'
+#      - 'scripts/testing/**'
+#      - 'scripts/install/**'
+#      - 'scripts/setup/**'
+#      - 'setup.sh'
+#
+#jobs:
+#  onboarding:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Install Nix
+#        uses: DeterminateSystems/nix-installer-action@v17
+#
+#      - name: Install shell tools
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y shellcheck ripgrep
+#
+#      - name: Create CI user-config.nix
+#        run: |
+#          cat > ./user-config.nix <<'EOF'
+#          {
+#            username = "runner";
+#            fullName = "CI Runner";
+#            email = "ci@example.com";
+#            githubUsername = "ci";
+#            hostname = "ci-mac";
+#            signingKey = "";
+#            directories = {
+#              dotfiles = "Documents/dotfile";
+#              workspace = "Development";
+#              downloads = "Downloads";
+#              documents = "Documents";
+#            };
+#          }
+#          EOF
+#
+#      - name: Run onboarding smoke checks
+#        run: |
+#          chmod +x ./scripts/testing/onboarding-smoke.sh
+#          ./scripts/testing/onboarding-smoke.sh --strict-shellcheck

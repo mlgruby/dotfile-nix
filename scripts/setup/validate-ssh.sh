@@ -110,6 +110,11 @@ for possible_dir in "dotfile" "dotfiles" "nix-config" "nix-darwin" ".dotfiles"; 
     fi
 done
 
+FLAKE_HOSTNAME=""
+if [ -n "$DOTFILES_DIR" ] && [ -f "$DOTFILES_DIR/user-config.nix" ]; then
+    FLAKE_HOSTNAME=$(grep -E '^\s*hostname\s*=' "$DOTFILES_DIR/user-config.nix" | sed 's/.*"\([^"]*\)".*/\1/')
+fi
+
 echo ""
 
 # Summary and recommendations
@@ -134,9 +139,13 @@ else
     
     echo -e "${BLUE}  • Upload public key to GitHub: gh ssh-key add ~/.ssh/github.pub${NC}"
     if [ -n "$DOTFILES_DIR" ]; then
-        echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#\$(hostname -s)${NC}"
+        if [ -n "$FLAKE_HOSTNAME" ]; then
+            echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#$FLAKE_HOSTNAME${NC}"
+        else
+            echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>${NC}"
+        fi
     else
-        echo -e "${BLUE}  • Rebuild system: cd ~/Documents/[your-dotfiles-dir] && sudo darwin-rebuild switch --flake .#\$(hostname -s)${NC}"
+        echo -e "${BLUE}  • Rebuild system: cd ~/Documents/[your-dotfiles-dir] && sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>${NC}"
     fi
 fi
 
