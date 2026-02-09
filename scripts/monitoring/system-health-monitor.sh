@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/system-health-monitor.sh
+# scripts/monitoring/system-health-monitor.sh
 #
 # System Health Monitoring and Maintenance Script
 #
@@ -17,7 +17,7 @@
 # - Performance optimization suggestions
 #
 # Usage:
-#   ./scripts/system-health-monitor.sh [--check|--maintain|--report|--alert]
+#   ./scripts/monitoring/system-health-monitor.sh [--check|--maintain|--report|--alert]
 
 set -euo pipefail
 

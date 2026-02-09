@@ -84,19 +84,19 @@ The system includes a comprehensive performance analysis tool:
 
 ```bash
 # Basic system analysis
-./scripts/analyze-build-performance.sh
+./scripts/monitoring/analyze-build-performance.sh
 
 # Profile rebuild performance
-./scripts/analyze-build-performance.sh --profile
+./scripts/monitoring/analyze-build-performance.sh --profile
 
 # Analyze cache performance
-./scripts/analyze-build-performance.sh --cache
+./scripts/monitoring/analyze-build-performance.sh --cache
 
 # Full performance report
-./scripts/analyze-build-performance.sh --report
+./scripts/monitoring/analyze-build-performance.sh --report
 
 # Apply optimizations
-./scripts/analyze-build-performance.sh --optimize
+./scripts/monitoring/analyze-build-performance.sh --optimize
 ```
 
 ### Performance Monitoring Commands
@@ -186,7 +186,7 @@ If evaluations are taking longer than expected:
 rm -rf ~/.cache/nix/
 
 # Profile evaluation time
-time nix eval .#darwinConfigurations.$(hostname).system
+time nix eval .#darwinConfigurations.<hostname-from-user-config.nix>.system
 
 # Check for expensive operations
 perf-profile
@@ -320,7 +320,7 @@ Add performance checks to development workflow:
 # .git/hooks/pre-push
 #!/bin/bash
 echo "🔍 Performance check before push..."
-./scripts/analyze-build-performance.sh --profile
+./scripts/monitoring/analyze-build-performance.sh --profile
 ```
 
 ### IDE Integration
@@ -334,7 +334,7 @@ Configure editor integration for performance monitoring:
     {
       "label": "Nix: Performance Check",
       "type": "shell",
-      "command": "./scripts/analyze-build-performance.sh --profile"
+      "command": "./scripts/monitoring/analyze-build-performance.sh --profile"
     }
   ]
 }

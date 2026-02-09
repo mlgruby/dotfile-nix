@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/analyze-build-performance.sh
+# scripts/monitoring/analyze-build-performance.sh
 #
 # Build Performance Analysis and Optimization Script
 #
@@ -16,7 +16,7 @@
 # - Performance optimization suggestions
 #
 # Usage:
-#   ./scripts/analyze-build-performance.sh [--profile|--fix|--report]
+#   ./scripts/monitoring/analyze-build-performance.sh [--profile|--fix|--report]
 
 set -euo pipefail
 

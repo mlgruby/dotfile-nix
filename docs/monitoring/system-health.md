@@ -209,14 +209,14 @@ Run maintenance manually when needed:
 health-maintain
 
 # Individual maintenance components
-./scripts/system-health-monitor.sh --maintain
+./scripts/monitoring/system-health-monitor.sh --maintain
 ```
 
 ## Configuration
 
 ### Threshold Configuration
 
-Edit thresholds in `scripts/system-health-monitor.sh`:
+Edit thresholds in `scripts/monitoring/system-health-monitor.sh`:
 
 ```bash
 # Health check thresholds

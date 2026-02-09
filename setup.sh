@@ -6,13 +6,13 @@
 # This script downloads and runs the full installation script.
 # It's designed to be run with a simple curl command:
 #
-#   curl -sSL https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh | bash
+#   curl -sSL <your-repo-raw-url>/setup.sh | DOTFILES_REPO_URL=<your-repo-raw-url> bash
 #
 # Or downloaded and run locally:
 #
-#   curl -o setup.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh
+#   curl -o setup.sh <your-repo-raw-url>/setup.sh
 #   chmod +x setup.sh
-#   ./setup.sh
+#   DOTFILES_REPO_URL=<your-repo-raw-url> ./setup.sh
 
 set -e
 
@@ -24,7 +24,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://raw.githubusercontent.com/mlgruby/dotfile-nix/main"
+DEFAULT_REPO_URL="https://raw.githubusercontent.com/mlgruby/dotfile-nix/main"
+REPO_URL="${DOTFILES_REPO_URL:-$DEFAULT_REPO_URL}"
 SCRIPT_NAME="scripts/install/pre-nix-installation.sh"
 TEMP_DIR="/tmp/nix-darwin-setup"
 
@@ -55,6 +56,23 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+resolve_repo_url() {
+    if [[ -n "${DOTFILES_REPO_URL:-}" ]]; then
+        log_info "Using DOTFILES_REPO_URL: $DOTFILES_REPO_URL"
+        REPO_URL="$DOTFILES_REPO_URL"
+        return
+    fi
+
+    if [[ "${CI:-false}" == "true" ]] || [[ "$1" == "--yes" ]] || [[ "$1" == "-y" ]] || [[ ! -t 0 ]]; then
+        handle_error "DOTFILES_REPO_URL is required in non-interactive mode. Example: curl -sSL <your-repo-raw-url>/setup.sh | DOTFILES_REPO_URL=<your-repo-raw-url> bash"
+    fi
+
+    echo -e "${BLUE}Enter raw GitHub base URL for this dotfiles repo${NC}"
+    echo -e "${BLUE}(default: $DEFAULT_REPO_URL):${NC}"
+    read -r input_repo_url
+    REPO_URL="${input_repo_url:-$DEFAULT_REPO_URL}"
+}
+
 # Main setup function
 main() {
     echo -e "${BLUE}🚀 Nix-Darwin Setup Bootstrapper${NC}"
@@ -81,34 +99,47 @@ main() {
     
     log_success "System checks passed"
     
-    # Create temporary directory
-    log_info "Creating temporary directory..."
-    mkdir -p "$TEMP_DIR"
-    cd "$TEMP_DIR"
-    
-    # Download the installation script
-    log_info "Downloading installation script..."
-    if curl -sSL "$REPO_URL/$SCRIPT_NAME" -o "$SCRIPT_NAME"; then
-        log_success "Installation script downloaded successfully"
+    INSTALL_SCRIPT_PATH=""
+    USING_LOCAL_SCRIPT=false
+
+    # Prefer local script when setup.sh is executed from repository root.
+    if [[ -f "./$SCRIPT_NAME" ]] && [[ -f "./flake.nix" ]]; then
+        USING_LOCAL_SCRIPT=true
+        INSTALL_SCRIPT_PATH="./$SCRIPT_NAME"
+        log_info "Using local installation script: $INSTALL_SCRIPT_PATH"
     else
-        handle_error "Failed to download installation script from $REPO_URL/$SCRIPT_NAME"
+        resolve_repo_url "$1"
+
+        # Create temporary directory
+        log_info "Creating temporary directory..."
+        mkdir -p "$TEMP_DIR"
+        cd "$TEMP_DIR"
+
+        # Download the installation script
+        log_info "Downloading installation script..."
+        if curl -sSL "$REPO_URL/$SCRIPT_NAME" -o "$SCRIPT_NAME"; then
+            log_success "Installation script downloaded successfully"
+        else
+            handle_error "Failed to download installation script from $REPO_URL/$SCRIPT_NAME"
+        fi
+
+        # Verify the script was downloaded and is not empty
+        if [[ ! -s "$SCRIPT_NAME" ]]; then
+            handle_error "Downloaded script is empty or corrupted"
+        fi
+
+        # Make the script executable
+        log_info "Making script executable..."
+        chmod +x "$SCRIPT_NAME"
+        INSTALL_SCRIPT_PATH="$SCRIPT_NAME"
+
+        # Show script info
+        log_info "Script information:"
+        echo -e "  • Source: $REPO_URL/$SCRIPT_NAME"
+        echo -e "  • Size: $(wc -c < "$INSTALL_SCRIPT_PATH") bytes"
+        echo -e "  • Lines: $(wc -l < "$INSTALL_SCRIPT_PATH") lines"
+        echo ""
     fi
-    
-    # Verify the script was downloaded and is not empty
-    if [[ ! -s "$SCRIPT_NAME" ]]; then
-        handle_error "Downloaded script is empty or corrupted"
-    fi
-    
-    # Make the script executable
-    log_info "Making script executable..."
-    chmod +x "$SCRIPT_NAME"
-    
-    # Show script info
-    log_info "Script information:"
-    echo -e "  • Source: $REPO_URL/$SCRIPT_NAME"
-    echo -e "  • Size: $(wc -c < "$SCRIPT_NAME") bytes"
-    echo -e "  • Lines: $(wc -l < "$SCRIPT_NAME") lines"
-    echo ""
     
     # Ask for confirmation
     echo -e "${YELLOW}This script will:${NC}"
@@ -129,7 +160,7 @@ main() {
         # Script is being piped, can't read from stdin
         log_warning "Script is being piped, cannot read user input"
         echo -e "${BLUE}To run interactively, download and run locally:${NC}"
-        echo -e "${BLUE}  curl -o setup.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh${NC}"
+        echo -e "${BLUE}  curl -o setup.sh $REPO_URL/setup.sh${NC}"
         echo -e "${BLUE}  chmod +x setup.sh${NC}"
         echo -e "${BLUE}  ./setup.sh${NC}"
         echo ""
@@ -150,19 +181,21 @@ main() {
     echo ""
     
     # Execute the downloaded script
-    if bash "$SCRIPT_NAME"; then
+    if bash "$INSTALL_SCRIPT_PATH"; then
         log_success "Installation completed successfully!"
     else
         log_error "Installation failed!"
-        log_info "The installation script is available at: $TEMP_DIR/$SCRIPT_NAME"
+        log_info "The installation script is available at: $INSTALL_SCRIPT_PATH"
         log_info "You can inspect it and run it manually if needed"
         exit 1
     fi
     
     # Cleanup
-    log_info "Cleaning up temporary files..."
-    cd "$HOME"
-    rm -rf "$TEMP_DIR"
+    if [[ "$USING_LOCAL_SCRIPT" != "true" ]]; then
+        log_info "Cleaning up temporary files..."
+        cd "$HOME"
+        rm -rf "$TEMP_DIR"
+    fi
     
     echo ""
     log_success "Setup complete! 🎉"
@@ -170,10 +203,10 @@ main() {
     echo -e "${BLUE}Next steps:${NC}"
     echo -e "  1. Restart your terminal"
     echo -e "  2. Navigate to your dotfiles directory in ~/Documents/"
-    echo -e "  3. Run system rebuild: ${YELLOW}sudo darwin-rebuild switch --flake .#\$(hostname -s)${NC}"
+    echo -e "  3. Run system rebuild: ${YELLOW}sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>${NC}"
     echo ""
     echo -e "${BLUE}For help and troubleshooting:${NC}"
-    echo -e "  • Run the SSH validator: ${YELLOW}./validate-ssh.sh${NC}"
+    echo -e "  • Run the SSH validator: ${YELLOW}./scripts/setup/validate-ssh.sh${NC}"
     echo -e "  • Check the documentation"
     echo -e "  • Review the configuration files"
 }
@@ -186,6 +219,9 @@ case "${1:-}" in
         echo "Options:"
         echo "  --yes, -y    Skip confirmation prompt"
         echo "  --help, -h   Show this help message"
+        echo ""
+        echo "Environment:"
+        echo "  DOTFILES_REPO_URL   Raw GitHub base URL (e.g. https://raw.githubusercontent.com/<owner>/<repo>/main)"
         echo ""
         echo "This script downloads and runs the Nix-Darwin installation script."
         echo "It will set up a complete declarative macOS development environment."

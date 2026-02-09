@@ -108,6 +108,7 @@ Start Here → Architecture → Configuration → Advanced Topics
 - **[Impermanence Evaluation](advanced/impermanence-evaluation.md)**
 - **[NUR Integration Analysis](advanced/nur-integration-analysis.md)**
 - **[Secrets Management](advanced/secrets-management-analysis.md)**
+- **[Onboarding Test Plan](testing/onboarding-test-plan.md)**
 
 ### Alias Discovery
 
