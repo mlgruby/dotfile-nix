@@ -227,7 +227,7 @@ echo "✅ Secrets rotation complete"
 #### 4.2 Health Monitoring Integration
 
 ```bash
-# Add to scripts/system-health-monitor.sh
+# Add to scripts/monitoring/system-health-monitor.sh
 check_secrets_health() {
   echo "🔐 Checking secrets management health..."
   

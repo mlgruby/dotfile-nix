@@ -7,7 +7,7 @@ echo "🔧 Fixing nix-darwin installation issues..."
 
 # Fix home directory ownership
 echo "Fixing home directory ownership..."
-sudo chown -R $(whoami):staff $HOME
+sudo chown -R "$(whoami):staff" "$HOME"
 
 # Enable experimental features
 echo "Enabling Nix experimental features..."
@@ -26,4 +26,3 @@ echo "✅ Fixes applied!"
 echo ""
 echo "Now try:"
 echo "  nix run nix-darwin --extra-experimental-features \"nix-command flakes\" -- switch --flake \".#\$(hostname)\""
-

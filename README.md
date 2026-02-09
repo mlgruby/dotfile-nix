@@ -116,7 +116,7 @@ The repository is organized into logical, optimized components:
 For a quick setup that proceeds automatically after 5 seconds:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh | bash
+curl -sSL <your-repo-raw-url>/setup.sh | DOTFILES_REPO_URL=<your-repo-raw-url> bash
 ```
 
 ### Option 2: Download and Run (Interactive)
@@ -124,9 +124,9 @@ curl -sSL https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh | 
 For full interactive control with confirmation prompts:
 
 ```bash
-curl -o setup.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/setup.sh
+curl -o setup.sh <your-repo-raw-url>/setup.sh
 chmod +x setup.sh
-./setup.sh
+DOTFILES_REPO_URL=<your-repo-raw-url> ./setup.sh
 ```
 
 This will automatically:
@@ -151,7 +151,7 @@ xcode-select --install
 ```bash
 mkdir -p ~/Documents
 cd ~/Documents
-git clone https://github.com/mlgruby/dotfile-nix.git dotfile
+git clone <your-repo-url> dotfile
 cd dotfile
 ```
 
@@ -195,7 +195,7 @@ The installation script includes intelligent SSH key management:
 **Validate your SSH setup anytime:**
 
 ```bash
-./validate-ssh.sh
+./scripts/setup/validate-ssh.sh
 ```
 
 This will check:
@@ -282,7 +282,7 @@ Next steps:
 After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/Documents/dotfile` directory:
 
 ```bash
-sudo darwin-rebuild switch --flake .#$(hostname)
+sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>
 # Or use the 'rebuild' alias (which includes sudo automatically)
 rebuild
 ```
@@ -315,7 +315,7 @@ dotfile/
 ### System Commands
 
 ```bash
-rebuild   # Alias for sudo darwin-rebuild switch --flake .#$(hostname)
+rebuild   # Uses hostname defined in user-config.nix
 update    # Update flake inputs and rebuild
 cleanup   # Clean old Nix generations
 ```

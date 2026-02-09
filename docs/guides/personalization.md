@@ -117,11 +117,10 @@ health-check # → system health monitoring
 **Adding Custom Aliases**:
 
 ```nix
-# In home-manager/aliases.nix
-programs.zsh.shellAliases = {
+# In home-manager/aliases/core.nix (or another file under home-manager/aliases/)
+{
   # Your custom aliases
   myproject = "cd ~/Development/my-important-project";
-  deploy = "cd ~/Development/my-app && ./deploy.sh";
   logs = "tail -f /var/log/system.log";
 };
 ```

@@ -53,7 +53,7 @@
 # ------
 # 1. Basic Installation:
 #    ```bash
-#    curl -o pre-nix-installation.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/pre-nix-installation.sh
+#    curl -o pre-nix-installation.sh <your-repo-raw-url>/scripts/install/pre-nix-installation.sh
 #    chmod +x pre-nix-installation.sh
 #    ./pre-nix-installation.sh
 #    ```
@@ -117,7 +117,7 @@ set -e
 # This script is designed to be run on a completely fresh Mac with nothing installed.
 # Download and run with:
 # 
-#   curl -o pre-nix-installation.sh https://raw.githubusercontent.com/mlgruby/dotfile-nix/main/pre-nix-installation.sh
+#   curl -o pre-nix-installation.sh <your-repo-raw-url>/scripts/install/pre-nix-installation.sh
 #   chmod +x pre-nix-installation.sh
 #   ./pre-nix-installation.sh
 #
@@ -138,6 +138,52 @@ command_exists() {
 handle_error() {
     echo -e "${RED}Error: $1${NC}"
     exit 1
+}
+
+normalize_hostname() {
+    local raw="$1"
+
+    # Keep only the first label and normalize separators for flake output names.
+    raw="${raw%%.*}"
+    raw="${raw//_/-}"
+    raw=$(echo "$raw" | tr -cd '[:alnum:]-')
+    raw=$(echo "$raw" | sed -E 's/-+/-/g; s/^-+//; s/-+$//')
+
+    echo "$raw"
+}
+
+is_valid_hostname() {
+    [[ "$1" =~ ^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$ ]]
+}
+
+safe_link_config_dir() {
+    local dir_name="$1"
+    local source_dir="$DOTFILES_PATH/$dir_name"
+    local target_dir="$HOME/.config/$dir_name"
+    local backup_dir="$HOME/.config-backups/dotfile-install-$BACKUP_TS"
+
+    if [ ! -d "$source_dir" ]; then
+        echo -e "${YELLOW}⚠ Directory $dir_name not found in dotfiles, creating minimal structure${NC}"
+        mkdir -p "$source_dir"
+    fi
+
+    if [ -L "$target_dir" ]; then
+        local current_link
+        current_link="$(readlink "$target_dir")"
+        if [ "$current_link" = "$source_dir" ]; then
+            echo -e "${GREEN}✓ $dir_name already linked${NC}"
+            return
+        fi
+    fi
+
+    if [ -e "$target_dir" ] || [ -L "$target_dir" ]; then
+        mkdir -p "$backup_dir"
+        mv "$target_dir" "$backup_dir/$dir_name"
+        echo -e "${YELLOW}⚠ Backed up existing ~/.config/$dir_name to $backup_dir/$dir_name${NC}"
+    fi
+
+    ln -sfn "$source_dir" "$target_dir"
+    echo -e "${GREEN}✓ Linked $dir_name${NC}"
 }
 
 print_phase() {
@@ -277,9 +323,27 @@ else
     echo -e "${BLUE}Enter your email:${NC}"
     read -r EMAIL
     
-    GITHUB_USERNAME="satyasheel"  # Default GitHub username
-    
-    HOSTNAME=$(hostname)
+    echo -e "${BLUE}Enter your GitHub username (default: $USERNAME):${NC}"
+    read -r GITHUB_USERNAME
+    GITHUB_USERNAME=${GITHUB_USERNAME:-$USERNAME}
+
+    DEFAULT_HOSTNAME=$(scutil --get LocalHostName 2>/dev/null || hostname -s)
+    DEFAULT_HOSTNAME=$(normalize_hostname "$DEFAULT_HOSTNAME")
+    DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME:-"macbook"}
+
+    echo -e "${BLUE}Enter hostname for this machine (default: $DEFAULT_HOSTNAME):${NC}"
+    read -r HOSTNAME
+    HOSTNAME=${HOSTNAME:-$DEFAULT_HOSTNAME}
+    HOSTNAME=$(normalize_hostname "$HOSTNAME")
+
+    while ! is_valid_hostname "$HOSTNAME"; do
+        echo -e "${YELLOW}⚠ Invalid hostname format: $HOSTNAME${NC}"
+        echo -e "${BLUE}Use only letters, numbers, and hyphens (e.g., macbook-pro).${NC}"
+        echo -e "${BLUE}Enter hostname:${NC}"
+        read -r HOSTNAME
+        HOSTNAME=$(normalize_hostname "$HOSTNAME")
+    done
+
     echo -e "${BLUE}Using hostname: $HOSTNAME${NC}"
     
     SKIP_CLONE=false
@@ -412,11 +476,8 @@ fi
 # 3.2: Directory Structure & Symlinks
 echo -e "${BLUE}3.2 Setting up configuration directories...${NC}"
 
-# Create config directories
-mkdir -p "$HOME/.config/nix" "$HOME/.config/darwin" "$HOME/.config/home-manager"
-
-# Clean up existing symlinks
-rm -rf "$HOME/.config/nix" "$HOME/.config/darwin" "$HOME/.config/home-manager"
+# Prepare backup timestamp for existing config directories.
+BACKUP_TS=$(date +%Y%m%d_%H%M%S)
 mkdir -p "$HOME/.config"
 
 # Reorganize dotfiles if needed
@@ -431,14 +492,7 @@ fi
 # Create symlinks
 echo -e "${BLUE}Creating configuration symlinks...${NC}"
 for dir in nix darwin home-manager; do
-    if [ -d "$dir" ]; then
-        ln -sfn "$DOTFILES_PATH/$dir" "$HOME/.config/$dir"
-        echo -e "${GREEN}✓ Linked $dir${NC}"
-    else
-        echo -e "${YELLOW}⚠ Directory $dir not found, creating minimal structure${NC}"
-        mkdir -p "$dir"
-        ln -sfn "$DOTFILES_PATH/$dir" "$HOME/.config/$dir"
-    fi
+    safe_link_config_dir "$dir"
 done
 
 # Show structure
