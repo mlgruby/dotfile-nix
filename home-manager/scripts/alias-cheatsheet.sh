@@ -90,7 +90,7 @@ show_quick_reference() {
     echo -e "  ${GREEN}kfp${NC}         Select pod (interactive)"
     echo ""
     echo -e "${MAGENTA}🔧 System${NC}"
-    echo -e "  ${GREEN}rebuild${NC}     Rebuild system configuration"
+    echo -e "  ${GREEN}rebuild${NC}     Rebuild system configuration (supports --work/--personal)"
     echo -e "  ${GREEN}update${NC}      Update and rebuild"
     echo -e "  ${GREEN}cleanup${NC}     Clean old generations and caches"
     echo -e "  ${GREEN}rollback${NC}    Rollback to previous generation"

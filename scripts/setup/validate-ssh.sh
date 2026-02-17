@@ -12,6 +12,67 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+normalize_hostname() {
+    local raw="$1"
+    raw="${raw%%.*}"
+    raw="${raw//_/-}"
+    raw=$(echo "$raw" | tr -cd '[:alnum:]-')
+    raw=$(echo "$raw" | sed -E 's/-+/-/g; s/^-+//; s/-+$//')
+    echo "$raw"
+}
+
+list_hosts_profiles() {
+    local hosts_file="$1"
+    awk '
+        /^[[:space:]]*hosts[[:space:]]*=[[:space:]]*{/ {in_hosts=1; next}
+        in_hosts && /^[[:space:]]*};[[:space:]]*$/ {in_hosts=0; exit}
+        in_hosts && /^[[:space:]]*[a-zA-Z0-9_-]+[[:space:]]*=[[:space:]]*{/ {
+            line=$0
+            sub(/^[[:space:]]*/, "", line)
+            sub(/[[:space:]]*=.*/, "", line)
+            print line
+        }
+    ' "$hosts_file"
+}
+
+read_hosts_profile_value() {
+    local profile="$1"
+    local key="$2"
+    local hosts_file="$3"
+    awk -v profile="$profile" -v key="$key" '
+        /^[[:space:]]*hosts[[:space:]]*=[[:space:]]*{/ {in_hosts=1; next}
+        in_hosts && /^[[:space:]]*};[[:space:]]*$/ {in_hosts=0; exit}
+        in_hosts && $0 ~ ("^[[:space:]]*" profile "[[:space:]]*=[[:space:]]*{") {in_profile=1; next}
+        in_profile && /^[[:space:]]*};[[:space:]]*$/ {in_profile=0; next}
+        in_profile {
+            pattern="^[[:space:]]*" key "[[:space:]]*="
+            if ($0 ~ pattern) {
+                match($0, /"[^"]*"/)
+                if (RSTART > 0) {
+                    print substr($0, RSTART + 1, RLENGTH - 2)
+                    exit
+                }
+            }
+        }
+    ' "$hosts_file"
+}
+
+find_hosts_profile_by_hostname() {
+    local hosts_file="$1"
+    local current_hostname="$2"
+    local profile
+    while IFS= read -r profile; do
+        [ -z "$profile" ] && continue
+        local file_hostname
+        file_hostname=$(read_hosts_profile_value "$profile" "hostname" "$hosts_file")
+        if [ "$file_hostname" = "$current_hostname" ]; then
+            echo "$profile"
+            return 0
+        fi
+    done < <(list_hosts_profiles "$hosts_file")
+    return 1
+}
+
 echo -e "${BLUE}🔍 SSH Configuration Validator${NC}"
 echo -e "${BLUE}==============================${NC}"
 echo ""
@@ -111,8 +172,17 @@ for possible_dir in "dotfile" "dotfiles" "nix-config" "nix-darwin" ".dotfiles"; 
 done
 
 FLAKE_HOSTNAME=""
-if [ -n "$DOTFILES_DIR" ] && [ -f "$DOTFILES_DIR/user-config.nix" ]; then
-    FLAKE_HOSTNAME=$(grep -E '^\s*hostname\s*=' "$DOTFILES_DIR/user-config.nix" | sed 's/.*"\([^"]*\)".*/\1/')
+if [ -n "$DOTFILES_DIR" ]; then
+    CURRENT_HOSTNAME=$(normalize_hostname "$(scutil --get LocalHostName 2>/dev/null || hostname -s)")
+    if [ -f "$DOTFILES_DIR/hosts.nix" ]; then
+        ACTIVE_PROFILE=$(find_hosts_profile_by_hostname "$DOTFILES_DIR/hosts.nix" "$CURRENT_HOSTNAME" || true)
+        if [ -z "$ACTIVE_PROFILE" ]; then
+            ACTIVE_PROFILE=$(list_hosts_profiles "$DOTFILES_DIR/hosts.nix" | head -n1)
+        fi
+        if [ -n "$ACTIVE_PROFILE" ]; then
+            FLAKE_HOSTNAME=$(read_hosts_profile_value "$ACTIVE_PROFILE" "hostname" "$DOTFILES_DIR/hosts.nix")
+        fi
+    fi
 fi
 
 echo ""
@@ -142,10 +212,10 @@ else
         if [ -n "$FLAKE_HOSTNAME" ]; then
             echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#$FLAKE_HOSTNAME${NC}"
         else
-            echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>${NC}"
+            echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>${NC}"
         fi
     else
-        echo -e "${BLUE}  • Rebuild system: cd ~/Documents/[your-dotfiles-dir] && sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>${NC}"
+        echo -e "${BLUE}  • Rebuild system: cd ~/Documents/[your-dotfiles-dir] && sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>${NC}"
     fi
 fi
 

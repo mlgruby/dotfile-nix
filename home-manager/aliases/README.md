@@ -27,7 +27,7 @@ aliases/
 | `gl` | Git pull | `gl` |
 | `d` | Docker | `d ps` |
 | `k` | Kubectl | `k get pods` |
-| `rebuild` | Rebuild system | `rebuild` |
+| `rebuild` | Rebuild system (supports profile flags) | `rebuild --work` |
 | `cleanup` | Clean system | `cleanup` |
 
 ### Dangerous Operations

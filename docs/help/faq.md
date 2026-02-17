@@ -57,7 +57,7 @@ See: [Personalization Guide](../guides/personalization.md)
 
 ### Q: Can I change the directory structure?
 
-**A:** Yes! Edit `user-config.nix`:
+**A:** Yes! Edit `hosts.nix`:
 
 ```nix
 directories = {
@@ -89,7 +89,7 @@ sudo darwin-rebuild rollback
 
 # Or list all generations and pick one
 sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
-sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix> --rollback
+sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix> --rollback
 ```
 
 ### Q: Updates are slow, how can I speed them up?
@@ -202,7 +202,7 @@ See: [Development Environment Templates](../development/environment-templates.md
 **A:** Absolutely! That's a key benefit:
 
 1. **Clone the repository** on each machine
-2. **Update `user-config.nix`** with machine-specific details
+2. **Update `hosts.nix`** with machine-specific details
 3. **Run the installation** script
 4. **Enjoy identical environments**
 

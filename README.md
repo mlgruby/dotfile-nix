@@ -158,19 +158,38 @@ cd dotfile
 1. **Configure User Settings**
 
 ```bash
-cp user-config.template.nix user-config.nix
+cp hosts.example.nix hosts.nix
 ```
 
-Edit `user-config.nix` with your information:
+Edit `hosts.nix` with your information:
 
 ```nix
 {
-  username = "your-macos-username";  # Must match your macOS login
-  fullName = "Your Full Name";
-  email = "your.email@example.com";
-  githubUsername = "your-github-username";
-  hostname = "your-hostname";  # e.g., macbook-pro
+  common = {
+    username = "your-macos-username";
+    fullName = "Your Full Name";
+    githubUsername = "your-github-username";
+  };
+  hosts = {
+    work = {
+      hostname = "your-work-hostname";
+      profile = "work";
+    };
+    personal = {
+      hostname = "your-personal-hostname";
+      profile = "personal";
+    };
+  };
 }
+```
+
+Configure Git emails locally (not in `hosts.nix`):
+
+```bash
+git config -f ~/.gitconfig-work user.email "your.work@email.com"
+git config -f ~/.gitconfig-personal user.email "your.personal@email.com"
+git config --global --replace-all "includeIf.gitdir:$HOME/Development/Work/.path" "$HOME/.gitconfig-work"
+git config --global --replace-all "includeIf.gitdir:$HOME/Development/Personal/.path" "$HOME/.gitconfig-personal"
 ```
 
 1. **Run Installation**
@@ -211,29 +230,32 @@ This will check:
 For enhanced security and verified commits on GitHub, you can automatically set up GPG signing:
 
 ```bash
-./scripts/setup/gpg-github.sh
+./scripts/setup/gpg-github.sh --all
+# or one scope only:
+./scripts/setup/gpg-github.sh --work
+./scripts/setup/gpg-github.sh --personal
 ```
 
 This script will:
 
-- ✅ Check if a GPG key already exists for your email
+- ✅ Read email from `~/.gitconfig-work` / `~/.gitconfig-personal` (prompts if missing)
+- ✅ Check if a GPG key already exists for each selected email
 - ✅ Generate a new GPG key if needed (using secure defaults)
 - ✅ Authenticate with GitHub (if not already done)
 - ✅ Upload your public key to GitHub automatically
-- ✅ Update your `user-config.nix` with the key ID
-- ✅ Rebuild your configuration
+- ✅ Configure `user.signingkey` + `commit.gpgsign=true` in local `~/.gitconfig-*`
 - ✅ Test GPG signing functionality
 
 **Prerequisites:**
 
-- `user-config.nix` must be configured with your email
+- Git email configured locally via `~/.gitconfig-work` / `~/.gitconfig-personal`
 - GitHub CLI authentication (script will prompt if needed)
 
 **After setup:**
 
 - All your commits will be automatically signed
 - GitHub will show "Verified" badges on your commits
-- Your GPG key ID will be saved in `user-config.nix`
+- Your signing key IDs are stored only in local `~/.gitconfig-*` files (not tracked in git)
 
 **Manual GitHub Authentication (if needed):**
 
@@ -241,40 +263,22 @@ This script will:
 gh auth login
 ```
 
-**Example Output:**
+**Example Output (`--work`):**
 
 ```text
-=== Automated GPG Setup for GitHub ===
+=== GPG + GitHub Signing Setup (Local Profiles) ===
 
 [INFO] Checking prerequisites...
 [SUCCESS] Prerequisites check passed
-[INFO] Extracting user information from user-config.nix...
-[SUCCESS] User info extracted: John Doe <john@example.com>
-[INFO] Checking for existing GPG keys...
+[INFO] Configuring scope: work
 [WARNING] No existing GPG key found for john@example.com
 [INFO] Generating new GPG key for john@example.com...
 [SUCCESS] GPG key generated successfully: ABC123DEF456789
-[INFO] Checking GitHub authentication...
-[SUCCESS] GitHub authentication confirmed
-[INFO] Checking if GPG key already exists on GitHub...
-[WARNING] GPG key not found on GitHub
 [INFO] Uploading GPG key to GitHub...
 [SUCCESS] GPG key uploaded to GitHub successfully
-[INFO] Updating user-config.nix with GPG key ID...
-[SUCCESS] Updated user-config.nix with GPG key ID: ABC123DEF456789
-[INFO] Rebuilding Darwin configuration...
-[SUCCESS] Darwin configuration rebuilt successfully
-[INFO] Testing GPG signing...
+[SUCCESS] Configured /Users/<you>/.gitconfig-work
 [SUCCESS] GPG signing test passed
-[SUCCESS] Git signing is enabled
-
-[SUCCESS] GPG setup completed successfully!
-
-Next steps:
-1. Make a test commit: git commit -m 'Test GPG signing'
-2. Push to GitHub: git push origin main
-3. Check GitHub for the 'Verified' badge
-4. Your GPG key ID is: ABC123DEF456789
+[SUCCESS] GPG setup completed
 ```
 
 ## Applying Changes
@@ -282,7 +286,7 @@ Next steps:
 After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/Documents/dotfile` directory:
 
 ```bash
-sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>
+sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>
 # Or use the 'rebuild' alias (which includes sudo automatically)
 rebuild
 ```
@@ -295,7 +299,8 @@ rebuild
 dotfile/
 ├── flake.nix                   # Main configuration
 ├── flake.lock                  # Dependency lock file
-├── user-config.template.nix    # User configuration template
+├── hosts.nix                   # Machine configurations (work/personal)
+├── hosts.example.nix           # Hosts template
 ├── setup.sh                    # Quick setup script
 ├── scripts/                    # Organized scripts
 │   ├── install/
@@ -315,7 +320,11 @@ dotfile/
 ### System Commands
 
 ```bash
-rebuild   # Uses hostname defined in user-config.nix
+rebuild   # Uses hostname resolved from active host in hosts.nix
+          # (resolved from the active host entry in hosts.nix)
+          # Optional: rebuild --work | rebuild --personal
+rebuild-work      # Explicit work target
+rebuild-personal  # Explicit personal target
 update    # Update flake inputs and rebuild
 cleanup   # Clean old Nix generations
 ```

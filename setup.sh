@@ -203,7 +203,7 @@ main() {
     echo -e "${BLUE}Next steps:${NC}"
     echo -e "  1. Restart your terminal"
     echo -e "  2. Navigate to your dotfiles directory in ~/Documents/"
-    echo -e "  3. Run system rebuild: ${YELLOW}sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>${NC}"
+    echo -e "  3. Run system rebuild: ${YELLOW}sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>${NC}"
     echo ""
     echo -e "${BLUE}For help and troubleshooting:${NC}"
     echo -e "  • Run the SSH validator: ${YELLOW}./scripts/setup/validate-ssh.sh${NC}"
