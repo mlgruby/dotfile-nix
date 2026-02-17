@@ -4,11 +4,11 @@ This document explains how to customize directory paths in your dotfile configur
 
 ## Overview
 
-The dotfile system now supports dynamic path configuration through the `user-config.nix` file, eliminating hardcoded paths and making the configuration portable and customizable.
+The dotfile system now supports dynamic path configuration through the `hosts.nix` file, eliminating hardcoded paths and making the configuration portable and customizable.
 
 ## Configuration Structure
 
-### user-config.nix
+### hosts.nix
 
 ```nix
 {
@@ -109,7 +109,7 @@ The system includes comprehensive path validation:
 
 If you're upgrading from a version with hardcoded paths:
 
-1. **Update user-config.nix** with the new directory structure
+1. **Update hosts.nix** with the new directory structure
 2. **Customize paths** to match your current setup
 3. **Rebuild system** to apply changes
 4. **Test aliases** to ensure they point to correct locations
@@ -153,7 +153,7 @@ directories = {
    - Ensure all required directories are specified
 
 2. **Aliases Point to Wrong Locations**
-   - Verify directory paths in `user-config.nix`
+   - Verify directory paths in `hosts.nix`
    - Rebuild system after making changes
 
 3. **Custom Directories Not Creating Aliases**

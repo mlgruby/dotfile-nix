@@ -39,21 +39,21 @@
 #          sudo apt-get update
 #          sudo apt-get install -y shellcheck ripgrep
 #
-#      - name: Create CI user-config.nix
+#      - name: Create CI hosts.nix
 #        run: |
-#          cat > ./user-config.nix <<'EOF'
+#          cat > ./hosts.nix <<'EOF'
 #          {
-#            username = "runner";
-#            fullName = "CI Runner";
-#            email = "ci@example.com";
-#            githubUsername = "ci";
-#            hostname = "ci-mac";
-#            signingKey = "";
-#            directories = {
-#              dotfiles = "Documents/dotfile";
-#              workspace = "Development";
-#              downloads = "Downloads";
-#              documents = "Documents";
+#            common = {
+#              username = "runner";
+#              fullName = "CI Runner";
+#              githubUsername = "ci";
+#              signingKey = "";
+#            };
+#            hosts = {
+#              ci = {
+#                hostname = "ci-mac";
+#                profile = "work";
+#              };
 #            };
 #          }
 #          EOF

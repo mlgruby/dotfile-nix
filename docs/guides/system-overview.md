@@ -199,7 +199,7 @@ sudo nix-collect-garbage -d
 dotfile/
 ├── flake.nix              # System definition (entry point)
 ├── flake.lock             # Dependency versions (auto-generated)
-├── user-config.nix        # Your personal settings
+├── hosts.nix        # Your personal settings
 ├── darwin/                # System-level configuration
 │   ├── configuration.nix  # Main system config
 │   ├── homebrew.nix       # Package management
@@ -265,7 +265,7 @@ dotfile/
 1. **Small Config Changes**:
 
    ```bash
-   vim user-config.nix    # Edit personal settings
+   vim hosts.nix    # Edit personal settings
    rebuild               # Apply changes
    ```
 

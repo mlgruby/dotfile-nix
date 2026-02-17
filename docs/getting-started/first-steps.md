@@ -21,17 +21,17 @@ which zsh
 
 ## 🎯 Essential First Steps
 
-### 1. Update Your User Configuration
+### 1. Update Your Host Configuration
 
-Your personal settings are stored in `user-config.nix`. Let's make sure
+Your machine settings are stored in `hosts.nix`. Let's make sure
 everything is correct:
 
 ```bash
 # Navigate to your dotfiles
 cd ~/Documents/dotfile
 
-# Edit your user configuration
-vim user-config.nix
+# Edit your host configuration
+vim hosts.nix
 ```
 
 **Key settings to verify:**
@@ -40,6 +40,7 @@ vim user-config.nix
 - `email` - Used for Git commits
 - `githubUsername` - For GitHub integration
 - `hostname` - Should match your Mac's hostname
+- `profile` - Keep `work` for work host and `personal` for personal host
 
 ### 2. Test Core Functionality
 

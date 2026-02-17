@@ -26,7 +26,7 @@ Use a clean macOS VM snapshot and run:
 
 ```bash
 DOTFILES_REPO_URL=<your-repo-raw-url> ./setup.sh --yes
-sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>
+sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>
 ```
 
 Then validate:
