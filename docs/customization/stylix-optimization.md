@@ -202,7 +202,7 @@ stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
 
 ```bash
 # Check Stylix configuration
-nix eval .#darwinConfigurations.<hostname-from-user-config.nix>.config.stylix.targets
+nix eval .#darwinConfigurations.<hostname-from-hosts.nix>.config.stylix.targets
 
 # Test color variables
 echo $BASE16_COLOR_00_HEX  # Should show base color

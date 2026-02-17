@@ -57,13 +57,13 @@ run_guardrail_checks() {
 
   check_contains \
     ./flake.nix \
-    'user-config\.nix not found\.' \
-    'flake has clear missing user-config error'
+    'hosts\.nix not found\.' \
+    'flake has clear missing host-config error'
 
   check_contains \
     ./home-manager/aliases/platform.nix \
     'userConfig\.hostname' \
-    'darwin rebuild aliases use user-config hostname'
+    'darwin rebuild aliases use resolved host hostname'
 }
 
 print_vm_checklist() {
@@ -73,10 +73,10 @@ Manual VM checklist (fresh macOS snapshot)
 1. Clone repo to ~/Documents/dotfile.
 2. Run setup in non-interactive mode:
    DOTFILES_REPO_URL=<your-repo-raw-url> ./setup.sh --yes
-3. Confirm user-config values:
-   username, email, githubUsername, hostname.
+3. Confirm host config values:
+   hosts.nix has username/fullName/githubUsername and host hostname/profile.
 4. Run rebuild:
-   sudo darwin-rebuild switch --flake .#<hostname-from-user-config.nix>
+   sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>
 5. Validate key commands:
    rebuild
    health-check

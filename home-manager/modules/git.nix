@@ -18,7 +18,7 @@
 # - Works with shell aliases
 #
 # Note:
-# - Identity from user-config
+# - Identity from active host profile (email can also come from local includeIf)
 # - Additional aliases in aliases.nix
 {...} @ args: let
   inherit (args) fullName email signingKey;
@@ -30,12 +30,16 @@ in {
     # All configuration now under 'settings' namespace
     settings = {
       # User Identity
-      user = {
-        name = fullName;
-        email = email;
-      } // (if signingKey != "" then {
-        signingkey = signingKey; # GPG key ID for signing commits
-      } else {});
+      user =
+        {
+          name = fullName;
+        }
+        // (if email != "" then {
+          email = email;
+        } else {})
+        // (if signingKey != "" then {
+          signingkey = signingKey; # GPG key ID for signing commits
+        } else {});
 
       # Built-in Git Aliases
       alias = {

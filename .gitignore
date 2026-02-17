@@ -27,7 +27,7 @@ build/
 # Darwin system files
 /private/var/folders/
 # User Configuration
-user-config.nix
+home-manager/aliases.nix.bak
 # Claude Code settings
 .claude/
 # intelij

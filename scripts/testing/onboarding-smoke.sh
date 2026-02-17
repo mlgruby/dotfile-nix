@@ -47,11 +47,11 @@ collect_shell_files() {
 }
 
 check_required_files() {
+  local config_template_found=0
   local file
   for file in \
     ./setup.sh \
     ./flake.nix \
-    ./user-config.template.nix \
     ./scripts/install/pre-nix-installation.sh \
     ./scripts/setup/validate-ssh.sh; do
     if [[ -f "$file" ]]; then
@@ -60,6 +60,16 @@ check_required_files() {
       fail "required file missing: $file"
     fi
   done
+
+  if [[ -f "./hosts.example.nix" ]]; then
+    config_template_found=1
+  fi
+
+  if [[ "$config_template_found" -eq 1 ]]; then
+    pass "required config template exists (hosts.example.nix preferred)"
+  else
+    fail "missing config template: expected hosts.example.nix"
+  fi
 }
 
 check_shell_syntax() {
@@ -167,6 +177,22 @@ check_stale_patterns() {
   fi
 }
 
+check_hosts_no_emails() {
+  if [[ ! -f ./hosts.nix ]]; then
+    info "hosts.nix not present; skipping email-leak check"
+    return
+  fi
+
+  local matches
+  matches="$(rg -n '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' ./hosts.nix || true)"
+  if [[ -n "$matches" ]]; then
+    fail "hosts.nix contains email-like values; keep emails in local ~/.gitconfig-* only"
+    printf '%s\n' "$matches"
+  else
+    pass "hosts.nix contains no email-like values"
+  fi
+}
+
 info "running onboarding smoke checks from $ROOT_DIR"
 check_command bash
 check_command rg
@@ -177,6 +203,7 @@ check_shellcheck
 check_nix_flake
 check_script_references
 check_stale_patterns
+check_hosts_no_emails
 
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "onboarding smoke checks passed"

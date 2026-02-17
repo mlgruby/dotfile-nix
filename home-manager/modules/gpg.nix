@@ -35,8 +35,10 @@
     maxCacheTtl = 86400;           # 24 hours
     maxCacheTtlSsh = 86400;        # 24 hours
     
-    # Enable SSH support for Git operations
-    enableSshSupport = true;
+    # Keep SSH auth on the OS ssh-agent (plus Keychain on macOS).
+    # Enabling gpg-agent SSH support rewires SSH_AUTH_SOCK and can
+    # cause "agent refused operation" with standard ~/.ssh/* keys.
+    enableSshSupport = false;
     
     # Use system default pinentry program
     # pinentryPackage is handled automatically by Home Manager

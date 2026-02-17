@@ -28,7 +28,9 @@ in
     # --------------------------------------------------------------------------
     # System Rebuild
     # --------------------------------------------------------------------------
-    rebuild = "cd ${dotfileDir} && echo '🔄 Building system configuration...' && sudo darwin-rebuild switch --flake .#\"${userConfig.hostname}\" && cd - && echo '✅ System rebuild complete!' && rl";  # Rebuild and activate system configuration
+    rebuild = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" ${homeDir}/.config/home-manager/scripts/rebuild-system.sh";  # Rebuild current host; supports --work/--personal
+    rebuild-work = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" ${homeDir}/.config/home-manager/scripts/rebuild-system.sh --work";  # Force work host rebuild
+    rebuild-personal = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" ${homeDir}/.config/home-manager/scripts/rebuild-system.sh --personal";  # Force personal host rebuild
 
     rebuild-fast = mkTemplateAlias ''
       cd @dotfileDir@ && \

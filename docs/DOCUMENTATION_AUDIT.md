@@ -66,7 +66,7 @@ Comprehensive audit of documentation vs current code state.
 - ❌ `technical/nix-concepts.md` (linked, doesn't exist)
 - ❌ `technical/home-manager.md` (linked, doesn't exist)
 - ❌ `reference/flake-structure.md` (linked, doesn't exist)
-- ❌ `reference/user-config.md` (linked, doesn't exist)
+- ❌ `reference/hosts.md` (linked, doesn't exist)
 - ❌ `reference/darwin-modules.md` (linked, doesn't exist)
 - ❌ `reference/home-manager-modules.md` (linked, doesn't exist)
 - ❌ `reference/aliases.md` (linked, doesn't exist)

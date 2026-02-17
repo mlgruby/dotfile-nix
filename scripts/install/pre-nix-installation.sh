@@ -156,6 +156,236 @@ is_valid_hostname() {
     [[ "$1" =~ ^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$ ]]
 }
 
+is_valid_profile() {
+    [[ "$1" == "personal" || "$1" == "work" ]]
+}
+
+is_valid_email() {
+    [[ "$1" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]
+}
+
+ensure_trailing_slash() {
+    local path="$1"
+    case "$path" in
+        */) echo "$path" ;;
+        *) echo "${path}/" ;;
+    esac
+}
+
+list_hosts_profiles() {
+    local hosts_file="$1"
+    awk '
+        /^[[:space:]]*hosts[[:space:]]*=[[:space:]]*{/ {in_hosts=1; next}
+        in_hosts && /^[[:space:]]*};[[:space:]]*$/ {in_hosts=0; exit}
+        in_hosts && /^[[:space:]]*[a-zA-Z0-9_-]+[[:space:]]*=[[:space:]]*{/ {
+            line=$0
+            sub(/^[[:space:]]*/, "", line)
+            sub(/[[:space:]]*=.*/, "", line)
+            print line
+        }
+    ' "$hosts_file"
+}
+
+read_hosts_common_value() {
+    local key="$1"
+    local hosts_file="$2"
+    awk -v key="$key" '
+        /^[[:space:]]*common[[:space:]]*=[[:space:]]*{/ {in_common=1; next}
+        in_common && /^[[:space:]]*};[[:space:]]*$/ {in_common=0; exit}
+        in_common {
+            pattern="^[[:space:]]*" key "[[:space:]]*="
+            if ($0 ~ pattern) {
+                match($0, /"[^"]*"/)
+                if (RSTART > 0) {
+                    print substr($0, RSTART + 1, RLENGTH - 2)
+                    exit
+                }
+            }
+        }
+    ' "$hosts_file"
+}
+
+read_hosts_profile_value() {
+    local profile="$1"
+    local key="$2"
+    local hosts_file="$3"
+    awk -v profile="$profile" -v key="$key" '
+        /^[[:space:]]*hosts[[:space:]]*=[[:space:]]*{/ {in_hosts=1; next}
+        in_hosts && /^[[:space:]]*};[[:space:]]*$/ {in_hosts=0; exit}
+        in_hosts && $0 ~ ("^[[:space:]]*" profile "[[:space:]]*=[[:space:]]*{") {in_profile=1; next}
+        in_profile && /^[[:space:]]*};[[:space:]]*$/ {in_profile=0; next}
+        in_profile {
+            pattern="^[[:space:]]*" key "[[:space:]]*="
+            if ($0 ~ pattern) {
+                match($0, /"[^"]*"/)
+                if (RSTART > 0) {
+                    print substr($0, RSTART + 1, RLENGTH - 2)
+                    exit
+                }
+            }
+        }
+    ' "$hosts_file"
+}
+
+find_hosts_profile_by_hostname() {
+    local hosts_file="$1"
+    local current_hostname="$2"
+    local profile
+    while IFS= read -r profile; do
+        [ -z "$profile" ] && continue
+        local file_hostname
+        file_hostname=$(read_hosts_profile_value "$profile" "hostname" "$hosts_file")
+        if [ "$file_hostname" = "$current_hostname" ]; then
+            echo "$profile"
+            return 0
+        fi
+    done < <(list_hosts_profiles "$hosts_file")
+    return 1
+}
+
+configure_git_email_profiles() {
+    local default_work_path="$HOME/Documents/Work/"
+    local default_personal_path="$HOME/Documents/Personal/"
+    local work_path=""
+    local personal_path=""
+    local work_email=""
+    local personal_email=""
+
+    if [ -f "$HOME/.gitconfig-work" ]; then
+        work_email=$(git config -f "$HOME/.gitconfig-work" --get user.email || true)
+    fi
+    if [ -f "$HOME/.gitconfig-personal" ]; then
+        personal_email=$(git config -f "$HOME/.gitconfig-personal" --get user.email || true)
+    fi
+
+    echo -e "${BLUE}Git uses repository paths to select WORK vs PERSONAL email (includeIf.gitdir).${NC}"
+    echo -e "${BLUE}Any repo inside this WORK directory will use your WORK email profile.${NC}"
+    echo -e "${BLUE}Set base directory for work repositories (default: $default_work_path):${NC}"
+    read -r work_path
+    work_path=${work_path:-$default_work_path}
+    work_path=$(ensure_trailing_slash "$work_path")
+
+    echo -e "${BLUE}Any repo inside this PERSONAL directory will use your PERSONAL email profile.${NC}"
+    echo -e "${BLUE}Set base directory for personal repositories (default: $default_personal_path):${NC}"
+    read -r personal_path
+    personal_path=${personal_path:-$default_personal_path}
+    personal_path=$(ensure_trailing_slash "$personal_path")
+
+    echo -e "${BLUE}Enter WORK Git email${work_email:+ (default: $work_email)}:${NC}"
+    read -r input_work_email
+    work_email=${input_work_email:-$work_email}
+    while ! is_valid_email "${work_email:-}"; do
+        echo -e "${YELLOW}⚠ Invalid work email format. Use a valid email like name@example.com${NC}"
+        echo -e "${BLUE}Enter WORK Git email:${NC}"
+        read -r work_email
+    done
+
+    echo -e "${BLUE}Enter PERSONAL Git email${personal_email:+ (default: $personal_email)}:${NC}"
+    read -r input_personal_email
+    personal_email=${input_personal_email:-$personal_email}
+    while ! is_valid_email "${personal_email:-}"; do
+        echo -e "${YELLOW}⚠ Invalid personal email format. Use a valid email like name@example.com${NC}"
+        echo -e "${BLUE}Enter PERSONAL Git email:${NC}"
+        read -r personal_email
+    done
+
+    cat > "$HOME/.gitconfig-work" << EOF
+[user]
+    email = $work_email
+EOF
+
+    cat > "$HOME/.gitconfig-personal" << EOF
+[user]
+    email = $personal_email
+EOF
+
+    # Remove previous defaults if they exist to avoid stale includeIf rules.
+    git config --global --unset-all "includeIf.gitdir:${HOME}/Development/Work/.path" >/dev/null 2>&1 || true
+    git config --global --unset-all "includeIf.gitdir:${HOME}/Development/Personal/.path" >/dev/null 2>&1 || true
+
+    git config --global --replace-all "includeIf.gitdir:${work_path}.path" "$HOME/.gitconfig-work"
+    git config --global --replace-all "includeIf.gitdir:${personal_path}.path" "$HOME/.gitconfig-personal"
+
+    echo -e "${GREEN}✓ Git email profiles configured${NC}"
+    echo -e "  • Work: $work_path -> $HOME/.gitconfig-work"
+    echo -e "  • Personal: $personal_path -> $HOME/.gitconfig-personal"
+}
+
+configure_dotfiles_git_scope() {
+    local dotfiles_path="$1"
+    local dotfiles_path_with_slash
+    dotfiles_path_with_slash=$(ensure_trailing_slash "$dotfiles_path")
+
+    # Dotfiles repo is treated as personal by default.
+    git config --global --replace-all "includeIf.gitdir:${dotfiles_path_with_slash}.path" "$HOME/.gitconfig-personal"
+    echo -e "${GREEN}✓ Dotfiles repository mapped to PERSONAL Git profile${NC}"
+    echo -e "  • Dotfiles: $dotfiles_path_with_slash -> $HOME/.gitconfig-personal"
+}
+
+optional_github_auth_and_signing_setup() {
+    local gpg_script="$DOTFILES_PATH/scripts/setup/gpg-github.sh"
+    local run_gh_auth=""
+    local setup_signing=""
+    local signing_scope=""
+
+    echo -e "${BLUE}4.4 Optional GitHub auth and commit-signing setup...${NC}"
+
+    if ! command_exists gh; then
+        echo -e "${YELLOW}⚠ GitHub CLI (gh) is not available yet. Skipping GitHub auth/GPG setup.${NC}"
+        echo -e "${BLUE}  You can run later: gh auth login && ./scripts/setup/gpg-github.sh --all${NC}"
+        return
+    fi
+
+    echo -e "${BLUE}Authenticate GitHub CLI now? (y/N)${NC}"
+    read -r run_gh_auth
+    if [[ "$run_gh_auth" =~ ^[Yy]$ ]]; then
+        if gh auth status >/dev/null 2>&1; then
+            echo -e "${GREEN}✓ GitHub CLI already authenticated${NC}"
+        else
+            if gh auth login; then
+                echo -e "${GREEN}✓ GitHub CLI authentication complete${NC}"
+            else
+                echo -e "${YELLOW}⚠ GitHub authentication not completed. You can run 'gh auth login' later.${NC}"
+            fi
+        fi
+    else
+        echo -e "${YELLOW}⚠ Skipped GitHub CLI authentication${NC}"
+    fi
+
+    if [ ! -f "$gpg_script" ]; then
+        echo -e "${YELLOW}⚠ GPG setup script not found at $gpg_script${NC}"
+        return
+    fi
+
+    echo -e "${BLUE}Configure Git commit signing now?${NC}"
+    echo -e "${BLUE}Choose scope: [all/work/personal/skip] (default: skip)${NC}"
+    read -r setup_signing
+    setup_signing=$(echo "${setup_signing:-skip}" | tr '[:upper:]' '[:lower:]')
+
+    case "$setup_signing" in
+        all|work|personal)
+            signing_scope="--$setup_signing"
+            if bash "$gpg_script" "$signing_scope"; then
+                echo -e "${GREEN}✓ GPG signing setup completed for scope: $setup_signing${NC}"
+            else
+                echo -e "${YELLOW}⚠ GPG signing setup did not complete. You can rerun: ./scripts/setup/gpg-github.sh $signing_scope${NC}"
+            fi
+            ;;
+        skip|"")
+            echo -e "${YELLOW}⚠ Skipped GPG signing setup${NC}"
+            ;;
+        *)
+            echo -e "${YELLOW}⚠ Invalid option '$setup_signing'. Skipping GPG signing setup.${NC}"
+            echo -e "${BLUE}  You can run later: ./scripts/setup/gpg-github.sh --all${NC}"
+            ;;
+    esac
+}
+
+first_hosts_profile() {
+    local hosts_file="$1"
+    list_hosts_profiles "$hosts_file" | head -n1
+}
+
 safe_link_config_dir() {
     local dir_name="$1"
     local source_dir="$DOTFILES_PATH/$dir_name"
@@ -282,28 +512,56 @@ mkdir -p "$HOME/.config"
 
 # Check for existing dotfiles in common locations
 EXISTING_CONFIG=""
+HOSTS_CONFIG_FILE=""
+ACTIVE_PROFILE=""
+CURRENT_HOSTNAME=$(normalize_hostname "$(scutil --get LocalHostName 2>/dev/null || hostname -s)")
 for possible_dir in "dotfile" "dotfiles" "nix-config" "nix-darwin" ".dotfiles"; do
-    if [ -f "$HOME/Documents/$possible_dir/user-config.nix" ]; then
-        EXISTING_CONFIG="$HOME/Documents/$possible_dir"
-        break
+    CANDIDATE_REPO="$HOME/Documents/$possible_dir"
+    if [ ! -d "$CANDIDATE_REPO" ]; then
+        continue
+    fi
+
+    if [ -f "$CANDIDATE_REPO/hosts.nix" ]; then
+        HOSTS_CONFIG_FILE="$CANDIDATE_REPO/hosts.nix"
+        ACTIVE_PROFILE=$(find_hosts_profile_by_hostname "$HOSTS_CONFIG_FILE" "$CURRENT_HOSTNAME" || true)
+        if [ -z "$ACTIVE_PROFILE" ]; then
+            ACTIVE_PROFILE=$(first_hosts_profile "$HOSTS_CONFIG_FILE" || true)
+        fi
+        if [ -n "$ACTIVE_PROFILE" ]; then
+            EXISTING_CONFIG="$CANDIDATE_REPO"
+            break
+        fi
     fi
 done
 
 # Check if we already have a dotfiles repo
 if [ -n "$EXISTING_CONFIG" ]; then
-    echo -e "${GREEN}✓ Found existing user-config.nix in $EXISTING_CONFIG${NC}"
+    echo -e "${GREEN}✓ Found existing config in $EXISTING_CONFIG${NC}"
     cd "$EXISTING_CONFIG"
-    
-    USERNAME=$(grep -E '^\s*username\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
-    FULLNAME=$(grep -E '^\s*fullName\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
-    EMAIL=$(grep -E '^\s*email\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
-    GITHUB_USERNAME=$(grep -E '^\s*githubUsername\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
-    HOSTNAME=$(grep -E '^\s*hostname\s*=' user-config.nix | sed 's/.*"\([^"]*\)".*/\1/')
+    if [ -z "$HOSTS_CONFIG_FILE" ] || [ -z "$ACTIVE_PROFILE" ]; then
+        handle_error "hosts.nix not found or missing profiles in $EXISTING_CONFIG"
+    fi
+    echo -e "${GREEN}  Using hosts.nix profile: $ACTIVE_PROFILE${NC}"
+    USERNAME=$(read_hosts_common_value "username" "$HOSTS_CONFIG_FILE")
+    FULLNAME=$(read_hosts_common_value "fullName" "$HOSTS_CONFIG_FILE")
+    GITHUB_USERNAME=$(read_hosts_common_value "githubUsername" "$HOSTS_CONFIG_FILE")
+    SIGNING_KEY=$(read_hosts_common_value "signingKey" "$HOSTS_CONFIG_FILE")
+
+    HOSTNAME=$(read_hosts_profile_value "$ACTIVE_PROFILE" "hostname" "$HOSTS_CONFIG_FILE")
+    PROFILE=$(read_hosts_profile_value "$ACTIVE_PROFILE" "profile" "$HOSTS_CONFIG_FILE")
+    PROFILE=${PROFILE:-$ACTIVE_PROFILE}
+
+    SIGNING_KEY=${SIGNING_KEY:-""}
+    PROFILE=${PROFILE:-personal}
+    PROFILE=$(echo "$PROFILE" | tr '[:upper:]' '[:lower:]')
+    if ! is_valid_profile "$PROFILE"; then
+        PROFILE="personal"
+    fi
     
     echo -e "${GREEN}Configuration loaded:${NC}"
     echo -e "  Username: $USERNAME"
     echo -e "  GitHub: $GITHUB_USERNAME"
-    echo -e "  Email: $EMAIL"
+    echo -e "  Profile: $PROFILE"
     
     # Set the dotfiles directory for later use
     DOTFILES_PATH="$EXISTING_CONFIG"
@@ -319,9 +577,6 @@ else
     
     echo -e "${BLUE}Enter your full name:${NC}"
     read -r FULLNAME
-    
-    echo -e "${BLUE}Enter your email:${NC}"
-    read -r EMAIL
     
     echo -e "${BLUE}Enter your GitHub username (default: $USERNAME):${NC}"
     read -r GITHUB_USERNAME
@@ -345,6 +600,22 @@ else
     done
 
     echo -e "${BLUE}Using hostname: $HOSTNAME${NC}"
+
+    DEFAULT_PROFILE="personal"
+    echo -e "${BLUE}Enter profile for this machine [personal/work] (default: $DEFAULT_PROFILE):${NC}"
+    read -r PROFILE
+    PROFILE=${PROFILE:-$DEFAULT_PROFILE}
+    PROFILE=$(echo "$PROFILE" | tr '[:upper:]' '[:lower:]')
+
+    while ! is_valid_profile "$PROFILE"; do
+        echo -e "${YELLOW}⚠ Invalid profile: $PROFILE${NC}"
+        echo -e "${BLUE}Allowed values: personal or work${NC}"
+        echo -e "${BLUE}Enter profile:${NC}"
+        read -r PROFILE
+        PROFILE=$(echo "$PROFILE" | tr '[:upper:]' '[:lower:]')
+    done
+
+    SIGNING_KEY=""
     
     SKIP_CLONE=false
 fi
@@ -354,9 +625,9 @@ echo -e "${BLUE}2.2 Setting up Git configuration...${NC}"
 
 # Configure git
 git config --global user.name "$FULLNAME"
-git config --global user.email "$EMAIL"
+configure_git_email_profiles
+echo -e "${GREEN}✓ Git configured (name + per-scope email profiles)${NC}"
 
-echo -e "${GREEN}✓ Git configured${NC}"
 
 # 2.3: Setup Dotfiles Repository
 echo -e "${BLUE}2.3 Setting up dotfiles repository...${NC}"
@@ -402,22 +673,56 @@ else
 fi
 
 cd "$DOTFILES_PATH"
+configure_dotfiles_git_scope "$DOTFILES_PATH"
 
-# 2.4: Create/Update user-config.nix
-echo -e "${BLUE}2.4 Creating user configuration file...${NC}"
+# 2.4: Create/Update hosts.nix
+echo -e "${BLUE}2.4 Creating host configuration file...${NC}"
 
-cat > user-config.nix << EOF
+HOSTS_FILE="hosts.nix"
+if [ "$PROFILE" = "work" ]; then
+    OTHER_PROFILE="personal"
+else
+    OTHER_PROFILE="work"
+fi
+
+OTHER_HOSTNAME=""
+if [ -f "$HOSTS_FILE" ]; then
+    OTHER_HOSTNAME=$(read_hosts_profile_value "$OTHER_PROFILE" "hostname" "$HOSTS_FILE")
+fi
+OTHER_HOSTNAME=${OTHER_HOSTNAME:-"your-${OTHER_PROFILE}-hostname"}
+
+if [ "$PROFILE" = "work" ]; then
+    WORK_HOSTNAME="$HOSTNAME"
+    PERSONAL_HOSTNAME="$OTHER_HOSTNAME"
+else
+    PERSONAL_HOSTNAME="$HOSTNAME"
+    WORK_HOSTNAME="$OTHER_HOSTNAME"
+fi
+
+cat > "$HOSTS_FILE" << EOF
 {
-  username = "$USERNAME";
-  fullName = "$FULLNAME";
-  email = "$EMAIL";
-  githubUsername = "$GITHUB_USERNAME";
-  hostname = "$HOSTNAME";
-  signingKey = ""; # Will be set up later if needed
+  common = {
+    username = "$USERNAME";
+    fullName = "$FULLNAME";
+    githubUsername = "$GITHUB_USERNAME";
+    signingKey = "$SIGNING_KEY"; # GPG key ID for signing commits
+  };
+
+  hosts = {
+    work = {
+      hostname = "$WORK_HOSTNAME";
+      profile = "work";
+    };
+
+    personal = {
+      hostname = "$PERSONAL_HOSTNAME";
+      profile = "personal";
+    };
+  };
 }
 EOF
 
-echo -e "${GREEN}✓ User configuration saved to user-config.nix${NC}"
+echo -e "${GREEN}✓ Configuration saved to $HOSTS_FILE${NC}"
 echo -e "${GREEN}✓ Phase 2 Complete: User configuration and dotfiles ready!${NC}"
 
 # ================================================================================================
@@ -605,6 +910,8 @@ if git config --global user.name >/dev/null 2>&1; then
 else
     echo -e "${YELLOW}⚠ Git configuration may need adjustment${NC}"
 fi
+
+optional_github_auth_and_signing_setup
 
 echo -e "${GREEN}✓ Phase 4 Complete: Setup finished!${NC}"
 

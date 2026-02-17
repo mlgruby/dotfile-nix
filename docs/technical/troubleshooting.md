@@ -51,15 +51,15 @@ brew update && brew upgrade
 ### User Configuration
 
 ```bash
-# Error: user-config.nix not found
-cp user-config.template.nix user-config.nix
-# Edit user-config.nix with your details
+# Error: hosts.nix not found
+cp hosts.example.nix hosts.nix
+# Edit hosts.nix with your details
 
 # Error: Wrong hostname
 hostname  # Check current hostname
-# Update hostname in user-config.nix
+# Update hostname in hosts.nix (matching work/personal entry)
 
-# Error: Missing required attributes in user-config.nix
+# Error: Missing required attributes in host config
 # This error occurs when required fields are missing from your configuration.
 # Required fields:
 # - username
@@ -70,11 +70,11 @@ hostname  # Check current hostname
 # Solution:
 # ```bash
 # # Check your configuration
-# cat user-config.nix
+# cat hosts.nix
 # 
 # # Ensure all required fields are present
-# cp user-config.template.nix user-config.nix
-# # Edit user-config.nix with your details
+# cp hosts.example.nix hosts.nix
+# # Edit hosts.nix with your details
 # ```
 
 # Error: Invalid hostname format
@@ -91,7 +91,7 @@ hostname  # Check current hostname
 # # Check current hostname
 # hostname
 # 
-# # Update hostname in user-config.nix
+# # Update hostname in hosts.nix
 # # Use a valid format like: macbook-pro
 # ```
 ```
@@ -209,7 +209,7 @@ source ~/.zshrc
 ## Prevention
 
 1. **Before Making Changes**
-   - Backup your `user-config.nix`
+   - Backup your `hosts.nix`
    - Commit working configuration
    - Create a new branch for testing
 
