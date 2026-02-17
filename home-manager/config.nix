@@ -52,8 +52,8 @@
 
     # Bedrock settings
     useBedrock = "1";
-    maxOutputTokens = "4096";
-    maxThinkingTokens = "1024";
+    maxOutputTokens = "8192";
+    maxThinkingTokens = "4096";
 
     # Model IDs - Using EU region endpoints for GDPR compliance
     # Format: eu.anthropic.<model>-<version>-v1:0

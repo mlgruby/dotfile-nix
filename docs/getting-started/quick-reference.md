@@ -250,7 +250,7 @@ vim ~/.config/alacritty/config.toml
 
 | What to Change | File to Edit |
 |----------------|--------------|
-| **Personal Info** | `user-config.nix` |
+| **Personal Info** | `hosts.nix` |
 | **System Settings** | `darwin/configuration.nix` |
 | **Packages** | `darwin/homebrew.nix` |
 | **Shell Aliases** | `home-manager/aliases/` (organized by category) |

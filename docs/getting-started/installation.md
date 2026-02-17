@@ -62,7 +62,7 @@ Personalize the configuration for your use:
    Start by copying the template:
 
    ```bash
-   cp user-config.template.nix user-config.nix
+   cp hosts.example.nix hosts.nix
    ```
 
 2. **Edit user settings**
@@ -71,12 +71,33 @@ Personalize the configuration for your use:
 
    ```nix
    {
-     username = "your-macos-username";  # Must match your macOS login
-     fullName = "Your Full Name";
-     email = "your.email@example.com";
-     githubUsername = "your-github-username";
-     hostname = "your-hostname";        # Your Mac's hostname
+     common = {
+       username = "your-macos-username";
+       fullName = "Your Full Name";
+       githubUsername = "your-github-username";
+     };
+
+     hosts = {
+       work = {
+         hostname = "your-work-hostname";
+         profile = "work";
+       };
+
+       personal = {
+         hostname = "your-personal-hostname";
+         profile = "personal";
+       };
+     };
    }
+   ```
+
+   Configure Git emails locally (not in `hosts.nix`):
+
+   ```bash
+   git config -f ~/.gitconfig-work user.email "your.work@email.com"
+   git config -f ~/.gitconfig-personal user.email "your.personal@email.com"
+   git config --global --replace-all "includeIf.gitdir:$HOME/Development/Work/.path" "$HOME/.gitconfig-work"
+   git config --global --replace-all "includeIf.gitdir:$HOME/Development/Personal/.path" "$HOME/.gitconfig-personal"
    ```
 
 ### 3. Run Installation

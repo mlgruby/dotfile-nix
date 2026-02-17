@@ -58,6 +58,9 @@ in
         compression = true;
         controlMaster = "auto";
         controlPersist = "10m";
+        extraOptions = {
+          UseKeychain = "yes";
+        };
         forwardAgent = false;
         serverAliveInterval = 60;
         serverAliveCountMax = 3;

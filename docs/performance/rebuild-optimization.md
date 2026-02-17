@@ -186,7 +186,7 @@ If evaluations are taking longer than expected:
 rm -rf ~/.cache/nix/
 
 # Profile evaluation time
-time nix eval .#darwinConfigurations.<hostname-from-user-config.nix>.system
+time nix eval .#darwinConfigurations.<hostname-from-hosts.nix>.system
 
 # Check for expensive operations
 perf-profile

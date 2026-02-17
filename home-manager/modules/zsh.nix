@@ -86,6 +86,17 @@
       };
 
       initContent = ''
+        # Ensure shells use macOS launchd ssh-agent socket.
+        # This prevents stale SSH_AUTH_SOCK values (for example from gpg-agent)
+        # from being carried across long-lived sessions.
+        if command -v launchctl > /dev/null 2>&1; then
+          launchd_ssh_sock="$(launchctl getenv SSH_AUTH_SOCK 2>/dev/null || true)"
+          if [ -n "$launchd_ssh_sock" ] && [ -S "$launchd_ssh_sock" ]; then
+            export SSH_AUTH_SOCK="$launchd_ssh_sock"
+          fi
+          unset launchd_ssh_sock
+        fi
+
         # Python Environment Management
         # System-wide Python 3.12 via Homebrew
         # Project-specific Python versions via uv

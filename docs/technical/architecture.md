@@ -236,7 +236,7 @@ Can rollback   Built but not    Running system
 ~/Documents/dotfile/         # Repository root
 ├── flake.nix               # System definition
 ├── flake.lock              # Input version lock
-├── user-config.nix         # Personal configuration
+├── hosts.nix               # Host configuration (work/personal)
 ├── darwin/                 # System configuration
 ├── home-manager/           # User environment
 ├── scripts/                # Automation scripts

@@ -159,7 +159,7 @@ cleanup
 Follow these guidelines to maintain a stable and manageable configuration:
 
 1. **Version Control**
-   - Keep a backup of `user-config.nix`
+   - Keep a backup of `hosts.nix`
    - Commit changes to your fork
    - Use branches for testing
 

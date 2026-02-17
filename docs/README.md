@@ -93,7 +93,8 @@ Start Here → Architecture → Configuration → Advanced Topics
 ### Configuration Files
 
 - **[flake.nix](../flake.nix)** - Main system definition
-- **[user-config.nix](../user-config.nix)** - Personal settings template
+- **[hosts.nix](../hosts.nix)** - Host configurations (work/personal)
+- **[hosts.example.nix](../hosts.example.nix)** - Host configuration template
 - **[Darwin Configuration](../darwin/configuration.nix)** - System-level config
 - **[Home Manager](../home-manager/default.nix)** - User environment config
 

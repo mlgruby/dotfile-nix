@@ -50,7 +50,7 @@
 # - Manages dotfiles and configs
 #
 # Note:
-# - User-specific settings in user-config.nix
+# - User-specific settings in hosts.nix profile entries
 # - Some features need manual setup
 # - Check module docs for details
 # - Configuration is declarative
@@ -181,6 +181,37 @@
     };
     ".config/home-manager/scripts/alias-cheatsheet.sh" = {
       source = ./scripts/alias-cheatsheet.sh;
+      executable = true;
+    };
+    ".config/home-manager/scripts/rebuild-system.sh" = {
+      source = ./scripts/rebuild-system.sh;
+      executable = true;
+    };
+    "bin/rebuild" = {
+      text = ''
+        #!/usr/bin/env bash
+        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
+        CURRENT_CONFIG_HOST="${userConfig.hostname}"
+        exec "$HOME/.config/home-manager/scripts/rebuild-system.sh" "$@"
+      '';
+      executable = true;
+    };
+    "bin/rebuild-work" = {
+      text = ''
+        #!/usr/bin/env bash
+        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
+        CURRENT_CONFIG_HOST="${userConfig.hostname}"
+        exec "$HOME/.config/home-manager/scripts/rebuild-system.sh" --work "$@"
+      '';
+      executable = true;
+    };
+    "bin/rebuild-personal" = {
+      text = ''
+        #!/usr/bin/env bash
+        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
+        CURRENT_CONFIG_HOST="${userConfig.hostname}"
+        exec "$HOME/.config/home-manager/scripts/rebuild-system.sh" --personal "$@"
+      '';
       executable = true;
     };
   };

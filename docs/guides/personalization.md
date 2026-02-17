@@ -71,7 +71,7 @@ $character"""
 
 ### Custom Directory Structure
 
-Customize your directory layout in `user-config.nix`:
+Customize your directory layout in `hosts.nix`:
 
 ```nix
 directories = {
@@ -358,7 +358,7 @@ home.packages = with pkgs; [
 ### Essential Customizations
 
 - [ ] **Choose your theme** (Gruvbox, Tokyo Night, Catppuccin, etc.)
-- [ ] **Set up custom directories** in `user-config.nix`
+- [ ] **Set up custom directories** in `hosts.nix`
 - [ ] **Add your favorite GUI apps** to Homebrew casks
 - [ ] **Configure Git identity** and signing key
 - [ ] **Customize shell aliases** for your workflow
@@ -389,7 +389,7 @@ stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml
 ### 2. Add Personal Project Shortcuts
 
 ```nix
-# user-config.nix
+# hosts.nix
 directories = {
   # ... existing directories
   blog = "Development/my-blog";
