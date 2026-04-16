@@ -46,7 +46,9 @@
     # Python
     PYTHONSTARTUP = "$XDG_CONFIG_HOME/python/pythonrc";
     JUPYTER_CONFIG_DIR = "$XDG_CONFIG_HOME/jupyter";
-    
-    # Docker - using default ~/.docker to preserve CLI plugin discovery
+
+    # Keep Docker config at the default path so CLI plugin discovery works
+    # consistently (for example `docker mcp` from Docker Desktop).
+    DOCKER_CONFIG = "$HOME/.docker";
   };
 }

@@ -116,5 +116,9 @@ fi
 
 echo "Building system configuration for target: $target_host"
 cd "$DOTFILE_DIR"
-sudo darwin-rebuild switch --flake ".#$target_host" "${extra_args[@]}"
+sudo darwin-rebuild switch \
+  --flake ".#$target_host" \
+  --option connect-timeout "${NIX_CONNECT_TIMEOUT:-15}" \
+  --option download-attempts "${NIX_DOWNLOAD_ATTEMPTS:-5}" \
+  "${extra_args[@]}"
 echo "System rebuild complete for: $target_host"

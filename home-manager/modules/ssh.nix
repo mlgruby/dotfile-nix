@@ -72,6 +72,11 @@ in
         user = "git";
         identityFile = "~/.ssh/github";
         identitiesOnly = true;
+        extraOptions = {
+          # Avoid Apple ssh-agent/keychain edge cases after reboot
+          # ("agent refused operation") by forcing direct key usage.
+          IdentityAgent = "none";
+        };
       };
 
       # Internal/private network hosts
