@@ -123,6 +123,8 @@
     };
   };
 
+  gtk.gtk4.theme = null;
+
   # Optimized Stylix Target Configuration
   # Conservative approach using only confirmed working targets
   # Based on applications we have configured and Stylix documentation
@@ -192,7 +194,7 @@
         #!/usr/bin/env bash
         DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
         CURRENT_CONFIG_HOST="${userConfig.hostname}"
-        exec "$HOME/.config/home-manager/scripts/rebuild-system.sh" "$@"
+        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" "$@"
       '';
       executable = true;
     };
@@ -201,7 +203,7 @@
         #!/usr/bin/env bash
         DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
         CURRENT_CONFIG_HOST="${userConfig.hostname}"
-        exec "$HOME/.config/home-manager/scripts/rebuild-system.sh" --work "$@"
+        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" --work "$@"
       '';
       executable = true;
     };
@@ -210,7 +212,7 @@
         #!/usr/bin/env bash
         DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
         CURRENT_CONFIG_HOST="${userConfig.hostname}"
-        exec "$HOME/.config/home-manager/scripts/rebuild-system.sh" --personal "$@"
+        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" --personal "$@"
       '';
       executable = true;
     };

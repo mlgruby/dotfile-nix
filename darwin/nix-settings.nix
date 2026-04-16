@@ -1,4 +1,9 @@
-{userConfig, pkgs, ...}: {
+{
+  lib,
+  userConfig,
+  pkgs,
+  ...
+}: {
   # Nix Settings extracted from flake.nix inline module
   # Includes settings previously in darwin/configuration.nix
   # OPTIMIZED FOR REBUILD PERFORMANCE
@@ -17,8 +22,11 @@
     eval-cache = true; # Enable evaluation cache (default, but explicit)
 
     # Network optimization
-    connect-timeout = 5; # Faster timeout for unreachable substituters
-    download-attempts = 3; # Retry failed downloads
+    # 5s is too aggressive for real-world cache DNS/network jitter and causes
+    # rebuilds to fail even when the cache is healthy.
+    connect-timeout = 15;
+    download-attempts = 5;
+    download-buffer-size = 536870912; # 512 MiB for large binary cache fetches
     
     # Substituters for binary cache (performance critical)
     substituters = [
@@ -80,4 +88,27 @@
     automatic = true;
     interval = { Day = 1; }; # Daily store optimization
   };
+
+  # nix-darwin's default kickstart path can fail if launchd briefly unloads the
+  # daemon during service reload. Bootstrap the plist again before retrying.
+  system.activationScripts.nix-daemon.text = lib.mkForce ''
+    if [[ -e /etc/nix/nix.custom.conf ]]; then
+      mv /etc/nix/nix.custom.conf{,.before-nix-darwin}
+    fi
+
+    if ! diff /etc/nix/nix.conf /run/current-system/etc/nix/nix.conf &> /dev/null || ! diff /etc/nix/machines /run/current-system/etc/nix/machines &> /dev/null; then
+      echo "reloading nix-daemon..." >&2
+      launchctl kill HUP system/org.nixos.nix-daemon 2>/dev/null || true
+    fi
+
+    while ! nix-store --store daemon -q --hash ${pkgs.stdenv.shell} &>/dev/null; do
+      echo "waiting for nix-daemon" >&2
+      if ! launchctl kickstart system/org.nixos.nix-daemon 2>/dev/null; then
+        launchctl bootstrap system /Library/LaunchDaemons/org.nixos.nix-daemon.plist 2>/dev/null || true
+        launchctl enable system/org.nixos.nix-daemon 2>/dev/null || true
+        launchctl kickstart system/org.nixos.nix-daemon 2>/dev/null || true
+      fi
+      sleep 1
+    done
+  '';
 }

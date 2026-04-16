@@ -8,7 +8,8 @@
 # - Sets environment variables for Bedrock API access
 #
 # How it works:
-# - Creates ~/.claude/settings.json with Bedrock configuration
+# - Creates ~/.claude/settings.default.json with Bedrock configuration
+# - Bootstraps ~/.claude/settings.json only if missing so plugins can mutate it
 # - Uses EU region endpoints for GDPR compliance
 # - Auto-refreshes AWS SSO credentials when they expire
 #
@@ -20,15 +21,11 @@
 # Usage:
 # - Run 'claude' in terminal to start Claude Code
 # - Credentials auto-refresh via awsAuthRefresh command
-{...}: let
+{lib, ...}: let
   defaults = import ../config.nix;
   inherit (defaults) claude;
   inherit (defaults.aws) region;
-in {
-  # Claude Code settings file
-  # Location: ~/.claude/settings.json
-  # Docs: https://docs.anthropic.com/claude-code/configuration
-  home.file.".claude/settings.json".text = builtins.toJSON {
+  settings = builtins.toJSON {
     # AWS SSO auto-refresh command
     # Runs automatically when Bedrock returns credential errors
     awsAuthRefresh = "aws sso login --profile ${claude.awsProfile}";
@@ -38,7 +35,7 @@ in {
     env = {
       # AWS profile for Bedrock API calls
       AWS_PROFILE = claude.awsProfile;
-      # Region must match the model endpoint prefix (eu. = eu-west-1)
+      # Region must support the selected Bedrock inference profile
       AWS_REGION = region;
 
       # Enable Bedrock as the backend (instead of direct Anthropic API)
@@ -48,7 +45,7 @@ in {
       # Max tokens for extended thinking/reasoning
       MAX_THINKING_TOKENS = claude.maxThinkingTokens;
 
-      # Model selection - all use EU endpoints for GDPR compliance
+      # Model selection - defaults use EU endpoints for GDPR compliance
       # Sonnet: Balanced speed and capability (default)
       ANTHROPIC_MODEL = claude.models.default;
       # Haiku: Fast responses, lower cost (for simple tasks)
@@ -57,4 +54,22 @@ in {
       ANTHROPIC_DEFAULT_OPUS_MODEL = claude.models.opus;
     };
   };
+in {
+  # Claude Code default settings template.
+  # The live settings file must remain mutable because Claude plugins edit it.
+  # Location: ~/.claude/settings.default.json
+  # Docs: https://docs.anthropic.com/claude-code/configuration
+  home.file.".claude/settings.default.json".text = settings;
+
+  home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    mkdir -p "$HOME/.claude"
+
+    if [ -L "$HOME/.claude/settings.json" ]; then
+      rm "$HOME/.claude/settings.json"
+    fi
+
+    if [ ! -e "$HOME/.claude/settings.json" ]; then
+      install -m 600 "$HOME/.claude/settings.default.json" "$HOME/.claude/settings.json"
+    fi
+  '';
 }

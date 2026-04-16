@@ -28,9 +28,9 @@ in
     # --------------------------------------------------------------------------
     # System Rebuild
     # --------------------------------------------------------------------------
-    rebuild = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" ${homeDir}/.config/home-manager/scripts/rebuild-system.sh";  # Rebuild current host; supports --work/--personal
-    rebuild-work = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" ${homeDir}/.config/home-manager/scripts/rebuild-system.sh --work";  # Force work host rebuild
-    rebuild-personal = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" ${homeDir}/.config/home-manager/scripts/rebuild-system.sh --personal";  # Force personal host rebuild
+    rebuild = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" bash ${homeDir}/.config/home-manager/scripts/rebuild-system.sh";  # Rebuild current host; supports --work/--personal
+    rebuild-work = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" bash ${homeDir}/.config/home-manager/scripts/rebuild-system.sh --work";  # Force work host rebuild
+    rebuild-personal = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" bash ${homeDir}/.config/home-manager/scripts/rebuild-system.sh --personal";  # Force personal host rebuild
 
     rebuild-fast = mkTemplateAlias ''
       cd @dotfileDir@ && \

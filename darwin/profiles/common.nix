@@ -1,7 +1,6 @@
 {
   # Shared base packages for all macOS profiles.
   taps = [
-    "warrensbox/tap"
     "nguyenphutrong/tap"
   ];
 
@@ -15,6 +14,7 @@
     "zoxide"
     "uv"
     "poetry"
+    "poppler"
     "python@3.12"
     "cmake"
     "duckdb"
@@ -25,6 +25,7 @@
     "go"
     "node"
     "shellcheck"
+    "kafka"
     "yamlresume"
     "fzf"
     "yq"
@@ -39,7 +40,6 @@
     "helm"
     "terraform-docs"
     "tflint"
-    "warrensbox/tap/tfswitch"
   ];
 
   casks = [
@@ -67,7 +67,7 @@
     "insync"
     "obsidian"
     "quotio"
-    "spotify"
+    # "spotify"
     "whatsapp"
     "vlc"
     "font-jetbrains-mono-nerd-font"
@@ -82,6 +82,8 @@
     "font-dejavu-sans-mono-nerd-font"
     "font-inconsolata-nerd-font"
     "tailscale-app"
+    "copilot-cli"
+    # "steam"
   ];
 
   masApps = {};
