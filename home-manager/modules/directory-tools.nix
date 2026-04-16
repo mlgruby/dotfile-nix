@@ -51,7 +51,7 @@
         ];
         
         # Gruvbox Dark theme for broot
-        skin = {
+        skin = lib.mkForce {
           default = "rgb(235, 219, 178) none";              # Default text
           tree = "rgb(146, 131, 116) none";                 # Tree lines
           parent = "rgb(235, 219, 178) none";               # Parent directory
@@ -91,7 +91,7 @@
           
           # Selection and matching
           selected_line = "none rgb(60, 56, 54)";           # Selected line background
-          char_match = "rgb(250, 189, 47) none";            # Character matches
+          char_match = "rgb(250, 189, 47) none"; # Character matches
           file_error = "rgb(251, 73, 52) none";             # File errors
           
           # Interface elements
