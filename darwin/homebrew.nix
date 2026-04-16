@@ -132,7 +132,6 @@ in {
     global = {
       autoUpdate = true;
       brewfile = true;
-      lockfiles = true;
     };
 
     # Mac App Store apps

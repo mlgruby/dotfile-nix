@@ -70,7 +70,7 @@
       set -g status-position top
       set -g default-terminal "screen-256color"
       set -ag terminal-overrides ",xterm-256color:RGB"
-      set -g update-environment "DISPLAY KRB5CCNAME SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY"
+      set -g update-environment "DISPLAY KRB5CCNAME SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY DOCKER_CONFIG"
 
       # Pane Management
       bind h split-window -h -c "#{pane_current_path}"

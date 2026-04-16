@@ -55,12 +55,12 @@
     maxOutputTokens = "8192";
     maxThinkingTokens = "4096";
 
-    # Model IDs - Using EU region endpoints for GDPR compliance
-    # Format: eu.anthropic.<model>-<version>-v1:0
+    # Model IDs - Using EU geo inference endpoints for GDPR compliance
+    # Format: eu.anthropic.<model>-<version>
     # Available models: https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html
     models = {
-      # Default model for general tasks (balanced speed/capability)
-      default = "eu.anthropic.claude-sonnet-4-5-20250929-v1:0";
+      # Default model for general tasks (Sonnet 4.6, 1M context)
+      default = "eu.anthropic.claude-sonnet-4-6";
       # Fast model for simple tasks (lower latency, lower cost)
       fast = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
       # Most capable model for complex reasoning
@@ -98,7 +98,6 @@
     lazywarden = "192.168.10.28";       # Bitwarden backup
     ha = "192.168.10.24";               # Home Assistant
     linkwarden = "192.168.10.29";       # Bookmark manager
-    wazuh = "192.168.10.27";            # Wazuh
     windmill = "192.168.10.30";         # Windmill
 
     # Monitoring stack
@@ -106,8 +105,9 @@
     prometheus = "192.168.10.17";
 
     # Utilities
-    warracker = "192.168.10.19";     # Warranty tracker
-    netspeed = "192.168.10.25";      # Network speed test
+    warracker = "192.168.10.19";          # Warranty tracker
+    utility = "192.168.10.9";             # Utility Hub
+    Obsidian-Livesync = "192.168.10.19";  # Obsidian Livesync
   };
 
   # ==========================================================================

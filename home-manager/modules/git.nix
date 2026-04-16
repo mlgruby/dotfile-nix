@@ -25,6 +25,7 @@
 in {
   programs.git = {
     enable = true;
+    signing.format = null;
 
     # Git Configuration using new settings structure
     # All configuration now under 'settings' namespace
