@@ -64,10 +64,10 @@ which kotlin-language-server  # Kotlin LSP
 ### Adding Software
 
 ```bash
-# Add CLI tool (edit homebrew.nix)
-vim ~/Documents/dotfile/darwin/homebrew.nix
+# Add CLI tool (prefer Home Manager package modules)
+vim ~/Documents/dotfile/home-manager/modules/packages/system.nix
 
-# Add GUI app (edit homebrew.nix casks section)
+# Add GUI app or macOS integration (edit Homebrew casks/brews)
 vim ~/Documents/dotfile/darwin/homebrew.nix
 
 # Apply changes
@@ -78,9 +78,10 @@ rebuild
 
 | Type | Location | Examples |
 |------|----------|----------|
-| **CLI Tools** | `homebrew.brews` | `git`, `curl`, `jq` |
+| **CLI Tools** | `home-manager/modules/packages/*.nix` | `fd`, `duf`, `shellcheck`, `awscli2` |
 | **GUI Apps** | `homebrew.casks` | `brave-browser`, `docker-desktop` |
-| **Development** | Template-specific | Language runtimes, debuggers |
+| **Global runtimes/build tools** | `darwin/profiles/common.nix` | `node`, `go`, `cmake` |
+| **Project tooling** | Template-specific | Language runtimes, debuggers |
 
 ## 📁 Directory Navigation
 

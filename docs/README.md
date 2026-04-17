@@ -47,6 +47,7 @@ Start Here → Development Environment → Terminal Setup → Performance
 - [Development Environment Templates](development/environment-templates.md)
 - [Git & GitHub Setup](guides/git-setup.md)
 - [AWS SSO Setup](guides/aws-sso-setup.md)
+- [Lazywarden Recovery](guides/lazywarden-recovery.md)
 - [Python Development](development/python-setup.md)
 - [Cloud Tools (AWS, GCP)](development/cloud-setup.md)
 
@@ -87,6 +88,7 @@ Start Here → Architecture → Configuration → Advanced Topics
 
 - **[Alias System](../home-manager/aliases/README.md)** - Complete alias reference (~220 total)
 - **[Scripts Guide](../home-manager/scripts/README.md)** - Helper scripts documentation
+- **[Lazywarden Recovery](guides/lazywarden-recovery.md)** - Decrypt Lazywarden backup archives
 - **[Quick Start](../SCRIPTS_QUICKSTART.md)** - Get started with aliases in 5 minutes
 - **[Refactoring Analysis](../REFACTORING_ANALYSIS.md)** - Code improvement opportunities
 
@@ -169,6 +171,7 @@ docs/
 ├── guides/                      ← Step-by-step guides
 │   ├── system-overview.md
 │   ├── configuration-basics.md
+│   ├── lazywarden-recovery.md
 │   ├── personalization.md
 │   ├── development-setup.md
 │   ├── terminal-setup.md

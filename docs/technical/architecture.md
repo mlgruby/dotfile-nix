@@ -270,7 +270,7 @@ The system validates user configuration to prevent common errors:
 ```nix
 validateConfig = config: let
   # Check required attributes
-  requiredAttrs = [ "username" "hostname" "email" "fullName" "githubUsername" ];
+  requiredAttrs = [ "username" "hostname" "fullName" "githubUsername" ];
   missingAttrs = builtins.filter (attr: !(builtins.hasAttr attr config)) requiredAttrs;
   
   # Validate hostname format

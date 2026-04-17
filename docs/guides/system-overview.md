@@ -129,12 +129,12 @@ environment.systemPackages = with pkgs; [
 ```nix
 # Native macOS integration
 homebrew = {
-  brews = [ "awscli" "terraform" ];
+  brews = [ "mas" "gnu-getopt" ];
   casks = [ "brave-browser" "docker-desktop" ];
 };
 ```
 
-**Best for**: GUI applications, macOS-specific tools
+**Best for**: GUI applications, fonts, vendor apps, and macOS-specific tools
 
 ### Development Templates (Project-specific)
 

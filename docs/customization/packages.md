@@ -43,7 +43,7 @@ home.packages = with pkgs; [
   # Utilities
   btop       # System monitor
   duf        # Disk usage
-  neofetch   # System info
+  fastfetch  # System info
 ];
 ```
 

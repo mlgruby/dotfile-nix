@@ -26,7 +26,7 @@
 { config, lib, ... }:
 
 let
-  defaults = import ../config.nix;
+  defaults = import ../config/ssh.nix;
 
   # Helper function to create homelab SSH host config
   mkHomelabHost = name: ip: {
@@ -39,9 +39,7 @@ let
   };
 
   # Generate all homelab hosts from defaults
-  homelabMatchBlocks = builtins.listToAttrs (
-    lib.mapAttrsToList mkHomelabHost defaults.homelabHosts
-  );
+  homelabMatchBlocks = builtins.listToAttrs (lib.mapAttrsToList mkHomelabHost defaults.homelabHosts);
 in
 {
   programs.ssh = {
@@ -85,6 +83,7 @@ in
         compression = true;
         serverAliveInterval = 60;
       };
-    } // homelabMatchBlocks;  # Merge in all homelab hosts
+    }
+    // homelabMatchBlocks; # Merge in all homelab hosts
   };
 }
