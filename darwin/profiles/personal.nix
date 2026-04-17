@@ -1,18 +1,10 @@
-{
-  # Add profile-specific packages here.
+# Personal profile Homebrew overrides.
+#
+# Keep this file focused on differences from common.nix. Shared packages belong
+# in darwin/homebrew-packages/; personal-only additions or removals belong here.
+
+(import ./lib.nix).mkProfile {
   # Example:
   # extraCasks = [ "spotify" "discord" ];
-
-  extraTaps = [];
-  extraBrews = [];
-  extraCasks = [];
-
-  # Remove from common set for this profile.
-  # Example:
   # removeCasks = [ "microsoft-office" "slack" ];
-  removeTaps = [];
-  removeBrews = [];
-  removeCasks = [];
-
-  masApps = {};
 }

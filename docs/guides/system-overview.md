@@ -129,12 +129,12 @@ environment.systemPackages = with pkgs; [
 ```nix
 # Native macOS integration
 homebrew = {
-  brews = [ "awscli" "terraform" ];
+  brews = [ "mas" "gnu-getopt" ];
   casks = [ "brave-browser" "docker-desktop" ];
 };
 ```
 
-**Best for**: GUI applications, macOS-specific tools
+**Best for**: GUI applications, fonts, vendor apps, and macOS-specific tools
 
 ### Development Templates (Project-specific)
 
@@ -153,7 +153,7 @@ setup-dev-env nodejs  # Creates .envrc with Node.js tools
 1. **Edit Configuration**
 
    ```bash
-   vim darwin/homebrew.nix  # Add a package
+   vim darwin/homebrew-packages/casks/apps.nix  # Add a shared GUI app
    ```
 
 2. **Build System**
@@ -202,7 +202,9 @@ dotfile/
 ├── hosts.nix        # Your personal settings
 ├── darwin/                # System-level configuration
 │   ├── configuration.nix  # Main system config
-│   ├── homebrew.nix       # Package management
+│   ├── homebrew.nix       # Homebrew activation and profile composition
+│   ├── homebrew-packages/ # Shared Homebrew package lists
+│   ├── profiles/          # Profile-specific Homebrew overrides
 │   └── *.nix             # Other system modules
 ├── home-manager/          # User-level configuration
 │   ├── default.nix       # Main user config
@@ -272,7 +274,7 @@ dotfile/
 2. **Adding Software**:
 
    ```bash
-   vim darwin/homebrew.nix  # Add to brews or casks
+   vim darwin/homebrew-packages/casks/apps.nix  # Add shared GUI apps
    rebuild                  # Install and configure
    ```
 

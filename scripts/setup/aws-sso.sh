@@ -11,7 +11,7 @@ echo "🚀 Setting up AWS SSO configuration for Lightricks..."
 # Check if AWS CLI is installed
 if ! command -v aws &> /dev/null; then
     echo "❌ AWS CLI is not installed. Please install it first:"
-    echo "   macOS: brew install awscli"
+    echo "   dotfile: add awscli2 to home-manager/modules/packages/cloud.nix and rebuild"
     echo "   Linux: curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip awscliv2.zip && sudo ./aws/install"
     exit 1
 fi
@@ -142,6 +142,34 @@ _aws_test_creds() {
   return 1
 }
 
+_aws_credential_value() {
+  local creds="$1" key="$2"
+  printf '%s\n' "$creds" |
+    awk -F= -v key="$key" '
+      $1 == key || $1 == "export " key {
+        sub(/^[^=]*=/, "")
+        gsub(/^"|"$/, "")
+        print
+        exit
+      }
+    '
+}
+
+_aws_export_env_output() {
+  local creds="$1"
+  local access_key secret_key session_token
+
+  access_key="$(_aws_credential_value "$creds" "AWS_ACCESS_KEY_ID")"
+  secret_key="$(_aws_credential_value "$creds" "AWS_SECRET_ACCESS_KEY")"
+  session_token="$(_aws_credential_value "$creds" "AWS_SESSION_TOKEN")"
+
+  [ -n "$access_key" ] && export AWS_ACCESS_KEY_ID="$access_key"
+  [ -n "$secret_key" ] && export AWS_SECRET_ACCESS_KEY="$secret_key"
+  [ -n "$session_token" ] && export AWS_SESSION_TOKEN="$session_token"
+
+  [ -n "$access_key" ] && [ -n "$secret_key" ] && [ -n "$session_token" ]
+}
+
 _aws_sso_login_single() {
   local profile="$1"
   local label="$2"
@@ -158,7 +186,6 @@ _aws_sso_login_single() {
 
 # Core SSO login function (single or both)
 aws_sso_login() {
-  local profiles=("${@:-default-sso}")
   if [ $# -eq 0 ] || [ "$1" = "both" ]; then
     echo "🔐 Logging into both AWS SSO profiles..."
     _aws_sso_login_single "production-sso" "Production SSO login" || return 1
@@ -171,7 +198,8 @@ aws_sso_login() {
     _aws_sso_login_single "$1" "Logging into AWS SSO for profile: $1" || return 1
     export AWS_PROFILE="$1"
     sleep 2
-    if local account_id=$(_aws_test_creds "$1"); then
+    local account_id
+    if account_id="$(_aws_test_creds "$1")"; then
       echo "✅ SSO credentials working - Account: $account_id"
     else
       echo "⚠️  SSO login succeeded but credentials not ready"
@@ -183,7 +211,7 @@ aws_sso_login() {
 # Profile switching with credential testing
 aws_profile() {
   local profile="${1:-default}"
-  if ! aws configure list-profiles | grep -q "^$profile$"; then
+  if ! aws configure list-profiles | grep -Fxq "$profile"; then
     echo "❌ Profile '$profile' not found. Available:"
     aws configure list-profiles
     return 1
@@ -191,8 +219,10 @@ aws_profile() {
   unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
   export AWS_PROFILE="$profile"
   echo "🎯 Switched to AWS profile: $AWS_PROFILE"
-  if local account_id=$(_aws_test_creds "$profile"); then
-    local user_arn=$(AWS_PROFILE="$profile" aws sts get-caller-identity --query Arn --output text 2>/dev/null)
+  local account_id
+  if account_id="$(_aws_test_creds "$profile")"; then
+    local user_arn
+    user_arn="$(AWS_PROFILE="$profile" aws sts get-caller-identity --query Arn --output text 2>/dev/null)"
     echo "✅ Profile working - Account: $account_id"
     echo "👤 Identity: $user_arn"
   else
@@ -210,11 +240,16 @@ aws_export_creds() {
     echo "💡 Try: aws_sso_login $profile"
     return 1
   fi
-  if local temp_creds=$(aws configure export-credentials --profile "$profile" --format env 2>/dev/null); then
+  local temp_creds
+  if temp_creds="$(aws configure export-credentials --profile "$profile" --format env 2>/dev/null)"; then
     echo "✅ Exporting temporary credentials as environment variables..."
-    eval "$temp_creds"
-    echo "🔑 Credentials exported: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN"
-    if local account_id=$(_aws_test_creds "$profile"); then
+    if ! _aws_export_env_output "$temp_creds"; then
+      echo "❌ Failed to parse exported credentials"
+      return 1
+    fi
+    echo "🔑 Credentials exported without eval: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN"
+    local account_id
+    if account_id="$(_aws_test_creds "$profile")"; then
       echo "✅ Environment credentials verified - Account: $account_id"
     fi
   else
@@ -235,11 +270,17 @@ aws_export_to_file() {
     return 1
   fi
   
-  if local temp_creds=$(aws configure export-credentials --profile "$profile" --format env 2>/dev/null); then
-    echo "$temp_creds" > "$output_file"
+  local temp_creds
+  if temp_creds="$(aws configure export-credentials --profile "$profile" --format env 2>/dev/null)"; then
+    mkdir -p "$(dirname "$output_file")"
+    local old_umask
+    old_umask="$(umask)"
+    umask 077
+    printf '%s\n' "$temp_creds" > "$output_file"
+    umask "$old_umask"
+    chmod 600 "$output_file"
     echo "✅ Credentials exported to: $output_file"
     echo "💡 To use: source $output_file"
-    echo "💡 Or: eval \"\$(cat $output_file)\""
   else
     echo "❌ Failed to export credentials"
     return 1
@@ -253,10 +294,11 @@ aws_whoami() {
   echo "Region: ${AWS_REGION:-$AWS_DEFAULT_REGION}"
   echo ""
   if aws sts get-caller-identity > /dev/null 2>&1; then
-    local identity=$(aws sts get-caller-identity)
-    local account=$(echo "$identity" | grep -o '"Account": "[^"]*"' | cut -d'"' -f4)
-    local arn=$(echo "$identity" | grep -o '"Arn": "[^"]*"' | cut -d'"' -f4)
-    local user_id=$(echo "$identity" | grep -o '"UserId": "[^"]*"' | cut -d'"' -f4)
+    local identity account arn user_id
+    identity="$(aws sts get-caller-identity)"
+    account="$(echo "$identity" | grep -o '"Account": "[^"]*"' | cut -d'"' -f4)"
+    arn="$(echo "$identity" | grep -o '"Arn": "[^"]*"' | cut -d'"' -f4)"
+    user_id="$(echo "$identity" | grep -o '"UserId": "[^"]*"' | cut -d'"' -f4)"
     echo "✅ Account: $account"
     echo "👤 User ID: $user_id"
     echo "🎭 ARN: $arn"
@@ -311,7 +353,7 @@ alias awsr='aws configure list'             # Show current config
 # ENVIRONMENT EXPORT HELPERS
 # ==========================================
 
-# Export credentials and show copy-paste commands
+# Export credentials to a sourceable file without printing secrets
 aws_export_env() {
   local profile="${1:-$AWS_PROFILE}"
   [ -z "$profile" ] && { echo "❌ No profile specified"; return 1; }
@@ -323,19 +365,7 @@ aws_export_env() {
     return 1
   fi
   
-  local temp_creds=$(aws configure export-credentials --profile "$profile" --format env 2>/dev/null)
-  if [ -n "$temp_creds" ]; then
-    echo ""
-    echo "📋 Copy and paste these commands to export credentials:"
-    echo "# ===== AWS Credentials for $profile ====="
-    echo "$temp_creds"
-    echo "# ===== End AWS Credentials ====="
-    echo ""
-    echo "💡 Or run: awse (alias for aws_export_creds)"
-  else
-    echo "❌ Failed to get credentials"
-    return 1
-  fi
+  aws_export_to_file "$profile" "$HOME/.aws/temp-creds.env"
 }
 
 # Generate .env file for applications
@@ -351,18 +381,26 @@ aws_generate_env_file() {
     return 1
   fi
   
-  local temp_creds=$(aws configure export-credentials --profile "$profile" --format env 2>/dev/null)
+  local temp_creds
+  temp_creds="$(aws configure export-credentials --profile "$profile" --format env-no-export 2>/dev/null)"
   if [ -n "$temp_creds" ]; then
     # Backup existing .env if it exists
     [ -f "$env_file" ] && cp "$env_file" "${env_file}.backup.$(date +%Y%m%d_%H%M%S)"
     
-    echo "# AWS Credentials - Generated $(date)" > "$env_file"
-    echo "$temp_creds" >> "$env_file"
-    echo "AWS_REGION=$AWS_REGION" >> "$env_file"
-    echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" >> "$env_file"
+    local old_umask
+    old_umask="$(umask)"
+    umask 077
+    {
+      echo "# AWS Credentials - Generated $(date)"
+      printf '%s\n' "$temp_creds"
+      echo "AWS_REGION=$AWS_REGION"
+      echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
+    } > "$env_file"
+    umask "$old_umask"
+    chmod 600 "$env_file"
     
     echo "✅ Generated $env_file with AWS credentials"
-    echo "💡 Use with: source $env_file"
+    echo "💡 File permissions set to 600. Do not commit this file."
   else
     echo "❌ Failed to generate .env file"
     return 1
@@ -370,7 +408,7 @@ aws_generate_env_file() {
 }
 
 # Short aliases for env export
-alias awsenv='aws_export_env'               # Show export commands
+alias awsenv='aws_export_env'               # Write sourceable temp credential file
 alias awsgen='aws_generate_env_file'        # Generate .env file
 
 EOF
@@ -387,6 +425,8 @@ EOF
             cat >> "$SHELL_CONFIG" << 'EOF'
 # Enable AWS CLI command completion for zsh  
 if command -v aws_completer &> /dev/null; then
+   autoload -U bashcompinit
+   bashcompinit
    complete -C aws_completer aws
 fi
 EOF
@@ -443,8 +483,8 @@ echo ""
 echo "🔑 CREDENTIAL EXPORT:"
 echo "   awse              # Export to environment variables"
 echo "   awsef <profile>   # Export profile to file"
-echo "   awsenv            # Show export commands to copy/paste"
-echo "   awsgen            # Generate .env file"
+echo "   awsenv            # Write sourceable temp credential file"
+echo "   awsgen            # Generate chmod 600 .env file"
 echo ""
 echo "🔍 UTILITIES:"
 echo "   awsw              # Who am I? (show current identity)"

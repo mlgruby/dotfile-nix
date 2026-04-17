@@ -1,6 +1,10 @@
-# Nix Darwin System Configuration
+# Nix Darwin Dotfiles
 
-A modular, reproducible system configuration for macOS using Nix, nix-darwin, and home-manager.
+A modular macOS configuration using Nix, nix-darwin, Home Manager, and
+Homebrew. The repo is organized around clear ownership boundaries: Nix manages
+system/user configuration, Home Manager owns user-level CLI tools and program
+settings, and Homebrew owns GUI apps, fonts, vendor apps, and selected global
+toolchains.
 
 ## 🚀 Quick Start
 
@@ -54,10 +58,10 @@ Each component serves a specific purpose in creating a reproducible system:
   - Handles dotfiles and program settings
   - Ensures consistent user environment
 
-- **Homebrew**: macOS package management
-  - Manages GUI applications
-  - Handles macOS-specific packages
-  - Provides quick updates for certain tools
+- **Homebrew**: macOS app and toolchain management
+  - Owns GUI apps, fonts, and vendor-managed desktop software
+  - Owns selected global runtimes/build chains shared with IDEs
+  - Avoids duplicating user-level CLI tools managed by Home Manager
 
 ## Design Decisions
 
@@ -83,20 +87,25 @@ Each component serves a specific purpose in creating a reproducible system:
     - Streamlined configuration files
     - Fast shell startup times
 
-### File Structure
+### Current Shape
 
 The repository is organized into logical, optimized components:
 
 - `darwin/` - System configuration
   - Separates macOS-specific settings
-  - Manages system-wide packages
+  - Composes Homebrew package lists from `darwin/homebrew-packages/`
+  - Applies profile-specific Homebrew overrides from `darwin/profiles/`
   - Controls security policies
 
-- `home-manager/` - User environment (Optimized)
+- `home-manager/` - User environment
   - Modular program configurations with helper functions
   - Lazy-loaded AWS SSO functions for fast startup
+  - Package-only CLI groups under `home-manager/modules/packages/`
   - Personal preferences and tools
   - Shell and terminal setup
+
+- `lib/` - Shared Nix helpers
+  - Host config validation and enrichment
 
 - `nix/` - Core Nix setup
   - Basic Nix configuration
@@ -111,7 +120,7 @@ The repository is organized into logical, optimized components:
 
 ## Quick Start
 
-### Option 1: One-Command Setup (Automatic)
+### Option 1: One-Command Setup
 
 For a quick setup that proceeds automatically after 5 seconds:
 
@@ -135,6 +144,13 @@ This will automatically:
 - Perform system checks
 - Ask for your preferred directory name (defaults to `dotfile`)
 - Guide you through the complete setup process
+
+After setup, open a new terminal and run:
+
+```bash
+rebuild
+./scripts/setup/validate-ssh.sh
+```
 
 ## Manual Installation
 
@@ -293,6 +309,26 @@ rebuild
 
 **Note:** The `sudo` is required due to recent nix-darwin updates that require system activation to run as root for security reasons.
 
+## Package Ownership
+
+Use one owner for each tool:
+
+| What you are adding | Where it belongs |
+|---------------------|------------------|
+| Configured Home Manager programs | `home-manager/modules/programs/` or a dedicated module |
+| Plain user-level CLI binaries | `home-manager/modules/packages/*.nix` |
+| GUI apps and vendor macOS apps | `darwin/homebrew-packages/casks/` |
+| Fonts | `darwin/homebrew-packages/casks/fonts.nix` |
+| Global IDE/shared toolchains | `darwin/homebrew-packages/brews/toolchains.nix` |
+| Work/personal-only package changes | `darwin/profiles/work.nix` or `darwin/profiles/personal.nix` |
+| Project-pinned dependencies | Project config, `direnv`, `uv`, or project flakes |
+
+Useful references:
+
+- [Package Management](docs/guides/package-management.md)
+- [Toolchain Ownership](docs/guides/toolchain-ownership.md)
+- [Home Manager Package Groups](home-manager/modules/packages/README.md)
+
 ## Directory Structure
 
 ```bash
@@ -301,7 +337,16 @@ dotfile/
 ├── flake.lock                  # Dependency lock file
 ├── hosts.nix                   # Machine configurations (work/personal)
 ├── hosts.example.nix           # Hosts template
+├── lib/                         # Shared Nix helpers
 ├── setup.sh                    # Quick setup script
+├── darwin/
+│   ├── homebrew.nix            # Homebrew activation and composition
+│   ├── homebrew-packages/      # Shared Homebrew package lists
+│   └── profiles/               # Work/personal Homebrew overrides
+├── home-manager/
+│   ├── default.nix             # User environment entry point
+│   ├── modules/package-groups.nix
+│   └── modules/packages/       # Package-only Home Manager CLI groups
 ├── scripts/                    # Organized scripts
 │   ├── install/
 │   │   ├── pre-nix-installation.sh    # Installation script
@@ -321,7 +366,6 @@ dotfile/
 
 ```bash
 rebuild   # Uses hostname resolved from active host in hosts.nix
-          # (resolved from the active host entry in hosts.nix)
           # Optional: rebuild --work | rebuild --personal
 rebuild-work      # Explicit work target
 rebuild-personal  # Explicit personal target
@@ -351,30 +395,41 @@ awsf      # Ultimate AWS workflow
 
 Comprehensive documentation is organized into the following sections:
 
+### Getting Started
+
+- [Documentation Index](docs/README.md)
+- [Installation Guide](docs/getting-started/installation.md)
+- [First Steps](docs/getting-started/first-steps.md)
+- [Quick Reference](docs/getting-started/quick-reference.md)
+
 ### Core Guides
 
-- [Installation Guide](docs/core/installation.md) - Complete setup instructions
-- [Configuration Guide](docs/core/configuration.md) - System configuration
-- [Troubleshooting Guide](docs/core/troubleshooting.md) - Common issues and solutions
+- [System Overview](docs/guides/system-overview.md)
+- [Configuration Basics](docs/guides/configuration-basics.md)
+- [Package Management](docs/guides/package-management.md)
+- [Toolchain Ownership](docs/guides/toolchain-ownership.md)
 
-### Tool Configuration
+### Tools
 
-- [Git & GitHub](docs/git.md)
-- [Cloud Tools](docs/cloud.md)
-- [Terminal Tools](docs/terminal.md)
+- [Git & GitHub](docs/guides/git-setup.md)
+- [Terminal Setup](docs/guides/terminal-setup.md)
+- [AWS SSO Setup](docs/guides/aws-sso-setup.md)
+- [Lazywarden Recovery](docs/guides/lazywarden-recovery.md)
+- [Python Development](docs/development/python-setup.md)
 
-### Customization
+### Customization And Help
 
-- [Package Management](docs/customization/packages.md) - Adding and managing packages
-- [Module System](docs/customization/modules.md) - Working with modules
-- [Theme Configuration](docs/customization/themes.md) - Visual customization
-
-Each guide contains detailed examples and best practices for its respective area.
+- [Package Customization](docs/customization/packages.md)
+- [Module System](docs/customization/modules.md)
+- [Theme Configuration](docs/customization/themes.md)
+- [FAQ](docs/help/faq.md)
+- [Troubleshooting](docs/help/troubleshooting.md)
+- [Onboarding Test Plan](docs/testing/onboarding-test-plan.md)
 
 ## Uninstallation
 
 ```bash
-./uninstall.sh
+./scripts/install/uninstall.sh
 ```
 
 ## Acknowledgments
@@ -388,4 +443,9 @@ This configuration was developed with the assistance of [Cursor](https://cursor.
 
 ## Important Notes
 
--*   **Neovim:** The Neovim configuration (`home-manager/neovim.nix`) uses an activation script to bootstrap a [LazyVim](https://www.lazyvim.org/) starter configuration into `~/.config/nvim` if that directory doesn't exist. Subsequent Neovim configuration changes should be made manually within `~/.config/nvim`. For a fully declarative setup, `programs.neovim` would need significant refactoring.
+- **Neovim:** The Neovim configuration (`home-manager/neovim.nix`) uses an
+  activation script to bootstrap a [LazyVim](https://www.lazyvim.org/) starter
+  configuration into `~/.config/nvim` if that directory does not exist.
+  Subsequent Neovim configuration changes should be made manually within
+  `~/.config/nvim`. For a fully declarative setup, `programs.neovim` would need
+  significant refactoring.

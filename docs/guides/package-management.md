@@ -9,7 +9,7 @@ Your system uses a **three-tier approach** for optimal compatibility and perform
 ```text
 📦 Package Sources
 ├── Nix Packages (Primary) - CLI tools, development utilities
-├── Homebrew (Compatibility) - GUI apps, macOS-specific tools  
+├── Homebrew (Compatibility) - GUI apps, fonts, macOS-specific tools
 └── Development Templates (Isolated) - Project-specific environments
 ```
 
@@ -44,7 +44,11 @@ environment.systemPackages = with pkgs; [
 
 ### User-Level Packages
 
-**Location**: `home-manager/default.nix`
+**Location**: `home-manager/default.nix` and `home-manager/modules/packages/*.nix`
+
+See
+[`home-manager/modules/packages/README.md`](../../home-manager/modules/packages/README.md)
+for package group ownership rules.
 
 ```nix
 home.packages = with pkgs; [
@@ -67,6 +71,18 @@ home.packages = with pkgs; [
   # Documentation
   markdownlint-cli
 ];
+```
+
+Package-only Home Manager modules are split by purpose:
+
+```text
+home-manager/modules/packages/
+├── cloud.nix        # AWS, Kubernetes, Terraform helpers
+├── development.nix  # linters, benchmarking, analysis tools
+├── languages.nix    # language servers and global language tooling
+├── security.nix     # sops, age
+├── system.nix       # fd, duf, dust, fastfetch, network/system tools
+└── text.nix         # pandoc, poppler-utils, glow, yq-go, JSON/YAML tools
 ```
 
 **Best for**:
@@ -99,9 +115,13 @@ nix show-config
 
 ## 🍺 Homebrew Package Management
 
-### CLI Tools (Brews)
+### Selected CLI Formulae (Brews)
 
-**Location**: `darwin/homebrew.nix`
+**Locations**:
+
+- `darwin/homebrew.nix` - Homebrew activation and profile composition
+- `darwin/homebrew-packages/brews/` - Shared formulae by ownership type
+- `darwin/profiles/*.nix` - Profile-specific additions and removals
 
 ```nix
 homebrew = {
@@ -114,28 +134,19 @@ homebrew = {
   brews = [
     # macOS-Specific Tools
     "mas"              # Mac App Store CLI
-    "mackup"           # Application settings sync
 
-    # Cloud Tools (frequent updates)
-    "awscli"
-    "google-cloud-sdk"
-    "azure-cli"
-
-    # Development Tools
-    "terraform"
-    "kubectl"
-    "helm"             # Kubernetes package manager
+    # Language runtimes and build chains intentionally kept global
+    "node"
+    "go"
+    "python@3.12"
     "gnu-getopt"       # GNU implementation of getopt
-
-    # System Utilities
-    "duf"              # Disk usage
-    "dust"             # Directory sizes
-    "zoxide"           # Smart cd
   ];
 };
 ```
 
 ### GUI Applications (Casks)
+
+Shared casks live under `darwin/homebrew-packages/casks/`.
 
 ```nix
 homebrew.casks = [
@@ -169,10 +180,11 @@ homebrew.casks = [
 **Use Homebrew for**:
 
 - GUI applications
-- Tools requiring frequent updates
+- Fonts and vendor apps
 - macOS-specific utilities
 - Proprietary software
-- Tools not available in nixpkgs
+- Tools not available or not appropriate in nixpkgs
+- Global language/build toolchains only when deliberately shared across projects
 
 **Managing Homebrew**:
 
@@ -192,6 +204,11 @@ brew doctor
 ```
 
 ## 🔧 Development Environment Templates
+
+Toolchains have their own ownership policy because global runtimes can affect
+IDEs and project builds. See [Toolchain Ownership](toolchain-ownership.md)
+before moving packages such as `node`, `go`, `python@3.12`, `uv`, `poetry`,
+`maven`, `cmake`, `pkg-config`, or `kafka`.
 
 ### Project-Specific Environments
 
@@ -289,16 +306,15 @@ home.packages = with pkgs; [
 **For Homebrew**:
 
 ```nix
-# Add to darwin/homebrew.nix
-homebrew.brews = [
-  # existing brews...
+# Shared formulae live under darwin/homebrew-packages/brews/.
+[
   "new-cli-tool"
-];
+]
 
-homebrew.casks = [
-  # existing casks...
+# Shared casks live under darwin/homebrew-packages/casks/.
+[
   "new-gui-app"
-];
+]
 ```
 
 #### 3. Apply Changes
@@ -331,10 +347,10 @@ cleanup
 #### Homebrew Packages
 
 ```nix
-# Remove from homebrew.nix
-# homebrew.brews = [
-#   "unwanted-brew"  # Remove this line  
-# ];
+# Remove shared packages from darwin/homebrew-packages/.
+#
+# For one profile only, add the package to removeBrews or removeCasks in
+# darwin/profiles/work.nix or darwin/profiles/personal.nix.
 
 # Or remove manually
 brew uninstall unwanted-package
@@ -541,6 +557,7 @@ direnv allow               # Activate project environment
 - **System packages**: `darwin/configuration.nix`
 - **User packages**: `home-manager/default.nix`  
 - **Homebrew config**: `darwin/homebrew.nix`
+- **Shared Homebrew packages**: `darwin/homebrew-packages/`
 - **Development templates**: `scripts/setup/dev-env.sh`
 
 **Next Steps**:
