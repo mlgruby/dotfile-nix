@@ -1,70 +1,20 @@
+let
+  homebrewPackages = ../homebrew-packages;
+in
 {
   # Shared base packages for all macOS profiles.
-  taps = [
-    "nguyenphutrong/tap"
-  ];
+  taps = import (homebrewPackages + "/taps.nix");
 
-  brews = [
-    "coreutils"
-    "gnu-getopt"
-    "mas"
-    "uv"
-    "poetry"
-    "python@3.12"
-    "cmake"
-    "maven"
-    "neovim"
-    "pkg-config"
-    "go"
-    "node"
-    "kafka"
-    "yamlresume"
-    "gnupg"
-  ];
+  brews =
+    (import (homebrewPackages + "/brews/core.nix"))
+    ++ (import (homebrewPackages + "/brews/development.nix"))
+    ++ (import (homebrewPackages + "/brews/toolchains.nix"));
 
-  casks = [
-    "temurin@11"
-    "temurin@17"
-    "slack"
-    "discord"
-    "microsoft-office"
-    "cursor"
-    "antigravity"
-    "claude-code"
-    "docker-desktop"
-    "jetbrains-toolbox"
-    "postman"
-    "visual-studio-code"
-    "alacritty"
-    "karabiner-elements"
-    "rectangle"
-    "the-unarchiver"
-    "bitwarden"
-    "brave-browser"
-    "google-chrome"
-    "claude"
-    "lm-studio"
-    "insync"
-    "obsidian"
-    "quotio"
-    # "spotify"
-    "whatsapp"
-    "vlc"
-    "font-jetbrains-mono-nerd-font"
-    "font-fira-code-nerd-font"
-    "font-hack-nerd-font"
-    "font-meslo-lg-nerd-font"
-    "font-inter"
-    "font-source-serif-4"
-    "font-source-sans-3"
-    "font-sauce-code-pro-nerd-font"
-    "font-ubuntu-mono-nerd-font"
-    "font-dejavu-sans-mono-nerd-font"
-    "font-inconsolata-nerd-font"
-    "tailscale-app"
-    "copilot-cli"
-    # "steam"
-  ];
+  casks =
+    (import (homebrewPackages + "/casks/apps.nix"))
+    ++ (import (homebrewPackages + "/casks/development.nix"))
+    ++ (import (homebrewPackages + "/casks/fonts.nix"))
+    ++ (import (homebrewPackages + "/casks/system.nix"));
 
   masApps = { };
 }

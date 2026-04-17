@@ -52,21 +52,18 @@ home.packages = with pkgs; [
 macOS-specific packages and GUI applications.
 
 ```nix
-# In darwin/homebrew.nix
-homebrew = {
-  # CLI Tools
-  brews = [
-    "git"
-    "starship"
-  ];
+# Shared GUI apps: darwin/homebrew-packages/casks/apps.nix
+[
+  "alacritty"
+  "brave-browser"
+  "visual-studio-code"
+]
 
-  # GUI Applications
-  casks = [
-    "alacritty"
-    "brave-browser"
-    "visual-studio-code"
-  ];
-};
+# Shared global toolchains: darwin/homebrew-packages/brews/toolchains.nix
+[
+  "node"
+  "python@3.12"
+]
 ```
 
 ## Adding Packages
@@ -114,7 +111,8 @@ homebrew = {
    pkgs.nodejs-18_x
 
    # Pin Homebrew versions
-   homebrew.brews = [
+   # darwin/homebrew-packages/brews/toolchains.nix
+   [
      "python@3.10"
    ];
    ```
@@ -147,9 +145,9 @@ homebrew = {
 1. **Remove from Configuration**
 
    ```nix
-   homebrew = {
-     # Remove from brews or casks list
-   };
+   # Remove shared packages from darwin/homebrew-packages/.
+   # For one profile only, add the package to removeBrews or removeCasks in
+   # darwin/profiles/work.nix or darwin/profiles/personal.nix.
    ```
 
 2. **Clean Up**

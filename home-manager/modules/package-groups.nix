@@ -1,6 +1,6 @@
-# home-manager/modules/utility-packages.nix
+# home-manager/modules/package-groups.nix
 #
-# Compatibility aggregator for package-only Home Manager modules.
+# Aggregates package-only Home Manager modules by ownership group.
 # Keep package ownership split by purpose under ./packages/.
 
 {

@@ -1,4 +1,7 @@
 # Language tooling managed by Home Manager.
+#
+# Package-only module: keep project-pinned dependencies in project configs
+# instead of installing them globally here.
 
 { pkgs, ... }:
 

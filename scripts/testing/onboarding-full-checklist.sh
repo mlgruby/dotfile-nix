@@ -76,6 +76,12 @@ run_guardrail_checks() {
   else
     fail "documentation stale-pattern guardrail failed"
   fi
+
+  if ./scripts/testing/check-nix-helper-semantics.sh; then
+    pass "Nix helper semantics guardrail passed"
+  else
+    fail "Nix helper semantics guardrail failed"
+  fi
 }
 
 print_vm_checklist() {

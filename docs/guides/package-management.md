@@ -46,6 +46,10 @@ environment.systemPackages = with pkgs; [
 
 **Location**: `home-manager/default.nix` and `home-manager/modules/packages/*.nix`
 
+See
+[`home-manager/modules/packages/README.md`](../../home-manager/modules/packages/README.md)
+for package group ownership rules.
+
 ```nix
 home.packages = with pkgs; [
   # Enhanced CLI Tools
@@ -113,7 +117,11 @@ nix show-config
 
 ### Selected CLI Formulae (Brews)
 
-**Location**: `darwin/homebrew.nix`
+**Locations**:
+
+- `darwin/homebrew.nix` - Homebrew activation and profile composition
+- `darwin/homebrew-packages/brews/` - Shared formulae by ownership type
+- `darwin/profiles/*.nix` - Profile-specific additions and removals
 
 ```nix
 homebrew = {
@@ -137,6 +145,8 @@ homebrew = {
 ```
 
 ### GUI Applications (Casks)
+
+Shared casks live under `darwin/homebrew-packages/casks/`.
 
 ```nix
 homebrew.casks = [
@@ -194,6 +204,11 @@ brew doctor
 ```
 
 ## 🔧 Development Environment Templates
+
+Toolchains have their own ownership policy because global runtimes can affect
+IDEs and project builds. See [Toolchain Ownership](toolchain-ownership.md)
+before moving packages such as `node`, `go`, `python@3.12`, `uv`, `poetry`,
+`maven`, `cmake`, `pkg-config`, or `kafka`.
 
 ### Project-Specific Environments
 
@@ -291,16 +306,15 @@ home.packages = with pkgs; [
 **For Homebrew**:
 
 ```nix
-# Add to darwin/homebrew.nix
-homebrew.brews = [
-  # existing brews...
+# Shared formulae live under darwin/homebrew-packages/brews/.
+[
   "new-cli-tool"
-];
+]
 
-homebrew.casks = [
-  # existing casks...
+# Shared casks live under darwin/homebrew-packages/casks/.
+[
   "new-gui-app"
-];
+]
 ```
 
 #### 3. Apply Changes
@@ -333,10 +347,10 @@ cleanup
 #### Homebrew Packages
 
 ```nix
-# Remove from homebrew.nix
-# homebrew.brews = [
-#   "unwanted-brew"  # Remove this line  
-# ];
+# Remove shared packages from darwin/homebrew-packages/.
+#
+# For one profile only, add the package to removeBrews or removeCasks in
+# darwin/profiles/work.nix or darwin/profiles/personal.nix.
 
 # Or remove manually
 brew uninstall unwanted-package
@@ -543,6 +557,7 @@ direnv allow               # Activate project environment
 - **System packages**: `darwin/configuration.nix`
 - **User packages**: `home-manager/default.nix`  
 - **Homebrew config**: `darwin/homebrew.nix`
+- **Shared Homebrew packages**: `darwin/homebrew-packages/`
 - **Development templates**: `scripts/setup/dev-env.sh`
 
 **Next Steps**:

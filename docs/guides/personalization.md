@@ -226,8 +226,8 @@ programs.git = {
 **GUI Applications via Homebrew**:
 
 ```nix
-# In darwin/homebrew.nix
-homebrew.casks = [
+# Shared apps: darwin/homebrew-packages/casks/apps.nix
+[
   # Existing apps
   "brave-browser"
   "visual-studio-code"
