@@ -87,6 +87,7 @@ let
         #!/usr/bin/env bash
         DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
         CURRENT_CONFIG_HOST="${userConfig.hostname}"
+        export DOTFILE_DIR CURRENT_CONFIG_HOST
         exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" ${args} "$@"
       '';
       executable = true;

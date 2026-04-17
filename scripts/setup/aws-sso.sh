@@ -425,6 +425,8 @@ EOF
             cat >> "$SHELL_CONFIG" << 'EOF'
 # Enable AWS CLI command completion for zsh  
 if command -v aws_completer &> /dev/null; then
+   autoload -U bashcompinit
+   bashcompinit
    complete -C aws_completer aws
 fi
 EOF
