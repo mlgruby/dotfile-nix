@@ -55,8 +55,12 @@ in
     initContent = ''
       # Enable AWS CLI command completion.
       if command -v aws_completer > /dev/null 2>&1; then
+        autoload -U bashcompinit
+        bashcompinit
         complete -C aws_completer aws
       elif [ -x "${pkgs.awscli2}/bin/aws_completer" ]; then
+        autoload -U bashcompinit
+        bashcompinit
         complete -C "${pkgs.awscli2}/bin/aws_completer" aws
       fi
 

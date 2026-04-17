@@ -92,6 +92,7 @@ check_shell_syntax() {
 check_shellcheck() {
   local shellcheck_cmd=()
   local shell_files=()
+  local file
 
   if command -v shellcheck >/dev/null 2>&1; then
     shellcheck_cmd=(shellcheck)

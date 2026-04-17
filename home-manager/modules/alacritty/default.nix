@@ -19,6 +19,7 @@ in
 {
   programs.alacritty = {
     enable = true;
+    package = null;
     settings = baseSettings // {
       general.import = [ "${pkgs.alacritty-theme}/share/alacritty-theme/gruvbox_dark.toml" ];
     };
