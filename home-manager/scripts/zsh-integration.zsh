@@ -43,18 +43,28 @@ if [ "$DOTFILES_AUTO_TMUX" = "1" ] && command -v tmux > /dev/null 2>&1; then
 fi
 
 function fzf-git-status() {
-  local selections=$(
+  local selections
+  selections=$(
     git status --porcelain |
       fzf --ansi \
-        --preview 'if [ -f {2} ]; then
-                    bat --color=always --style=numbers {2}
-                  elif [ -d {2} ]; then
-                    tree -C {2}
+        --preview 'path=$(printf "%s\n" {q} | sed "s/^...//; s/.* -> //")
+                  if [ -f "$path" ]; then
+                    bat --color=always --style=numbers "$path"
+                  elif [ -d "$path" ]; then
+                    tree -C "$path"
                   fi' \
         --preview-window right:70% \
         --multi
   )
-  [ -n "$selections" ] && LBUFFER+="$(echo "$selections" | awk '{print $2}' | tr '\n' ' ')"
+  if [ -n "$selections" ]; then
+    local line path quoted_paths=""
+    while IFS= read -r line; do
+      path="${line:3}"
+      [[ "$path" == *" -> "* ]] && path="${path##* -> }"
+      quoted_paths+="${(q)path} "
+    done <<< "$selections"
+    LBUFFER+="$quoted_paths"
+  fi
   zle reset-prompt
 }
 zle -N fzf-git-status

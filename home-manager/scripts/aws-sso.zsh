@@ -311,16 +311,17 @@ aws_session_token = $default_token" || return 1
 }
 
 # Lazy wrapper functions that load AWS SSO on first use.
-unalias awsp awsd awse awsf awsc awsl awsr awsw awsb awsall awsprod awsdefault awsprod-trad awsdefault-trad awsrp awsrs awsrd 2>/dev/null || true
+unalias awsp awsd awse awsef awsf awsc awsl awsr awsw awsb awsall awsprod awsdefault awsprod-trad awsdefault-trad awsrp awsrs awsrd 2>/dev/null || true
 
 awsp() { _load_aws_sso && aws_prod_env "$@"; }
 awsd() { _load_aws_sso && aws_default_env "$@"; }
 awse() { _load_aws_sso && aws_export_creds "$@"; }
+awsef() { _load_aws_sso && aws_export_to_file "$@"; }
 awsf() { _load_aws_sso && aws_super_workflow "$@"; }
 awsc() { _load_aws_sso && aws_clear "$@"; }
 awsl() { _load_aws_sso && aws_sso_login both "$@"; }
 awsr() { _load_aws_sso && aws_refresh_both "$@"; }
-awsw() { _load_aws_sso && aws_export_to_file "$@"; }
+awsw() { _load_aws_sso && aws_status "$@"; }
 awsb() { _load_aws_sso && aws_export_both_to_file "$@"; }
 awsall() { _load_aws_sso && aws_super_workflow "$@"; }
 
