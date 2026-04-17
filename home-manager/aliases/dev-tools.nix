@@ -118,11 +118,6 @@ in {
   tfa = "terraform apply";                       # Apply changes
   tfd = "terraform destroy";                     # Destroy infrastructure
 
-  # Version management
-  tfi = "tfswitch -i";                           # Install Terraform version
-  tfu = "tfswitch -u";                           # Update tfswitch
-  tfl = "tfswitch -l";                           # List available versions
-
   # Workspace management
   tfwst = "terraform workspace select";          # Switch workspace
   tfwsw = "terraform workspace show";            # Show current workspace

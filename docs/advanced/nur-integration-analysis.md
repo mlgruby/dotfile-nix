@@ -14,62 +14,63 @@ packages that are:
 - Experimental packages
 - Personal customizations
 
-## Current Homebrew Analysis
+## Current Ownership Analysis
 
 ### Packages Analyzed for NUR Migration
 
-Based on the current package ownership model:
+Based on the current package ownership model, NUR is only worth considering for
+tools that are not already cleanly owned by Home Manager, Homebrew, or
+project-local tooling.
 
 #### CLI Tools
 
 | Category | Package | NUR Available | Ownership |
 |----------|------------------|---------------|------------------|
-| **Core System** | coreutils | ❌ | Keep Homebrew (macOS optimized) |
+| **Core System** | coreutils | ❌ | Homebrew core formula |
 | | duf | ❌ | Home Manager package |
 | | dust | ❌ | Home Manager package |
 | | fd | ❌ | Home Manager package |
-| | mas | ❌ | Keep Homebrew (macOS specific) |
+| | mas | ❌ | Homebrew macOS integration |
 | | zoxide | ❌ | Home Manager `programs.zoxide` |
-| **Python** | uv | ❌ | Keep Homebrew |
-| | python@3.12 | ❌ | Keep Homebrew |
-| **Development** | cmake | ❌ | Keep Homebrew |
-| | neovim | ❌ | Keep Homebrew |
-| | pkg-config | ❌ | Keep Homebrew |
+| **Global Toolchains** | uv | ❌ | Homebrew shared toolchain |
+| | python@3.12 | ❌ | Homebrew shared toolchain |
+| | go | ❌ | Homebrew shared toolchain |
+| | node | ❌ | Homebrew shared toolchain |
+| | maven | ❌ | Homebrew shared toolchain |
+| **Development** | cmake | ❌ | Homebrew build-chain formula |
+| | neovim | ❌ | Homebrew formula |
+| | pkg-config | ❌ | Homebrew build-chain formula |
 | | git-lfs | ❌ | Home Manager `programs.git.lfs` |
-| | node | ❌ | Keep Homebrew |
 | | shellcheck | ❌ | Home Manager package |
 | **Text Processing** | fzf | ❌ | Home Manager `programs.fzf` |
 | | yq | ❌ | Home Manager package (`yq-go`) |
 | **Terminal Utils** | glow | ❌ | Home Manager package |
 | | fastfetch | ✅ | Home Manager package |
 | | tldr | ❌ | Home Manager `programs.tealdeer` |
-| **Security** | gnupg | ❌ | Keep Homebrew |
+| **Security** | gnupg | ❌ | Homebrew formula |
 | | sops | ❌ | Home Manager package |
 | | age | ❌ | Home Manager package |
 | **Cloud Tools** | awscli | ❌ | Home Manager package (`awscli2`) |
 | | terraform-docs | ❌ | Home Manager package |
 | | tflint | ❌ | Home Manager package |
-| | tfswitch | ❌ | Keep Homebrew |
 
-#### GUI Applications (38 casks)
+#### GUI Applications
 
 | Category | Homebrew Cask | NUR Available | Migration Status |
 |----------|---------------|---------------|------------------|
-| **Development JDKs** | temurin@8/11/17 | ❌ | Keep Homebrew (macOS optimized) |
-| **Development Tools** | cursor | ❌ | Keep Homebrew |
-| | docker-desktop | ❌ | Keep Homebrew (macOS integration) |
-| | google-cloud-sdk | ❌ | Keep Homebrew |
-| | jetbrains-toolbox | ❌ | Keep Homebrew |
-| | postman | ❌ | Keep Homebrew |
-| | visual-studio-code | ❌ | Keep Homebrew |
-| **Browsers** | brave-browser | ❌ | Keep Homebrew |
-| | google-chrome | ❌ | Keep Homebrew |
-| **System Tools** | alacritty | ❌ | Keep Homebrew |
-| | karabiner-elements | ❌ | Keep Homebrew (macOS specific) |
-| | rectangle | ❌ | Keep Homebrew (macOS specific) |
-| **Productivity** | bitwarden | ❌ | Keep Homebrew |
-| | obsidian | ❌ | Keep Homebrew |
-| | spotify | ❌ | Keep Homebrew |
+| **Development JDKs** | temurin@11/17 | ❌ | Homebrew cask |
+| **Development Tools** | cursor | ❌ | Homebrew cask |
+| | docker-desktop | ❌ | Homebrew cask, macOS integration |
+| | jetbrains-toolbox | ❌ | Homebrew cask |
+| | postman | ❌ | Homebrew cask |
+| | visual-studio-code | ❌ | Homebrew cask |
+| **Browsers** | brave-browser | ❌ | Homebrew cask |
+| | google-chrome | ❌ | Homebrew cask |
+| **System Tools** | alacritty | ❌ | Homebrew cask; Home Manager manages config only |
+| | karabiner-elements | ❌ | Homebrew cask, macOS integration |
+| | rectangle | ❌ | Homebrew cask, macOS integration |
+| **Productivity** | bitwarden | ❌ | Homebrew cask |
+| | obsidian | ❌ | Homebrew cask |
 
 ### NUR Packages Found
 
@@ -175,18 +176,19 @@ use flake .#python-dev
 ### Recommended Action
 
 1. **Skip NUR integration** for now
-2. **Focus on maximizing nixpkgs usage** for CLI tools
-3. **Keep Homebrew** for GUI applications and macOS-specific tools
+2. **Prefer Home Manager/nixpkgs** for user-level CLI tools
+3. **Keep Homebrew ownership** for GUI applications, fonts, vendor apps, and
+   global toolchains intentionally shared with IDEs
 4. **Use development templates** for project-specific tooling
 5. **Revisit NUR** only if specific niche packages are needed
 
 ### Alternative Improvements
 
-- Migrate more CLI tools from Homebrew to nixpkgs
+- Keep package ownership guardrails current
 - Enhance development environment templates
 - Improve Home Manager module usage
-- Focus on the backup strategy or secrets management TODOs instead
+- Focus on backup strategy or secrets management next
 
 This analysis shows that NUR integration would not meaningfully reduce
 Homebrew dependencies in our current setup, making it a lower-priority
-enhancement compared to other available TODO items.
+enhancement compared to the current ownership and guardrail work.
