@@ -21,10 +21,11 @@
 # Usage:
 # - Run 'claude' in terminal to start Claude Code
 # - Credentials auto-refresh via awsAuthRefresh command
-{lib, ...}: let
-  defaults = import ../config.nix;
-  inherit (defaults) claude;
-  inherit (defaults.aws) region;
+{ lib, ... }:
+let
+  claude = import ../config/claude.nix;
+  aws = import ../config/aws.nix;
+  inherit (aws) region;
   settings = builtins.toJSON {
     # AWS SSO auto-refresh command
     # Runs automatically when Bedrock returns credential errors
@@ -54,14 +55,15 @@
       ANTHROPIC_DEFAULT_OPUS_MODEL = claude.models.opus;
     };
   };
-in {
+in
+{
   # Claude Code default settings template.
   # The live settings file must remain mutable because Claude plugins edit it.
   # Location: ~/.claude/settings.default.json
   # Docs: https://docs.anthropic.com/claude-code/configuration
   home.file.".claude/settings.default.json".text = settings;
 
-  home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.claude"
 
     if [ -L "$HOME/.claude/settings.json" ]; then

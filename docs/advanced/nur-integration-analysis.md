@@ -18,37 +18,37 @@ packages that are:
 
 ### Packages Analyzed for NUR Migration
 
-Based on our current `darwin/homebrew.nix` configuration:
+Based on the current package ownership model:
 
-#### CLI Tools (58 packages)
+#### CLI Tools
 
-| Category | Homebrew Package | NUR Available | Migration Status |
+| Category | Package | NUR Available | Ownership |
 |----------|------------------|---------------|------------------|
 | **Core System** | coreutils | ❌ | Keep Homebrew (macOS optimized) |
-| | duf | ❌ | Keep Homebrew |
-| | dust | ❌ | Keep Homebrew |
-| | fd | ❌ | Keep Homebrew |
+| | duf | ❌ | Home Manager package |
+| | dust | ❌ | Home Manager package |
+| | fd | ❌ | Home Manager package |
 | | mas | ❌ | Keep Homebrew (macOS specific) |
-| | zoxide | ❌ | Keep Homebrew |
+| | zoxide | ❌ | Home Manager `programs.zoxide` |
 | **Python** | uv | ❌ | Keep Homebrew |
 | | python@3.12 | ❌ | Keep Homebrew |
 | **Development** | cmake | ❌ | Keep Homebrew |
 | | neovim | ❌ | Keep Homebrew |
 | | pkg-config | ❌ | Keep Homebrew |
-| | git-lfs | ❌ | Keep Homebrew |
+| | git-lfs | ❌ | Home Manager `programs.git.lfs` |
 | | node | ❌ | Keep Homebrew |
-| | shellcheck | ❌ | Keep Homebrew |
-| **Text Processing** | fzf | ❌ | Keep Homebrew |
-| | yq | ❌ | Keep Homebrew |
-| **Terminal Utils** | glow | ❌ | Keep Homebrew |
-| | neofetch | ❌ | Keep Homebrew |
-| | tldr | ❌ | Keep Homebrew |
+| | shellcheck | ❌ | Home Manager package |
+| **Text Processing** | fzf | ❌ | Home Manager `programs.fzf` |
+| | yq | ❌ | Home Manager package (`yq-go`) |
+| **Terminal Utils** | glow | ❌ | Home Manager package |
+| | fastfetch | ✅ | Home Manager package |
+| | tldr | ❌ | Home Manager `programs.tealdeer` |
 | **Security** | gnupg | ❌ | Keep Homebrew |
-| | sops | ❌ | Keep Homebrew |
-| | age | ❌ | Keep Homebrew |
-| **Cloud Tools** | awscli | ❌ | Keep Homebrew |
-| | terraform-docs | ❌ | Keep Homebrew |
-| | tflint | ❌ | Keep Homebrew |
+| | sops | ❌ | Home Manager package |
+| | age | ❌ | Home Manager package |
+| **Cloud Tools** | awscli | ❌ | Home Manager package (`awscli2`) |
+| | terraform-docs | ❌ | Home Manager package |
+| | tflint | ❌ | Home Manager package |
 | | tfswitch | ❌ | Keep Homebrew |
 
 #### GUI Applications (38 casks)
@@ -136,7 +136,7 @@ home.packages = with pkgs; [
   coreutils      # GNU coreutils
   fd             # find alternative
   fzf            # fuzzy finder
-  neofetch       # system info
+  fastfetch      # system info
   # ... many more
 ];
 ```

@@ -4,34 +4,11 @@
 #
 # Purpose:
 # - Manages packages that are better installed via Homebrew
-# - Handles GUI applications (casks) that aren't available via Nix
+# - Handles GUI applications and macOS integrations
 # - Maintains consistent font installation across systems
 #
 # Package Categories:
-# 1. CLI Tools:
-#    - Core System Utilities:
-#      - File and disk management
-#      - Directory navigation
-#      - Mac App Store integration
-#      - System monitoring
-#    - Development Tools:
-#      - Version control systems
-#      - Build tools and compilers
-#      - Development utilities
-#    - Text Processing:
-#      - Modern CLI alternatives
-#      - Search and filtering
-#      - Data format processors
-#    - Terminal Utilities:
-#      - System monitoring
-#      - Shell enhancements
-#      - Documentation tools
-#    - Cloud Tools:
-#      - Cloud provider CLIs
-#      - Infrastructure management
-#      - Version managers
-#
-# 2. GUI Applications (Casks):
+# 1. GUI Applications (Casks):
 #    - Development:
 #      - Code editors and IDEs
 #      - API testing tools
@@ -49,10 +26,15 @@
 #    - Cloud Tools:
 #      - Cloud platform SDKs
 #
-# 3. Fonts:
+# 2. Fonts:
 #    - Programming fonts with ligatures
 #    - Terminal-optimized fonts
 #    - Nerd Font variants for icons
+#
+# 3. Selected CLI Formulae:
+#    - macOS integration helpers such as mas
+#    - Language runtimes and build chains intentionally kept global
+#    - Tools where Homebrew is the deliberate owner
 #
 # Configuration:
 # - Auto-updates enabled
@@ -60,42 +42,43 @@
 # - Mac App Store integration
 #
 # Note:
-# - Packages are installed via Homebrew instead of Nix because:
-#   1. They require frequent updates (e.g., browsers)
-#   2. They integrate better with macOS when installed via Homebrew
-#   3. The Homebrew version is more up-to-date
-#   4. They need system-level integration
-#   5. They handle auto-updates better
+# - Prefer Home Manager/Nix for shell tools, configured CLI programs, and
+#   user-level terminal utilities.
+# - Prefer Homebrew for GUI apps, fonts, vendor apps, and macOS system
+#   integrations.
+# - Keep language runtimes and build chains here only when they are deliberately
+#   global rather than project-local.
 #
-# - Tools with Home Manager programs.* modules are handled there:
+# - Tools with Home Manager programs.* modules or home.packages are handled
+#   there:
 #   - git, gh, lazygit (managed by programs.git, programs.gh, programs.lazygit)
-#   - tmux, starship (managed by programs.tmux, programs.starship)
+#   - tmux, starship, fzf, zoxide (managed by programs.* modules)
+#   - fd, duf, dust, shellcheck, yq, glow, awscli2, sops, age, etc.
+#     (managed by modules under home-manager/modules/packages/)
 #   - This follows Home Manager best practices: one source per tool
+# - scripts/testing/check-package-ownership.sh enforces the boundary so
+#   Home Manager-owned tools do not drift back into Homebrew.
 #
 # Usage:
 # - Shared package lists live in darwin/profiles/common.nix
 # - Profile overrides live in darwin/profiles/personal.nix and darwin/profiles/work.nix
 # - Select profile via hosts.nix (hostname -> profile mapping)
-{userConfig, ...}: let
+{ userConfig, ... }:
+let
   profileName = userConfig.profile or "personal";
   common = import ./profiles/common.nix;
   profile = import (./profiles + "/${profileName}.nix");
 
-  unique = list:
-    builtins.foldl'
-    (acc: item:
-      if builtins.elem item acc
-      then acc
-      else acc ++ [item])
-    []
-    list;
+  unique =
+    list: builtins.foldl' (acc: item: if builtins.elem item acc then acc else acc ++ [ item ]) [ ] list;
 
-  removeItems = list: toRemove:
-    builtins.filter (item: !(builtins.elem item toRemove)) list;
+  removeItems = list: toRemove: builtins.filter (item: !(builtins.elem item toRemove)) list;
 
-  composeList = base: extra: remove:
+  composeList =
+    base: extra: remove:
     unique (removeItems (base ++ extra) remove);
-in {
+in
+{
   nix-homebrew = {
     # Install Homebrew under the default prefix
     enable = true;

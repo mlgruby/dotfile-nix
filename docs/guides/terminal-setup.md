@@ -63,7 +63,11 @@ tpU     # Uninstall removed plugins
 # System Information
 top     # System monitor (btop)
 df      # Disk usage (duf)
-sys     # System information (neofetch)
+sys     # System information (fastfetch)
+
+# Homelab recovery
+lwdec backup.zip       # Decrypt Lazywarden backup
+lw-restore backup.zip  # Decrypt to ~/Secure/lazywarden-restore
 
 # Process Management
 bm      # Basic monitoring

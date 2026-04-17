@@ -90,7 +90,13 @@ check_shell_syntax() {
 }
 
 check_shellcheck() {
-  if ! command -v shellcheck >/dev/null 2>&1; then
+  local shellcheck_cmd=()
+
+  if command -v shellcheck >/dev/null 2>&1; then
+    shellcheck_cmd=(shellcheck)
+  elif command -v nix >/dev/null 2>&1; then
+    shellcheck_cmd=(nix run nixpkgs#shellcheck --)
+  else
     if [[ "$REQUIRE_SHELLCHECK" -eq 1 ]]; then
       fail "shellcheck is required but not installed"
     else
@@ -102,7 +108,7 @@ check_shellcheck() {
   local failed=0
   local file
   while IFS= read -r file; do
-    if ! shellcheck -S warning "$file"; then
+    if ! "${shellcheck_cmd[@]}" -S warning "$file"; then
       printf '[FAIL] shellcheck warnings/errors: %s\n' "$file"
       failed=1
     fi

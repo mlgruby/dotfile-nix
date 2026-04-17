@@ -9,6 +9,7 @@ aliases/
 ├── core.nix          # Essential shell navigation and utilities
 ├── dev-tools.nix     # Development tools (Docker, K8s, Terraform, etc.)
 ├── git.nix           # Git workflows and GitHub CLI
+├── homelab.nix       # Homelab and self-hosted service aliases
 ├── platform.nix      # macOS/Linux system management
 ├── helpers.nix       # Helper functions for alias generation
 └── default.nix       # Main entry point
@@ -69,6 +70,15 @@ aliases/
 - Health: `health-check`, `health-report`
 - Logs: `logs-health`, `logs-alerts`
 - Finder: `showhidden`, `hidedesktop`
+
+### 5. Homelab (homelab.nix)
+- Lazywarden: `lwdec`, `lw-decrypt`, `lw-restore`
+
+| Alias | Description | Example |
+|-------|-------------|---------|
+| `lwdec` | Short form for `lazywarden-decrypt` | `lwdec backup.zip --output ~/Secure/lazywarden-restore` |
+| `lw-decrypt` | Readable alias for `lazywarden-decrypt` | `lw-decrypt backup.zip --no-attachments` |
+| `lw-restore` | Restore with default secure output directory | `lw-restore backup.zip` |
 
 ## Interactive Aliases (FZF-powered)
 

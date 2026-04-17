@@ -6,40 +6,20 @@
 
   brews = [
     "coreutils"
-    "duf"
-    "dust"
     "gnu-getopt"
-    "fd"
     "mas"
-    "zoxide"
     "uv"
     "poetry"
-    "poppler"
     "python@3.12"
     "cmake"
-    "duckdb"
     "maven"
     "neovim"
     "pkg-config"
-    "git-lfs"
     "go"
     "node"
-    "shellcheck"
     "kafka"
     "yamlresume"
-    "fzf"
-    "yq"
-    "glow"
-    "neofetch"
-    "tldr"
     "gnupg"
-    "sops"
-    "age"
-    "awscli"
-    "aws-iam-authenticator"
-    "helm"
-    "terraform-docs"
-    "tflint"
   ];
 
   casks = [
@@ -86,5 +66,5 @@
     # "steam"
   ];
 
-  masApps = {};
+  masApps = { };
 }

@@ -35,18 +35,14 @@ This is a one-time setup process.
 
 ### **Step 1: Install AWS CLI v2 (if not already installed)**
 
-**macOS (with Homebrew):**
+In this dotfile, AWS CLI v2 is installed declaratively via Home Manager:
 
-```bash
-brew install awscli
+```nix
+# home-manager/modules/packages/cloud.nix
+awscli2
 ```
 
-**macOS (official installer):**
-
-```bash
-curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
-sudo installer -pkg AWSCLIV2.pkg -target /
-```
+Run `rebuild --work` or `rebuild` after changing package configuration.
 
 **Verify installation:**
 
@@ -187,8 +183,8 @@ output = json
 which aws
 aws --version
 
-# If not found, install AWS CLI v2
-brew install awscli
+# If not found, rebuild the Home Manager package set
+rebuild --work
 ```
 
 **"SSO session expired" during setup:**

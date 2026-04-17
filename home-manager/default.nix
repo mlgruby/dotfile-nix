@@ -61,7 +61,39 @@
   username,
   userConfig,
   ...
-}: {
+}:
+let
+  helperScripts = [
+    "git-fuzzy-checkout.sh"
+    "git-fuzzy-log.sh"
+    "git-fuzzy-stash.sh"
+    "system-rollback.sh"
+    "alias-cheatsheet.sh"
+    "rebuild-system.sh"
+  ];
+
+  mkHelperScript = name: {
+    name = ".config/home-manager/scripts/${name}";
+    value = {
+      source = ./scripts/${name};
+      executable = true;
+    };
+  };
+
+  mkRebuildWrapper = name: args: {
+    inherit name;
+    value = {
+      text = ''
+        #!/usr/bin/env bash
+        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
+        CURRENT_CONFIG_HOST="${userConfig.hostname}"
+        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" ${args} "$@"
+      '';
+      executable = true;
+    };
+  };
+in
+{
   imports = [
     # Core modules
     ./modules/tmux.nix
@@ -112,7 +144,7 @@
   programs = {
     zsh = {
       enable = true;
-      shellAliases = import ./aliases {inherit pkgs config userConfig;};
+      shellAliases = import ./aliases { inherit pkgs config userConfig; };
     };
 
     home-manager.enable = true;
@@ -130,91 +162,45 @@
   # Based on applications we have configured and Stylix documentation
   stylix.targets = {
     # Terminal Applications - Carefully managed due to custom configs
-    alacritty.enable = false;        # DISABLED: Complex custom config conflicts with Stylix
-    
+    alacritty.enable = false; # DISABLED: Complex custom config conflicts with Stylix
+
     # Development Tools - Core supported targets
     neovim = {
-      enable = true;                 # ENABLED: Well-supported by Stylix
-      plugin = "mini.base16";        # Use recommended plugin
+      enable = true; # ENABLED: Well-supported by Stylix
+      plugin = "mini.base16"; # Use recommended plugin
       transparentBackground = {
-        main = false;                # Keep solid backgrounds for readability
+        main = false; # Keep solid backgrounds for readability
         signColumn = false;
         numberLine = false;
       };
     };
-    
+
     # System Monitoring - Confirmed supported
-    btop.enable = true;              # ENABLED: Stylix has native btop support
-    
+    btop.enable = true; # ENABLED: Stylix has native btop support
+
     # Shell and Prompt - Manual configuration preferred
-    starship.enable = false;         # DISABLED: Manual color configuration with Stylix integration
-    
+    starship.enable = false; # DISABLED: Manual color configuration with Stylix integration
+
     # Text Tools - Core supported targets
-    bat.enable = true;               # ENABLED: Native Stylix support
-    
+    bat.enable = true; # ENABLED: Native Stylix support
+
     # VCS Tools - Confirmed supported
-    lazygit.enable = true;           # ENABLED: Good Stylix integration
-    
+    lazygit.enable = true; # ENABLED: Good Stylix integration
+
     # Terminal Multiplexer - Core supported target
-    tmux.enable = true;              # ENABLED: Native Stylix support
-    
+    tmux.enable = true; # ENABLED: Native Stylix support
+
     # Disable unsupported or conflicting targets
-    vim.enable = false;              # DISABLED: Using Neovim instead
-    firefox.enable = false;          # DISABLED: Not our primary browser
+    vim.enable = false; # DISABLED: Using Neovim instead
+    firefox.enable = false; # DISABLED: Not our primary browser
   };
 
-  # Install shell helper scripts
-  home.file = {
-    ".config/home-manager/scripts/git-fuzzy-checkout.sh" = {
-      source = ./scripts/git-fuzzy-checkout.sh;
-      executable = true;
-    };
-    ".config/home-manager/scripts/git-fuzzy-log.sh" = {
-      source = ./scripts/git-fuzzy-log.sh;
-      executable = true;
-    };
-    ".config/home-manager/scripts/git-fuzzy-stash.sh" = {
-      source = ./scripts/git-fuzzy-stash.sh;
-      executable = true;
-    };
-    ".config/home-manager/scripts/system-rollback.sh" = {
-      source = ./scripts/system-rollback.sh;
-      executable = true;
-    };
-    ".config/home-manager/scripts/alias-cheatsheet.sh" = {
-      source = ./scripts/alias-cheatsheet.sh;
-      executable = true;
-    };
-    ".config/home-manager/scripts/rebuild-system.sh" = {
-      source = ./scripts/rebuild-system.sh;
-      executable = true;
-    };
-    "bin/rebuild" = {
-      text = ''
-        #!/usr/bin/env bash
-        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
-        CURRENT_CONFIG_HOST="${userConfig.hostname}"
-        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" "$@"
-      '';
-      executable = true;
-    };
-    "bin/rebuild-work" = {
-      text = ''
-        #!/usr/bin/env bash
-        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
-        CURRENT_CONFIG_HOST="${userConfig.hostname}"
-        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" --work "$@"
-      '';
-      executable = true;
-    };
-    "bin/rebuild-personal" = {
-      text = ''
-        #!/usr/bin/env bash
-        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
-        CURRENT_CONFIG_HOST="${userConfig.hostname}"
-        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" --personal "$@"
-      '';
-      executable = true;
-    };
-  };
+  # Install shell helper scripts and profile-aware rebuild wrappers.
+  home.file =
+    builtins.listToAttrs (map mkHelperScript helperScripts)
+    // builtins.listToAttrs [
+      (mkRebuildWrapper "bin/rebuild" "")
+      (mkRebuildWrapper "bin/rebuild-work" "--work")
+      (mkRebuildWrapper "bin/rebuild-personal" "--personal")
+    ];
 }

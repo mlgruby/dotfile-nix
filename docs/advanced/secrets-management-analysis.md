@@ -79,10 +79,10 @@ secrets management in the Nix Darwin dotfiles configuration.
 #### 1.1 Install SOPS and Age
 
 ```nix
-# Add to homebrew.nix or home-manager packages
-homebrew.brews = [
-  "sops"
-  "age"
+# Already managed declaratively in home-manager/modules/packages/security.nix
+home.packages = with pkgs; [
+  sops
+  age
 ];
 ```
 

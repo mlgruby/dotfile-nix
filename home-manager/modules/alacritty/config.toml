@@ -35,6 +35,8 @@ import = [
 [ env ]
 # Ensure proper color support
 TERM = "xterm-256color"
+# Only Alacritty should auto-attach to the persistent tmux workspace.
+DOTFILES_AUTO_TMUX = "1"
 
 [window]
 # Window appearance and behavior
