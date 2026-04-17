@@ -11,6 +11,7 @@
 # - core.nix: Essential shell aliases (~40 aliases)
 # - git.nix: Git workflow aliases (~80 aliases)
 # - dev-tools.nix: Docker, Terraform, k8s, modern CLI tools (~70 aliases)
+# - homelab.nix: Homelab/self-hosted service aliases
 # - platform.nix: macOS/Linux specific aliases (~30 aliases)
 #
 # Quick Reference:
@@ -25,9 +26,10 @@
   config,
   userConfig,
   ...
-}: let
+}:
+let
   # Import helper functions
-  helpers = import ./helpers.nix {inherit pkgs;};
+  helpers = import ./helpers.nix { inherit pkgs; };
 
   # Common args passed to all alias modules
   commonArgs = {
@@ -36,13 +38,11 @@
 
   # Import alias modules
   coreAliases = import ./core.nix commonArgs;
-  gitAliases = import ./git.nix {};
-  devToolsAliases = import ./dev-tools.nix {inherit helpers;};
+  gitAliases = import ./git.nix { };
+  devToolsAliases = import ./dev-tools.nix { inherit helpers; };
+  homelabAliases = import ./homelab.nix { inherit config; };
   platformAliases = import ./platform.nix commonArgs;
 in
-  # Combine all aliases
-  # Order matters - later modules can override earlier ones
-  coreAliases
-  // gitAliases
-  // devToolsAliases
-  // platformAliases
+# Combine all aliases
+# Order matters - later modules can override earlier ones
+coreAliases // gitAliases // devToolsAliases // homelabAliases // platformAliases

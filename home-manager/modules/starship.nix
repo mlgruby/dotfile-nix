@@ -13,13 +13,18 @@
 # Note:
 # - Requires Nerd Font
 # - Uses Gruvbox colors
-{...}: {
+{ ... }:
+let
+  shellConfig = import ../config/shell.nix;
+  symbols = shellConfig.languageSymbols;
+in
+{
   programs.starship = {
     enable = true;
     settings = {
       "$schema" = "https://starship.rs/config-schema.json";
 
-      format = ''[](color_orange)$os$username[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_aqua)$git_branch$git_status[](fg:color_aqua bg:color_blue)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:color_blue bg:color_bg3)$docker_context$conda[](fg:color_bg3 bg:color_bg1)[ ](fg:color_bg1)$line_break$character'';
+      format = "[](color_orange)$os$username[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_aqua)$git_branch$git_status[](fg:color_aqua bg:color_blue)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:color_blue bg:color_bg3)$docker_context$conda$cmd_duration[](fg:color_bg3 bg:color_bg1)[ ](fg:color_bg1)$line_break$character";
 
       palette = "gruvbox_dark";
 
@@ -100,55 +105,55 @@
       };
 
       nodejs = {
-        symbol = "";
+        symbol = symbols.nodejs;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       c = {
-        symbol = "";
+        symbol = symbols.c;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       rust = {
-        symbol = "";
+        symbol = symbols.rust;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       golang = {
-        symbol = "";
+        symbol = symbols.golang;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       php = {
-        symbol = "";
+        symbol = symbols.php;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       java = {
-        symbol = "";
+        symbol = symbols.java;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       kotlin = {
-        symbol = "";
+        symbol = symbols.kotlin;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       haskell = {
-        symbol = "";
+        symbol = symbols.haskell;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
 
       python = {
-        symbol = "";
+        symbol = symbols.python;
         style = "bg:color_blue"; # Gruvbox blue
         format = "[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)";
       };
@@ -162,6 +167,12 @@
       conda = {
         style = "bg:color_bg3"; # Gruvbox bg3
         format = "[[ $symbol( $environment) ](fg:#83a598 bg:color_bg3)]($style)";
+      };
+
+      cmd_duration = {
+        min_time = 1000;
+        style = "bg:color_bg3";
+        format = "[[ took $duration ](fg:color_yellow bg:color_bg3)]($style)";
       };
 
       time = {

@@ -37,8 +37,9 @@ Common questions and answers about the Nix Darwin dotfiles configuration.
 
 **A:** Depends on the type:
 
-- **CLI tools**: Add to `home-manager/default.nix` or `darwin/configuration.nix`
-- **GUI apps**: Add to `darwin/homebrew.nix` casks
+- **CLI tools**: Add to the appropriate `home-manager/modules/packages/` file
+- **GUI apps**: Add shared apps to `darwin/homebrew-packages/casks/`
+- **Profile-only apps**: Add overrides to `darwin/profiles/work.nix` or `darwin/profiles/personal.nix`
 - **Development tools**: Use `setup-dev-env` for project-specific environments
 
 See: [Package Management Guide](../guides/package-management.md)

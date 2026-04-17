@@ -64,41 +64,48 @@
   lib,
   userConfig,
   ...
-}: {
+}:
+{
   # Nix package manager settings
 
   # Enable Nix daemon
   nix = {
     enable = true;
-    
+
     # Nix daemon settings following best practices
     settings = {
       # Enable flakes and nix command
-      experimental-features = ["nix-command" "flakes"];
-      
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+
       # Trusted users for additional rights
-      trusted-users = ["${userConfig.username}" "root"];
-      
+      trusted-users = [
+        "${userConfig.username}"
+        "root"
+      ];
+
       # Note: auto-optimise-store is disabled as it can corrupt the Nix Store on nix-darwin
       # Using nix.optimise.automatic instead (configured below)
-      
+
       # Build settings for optimal performance
       max-jobs = "auto"; # Use all available logical cores
       cores = 0; # Use all available cores for each job
-      
+
       # Improve build performance with more substituters
       substituters = [
         "https://cache.nixos.org/"
         "https://nix-community.cachix.org"
       ];
-      
+
       # Trust public keys for binary caches
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
     };
-    
+
     # Store optimization (nix-darwin safe alternative to auto-optimise-store)
     optimise.automatic = true;
   };
@@ -149,13 +156,14 @@
   # This makes apps appear in Spotlight and Finder
   system = {
     activationScripts = {
-      applications.text = let
-        env = pkgs.buildEnv {
-          name = "system-applications";
-          paths = config.environment.systemPackages;
-          pathsToLink = [ "/Applications" ];
-        };
-      in
+      applications.text =
+        let
+          env = pkgs.buildEnv {
+            name = "system-applications";
+            paths = config.environment.systemPackages;
+            pathsToLink = [ "/Applications" ];
+          };
+        in
         pkgs.lib.mkForce ''
           # Clean up and recreate Nix Apps directory
           echo "setting up /Applications..." >&2
@@ -186,59 +194,18 @@
         fi
       '';
 
-      cleanupOldBackups.text = ''
-        echo "🧹 Cleaning up old .bak files to prevent conflicts..."
-        find /Users/${userConfig.username}/.config -name "*.bak" -type f -delete 2>/dev/null || true
-        echo "✓ Old backup files cleaned up"
-      '';
-
-      nixDaemonSetup.text = ''
-        echo "🔧 Ensuring Nix daemon is properly configured..."
-        
-        # Check if daemon plist exists
-        if [ -f "/Library/LaunchDaemons/org.nixos.nix-daemon.plist" ]; then
-          echo "✓ Nix daemon plist found"
-          
-          # Load the daemon if not already loaded
-          if ! sudo launchctl list | grep -q "org.nixos.nix-daemon"; then
-            echo "Loading Nix daemon..."
-            sudo launchctl load /Library/LaunchDaemons/org.nixos.nix-daemon.plist
-          fi
-          
-          # Enable daemon for automatic startup
-          sudo launchctl enable system/org.nixos.nix-daemon 2>/dev/null || true
-          
-          # Verify daemon is running
-          if sudo launchctl list | grep -q "org.nixos.nix-daemon"; then
-            echo "✅ Nix daemon is running and configured for auto-start"
-          else
-            echo "⚠️  Warning: Nix daemon may not be properly configured"
-          fi
-        else
-          echo "⚠️  Warning: Nix daemon plist not found"
-        fi
-      '';
-
       setDefaultBrowser.text = ''
         echo "🌐 Setting Google Chrome as default browser..."
-        
-        # Check if Chrome is installed
-        if [ -d "/Applications/Google Chrome.app" ]; then
-          # Set Chrome as default browser using defaultbrowser
-          # Install defaultbrowser if not present
-          if ! command -v defaultbrowser >/dev/null 2>&1; then
-            echo "Installing defaultbrowser utility..."
-            ${pkgs.curl}/bin/curl -L "https://github.com/kerma/defaultbrowser/releases/latest/download/defaultbrowser" -o /tmp/defaultbrowser
-            chmod +x /tmp/defaultbrowser
-            sudo mv /tmp/defaultbrowser /usr/local/bin/defaultbrowser
-          fi
-          
-          # Set Chrome as default
-          /usr/local/bin/defaultbrowser chrome
-          echo "✓ Google Chrome set as default browser"
-        else
+
+        if ! [ -d "/Applications/Google Chrome.app" ]; then
           echo "⚠️  Google Chrome not found, skipping default browser setup"
           echo "   Chrome will be installed via Homebrew on next rebuild"
+        elif command -v defaultbrowser >/dev/null 2>&1; then
+          defaultbrowser chrome
+          echo "✓ Google Chrome set as default browser"
+        else
+          echo "⚠️  defaultbrowser utility not found, skipping default browser setup"
+          echo "   Install it separately if you want rebuilds to set the default browser"
         fi
       '';
     };
@@ -297,28 +264,21 @@
     "Remember to run 'xcode-select --install' if building fails"
     # Note about credential management
     "AWS credentials should be managed via the provided scripts"
-          # Python environment note
-      "Use 'uv' for project dependencies and Python version management"
+    # Python environment note
+    "Use 'uv' for project dependencies and Python version management"
   ];
-
-  home-manager = {
-    useGlobalPkgs = true; # Use system-level packages
-    useUserPackages = true; # Enable user-specific packages
-    users.${userConfig.username} = import ../home-manager;
-    backupFileExtension = lib.mkForce "hm-backup";
-  };
 
   # Stylix System-wide Theming
   # Replaces manual theme configurations across applications
   stylix = {
     enable = true;
-    
+
     # Gruvbox Dark theme (matches your current manual configs)
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
-    
+
     # Generate a simple dark wallpaper from theme colors
     image = config.lib.stylix.pixel "base00";
-    
+
     # Font configuration (Homebrew fonts with minimal Nix packages for Stylix)
     fonts = {
       monospace = {

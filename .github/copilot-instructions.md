@@ -15,15 +15,18 @@ This repository manages a reproducible macOS system configuration using Nix, nix
 - Modular design: each tool gets its own `.nix` file
 
 **Layer 3: Package Management**
-- `flake.nix` - Orchestrates both layers + validates user config
+- `flake.nix` - Orchestrates both layers and imports validated host config
+- `lib/hosts.nix` - Validates `hosts.nix` and applies host defaults
 - `hosts.nix` - User/host personalization (common + per-host settings)
-- `darwin/homebrew.nix` - GUI applications and macOS-specific packages
+- `darwin/homebrew.nix` - Homebrew activation and profile composition
+- `darwin/homebrew-packages/` - Shared Homebrew formulae, casks, fonts, and taps
+- `darwin/profiles/` - Profile-specific Homebrew additions/removals
 
 ## Critical Patterns
 
-### 1. Host Config Validation (flake.nix)
+### 1. Host Config Validation (`lib/hosts.nix`)
 All configuration flows through `hosts.nix` (preferred) validation:
-- Required host attributes: `username`, `hostname`, `email`, `fullName`, `githubUsername`
+- Required host attributes: `username`, `hostname`, `fullName`, `githubUsername`
 - Hostname validation: only letters, numbers, hyphens allowed
 - Directory paths: configurable defaults with validation against dangerous characters
 - **Pattern**: Invalid config causes build-time errors, not runtime failures
@@ -108,7 +111,9 @@ darwin-rebuild switch --flake . --rollback
 | `flake.nix` | System orchestration, inputs, hosts validation | Adding dependencies, changing module layout |
 | `hosts.nix` | Shared + per-host settings | Personalizing multi-machine setup |
 | `darwin/` | macOS system config | System packages, defaults, security |
-| `darwin/homebrew.nix` | GUI app management | Adding/removing Homebrew casks |
+| `darwin/homebrew.nix` | Homebrew activation and composition | Changing Homebrew behavior |
+| `darwin/homebrew-packages/` | Shared Homebrew package lists | Adding/removing shared formulae and casks |
+| `darwin/profiles/` | Profile-specific Homebrew overrides | Adding/removing packages for one profile |
 | `home-manager/default.nix` | Module imports, home directory settings | Adding new program modules |
 | `home-manager/modules/` | Individual program configurations | Tool-specific config |
 | `home-manager/aliases/` | Shell aliases organization | Adding/modifying shell shortcuts |

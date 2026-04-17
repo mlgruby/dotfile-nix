@@ -56,14 +56,32 @@ run_guardrail_checks() {
     'installer normalizes hostname for flake output'
 
   check_contains \
-    ./flake.nix \
+    ./lib/hosts.nix \
     'hosts\.nix not found\.' \
-    'flake has clear missing host-config error'
+    'host config loader has clear missing-config error'
 
   check_contains \
     ./home-manager/aliases/platform.nix \
     'userConfig\.hostname' \
     'darwin rebuild aliases use resolved host hostname'
+
+  if ./scripts/testing/check-package-ownership.sh; then
+    pass "package ownership guardrail passed"
+  else
+    fail "package ownership guardrail failed"
+  fi
+
+  if ./scripts/testing/check-docs-stale-patterns.sh; then
+    pass "documentation stale-pattern guardrail passed"
+  else
+    fail "documentation stale-pattern guardrail failed"
+  fi
+
+  if ./scripts/testing/check-nix-helper-semantics.sh; then
+    pass "Nix helper semantics guardrail passed"
+  else
+    fail "Nix helper semantics guardrail failed"
+  fi
 }
 
 print_vm_checklist() {

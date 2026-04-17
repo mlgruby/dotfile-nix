@@ -64,11 +64,11 @@ which kotlin-language-server  # Kotlin LSP
 ### Adding Software
 
 ```bash
-# Add CLI tool (edit homebrew.nix)
-vim ~/Documents/dotfile/darwin/homebrew.nix
+# Add CLI tool (prefer Home Manager package modules)
+vim ~/Documents/dotfile/home-manager/modules/packages/system.nix
 
-# Add GUI app (edit homebrew.nix casks section)
-vim ~/Documents/dotfile/darwin/homebrew.nix
+# Add GUI app or macOS integration
+vim ~/Documents/dotfile/darwin/homebrew-packages/casks/apps.nix
 
 # Apply changes
 rebuild
@@ -78,9 +78,13 @@ rebuild
 
 | Type | Location | Examples |
 |------|----------|----------|
-| **CLI Tools** | `homebrew.brews` | `git`, `curl`, `jq` |
+| **CLI Tools** | `home-manager/modules/packages/*.nix` | `fd`, `duf`, `shellcheck`, `awscli2` |
 | **GUI Apps** | `homebrew.casks` | `brave-browser`, `docker-desktop` |
-| **Development** | Template-specific | Language runtimes, debuggers |
+| **Global runtimes/build tools** | `darwin/homebrew-packages/brews/toolchains.nix` | `node`, `go`, `cmake` |
+| **Project tooling** | Template-specific | Language runtimes, debuggers |
+
+See [Toolchain Ownership](../guides/toolchain-ownership.md) before moving
+global runtimes or build tools.
 
 ## 📁 Directory Navigation
 
@@ -224,7 +228,7 @@ awsw
 # Export credentials as environment variables
 awse
 
-# Generate .env file
+# Generate a chmod 600 .env file
 awsf
 
 # Clear all credentials
@@ -252,7 +256,7 @@ vim ~/.config/alacritty/config.toml
 |----------------|--------------|
 | **Personal Info** | `hosts.nix` |
 | **System Settings** | `darwin/configuration.nix` |
-| **Packages** | `darwin/homebrew.nix` |
+| **Packages** | `darwin/homebrew.nix`, `darwin/homebrew-packages/` |
 | **Shell Aliases** | `home-manager/aliases/` (organized by category) |
 | **Helper Scripts** | `home-manager/scripts/` (standalone scripts) |
 | **Terminal** | `home-manager/modules/alacritty/` |

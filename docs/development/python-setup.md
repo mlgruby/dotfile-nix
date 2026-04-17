@@ -102,5 +102,5 @@ uv run python script.py
 
 The system is configured in:
 
-- `darwin/homebrew.nix` - Python 3.12 and uv installation
+- `darwin/homebrew-packages/brews/toolchains.nix` - Python 3.12 and uv installation
 - `home-manager/modules/zsh.nix` - PATH setup and environment variables
