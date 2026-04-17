@@ -99,7 +99,8 @@ _load_aws_sso() {
       _aws_sso_login_single "$1" "Logging into AWS SSO for profile: $1" || return 1
       export AWS_PROFILE="$1"
       sleep 2
-      if local account_id=$(_aws_test_creds "$1"); then
+      local account_id
+      if account_id="$(_aws_test_creds "$1")"; then
         echo "✅ SSO credentials working - Account: $account_id"
       else
         echo "⚠️  SSO login succeeded but credentials not ready"
@@ -111,7 +112,7 @@ _load_aws_sso() {
   # Profile switching with credential testing.
   aws_profile() {
     local profile="${1:-default}"
-    if ! aws configure list-profiles | grep -q "^$profile$"; then
+    if ! aws configure list-profiles | grep -Fxq "$profile"; then
       echo "❌ Profile '$profile' not found. Available:"
       aws configure list-profiles
       return 1
@@ -121,7 +122,8 @@ _load_aws_sso() {
     export AWS_PROFILE="$profile"
     echo "🎯 Switched to AWS profile: $AWS_PROFILE"
 
-    if local account_id=$(_aws_test_creds "$profile"); then
+    local account_id
+    if account_id="$(_aws_test_creds "$profile")"; then
       local user_arn
       user_arn=$(AWS_PROFILE="$profile" aws sts get-caller-identity --query Arn --output text 2>/dev/null)
       echo "✅ Profile working - Account: $account_id"
@@ -148,7 +150,8 @@ _load_aws_sso() {
     if [ $? -eq 0 ] && [ -n "$temp_creds" ] && _aws_export_env_output "$temp_creds"; then
       echo "✅ Exporting temporary credentials as environment variables..."
       echo "🔑 Credentials exported: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN"
-      if local account_id=$(_aws_test_creds "$profile"); then
+      local account_id
+      if account_id="$(_aws_test_creds "$profile")"; then
         echo "✅ Environment credentials verified - Account: $account_id"
       fi
     else
@@ -194,7 +197,8 @@ aws_secret_access_key = $secret_key
 aws_session_token = $session_token" || return 1
 
     echo "✅ Credentials written to ~/.aws/credentials as [$target_profile]"
-    if local account_id=$(_aws_test_creds "$target_profile"); then
+    local account_id
+    if account_id="$(_aws_test_creds "$target_profile")"; then
       echo "✅ File credentials verified - Account: $account_id"
     fi
   }
@@ -259,7 +263,8 @@ aws_session_token = $default_token" || return 1
     echo "  Region: ${AWS_DEFAULT_REGION:-eu-west-1}"
     [ -n "$AWS_ACCESS_KEY_ID" ] && echo "  Access Key: Set (***${AWS_ACCESS_KEY_ID: -4})"
 
-    if [ -n "$AWS_PROFILE" ] && local account_id=$(_aws_test_creds "$AWS_PROFILE"); then
+    local account_id
+    if [ -n "$AWS_PROFILE" ] && account_id="$(_aws_test_creds "$AWS_PROFILE")"; then
       local user_arn
       user_arn=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null)
       echo "✅ Active - Account: $account_id"

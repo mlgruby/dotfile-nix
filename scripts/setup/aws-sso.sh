@@ -11,7 +11,7 @@ echo "🚀 Setting up AWS SSO configuration for Lightricks..."
 # Check if AWS CLI is installed
 if ! command -v aws &> /dev/null; then
     echo "❌ AWS CLI is not installed. Please install it first:"
-    echo "   macOS: brew install awscli"
+    echo "   dotfile: add awscli2 to home-manager/modules/packages/cloud.nix and rebuild"
     echo "   Linux: curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\" && unzip awscliv2.zip && sudo ./aws/install"
     exit 1
 fi

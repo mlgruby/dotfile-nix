@@ -57,16 +57,16 @@ lwdec ~/Downloads/bw-backup_2026_04_17.zip \
 - Decrypted JSON files are written with `0600` permissions.
 - ZIP member paths are validated before extraction.
 - Attachments are optional and prompt for their own ZIP password.
-- The legacy `decrypt_lazywarden.py` command still works, but new usage should
-  prefer `lazywarden-decrypt` or the `lwdec` alias.
+- Use `lazywarden-decrypt` or the `lwdec` alias. The old
+  `decrypt_lazywarden.py` command is intentionally not installed.
 
 ## Implementation
 
 The tool is packaged by Home Manager in:
 
 ```text
-home-manager/modules/lazywarden.nix
-home-manager/modules/lazywarden/decrypt_lazywarden.py
+home-manager/modules/lazywarden/default.nix
+home-manager/modules/lazywarden/lazywarden-decrypt.py
 ```
 
 The homelab aliases live in:
