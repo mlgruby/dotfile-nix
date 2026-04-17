@@ -117,7 +117,7 @@ in
     ./modules/ssh.nix
     ./modules/programs/terminal-tools.nix
     ./modules/directory-tools.nix
-    ./modules/utility-packages.nix
+    ./modules/package-groups.nix
     ./modules/xdg.nix
     ./modules/fonts.nix
     ./neovim.nix

@@ -24,6 +24,9 @@ info() {
 }
 
 homebrew_files=(
+  "darwin/homebrew-packages/brews/core.nix"
+  "darwin/homebrew-packages/brews/development.nix"
+  "darwin/homebrew-packages/brews/toolchains.nix"
   "darwin/profiles/common.nix"
   "darwin/profiles/personal.nix"
   "darwin/profiles/work.nix"

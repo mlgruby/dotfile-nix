@@ -68,6 +68,7 @@ darwin/
 ├── nix-settings.nix      # Nix daemon configuration
 ├── macos-defaults.nix    # macOS system preferences
 ├── homebrew.nix          # Hybrid package management
+├── homebrew-packages/    # Shared Homebrew package lists
 ├── misc-system.nix       # Additional system settings
 └── system-monitoring.nix # Health monitoring & maintenance
 ```
@@ -143,7 +144,7 @@ The system uses a **hybrid approach** for optimal compatibility and performance:
 
 - CLI development tools
 - Libraries and dependencies
-- Language runtimes
+- User-level language tooling
 - System utilities
 
 **Benefits**:
@@ -169,7 +170,7 @@ environment.systemPackages = with pkgs; [
 
 - GUI applications
 - macOS-specific tools
-- Packages requiring frequent updates
+- Global runtimes/build chains intentionally shared across tools
 - Proprietary software
 
 **Benefits**:

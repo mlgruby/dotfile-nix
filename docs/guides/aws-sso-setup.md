@@ -369,11 +369,11 @@ aws ec2 describe-instances  # Use default credentials
 ### **4. Application Development Setup**
 
 ```bash
-# Export credentials for applications
-aws configure export-credentials --format env > .env
+# Export credentials for applications without printing secrets
+awsef
 
-# Or export to environment variables
-eval $(aws configure export-credentials --format env)
+# Or export to the current shell with the dotfile helper
+awse
 
 # Verify credentials are set
 echo $AWS_ACCESS_KEY_ID

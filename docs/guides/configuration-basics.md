@@ -98,11 +98,12 @@ You have two main options for adding packages, depending on the type of software
 
 2. **Via Homebrew**
 
-   Prefer this for GUI applications and packages that need frequent updates:
+   Prefer this for GUI applications, fonts, vendor apps, and toolchains that are
+   intentionally shared across IDEs or project tooling:
 
    ```nix
-   # In darwin/homebrew.nix
-   homebrew.casks = [
+   # In darwin/homebrew-packages/casks/apps.nix
+   [
      "your-app"
    ];
    ```
