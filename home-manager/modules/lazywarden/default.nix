@@ -11,16 +11,11 @@ let
 
   lazywarden-decrypt = pkgs.writeScriptBin "lazywarden-decrypt" ''
     #!${pythonWithPackages}/bin/python3
-    ${builtins.readFile ./lazywarden/decrypt_lazywarden.py}
-  '';
-
-  decrypt-lazywarden-legacy = pkgs.writeShellScriptBin "decrypt_lazywarden.py" ''
-    exec ${lazywarden-decrypt}/bin/lazywarden-decrypt "$@"
+    ${builtins.readFile ./lazywarden-decrypt.py}
   '';
 in
 {
   home.packages = [
     lazywarden-decrypt
-    decrypt-lazywarden-legacy
   ];
 }

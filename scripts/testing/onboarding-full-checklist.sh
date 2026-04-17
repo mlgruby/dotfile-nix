@@ -70,6 +70,12 @@ run_guardrail_checks() {
   else
     fail "package ownership guardrail failed"
   fi
+
+  if ./scripts/testing/check-docs-stale-patterns.sh; then
+    pass "documentation stale-pattern guardrail passed"
+  else
+    fail "documentation stale-pattern guardrail failed"
+  fi
 }
 
 print_vm_checklist() {
