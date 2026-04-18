@@ -323,8 +323,13 @@ confirm_maintenance() {
         return 0
     fi
 
-    printf "This will run Nix GC, Homebrew upgrade/cleanup, cache cleanup, and sudo macOS maintenance. Continue? [y/N] "
+    if [[ ! -t 0 ]]; then
+        log_error "Maintenance requires an interactive terminal. Set HEALTH_MAINTAIN_CONFIRM=1 to run non-interactively."
+        exit 1
+    fi
+
     local answer
+    printf "This will run Nix GC, Homebrew upgrade/cleanup, cache cleanup, and sudo macOS maintenance. Continue? [y/N] "
     read -r answer
     case "$answer" in
         [Yy]|[Yy][Ee][Ss])

@@ -169,7 +169,7 @@
   quickamend = "gaa && gcan"; # Stage all and amend last commit
   quicksave = "gwip"; # Quick WIP commit (alias for gwip)
   quickfix = "echo 'Use quickfix-force when you intentionally want amend + force-with-lease.'"; # Safe hint for the old destructive shortcut
-  quickfix-force = "read -r '?Amend and force-push with lease? [y/N] ' ans && [[ $ans = [Yy] || $ans = [Yy][Ee][Ss] ]] && gaa && git commit --amend --no-edit && gpsf"; # Confirm, then amend and force push with lease
+  quickfix-force = "printf '%s' 'Amend and force-push with lease? [y/N] '; read -r ans; case \"$ans\" in [Yy]|[Yy][Ee][Ss]) gaa && git commit --amend --no-edit && gpsf ;; *) echo 'quickfix-force cancelled.' ;; esac"; # Confirm, then amend and force push with lease
 
   # ==========================================================================
   # Search Operations
