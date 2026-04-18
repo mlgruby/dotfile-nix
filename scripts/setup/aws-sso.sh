@@ -1,12 +1,16 @@
 #!/bin/bash
 
 # AWS SSO Setup Script for Non-Nix Users
+#
+# Canonical Nix users should use home-manager/modules/aws-sso.nix. This script
+# exists only for standalone shell environments that do not load Home Manager.
 # Supports both bash and zsh shells automatically
 # Includes short aliases and credential export functionality
 
 set -e
 
-echo "🚀 Setting up AWS SSO configuration for Lightricks..."
+echo "🚀 Setting up AWS SSO configuration for Vortexa..."
+echo "ℹ️  Nix/Home Manager users already get this from home-manager/modules/aws-sso.nix."
 
 # Check if AWS CLI is installed
 if ! command -v aws &> /dev/null; then
@@ -30,48 +34,48 @@ fi
 cat > ~/.aws/config << 'EOF'
 # Traditional profiles for Java/Scala applications (no SSO properties)
 [default]
-region = us-west-2
+region = eu-west-1
 output = json
 
 [profile production]
-region = us-west-2
+region = eu-west-1
 output = json
 
 [profile staging]
-region = us-west-2
+region = eu-west-1
 output = json
 
 [profile prod]
-region = us-west-2
+region = eu-west-1
 output = json
 
 [profile dev]
-region = us-west-2
+region = eu-west-1
 output = json
 
 # SSO profiles for CLI usage
 [profile production-sso]
-sso_start_url = https://d-90670ca891.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 384822754266
-sso_role_name = DataPlatformTeam
-region = us-west-2
+sso_start_url = https://vortexa.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 501857513371
+sso_role_name = PMMT
+region = eu-west-1
 output = json
 
 [profile staging-sso]
-sso_start_url = https://d-90670ca891.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 588736812464
-sso_role_name = AdministratorAccess
-region = us-west-2
+sso_start_url = https://vortexa.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 045251666112
+sso_role_name = PMMT
+region = eu-west-1
 output = json
 
 [profile default-sso]
-sso_start_url = https://d-90670ca891.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 588736812464
-sso_role_name = AdministratorAccess
-region = us-west-2
+sso_start_url = https://vortexa.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 045251666112
+sso_role_name = PMMT
+region = eu-west-1
 output = json
 EOF
 
@@ -129,8 +133,8 @@ if [ -n "$SHELL_CONFIG" ]; then
 # ==========================================
 # AWS SSO Configuration - Added by setup script
 # ==========================================
-export AWS_DEFAULT_REGION="us-west-2"
-export AWS_REGION="us-west-2"
+export AWS_DEFAULT_REGION="eu-west-1"
+export AWS_REGION="eu-west-1"
 
 # AWS SSO Helper Functions
 _aws_test_creds() {
@@ -501,5 +505,5 @@ if [ -n "$SHELL_CONFIG" ]; then
     echo "ℹ️  Config file used: $SHELL_CONFIG"
 fi
 echo ""
-echo "⚠️  Note: You'll need access to the Lightricks AWS SSO portal"
+echo "⚠️  Note: You'll need access to the Vortexa AWS SSO portal"
 echo "   Contact your admin if you don't have access." 

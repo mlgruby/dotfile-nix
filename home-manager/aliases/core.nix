@@ -95,7 +95,7 @@ in
   # Process Management
   # ==========================================================================
   psg = "ps aux | grep"; # Search running processes - usage: psg nginx
-  killall = "pkill -f"; # Kill processes by name pattern - usage: killall node
+  pkillf = "pkill -f"; # Kill processes by name pattern - usage: pkillf node
   sys = "fastfetch"; # Show system information
 
   # ==========================================================================

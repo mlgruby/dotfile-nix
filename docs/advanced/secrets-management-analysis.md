@@ -128,14 +128,14 @@ secrets/
 aws:
   accounts:
     production:
-      id: "384822754266"
-      sso_role: "DataPlatformTeam"
+      id: "501857513371"
+      sso_role: "PMMT"
     development:
-      id: "588736812464" 
-      sso_role: "AdministratorAccess"
+      id: "045251666112"
+      sso_role: "PMMT"
   sso:
-    start_url: "https://d-90670ca891.awsapps.com/start"
-    region: "us-east-1"
+    start_url: "https://vortexa.awsapps.com/start"
+    region: "eu-west-1"
 ```
 
 #### 2.3 Update Nix Configuration

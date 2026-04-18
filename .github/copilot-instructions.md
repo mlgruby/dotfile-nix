@@ -159,11 +159,8 @@ darwin-rebuild switch --flake . --rollback
 
 ## Common Refactoring Opportunities
 
-From [refactoring analysis](../REFACTORING_ANALYSIS.md):
-- **aws-sso.nix** (376 lines): Extract embedded shell functions to separate `~/.config/aws-sso/functions.sh`
-- **fonts.nix** (243 lines): Use generate functions to reduce repetition
-- **Large config blocks**: Consider helper functions to abstract patterns
-- **Backup files**: `aliases.nix.bak` can be removed
+Use [the current refactoring backlog](../docs/refactoring-backlog.md) for active
+cleanup work. Historical analysis lives under `docs/archive/`.
 
 ## Testing & Validation
 

@@ -1,10 +1,10 @@
 # System Health Monitoring
 
-This document covers the automated system health monitoring and maintenance setup for your Nix Darwin environment.
+This document covers the automated system health monitoring and manual maintenance setup for your Nix Darwin environment.
 
 ## Overview
 
-The system health monitoring provides comprehensive oversight of system performance, automated maintenance, and proactive issue detection. It integrates seamlessly with your Nix Darwin configuration.
+The system health monitoring provides comprehensive oversight of system performance, scheduled reporting, and proactive issue detection. Mutating maintenance remains manual so cleanup and upgrades only happen when explicitly requested.
 
 ## Features
 
@@ -17,9 +17,9 @@ The system health monitoring provides comprehensive oversight of system performa
 - **Load Average**: System load monitoring with multi-core awareness
 - **Temperature**: CPU temperature monitoring (if tools available)
 
-### 🛠️ **System Maintenance**
+### 🛠️ **Manual System Maintenance**
 
-- **Nix Store**: Automated garbage collection and store optimization
+- **Nix Store**: Garbage collection and store optimization
 - **Homebrew**: Package updates, upgrades, and cleanup
 - **System Cleanup**: Temporary files, caches, and log cleanup
 - **macOS Maintenance**: Spotlight indexing and DNS cache refresh
@@ -36,7 +36,7 @@ The system health monitoring provides comprehensive oversight of system performa
 - **Critical Issues**: Immediate detection of system-critical problems
 - **Threshold Monitoring**: Configurable warning thresholds
 - **Service Health**: Nix daemon and essential service monitoring
-- **Automated Reporting**: Regular health status reports
+- **Scheduled Reporting**: Regular health status reports
 
 ## Automated Scheduling
 
@@ -53,7 +53,7 @@ The monitoring system runs on the following schedule:
 ### Weekly Tasks
 
 ```text
-Sunday 10:00 AM - System Maintenance
+Sunday 10:00 AM - Weekly Health Report
 ```
 
 ### Services Configuration
@@ -61,7 +61,7 @@ Sunday 10:00 AM - System Maintenance
 All services are managed via launchd and configured in `darwin/system-monitoring.nix`:
 
 - **system-health-check**: Daily comprehensive health assessment
-- **system-maintenance**: Weekly automated maintenance tasks
+- **system-health-report**: Weekly non-mutating health report
 - **performance-monitor**: Daily performance analysis
 - **critical-alerts**: Three-times-daily critical issue detection
 
@@ -102,8 +102,8 @@ perf-optimize
 # View health check logs
 logs-health
 
-# View maintenance logs
-logs-maintenance
+# View weekly report logs
+logs-report
 
 # View performance logs
 logs-performance
@@ -173,9 +173,14 @@ monitor-unload
 
 ## Maintenance Tasks
 
-### Automated Maintenance (Weekly)
+### Scheduled Weekly Report
 
-The system performs these maintenance tasks every Sunday:
+Every Sunday the system generates a non-mutating health report. Use `health-maintain`
+when you intentionally want to run cleanup, upgrades, and maintenance commands.
+
+### Manual Maintenance
+
+The manual maintenance command performs these tasks:
 
 #### Nix Maintenance
 
@@ -199,8 +204,6 @@ The system performs these maintenance tasks every Sunday:
 
 - Spotlight index rebuilding
 - DNS cache flushing
-
-### Manual Maintenance
 
 Run maintenance manually when needed:
 
@@ -244,7 +247,7 @@ StartCalendarInterval = [
 Logs are stored in `~/.local/var/log/`:
 
 - `system-health-check.log` - Daily health checks
-- `system-maintenance.log` - Weekly maintenance tasks
+- `system-health-report.log` - Weekly health reports
 - `performance-monitor.log` - Performance analysis
 - `critical-alerts.log` - Critical issue alerts
 
