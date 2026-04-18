@@ -210,24 +210,6 @@
       '';
     };
 
-    # macOS System Preferences
-    # Configure system-wide settings and defaults
-    defaults = {
-      # Finder preferences
-      finder.FXPreferredViewStyle = "clmv"; # Column view by default
-      # Login window settings
-      loginwindow.GuestEnabled = false; # Disable guest account
-      # Global system settings
-      NSGlobalDomain = {
-        AppleICUForce24HourTime = true; # Use 24-hour time
-        AppleInterfaceStyle = "Dark"; # Enable dark mode
-        KeyRepeat = 2; # Faster key repeat
-      };
-      dock = {
-        # ... your existing settings ...
-      };
-    };
-
     # System state version
     stateVersion = lib.mkForce 4;
 
