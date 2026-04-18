@@ -9,43 +9,26 @@
 #
 # Key components:
 # 1. System Configuration:
-# - Nix package manager settings and trusted users
-# - Performance tuning (jobs and cores)
 # - Architecture settings (aarch64-darwin)
+# - Hostname and user wiring
 # - Security settings (TouchID, sudo)
 #
 # 2. Package Management:
 # - System-wide package installation via Nix
 #   - Core system utilities (curl, wget, gnutls)
-#   - Python base (python3, pipx)
 #   - Build dependencies (openssl, readline, sqlite, zlib)
-#   - Cloud platform CLIs (AWS, GCP, Terraform)
 #
 # 3. macOS Integration:
-# System preferences:
-# - Dark mode by default
-# - 24-hour time format
 # - TouchID for sudo
-# - Fast key repeat rate
-# - Column view in Finder
-# - Show hidden files
-# - Show path bar and status bar
+# - Nix application aliases in /Applications/Nix Apps
 #
 # 4. Development Environment:
 # Post-activation scripts:
-# - SDKMAN and Java version management
-#   - Installs Java 8, 11, 17 (Amazon Corretto)
-#   - Sets Java 11 as default
-# - Python environment setup
-#   - System-wide Python 3.12 via Homebrew
-#   - uv for project Python version management
-# - AWS credential management
+# - Xcode Command Line Tools validation
+# - Default browser setup
 #
 # 5. Security:
 # - TouchID/password authentication for sudo
-# - Secure system defaults
-# - Guest login disabled
-# - Trusted users configuration
 #
 # Integration:
 # - Works with home-manager for user config
@@ -66,50 +49,6 @@
   ...
 }:
 {
-  # Nix package manager settings
-
-  # Enable Nix daemon
-  nix = {
-    enable = true;
-
-    # Nix daemon settings following best practices
-    settings = {
-      # Enable flakes and nix command
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-
-      # Trusted users for additional rights
-      trusted-users = [
-        "${userConfig.username}"
-        "root"
-      ];
-
-      # Note: auto-optimise-store is disabled as it can corrupt the Nix Store on nix-darwin
-      # Using nix.optimise.automatic instead (configured below)
-
-      # Build settings for optimal performance
-      max-jobs = "auto"; # Use all available logical cores
-      cores = 0; # Use all available cores for each job
-
-      # Improve build performance with more substituters
-      substituters = [
-        "https://cache.nixos.org/"
-        "https://nix-community.cachix.org"
-      ];
-
-      # Trust public keys for binary caches
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      ];
-    };
-
-    # Store optimization (nix-darwin safe alternative to auto-optimise-store)
-    optimise.automatic = true;
-  };
-
   # Set correct GID for nixbld group
   ids.gids.nixbld = 350;
 
