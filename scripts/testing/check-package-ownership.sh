@@ -68,7 +68,12 @@ active_brew_lines() {
   awk '
     /^[[:space:]]*#/ { next }
     inRemove && /\]/ { inRemove = 0; next }
-    /removeBrews[[:space:]]*=/ { inRemove = 1; next }
+    /removeBrews[[:space:]]*=/ {
+      if ($0 !~ /\]/) {
+        inRemove = 1
+      }
+      next
+    }
     inRemove { next }
     { print }
   ' "$file"
