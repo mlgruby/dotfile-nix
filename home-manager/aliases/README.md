@@ -29,7 +29,7 @@ aliases/
 | `d` | Docker | `d ps` |
 | `k` | Kubectl | `k get pods` |
 | `rebuild` | Rebuild system (supports profile flags) | `rebuild --work` |
-| `cleanup` | Clean system | `cleanup` |
+| `cleanup` | Confirm, then clean system | `cleanup` |
 
 ### Dangerous Operations
 

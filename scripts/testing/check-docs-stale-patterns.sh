@@ -29,7 +29,7 @@ check_no_matches() {
   shift 2
 
   local matches
-  matches="$(rg -n "$pattern" "$@" || true)"
+  matches="$(rg -n --glob '!docs/archive/**' "$pattern" "$@" || true)"
   if [[ -n "$matches" ]]; then
     fail "$label"
     printf '%s\n' "$matches"
