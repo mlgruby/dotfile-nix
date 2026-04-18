@@ -24,7 +24,38 @@
   pkgs,
   userConfig,
   ...
-}: {
+}:
+let
+  homeDir = "/Users/${userConfig.username}";
+  dotfileDir = "${homeDir}/${userConfig.directories.dotfiles}";
+  logDir = "${homeDir}/.local/var/log";
+  healthReportsDir = "${dotfileDir}/.health-reports";
+  performanceReportsDir = "${dotfileDir}/.performance-reports";
+
+  mkLogPath = name: "${logDir}/${name}.log";
+  mkScriptCommand = script: args: "cd ${dotfileDir} && ./${script} ${args}";
+  mkAgent =
+    {
+      command,
+      logName,
+      calendar ? null,
+      runAtLoad ? false,
+    }:
+    {
+      serviceConfig = {
+        ProgramArguments = [
+          "${pkgs.bash}/bin/bash"
+          "-c"
+          command
+        ];
+        RunAtLoad = runAtLoad;
+        StandardOutPath = mkLogPath logName;
+        StandardErrorPath = mkLogPath "${logName}.error";
+      }
+      // (if calendar == null then { } else { StartCalendarInterval = calendar; });
+    };
+in
+{
   # System health monitoring with launchd
   launchd.user.agents = {
     # Nix daemon startup check - runs at login to ensure daemon is working
@@ -32,100 +63,69 @@
       serviceConfig = {
         ProgramArguments = [
           "${pkgs.bash}/bin/bash"
-          "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/scripts/utils/nix-daemon-startup.sh"
+          "${dotfileDir}/scripts/utils/nix-daemon-startup.sh"
         ];
         RunAtLoad = true; # Run when user logs in
-        StandardOutPath = "/Users/${userConfig.username}/.local/var/log/nix-daemon-startup.out.log";
-        StandardErrorPath = "/Users/${userConfig.username}/.local/var/log/nix-daemon-startup.error.log";
-      };
-    };
-    # Daily health check service
-    system-health-check = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${pkgs.bash}/bin/bash"
-          "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/system-health-monitor.sh --check"
-        ];
-        StartCalendarInterval = [
-          {
-            Hour = 9;
-            Minute = 0;
-          } # 9:00 AM daily
-        ];
-        RunAtLoad = false;
-        StandardOutPath = "/Users/${userConfig.username}/.local/var/log/system-health-check.log";
-        StandardErrorPath = "/Users/${userConfig.username}/.local/var/log/system-health-check.error.log";
+        StandardOutPath = mkLogPath "nix-daemon-startup";
+        StandardErrorPath = mkLogPath "nix-daemon-startup.error";
       };
     };
 
-    # Weekly maintenance service
-    system-maintenance = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${pkgs.bash}/bin/bash"
-          "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/monitoring/system-health-monitor.sh --maintain"
-        ];
-        StartCalendarInterval = [
-          {
-            Weekday = 0; # Sunday
-            Hour = 10;
-            Minute = 0;
-          } # 10:00 AM every Sunday
-        ];
-        RunAtLoad = false;
-        StandardOutPath = "/Users/${userConfig.username}/.local/var/log/system-maintenance.log";
-        StandardErrorPath = "/Users/${userConfig.username}/.local/var/log/system-maintenance.error.log";
-      };
+    # Daily health check service
+    system-health-check = mkAgent {
+      command = mkScriptCommand "scripts/monitoring/system-health-monitor.sh" "--check";
+      logName = "system-health-check";
+      calendar = [
+        {
+          Hour = 9;
+          Minute = 0;
+        } # 9:00 AM daily
+      ];
+    };
+
+    # Weekly report service. Mutating maintenance stays manual via health-maintain.
+    system-health-report = mkAgent {
+      command = mkScriptCommand "scripts/monitoring/system-health-monitor.sh" "--report";
+      logName = "system-health-report";
+      calendar = [
+        {
+          Weekday = 0; # Sunday
+          Hour = 10;
+          Minute = 0;
+        } # 10:00 AM every Sunday
+      ];
     };
 
     # Performance monitoring service (lightweight, frequent)
-    performance-monitor = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${pkgs.bash}/bin/bash"
-          "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/monitoring/analyze-build-performance.sh --profile"
-        ];
-        StartCalendarInterval = [
-          {
-            Hour = 12;
-            Minute = 0;
-          } # Noon daily
-        ];
-        RunAtLoad = false;
-        StandardOutPath = "/Users/${userConfig.username}/.local/var/log/performance-monitor.log";
-        StandardErrorPath = "/Users/${userConfig.username}/.local/var/log/performance-monitor.error.log";
-      };
+    performance-monitor = mkAgent {
+      command = mkScriptCommand "scripts/monitoring/analyze-build-performance.sh" "--profile";
+      logName = "performance-monitor";
+      calendar = [
+        {
+          Hour = 12;
+          Minute = 0;
+        } # Noon daily
+      ];
     };
 
     # Critical alerts check (more frequent for urgent issues)
-    critical-alerts = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${pkgs.bash}/bin/bash"
-          "-c"
-          "cd /Users/${userConfig.username}/${userConfig.directories.dotfiles} && ./scripts/monitoring/system-health-monitor.sh --alert"
-        ];
-        StartCalendarInterval = [
-          {
-            Hour = 8;
-            Minute = 0;
-          } # 8:00 AM
-          {
-            Hour = 14;
-            Minute = 0;
-          } # 2:00 PM
-          {
-            Hour = 20;
-            Minute = 0;
-          } # 8:00 PM
-        ];
-        RunAtLoad = false;
-        StandardOutPath = "/Users/${userConfig.username}/.local/var/log/critical-alerts.log";
-        StandardErrorPath = "/Users/${userConfig.username}/.local/var/log/critical-alerts.error.log";
-      };
+    critical-alerts = mkAgent {
+      command = mkScriptCommand "scripts/monitoring/system-health-monitor.sh" "--alert";
+      logName = "critical-alerts";
+      calendar = [
+        {
+          Hour = 8;
+          Minute = 0;
+        } # 8:00 AM
+        {
+          Hour = 14;
+          Minute = 0;
+        } # 2:00 PM
+        {
+          Hour = 20;
+          Minute = 0;
+        } # 8:00 PM
+      ];
     };
   };
 
@@ -133,19 +133,19 @@
   system.activationScripts.createMonitoringDirectories = {
     text = ''
       echo "Setting up system monitoring directories..."
-      
+
       # Create log directories
-      mkdir -p "/Users/${userConfig.username}/.local/var/log"
-      chown ${userConfig.username}:staff "/Users/${userConfig.username}/.local/var/log"
-      
+      mkdir -p "${logDir}"
+      chown ${userConfig.username}:staff "${logDir}"
+
       # Create health reports directory
-      mkdir -p "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/.health-reports"
-      chown ${userConfig.username}:staff "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/.health-reports"
-      
+      mkdir -p "${healthReportsDir}"
+      chown ${userConfig.username}:staff "${healthReportsDir}"
+
       # Create performance reports directory if it doesn't exist
-      mkdir -p "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/.performance-reports"
-      chown ${userConfig.username}:staff "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/.performance-reports"
-      
+      mkdir -p "${performanceReportsDir}"
+      chown ${userConfig.username}:staff "${performanceReportsDir}"
+
       echo "✓ Monitoring directories created"
     '';
   };
@@ -157,18 +157,18 @@
     # iotop # I/O monitoring - not available on macOS ARM64
     # iostat # I/O statistics - built-in macOS command
     lsof # List open files
-    
+
     # Network monitoring
     nmap # Network scanner
     netcat # Network utility
-    
+
     # System utilities
     tree # Directory structure
     watch # Command monitoring
-    
+
     # Log analysis
     jq # JSON processing for log parsing
-    
+
     # Performance analysis
     hyperfine # Command-line benchmarking
   ];
@@ -176,9 +176,9 @@
   # Environment variables for monitoring
   environment.variables = {
     # Monitoring configuration
-    HEALTH_REPORTS_DIR = "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/.health-reports";
-    PERFORMANCE_REPORTS_DIR = "/Users/${userConfig.username}/${userConfig.directories.dotfiles}/.performance-reports";
-    SYSTEM_LOG_DIR = "/Users/${userConfig.username}/.local/var/log";
+    HEALTH_REPORTS_DIR = healthReportsDir;
+    PERFORMANCE_REPORTS_DIR = performanceReportsDir;
+    SYSTEM_LOG_DIR = logDir;
   };
 
   # Warning for manual setup

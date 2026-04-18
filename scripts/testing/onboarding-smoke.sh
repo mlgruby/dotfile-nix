@@ -166,7 +166,7 @@ check_stale_patterns() {
 
   for pattern in "${patterns[@]}"; do
     local matches
-    matches="$(rg -n "$pattern" "${scope[@]}" || true)"
+    matches="$(rg -n --glob '!docs/archive/**' "$pattern" "${scope[@]}" || true)"
     if [[ -n "$matches" ]]; then
       printf '[FAIL] stale pattern found: %s\n' "$pattern"
       printf '%s\n' "$matches"

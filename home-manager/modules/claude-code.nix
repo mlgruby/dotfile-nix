@@ -16,7 +16,7 @@
 # Integration:
 # - Requires AWS SSO login (aws sso login --profile default-sso)
 # - Works with aws-sso.nix for credential management
-# - Model IDs are centralized in config.nix
+# - Model IDs are centralized in ../config/claude.nix
 #
 # Usage:
 # - Run 'claude' in terminal to start Claude Code
