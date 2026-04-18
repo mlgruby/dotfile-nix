@@ -260,6 +260,8 @@ Generated reports are stored in `.health-reports/`:
 - **health_report_TIMESTAMP.txt** - Comprehensive health reports
 - **maintenance_TIMESTAMP.log** - Maintenance task logs
 
+These reports are generated locally and ignored by git.
+
 ### Performance Reports
 
 Performance analysis reports in `.performance-reports/`:
@@ -267,6 +269,8 @@ Performance analysis reports in `.performance-reports/`:
 - **system_analysis_TIMESTAMP.txt** - System configuration analysis
 - **rebuild_profile_TIMESTAMP.txt** - Build performance profiles
 - **cache_analysis_TIMESTAMP.txt** - Binary cache performance
+
+These reports are generated locally and ignored by git.
 
 ### Report Analysis
 
