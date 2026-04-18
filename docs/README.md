@@ -72,7 +72,7 @@ Start Here → System Overview → Performance → Monitoring
 
 - [Rebuild Optimization](performance/rebuild-optimization.md)
 - [System Health Monitoring](monitoring/system-health.md)
-- [Refactoring Analysis](../REFACTORING_ANALYSIS.md) - Code optimization opportunities
+- [Refactoring Backlog](refactoring-backlog.md) - Current cleanup backlog
 
 ### 🔧 I Want to Understand How It Works
 
@@ -93,7 +93,7 @@ Start Here → Architecture → Configuration → Advanced Topics
 - **[Lazywarden Recovery](guides/lazywarden-recovery.md)** - Decrypt Lazywarden backup archives
 - **[Toolchain Ownership](guides/toolchain-ownership.md)** - Runtime and build-tool ownership policy
 - **[Quick Start](../SCRIPTS_QUICKSTART.md)** - Get started with aliases in 5 minutes
-- **[Refactoring Analysis](../REFACTORING_ANALYSIS.md)** - Code improvement opportunities
+- **[Refactoring Backlog](refactoring-backlog.md)** - Current cleanup backlog
 
 ### Configuration Files
 

@@ -19,7 +19,6 @@ CATEGORY="${1:-all}"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
@@ -112,7 +111,7 @@ show_category() {
     case "$category" in
         core)
             echo -e "${CYAN}Core Shell Aliases${NC}\n"
-            alias | grep -E "^(c=|x=|h=|r=|rl=|l=|ll=|la=|ls=|\.\.=|backup=|xtract=|compress=|psg=|killall=|size=|copy=|paste=|json=|yaml=|path=|now=|today=|myip=|ports=)" | sort
+            alias | grep -E "^(c=|x=|h=|r=|rl=|l=|ll=|la=|ls=|\.\.=|backup=|xtract=|compress=|psg=|pkillf=|size=|copy=|paste=|json=|yaml=|path=|now=|today=|myip=|ports=)" | sort
             ;;
         git)
             echo -e "${CYAN}Git Workflow Aliases${NC}\n"

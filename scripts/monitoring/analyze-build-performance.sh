@@ -30,7 +30,7 @@ NC='\033[0m' # No Color
 
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILE_DIR="$(dirname "$SCRIPT_DIR")"
+DOTFILE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REPORT_DIR="$DOTFILE_DIR/.performance-reports"
 HOSTNAME=$(hostname)
 

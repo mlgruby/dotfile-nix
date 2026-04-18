@@ -60,11 +60,11 @@ aws --version
 aws configure sso
 
 # You'll be prompted for:
-# SSO start URL: https://d-90670ca891.awsapps.com/start
-# SSO Region: us-east-1
-# Account ID: 588736812464 (for dev/default)
-# Role name: AdministratorAccess
-# CLI default client Region: us-west-2
+# SSO start URL: https://vortexa.awsapps.com/start
+# SSO Region: eu-west-1
+# Account ID: 045251666112 (for dev/default)
+# Role name: PMMT
+# CLI default client Region: eu-west-1
 # CLI default output format: json
 # CLI profile name: default-sso
 ```
@@ -76,11 +76,11 @@ aws configure sso
 aws configure sso --profile production-sso
 
 # You'll be prompted for:
-# SSO start URL: https://d-90670ca891.awsapps.com/start
-# SSO Region: us-east-1
-# Account ID: 384822754266 (for production)
-# Role name: DataPlatformTeam
-# CLI default client Region: us-west-2
+# SSO start URL: https://vortexa.awsapps.com/start
+# SSO Region: eu-west-1
+# Account ID: 501857513371 (for production)
+# Role name: PMMT
+# CLI default client Region: eu-west-1
 # CLI default output format: json
 # CLI profile name: production-sso
 ```
@@ -121,8 +121,8 @@ You should see output like:
 ```json
 {
     "UserId": "AIDACKCEVSQ6C2EXAMPLE",
-    "Account": "588736812464",
-    "Arn": "arn:aws:sts::588736812464:assumed-role/..."
+    "Account": "045251666112",
+    "Arn": "arn:aws:sts::045251666112:assumed-role/..."
 }
 ```
 
@@ -151,19 +151,19 @@ After setup, these files will exist:
 
 ```ini
 [profile default-sso]
-sso_start_url = https://d-90670ca891.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 588736812464
-sso_role_name = AdministratorAccess
-region = us-west-2
+sso_start_url = https://vortexa.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 045251666112
+sso_role_name = PMMT
+region = eu-west-1
 output = json
 
 [profile production-sso]
-sso_start_url = https://d-90670ca891.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 384822754266
-sso_role_name = DataPlatformTeam
-region = us-west-2
+sso_start_url = https://vortexa.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 501857513371
+sso_role_name = PMMT
+region = eu-west-1
 output = json
 ```
 
@@ -230,24 +230,24 @@ For your organization's setup:
 
 | Account Type | Account ID | Role | Profile Name |
 |--------------|------------|------|--------------|
-| Development/Default | `588736812464` | `AdministratorAccess` | `default-sso` |
-| Production | `384822754266` | `DataPlatformTeam` | `production-sso` |
+| Development/Default | `045251666112` | `PMMT` | `default-sso` |
+| Production | `501857513371` | `PMMT` | `production-sso` |
 
-**SSO Portal URL:** `https://d-90670ca891.awsapps.com/start`
+**SSO Portal URL:** `https://vortexa.awsapps.com/start`
 
 ## 🏢 **Configured AWS Accounts**
 
 ### **Production Account**
 
-- **Account ID**: `384822754266`
-- **Role**: `DataPlatformTeam`
+- **Account ID**: `501857513371`
+- **Role**: `PMMT`
 - **SSO Profile**: `production-sso`
 - **Traditional Profile**: `production`
 
 ### **Development Account**
 
-- **Account ID**: `588736812464`
-- **Role**: `AdministratorAccess`
+- **Account ID**: `045251666112`
+- **Role**: `PMMT`
 - **SSO Profile**: `default-sso` / `staging-sso`
 - **Traditional Profile**: `default` / `staging`
 
@@ -406,18 +406,18 @@ aws sso login --profile default-sso
 
 ### **SSO Configuration**
 
-- **SSO Start URL**: `https://d-90670ca891.awsapps.com/start`
-- **SSO Region**: `us-east-1`
-- **Default Region**: `us-west-2`
+- **SSO Start URL**: `https://vortexa.awsapps.com/start`
+- **SSO Region**: `eu-west-1`
+- **Default Region**: `eu-west-1`
 - **Output Format**: `json`
 
 ### **Profile Types**
 
 **SSO Profiles** (for AWS CLI):
 
-- `production-sso` → DataPlatformTeam role
-- `default-sso` → AdministratorAccess role
-- `staging-sso` → AdministratorAccess role
+- `production-sso` → PMMT role
+- `default-sso` → PMMT role
+- `staging-sso` → PMMT role
 
 **Traditional Profiles** (for applications):
 
@@ -476,8 +476,8 @@ ls -la ~/.aws/credentials   # Verify file exists
 The module sets these automatically:
 
 ```bash
-AWS_DEFAULT_REGION=us-west-2
-AWS_REGION=us-west-2
+AWS_DEFAULT_REGION=eu-west-1
+AWS_REGION=eu-west-1
 AWS_PROFILE=<current-profile>
 ```
 
@@ -535,14 +535,15 @@ These are **not** standard AWS CLI commands, but convenient shortcuts defined in
 
 ### **How to Get These Aliases**
 
-Run the AWS SSO setup script to install the aliases:
+Home Manager installs these aliases automatically. Use the standalone setup
+script only for a non-Nix shell that does not load this dotfile through Home
+Manager:
 
 ```bash
 # Run the setup script
 ./scripts/setup/aws-sso.sh
 
-# Or manually source it
-source ./scripts/setup/aws-sso.sh
+# Nix/Home Manager users do not need this script.
 ```
 
 The script will add the aliases to your shell configuration file (`.bashrc` or `.zshrc`) automatically.

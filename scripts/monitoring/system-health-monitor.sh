@@ -31,7 +31,7 @@ NC='\033[0m' # No Color
 
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILE_DIR="$(dirname "$SCRIPT_DIR")"
+DOTFILE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REPORTS_DIR="$DOTFILE_DIR/.health-reports"
 HOSTNAME=$(hostname)
 
@@ -153,7 +153,7 @@ check_disk_usage() {
     echo "Disk Usage:"
     df -h | grep -E '^/dev/' | while read -r _ size used _ capacity mount; do
         local usage_percent
-        usage_percent=$(echo "$capacity" | sed 's/%//')
+        usage_percent="${capacity%%%}"
         echo "  $mount: $used / $size ($capacity)"
         
         if [ "$usage_percent" -gt "$DISK_THRESHOLD" ]; then
@@ -305,7 +305,7 @@ check_temperature() {
         
         # Extract numeric value and check threshold
         local temp_value
-        temp_value=$(echo "$cpu_temp" | sed 's/°C//')
+        temp_value="${cpu_temp%°C}"
         if (( $(echo "$temp_value > 80" | bc -l) )); then
             log_warning "High CPU temperature: $cpu_temp"
             return 1
@@ -317,8 +317,28 @@ check_temperature() {
     return 0
 }
 
+# Confirm before running mutating maintenance tasks.
+confirm_maintenance() {
+    if [ "${HEALTH_MAINTAIN_CONFIRM:-}" = "1" ]; then
+        return 0
+    fi
+
+    printf "This will run Nix GC, Homebrew upgrade/cleanup, cache cleanup, and sudo macOS maintenance. Continue? [y/N] "
+    local answer
+    read -r answer
+    case "$answer" in
+        [Yy]|[Yy][Ee][Ss])
+            ;;
+        *)
+            log_info "Maintenance cancelled."
+            exit 0
+            ;;
+    esac
+}
+
 # System maintenance tasks
 perform_maintenance() {
+    confirm_maintenance
     log_step "Performing system maintenance..."
     
     local maintenance_log
@@ -528,14 +548,14 @@ Usage:
 
 Options:
     --check        Quick health check
-    --maintain     Perform maintenance tasks
+    --maintain     Perform maintenance tasks after confirmation
     --report       Generate comprehensive health report
     --alert        Check for critical issues only
     --help         Show this help message
 
 Examples:
     $0 --check                # Quick health check
-    $0 --maintain             # Run maintenance
+    $0 --maintain             # Run maintenance after confirmation
     $0 --report               # Full health report
     $0 --alert                # Critical issues only
 
