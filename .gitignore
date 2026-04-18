@@ -5,6 +5,9 @@ result-*
 # Logs and databases
 *.log
 *.sqlite
+# Generated monitoring reports
+.health-reports/
+.performance-reports/
 # Environment files
 .env
 .envrc
