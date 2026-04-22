@@ -20,6 +20,7 @@
     ha = "192.168.10.24";
     linkwarden = "192.168.10.29";
     windmill = "192.168.10.30";
+    paperlessng = "192.168.10.20";
 
     metric-exporter = "192.168.10.32";
     prometheus = "192.168.10.17";

@@ -159,8 +159,8 @@
   # ==========================================================================
   # Workflow Shortcuts
   # ==========================================================================
-  gsync = "git fetch origin && git checkout main && git pull origin main"; # Sync with main branch
-  gup = "git fetch && git rebase origin/main"; # Update current branch from main
+  gsync = "git fetch origin && if branch=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD); then branch=\${branch#origin/}; elif git show-ref --verify --quiet refs/remotes/origin/main; then branch=main; elif git show-ref --verify --quiet refs/remotes/origin/master; then branch=master; else echo 'No origin/main or origin/master found.' >&2; false; fi && git checkout \"$branch\" && git pull --ff-only origin \"$branch\""; # Sync with main/master branch
+  gup = "git fetch origin && if branch=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD); then branch=\${branch#origin/}; elif git show-ref --verify --quiet refs/remotes/origin/main; then branch=main; elif git show-ref --verify --quiet refs/remotes/origin/master; then branch=master; else echo 'No origin/main or origin/master found.' >&2; false; fi && git rebase \"origin/$branch\""; # Update current branch from main/master
   gnuke = "git reset --hard && git clean -fd"; # Nuclear option - reset everything (DESTRUCTIVE!)
 
   # Quick workflow combinations

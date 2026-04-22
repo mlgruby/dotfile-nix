@@ -215,6 +215,13 @@ health-maintain
 ./scripts/monitoring/system-health-monitor.sh --maintain
 ```
 
+Maintenance prompts for confirmation in interactive shells. For non-interactive
+runs, set `HEALTH_MAINTAIN_CONFIRM=1` explicitly:
+
+```bash
+HEALTH_MAINTAIN_CONFIRM=1 ./scripts/monitoring/system-health-monitor.sh --maintain
+```
+
 ## Configuration
 
 ### Threshold Configuration

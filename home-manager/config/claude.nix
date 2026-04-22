@@ -2,8 +2,10 @@
   awsProfile = "default-sso";
 
   useBedrock = "1";
-  maxOutputTokens = "8192";
-  maxThinkingTokens = "4096";
+  maxOutputTokens = "16384";
+  maxThinkingTokens = "8192";
+  model = "opus";
+  effortLevel = "medium";
 
   # EU geo inference endpoints keep the default model path GDPR-friendly.
   models = {
