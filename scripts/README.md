@@ -80,7 +80,8 @@ scripts/
 - CPU, memory, disk, and network monitoring
 - Nix store health checks
 - Automated maintenance tasks
-- **Usage**: `./scripts/monitoring/system-health-monitor.sh [--check|--maintain|--report]`
+- Alert checks for critical issues
+- **Usage**: `./scripts/monitoring/system-health-monitor.sh [--check|--maintain|--report|--alert]`
 
 ### `monitoring/analyze-build-performance.sh`
 
