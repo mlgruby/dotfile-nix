@@ -8,8 +8,9 @@
 # - Sets environment variables for Bedrock API access
 #
 # How it works:
-# - Creates ~/.claude/settings.default.json with Bedrock configuration
-# - Bootstraps ~/.claude/settings.json only if missing so plugins can mutate it
+# - Creates ~/.claude/settings.default.json with Bedrock/statusline configuration
+# - Creates ~/.claude/statusline.default.sh with the default statusline script
+# - Bootstraps mutable Claude files only if missing so Claude can mutate them
 # - Uses EU region endpoints for GDPR compliance
 # - Auto-refreshes AWS SSO credentials when they expire
 #
@@ -21,11 +22,16 @@
 # Usage:
 # - Run 'claude' in terminal to start Claude Code
 # - Credentials auto-refresh via awsAuthRefresh command
-{ lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 let
   claude = import ../config/claude.nix;
   aws = import ../config/aws.nix;
   inherit (aws) region;
+  statuslinePath = "${config.home.homeDirectory}/.claude/statusline.sh";
   settings = builtins.toJSON {
     # AWS SSO auto-refresh command
     # Runs automatically when Bedrock returns credential errors
@@ -54,6 +60,14 @@ let
       # Opus: Most capable (for complex reasoning)
       ANTHROPIC_DEFAULT_OPUS_MODEL = claude.models.opus;
     };
+
+    model = claude.model;
+    effortLevel = claude.effortLevel;
+    statusLine = {
+      type = "command";
+      command = "bash \"${statuslinePath}\"";
+      refreshInterval = 30;
+    };
   };
 in
 {
@@ -62,6 +76,10 @@ in
   # Location: ~/.claude/settings.default.json
   # Docs: https://docs.anthropic.com/claude-code/configuration
   home.file.".claude/settings.default.json".text = settings;
+  home.file.".claude/statusline.default.sh" = {
+    source = ./claude-code/statusline.sh;
+    executable = true;
+  };
 
   home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.claude"
@@ -72,6 +90,10 @@ in
 
     if [ ! -e "$HOME/.claude/settings.json" ]; then
       install -m 600 "$HOME/.claude/settings.default.json" "$HOME/.claude/settings.json"
+    fi
+
+    if [ ! -e "$HOME/.claude/statusline.sh" ]; then
+      install -m 755 "$HOME/.claude/statusline.default.sh" "$HOME/.claude/statusline.sh"
     fi
   '';
 }
