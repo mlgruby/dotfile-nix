@@ -147,7 +147,17 @@
           ];
         };
 
-      nixpkgsConfig.config.allowUnfree = true;
+      nixpkgsConfig = {
+        config.allowUnfree = true;
+        overlays = [
+          (_final: prev: {
+            direnv = prev.direnv.overrideAttrs (_old: {
+              # direnv's zsh test can hang on aarch64-darwin during local rebuilds.
+              doCheck = false;
+            });
+          })
+        ];
+      };
     in
     {
       # Darwin system configurations generated from hosts.nix entries.
