@@ -31,10 +31,10 @@
       };
 
       initContent = ''
-        source "$HOME/.config/home-manager/scripts/zsh-integration.zsh"
+        source "${../scripts/zsh-integration.zsh}"
       ''
       + lib.optionalString (userConfig.profile == "work") ''
-        source "$HOME/.config/home-manager/scripts/work.zsh"
+        source "${../scripts/work.zsh}"
       '';
 
       history = {
@@ -60,18 +60,5 @@
 
   home = {
     enableNixpkgsReleaseCheck = false;
-
-    file = {
-      ".config/home-manager/scripts/zsh-integration.zsh" = {
-        source = ../scripts/zsh-integration.zsh;
-        executable = true;
-      };
-    }
-    // lib.optionalAttrs (userConfig.profile == "work") {
-      ".config/home-manager/scripts/work.zsh" = {
-        source = ../scripts/work.zsh;
-        executable = true;
-      };
-    };
   };
 }
