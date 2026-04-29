@@ -140,17 +140,47 @@ MODEL_PART=""
 
 CWD_PART=""
 GIT_PART=""
+PR_PART=""
 if [ -n "$CWD" ]; then
   CWD_SHORT="${CWD/#$HOME/\~}"
   CWD_PART="${CYAN}${CWD_SHORT}${R}"
   BRANCH=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
   [ -n "$BRANCH" ] && GIT_PART="${DIM}(${BRANCH})${R}"
+
+  # Active PR for current branch, cached briefly to avoid statusline latency.
+  if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "develop" ] && [ "$BRANCH" != "HEAD" ] && command -v gh >/dev/null 2>&1; then
+    SESSION_ID=$(echo "$input" | jq -r '.session_id // empty')
+    CACHE_BRANCH=$(printf '%s' "$BRANCH" | tr '/:' '--')
+    CACHE_FILE="/tmp/claude-pr-cache-${SESSION_ID:-default}-${CACHE_BRANCH}"
+    NOW=$(date +%s)
+    CACHE_AGE=999999
+    if [ -f "$CACHE_FILE" ]; then
+      CACHE_MTIME=$(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)
+      CACHE_AGE=$((NOW - CACHE_MTIME))
+    fi
+
+    if [ "$CACHE_AGE" -gt 60 ]; then
+      PR_NUM=$(gh pr list --state open --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
+      printf '%s' "${PR_NUM:-}" > "$CACHE_FILE"
+    else
+      PR_NUM=$(cat "$CACHE_FILE" 2>/dev/null || true)
+    fi
+
+    if [ -n "${PR_NUM:-}" ]; then
+      REPO_URL=$(git -C "$CWD" remote get-url origin 2>/dev/null | sed 's|git@github.com:|https://github.com/|;s|\.git$||' || true)
+      if [ -n "$REPO_URL" ]; then
+        PR_URL="${REPO_URL}/pull/${PR_NUM}"
+        PR_PART=" ${CYAN}\033]8;;${PR_URL}\033\\PR #${PR_NUM}\033]8;;\033\\${R}"
+      fi
+    fi
+  fi
 fi
 
 ROW1=""
 [ -n "$MODEL_PART" ] && ROW1="${MODEL_PART}"
 [ -n "$CWD_PART" ] && ROW1="${ROW1} | ${CWD_PART}"
 [ -n "$GIT_PART" ] && ROW1="${ROW1} ${GIT_PART}"
+[ -n "$PR_PART" ] && ROW1="${ROW1}${PR_PART}"
 [ -n "$PLUGIN_PART" ] && ROW1="${ROW1} | ${PLUGIN_PART}"
 
 # Row 2: usage, tokens, cost, timing, limits.
