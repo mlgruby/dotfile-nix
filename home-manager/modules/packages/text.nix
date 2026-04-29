@@ -8,6 +8,7 @@
 {
   home.packages = with pkgs; [
     pandoc # Universal document converter
+    marp-cli # Markdown presentation deck renderer
     poppler-utils # PDF utilities such as pdftotext and pdfinfo
     glow # Terminal markdown renderer
     yq-go # YAML processor
