@@ -153,8 +153,8 @@ in
   # ==========================================================================
   alias-find = "alias | fzf --preview 'echo {}' --preview-window=right:50% | cut -d'=' -f1"; # Fuzzy find aliases
   alias-search = "alias | grep -i"; # Search aliases by keyword - usage: alias-search docker
-  alias-help = "${homeDir}/.config/home-manager/scripts/alias-cheatsheet.sh"; # Show alias documentation - usage: alias-help [category]
-  alias-quick = "${homeDir}/.config/home-manager/scripts/alias-cheatsheet.sh quick"; # Show quick reference of most used aliases
+  alias-help = "${../scripts/alias-cheatsheet.sh}"; # Show alias documentation - usage: alias-help [category]
+  alias-quick = "${../scripts/alias-cheatsheet.sh} quick"; # Show quick reference of most used aliases
   alias-list = "alias | sort"; # List all aliases alphabetically
   alias-count = "alias | wc -l"; # Count total aliases
 }
