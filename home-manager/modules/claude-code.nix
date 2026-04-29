@@ -76,11 +76,6 @@ in
   # Location: ~/.claude/settings.default.json
   # Docs: https://docs.anthropic.com/claude-code/configuration
   home.file.".claude/settings.default.json".text = settings;
-  home.file.".claude/statusline.default.sh" = {
-    source = ./claude-code/statusline.sh;
-    executable = true;
-  };
-
   home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.claude"
 
@@ -93,7 +88,7 @@ in
     fi
 
     if [ ! -e "$HOME/.claude/statusline.sh" ]; then
-      install -m 755 "$HOME/.claude/statusline.default.sh" "$HOME/.claude/statusline.sh"
+      install -m 755 "${./claude-code/statusline.sh}" "$HOME/.claude/statusline.sh"
     fi
   '';
 }

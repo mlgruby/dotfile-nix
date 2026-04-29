@@ -63,23 +63,6 @@
   ...
 }:
 let
-  helperScripts = [
-    "git-fuzzy-checkout.sh"
-    "git-fuzzy-log.sh"
-    "git-fuzzy-stash.sh"
-    "system-rollback.sh"
-    "alias-cheatsheet.sh"
-    "rebuild-system.sh"
-  ];
-
-  mkHelperScript = name: {
-    name = ".config/home-manager/scripts/${name}";
-    value = {
-      source = ./scripts/${name};
-      executable = true;
-    };
-  };
-
   mkRebuildWrapper = name: args: {
     inherit name;
     value = {
@@ -88,7 +71,7 @@ let
         DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
         CURRENT_CONFIG_HOST="${userConfig.hostname}"
         export DOTFILE_DIR CURRENT_CONFIG_HOST
-        exec bash "$HOME/.config/home-manager/scripts/rebuild-system.sh" ${args} "$@"
+        exec bash "${./scripts/rebuild-system.sh}" ${args} "$@"
       '';
       executable = true;
     };
@@ -198,8 +181,7 @@ in
 
   # Install shell helper scripts and profile-aware rebuild wrappers.
   home.file =
-    builtins.listToAttrs (map mkHelperScript helperScripts)
-    // builtins.listToAttrs [
+    builtins.listToAttrs [
       (mkRebuildWrapper "bin/rebuild" "")
       (mkRebuildWrapper "bin/rebuild-work" "--work")
       (mkRebuildWrapper "bin/rebuild-personal" "--personal")

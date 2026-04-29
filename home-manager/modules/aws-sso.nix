@@ -44,11 +44,6 @@ in
 {
   home.file = {
     ".aws/config".text = awsConfigText;
-
-    ".config/home-manager/scripts/aws-sso.zsh" = {
-      source = ../scripts/aws-sso.zsh;
-      executable = true;
-    };
   };
 
   programs.zsh = {
@@ -64,7 +59,7 @@ in
         complete -C "${pkgs.awscli2}/bin/aws_completer" aws
       fi
 
-      source "$HOME/.config/home-manager/scripts/aws-sso.zsh"
+      source "${../scripts/aws-sso.zsh}"
     '';
 
     sessionVariables = {
