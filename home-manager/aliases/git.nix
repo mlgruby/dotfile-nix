@@ -20,13 +20,13 @@
   # Interactive FZF-powered Git
   # ==========================================================================
   # Branch selection with commit preview
-  gcb = "~/.config/home-manager/scripts/git-fuzzy-checkout.sh"; # Fuzzy checkout branch with preview
+  gcb = "${../scripts/git-fuzzy-checkout.sh}"; # Fuzzy checkout branch with preview
 
   # Log browsing with diff preview
-  fshow = "~/.config/home-manager/scripts/git-fuzzy-log.sh"; # Fuzzy browse commits with diff
+  fshow = "${../scripts/git-fuzzy-log.sh}"; # Fuzzy browse commits with diff
 
   # Stash selection and apply
-  fstash = "~/.config/home-manager/scripts/git-fuzzy-stash.sh"; # Fuzzy select and apply stash
+  fstash = "${../scripts/git-fuzzy-stash.sh}"; # Fuzzy select and apply stash
 
   # ==========================================================================
   # LazyGit Integration
