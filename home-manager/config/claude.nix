@@ -2,10 +2,12 @@
   awsProfile = "default-sso";
 
   useBedrock = "1";
+  # Keep repo defaults conservative. Temporary live experiments can override
+  # ~/.claude/settings.json without changing these template values.
   maxOutputTokens = "16384";
   maxThinkingTokens = "8192";
-  model = "opus";
-  effortLevel = "medium";
+  model = "sonnet";
+  effortLevel = "low";
 
   # EU geo inference endpoints keep the default model path GDPR-friendly.
   models = {
