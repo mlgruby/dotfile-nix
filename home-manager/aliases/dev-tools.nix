@@ -65,6 +65,13 @@ in
   bmn = "btm --network_legend"; # Show network legend
 
   # ==========================================================================
+  # Claude Code
+  # ==========================================================================
+  cc = "claude"; # Claude Code shorthand
+  ccc = "claude --continue"; # Continue the latest Claude Code conversation
+  ccr = "claude --resume"; # Resume a Claude Code conversation
+
+  # ==========================================================================
   # Tmux Session Management
   # ==========================================================================
   tn = "tmux new -s"; # Create new named session - usage: tn mysession

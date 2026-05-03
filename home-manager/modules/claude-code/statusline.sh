@@ -20,6 +20,9 @@ CW_TOK=$(echo "$input" | jq -r '.context_window.current_usage.cache_creation_inp
 COST_RAW=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 TOTAL_DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
 API_TIME=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+LINES_ADD=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+LINES_DEL=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+EXCEEDS_200K=$(echo "$input" | jq -r '.exceeds_200k_tokens // false')
 RL5_RAW=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0')
 RL7_RAW=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // 0')
 RL5=$(printf '%.0f' "$RL5_RAW")
@@ -94,6 +97,33 @@ ELAPSED_FMT=$(fmt_dur "$ELAPSED_S")
 API_FMT=$(fmt_dur "$API_S")
 TIME_PART="${DIM}⊙${R} ${ELAPSED_FMT} ${DIM}(api ${API_FMT})${R}"
 
+# Session duration.
+SESSION_PART=""
+if [ "$TOTAL_DURATION_MS" -gt 0 ] 2>/dev/null; then
+  SESS_MINS=$((TOTAL_DURATION_MS / 60000))
+  if [ "$SESS_MINS" -lt 1 ]; then
+    SESSION_PART="${DIM}session <1m${R}"
+  elif [ "$SESS_MINS" -lt 60 ]; then
+    SESSION_PART="${DIM}session ${SESS_MINS}m${R}"
+  else
+    SESS_H=$((SESS_MINS / 60))
+    SESS_M=$((SESS_MINS % 60))
+    SESSION_PART="${DIM}session ${SESS_H}h${SESS_M}m${R}"
+  fi
+fi
+
+# Lines changed.
+LINES_PART=""
+if [ "$LINES_ADD" -gt 0 ] || [ "$LINES_DEL" -gt 0 ]; then
+  LINES_PART="${GREEN}+${LINES_ADD}${R} ${RED}-${LINES_DEL}${R}"
+fi
+
+# Large context warning.
+WARN_PART=""
+if [ "$EXCEEDS_200K" = "true" ]; then
+  WARN_PART="${RED}${BOLD}⚠ >200k${R}"
+fi
+
 # Rate limits (only show when >0%).
 RL_PART=""
 if [ "$RL5" -gt 0 ] || [ "$RL7" -gt 0 ]; then
@@ -140,12 +170,10 @@ MODEL_PART=""
 
 CWD_PART=""
 GIT_PART=""
-PR_PART=""
 if [ -n "$CWD" ]; then
   CWD_SHORT="${CWD/#$HOME/\~}"
   CWD_PART="${CYAN}${CWD_SHORT}${R}"
   BRANCH=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
-  [ -n "$BRANCH" ] && GIT_PART="${DIM}(${BRANCH})${R}"
 
   # Active PR for current branch, cached briefly to avoid statusline latency.
   if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "develop" ] && [ "$BRANCH" != "HEAD" ] && command -v gh >/dev/null 2>&1; then
@@ -170,9 +198,13 @@ if [ -n "$CWD" ]; then
       REPO_URL=$(git -C "$CWD" remote get-url origin 2>/dev/null | sed 's|git@github.com:|https://github.com/|;s|\.git$||' || true)
       if [ -n "$REPO_URL" ]; then
         PR_URL="${REPO_URL}/pull/${PR_NUM}"
-        PR_PART=" ${CYAN}\033]8;;${PR_URL}\033\\PR #${PR_NUM}\033]8;;\033\\${R}"
+        GIT_PART="${DIM}(${BRANCH} ${R}${CYAN}\033]8;;${PR_URL}\033\\#${PR_NUM}\033]8;;\033\\${R}${DIM})${R}"
       fi
     fi
+  fi
+
+  if [ -n "$BRANCH" ] && [ -z "$GIT_PART" ]; then
+    GIT_PART="${DIM}(${BRANCH})${R}"
   fi
 fi
 
@@ -180,11 +212,14 @@ ROW1=""
 [ -n "$MODEL_PART" ] && ROW1="${MODEL_PART}"
 [ -n "$CWD_PART" ] && ROW1="${ROW1} | ${CWD_PART}"
 [ -n "$GIT_PART" ] && ROW1="${ROW1} ${GIT_PART}"
-[ -n "$PR_PART" ] && ROW1="${ROW1}${PR_PART}"
 [ -n "$PLUGIN_PART" ] && ROW1="${ROW1} | ${PLUGIN_PART}"
 
 # Row 2: usage, tokens, cost, timing, limits.
-ROW2="${BAR_C}${BAR}${R} ${BAR_C}${PCT}%${R} | ${DIM}in:${IN_FMT} out:${OUT_FMT} cr:${CR_FMT} cw:${CW_FMT}${R} | ${GOLD}${COST_FMT}${R}"
+ROW2="${BAR_C}${BAR}${R} ${BAR_C}${PCT}%${R}"
+[ -n "$WARN_PART" ] && ROW2="${ROW2} ${WARN_PART}"
+ROW2="${ROW2} | ${DIM}in:${IN_FMT} out:${OUT_FMT} cr:${CR_FMT} cw:${CW_FMT}${R} | ${GOLD}${COST_FMT}${R}"
 ROW2="${ROW2} | ${TIME_PART}${RL_PART}"
+[ -n "$SESSION_PART" ] && ROW2="${ROW2} | ${SESSION_PART}"
+[ -n "$LINES_PART" ] && ROW2="${ROW2} | ${LINES_PART}"
 
 printf '%b\n%b\n' "$ROW1" "$ROW2"
