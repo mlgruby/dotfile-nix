@@ -48,7 +48,10 @@
 # - Uses Ctrl+a prefix
 # - Mouse mode enabled
 # - Vi keys supported
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+  statusScript = "${config.home.homeDirectory}/.config/tmux/status-right.sh";
+in
 {
   programs.tmux = {
     enable = true;
@@ -69,6 +72,8 @@
       set -g mouse on
       set -g status on
       set -g status-position top
+      set -g status-interval 5
+      set -g status-right-length 220
       set -g default-terminal "screen-256color"
       set -ag terminal-overrides ",xterm-256color:RGB"
       set -g allow-passthrough all
@@ -104,6 +109,179 @@
       set -g @tmux-gruvbox 'dark'
       set -g @continuum-restore 'on'
       set -g @resurrect-capture-pane-contents 'on'
+
+      # Status modules
+      set -g status-right "#(${statusScript})"
+    '';
+  };
+
+  home.file.".config/tmux/status-right.sh" = {
+    executable = true;
+    text = ''
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # Detect connection: wifi (en0) or ethernet (en4/en5/en6)
+            conn_type="offline"
+            ssid="offline"
+            if ipconfig getifaddr en0 >/dev/null 2>&1; then
+              conn_type="wifi"
+              ssid="wifi"
+            else
+              for eth in en4 en5 en6; do
+                if ipconfig getifaddr "$eth" >/dev/null 2>&1; then
+                  conn_type="ethernet"
+                  ssid="ethernet"
+                  break
+                fi
+              done
+            fi
+
+            vpn="$(
+              tailscale status --json 2>/dev/null \
+                | python3 -c "import sys,json; d=json.load(sys.stdin); print('on' if d.get('BackendState') == 'Running' else 'off')" \
+                2>/dev/null || echo "off"
+            )"
+
+
+            disk="$(df -h / 2>/dev/null | awk 'NR==2{print $4" "$5}'  || echo "n/a")"
+            [ -n "$disk" ] || disk="n/a"
+
+            # Network throughput: delta bytes vs previous sample stored in /tmp
+            net="$(python3 -c "
+      import subprocess, time, os
+
+      cache='/tmp/tmux_net_cache'
+      def get_bytes():
+          out = subprocess.run(['netstat','-ib'], capture_output=True, text=True).stdout
+          for line in out.split('\n'):
+              if line.startswith('en0') and '<Link#' in line:
+                  parts = line.split()
+                  try: return int(parts[6]), int(parts[9]), time.time()
+                  except: pass
+          return 0, 0, time.time()
+
+      rx2, tx2, t2 = get_bytes()
+      try:
+          with open(cache) as f:
+              parts = f.read().split()
+              rx1, tx1, t1 = int(parts[0]), int(parts[1]), float(parts[2])
+          dt = max(t2 - t1, 1)
+          rx_kb = (rx2 - rx1) / dt / 1024
+          tx_kb = (tx2 - tx1) / dt / 1024
+          def fmt(k):
+              return f'{k/1024:.1f}M' if k >= 1024 else f'{k:.0f}K'
+          result = f'↓{fmt(rx_kb)} ↑{fmt(tx_kb)}'
+      except:
+          result = '...'
+      with open(cache, 'w') as f:
+          f.write(f'{rx2} {tx2} {t2}')
+      print(result)
+      " 2>/dev/null || echo "n/a")"
+
+            cpu="$(
+              top -l 1 2>/dev/null \
+                | awk -F'[:,%]' '/CPU usage/ { gsub(/^ +| +$/, "", $2); gsub(/^ +| +$/, "", $4); printf "%.0f%%", $2 + $4; exit }' \
+                || true
+            )"
+            [ -n "$cpu" ] || cpu="n/a"
+
+            mem="$(
+              vm_stat 2>/dev/null | awk '
+                /page size of/ { pageSize = $8 }
+                /Pages active/ { active = $3 }
+                /Pages inactive/ { inactive = $3 }
+                /Pages speculative/ { speculative = $3 }
+                /Pages wired down/ { wired = $4 }
+                END {
+                  gsub(/\./, "", active);
+                  gsub(/\./, "", inactive);
+                  gsub(/\./, "", speculative);
+                  gsub(/\./, "", wired);
+                  used = (active + inactive + speculative + wired) * pageSize / 1024 / 1024 / 1024;
+                  if (used > 0) {
+                    printf "%.1fG", used;
+                  }
+                }
+              ' \
+              || true
+            )"
+            [ -n "$mem" ] || mem="n/a"
+
+            battery="$(
+              pmset -g batt 2>/dev/null \
+                | awk -F';' '/%/ { gsub(/^ +| +$/, "", $1); sub(/^.*\t/, "", $1); print $1; exit }' \
+                || true
+            )"
+            [ -n "$battery" ] || battery="n/a"
+
+            battery_charging="$(
+              pmset -g batt 2>/dev/null \
+                | awk '/AC Power/ { ac=1 } /charged|charging/ { if (ac && !/dischar/) print "yes"; exit }' \
+                || true
+            )"
+
+            cpu_color="#b8bb26"
+            cpu_value="''${cpu%%%}"
+            if [ "$cpu_value" != "$cpu" ] && [ "$cpu_value" -ge 80 ] 2>/dev/null; then
+              cpu_color="#fb4934"
+            elif [ "$cpu_value" != "$cpu" ] && [ "$cpu_value" -ge 50 ] 2>/dev/null; then
+              cpu_color="#fabd2f"
+            fi
+
+            battery_color="#b8bb26"
+            battery_value="''${battery%%%}"
+            if [ "$battery_value" != "$battery" ] && [ "$battery_value" -le 20 ] 2>/dev/null; then
+              battery_color="#fb4934"
+            elif [ "$battery_value" != "$battery" ] && [ "$battery_value" -le 50 ] 2>/dev/null; then
+              battery_color="#fabd2f"
+            fi
+
+            if [ "$battery_charging" = "yes" ]; then
+              batt_icon="󰂄"
+            else
+              batt_icon="󰁹"
+            fi
+
+            vpn_icon="󰖂"  # 󰖂 VPN lock icon
+            vpn_color="#928374"
+            if [ "$vpn" = "on" ]; then
+              vpn_color="#b8bb26"
+            fi
+
+            case "$conn_type" in
+              wifi)
+                wifi_icon="󰖩"
+                wifi_color="#8ec07c"
+                ;;
+              ethernet)
+                wifi_icon="󰈀"
+                wifi_color="#83a598"
+                ;;
+              offline)
+                wifi_icon="󰖪"
+                wifi_color="#928374"
+                ;;
+            esac
+
+            segment() {
+              local bg="$1"
+              local fg="$2"
+              local prev_bg="$3"
+              local text="$4"
+              printf '#[fg=%s,bg=%s,nobold,nounderscore,noitalics]#[fg=%s,bg=%s] %s ' "$bg" "$prev_bg" "$fg" "$bg" "$text"
+            }
+
+            printf '%s%s%s%s%s%s%s%s%s#[default]' \
+              "$(segment "#3c3836" "#83a598" "#1d2021" "$net")" \
+              "$(segment "#504945" "$wifi_color" "#3c3836" "$wifi_icon $ssid")" \
+              "$(segment "#3c3836" "$vpn_color" "#504945" "$vpn_icon $vpn")" \
+              "$(segment "#504945" "#a89984" "#3c3836" "󰋊 $disk")" \
+              "$(segment "#3c3836" "$cpu_color" "#504945" " $cpu")" \
+              "$(segment "#504945" "#ebdbb2" "#3c3836" " $mem")" \
+              "$(segment "#3c3836" "$battery_color" "#504945" "$batt_icon $battery")" \
+              "$(segment "#504945" "#d5c4a1" "#3c3836" "$(date "+%H:%M")")" \
+              "$(segment "#bdae93" "#3c3836" "#504945" "$(hostname -s)")"
     '';
   };
 }
