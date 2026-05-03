@@ -6,7 +6,7 @@
   # ~/.claude/settings.json without changing these template values.
   maxOutputTokens = "16384";
   maxThinkingTokens = "8192";
-  model = "sonnet";
+  model = "eu.anthropic.claude-sonnet-4-6";
   effortLevel = "low";
 
   # EU geo inference endpoints keep the default model path GDPR-friendly.

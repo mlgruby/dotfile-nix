@@ -28,6 +28,7 @@ aliases/
 | `gl` | Git pull | `gl` |
 | `d` | Docker | `d ps` |
 | `k` | Kubectl | `k get pods` |
+| `cc` | Claude Code | `cc` |
 | `rebuild` | Rebuild system (supports profile flags) | `rebuild --work` |
 | `cleanup` | Confirm, then clean system | `cleanup` |
 
@@ -51,6 +52,7 @@ aliases/
 
 ### 2. Development Tools (dev-tools.nix)
 - Modern CLI: `eza`, `fd`, `duf`, `btm`
+- Claude Code: `cc`, `ccc`, `ccr`
 - Tmux: `tn`, `ta`, `tk`, `t`
 - FZF: `fe`, `fcd`, `fif`, `fkill`
 - Docker: `d`, `dc`, `dsp`, `drm`, `dlog`

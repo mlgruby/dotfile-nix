@@ -14,14 +14,16 @@
 # - Profile management
 #
 # Shortcuts:
-# Command + Shift +
-#   Enter -> Alacritty (Terminal)
-#   I     -> IntelliJ IDEA
-#   P     -> PyCharm
-#   S     -> Slack
-#   C     -> Cursor
-#   G     -> Google Chrome
-#   B     -> Brave Browser
+# - Command + Shift + Enter -> Alacritty (Terminal)
+# - Command + Shift + I     -> IntelliJ IDEA
+# - Command + Option + P    -> PyCharm
+# - Command + Shift + S     -> Slack
+# - Command + Shift + C     -> Cursor
+# - Command + Shift + X     -> Codex
+# - Command + Shift + D     -> DataGrip
+# - Command + Shift + A     -> Calendar
+# - Command + Shift + G     -> Google Chrome
+# - Command + Shift + B     -> Brave Browser
 #
 # Integration:
 # - Works with macOS application management
@@ -31,11 +33,12 @@
 # Note:
 # - Requires Karabiner-Elements to be installed (homebrew.nix)
 # - Configuration stored in ~/.config/karabiner/
-{lib, ...}: {
+{ lib, ... }:
+{
   # Karabiner Complete Configuration
   # Sets up configuration with custom modifications included
   home.file.".config/karabiner/karabiner.json" = {
-    force = true;  # Skip backup - we're managing this file declaratively
+    force = true; # Skip backup - we're managing this file declaratively
     text = builtins.toJSON {
       global = {
         check_for_updates_on_startup = true;
@@ -49,7 +52,7 @@
         {
           name = "Default";
           selected = true;
-          simple_modifications = [];
+          simple_modifications = [ ];
           virtual_hid_keyboard = {
             keyboard_type_v2 = "iso";
           };
@@ -66,8 +69,11 @@
                     from = {
                       key_code = "return_or_enter";
                       modifiers = {
-                        mandatory = ["command" "shift"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [
@@ -86,8 +92,11 @@
                     from = {
                       key_code = "i";
                       modifiers = {
-                        mandatory = ["command" "shift"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [
@@ -106,8 +115,11 @@
                     from = {
                       key_code = "p";
                       modifiers = {
-                        mandatory = ["command" "option"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "option"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [
@@ -126,8 +138,11 @@
                     from = {
                       key_code = "s";
                       modifiers = {
-                        mandatory = ["command" "shift"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [
@@ -146,13 +161,85 @@
                     from = {
                       key_code = "c";
                       modifiers = {
-                        mandatory = ["command" "shift"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [
                       {
                         shell_command = "osascript -e 'tell application \"Cursor\" to activate'";
+                      }
+                    ];
+                  }
+                ];
+              }
+              {
+                description = "Open Codex with Command + Shift + X";
+                manipulators = [
+                  {
+                    type = "basic";
+                    from = {
+                      key_code = "x";
+                      modifiers = {
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
+                      };
+                    };
+                    to = [
+                      {
+                        shell_command = "osascript -e 'tell application \"Codex\" to activate'";
+                      }
+                    ];
+                  }
+                ];
+              }
+              {
+                description = "Open DataGrip with Command + Shift + D";
+                manipulators = [
+                  {
+                    type = "basic";
+                    from = {
+                      key_code = "d";
+                      modifiers = {
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
+                      };
+                    };
+                    to = [
+                      {
+                        shell_command = "osascript -e 'tell application \"DataGrip\" to activate'";
+                      }
+                    ];
+                  }
+                ];
+              }
+              {
+                description = "Open Calendar with Command + Shift + A";
+                manipulators = [
+                  {
+                    type = "basic";
+                    from = {
+                      key_code = "a";
+                      modifiers = {
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
+                      };
+                    };
+                    to = [
+                      {
+                        shell_command = "osascript -e 'tell application \"Calendar\" to activate'";
                       }
                     ];
                   }
@@ -166,8 +253,11 @@
                     from = {
                       key_code = "g";
                       modifiers = {
-                        mandatory = ["command" "shift"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [
@@ -186,8 +276,11 @@
                     from = {
                       key_code = "b";
                       modifiers = {
-                        mandatory = ["command" "shift"];
-                        optional = ["any"];
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
                       };
                     };
                     to = [

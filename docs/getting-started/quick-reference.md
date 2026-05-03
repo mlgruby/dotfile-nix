@@ -303,8 +303,11 @@ cd ~/Documents/dotfile && git stash && rebuild
 |----------|--------|
 | `Cmd+Shift+Enter` | Open Alacritty |
 | `Cmd+Shift+I` | Open IntelliJ IDEA |
-| `Cmd+Shift+P` | Open PyCharm |
+| `Cmd+Option+P` | Open PyCharm |
 | `Cmd+Shift+C` | Open Cursor |
+| `Cmd+Shift+X` | Open Codex |
+| `Cmd+Shift+D` | Open DataGrip |
+| `Cmd+Shift+A` | Open Calendar |
 | `Cmd+Shift+G` | Open Google Chrome |
 | `Cmd+Shift+B` | Open Brave Browser |
 
