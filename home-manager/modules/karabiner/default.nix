@@ -31,7 +31,7 @@
 # - Supports multiple profiles and devices
 #
 # Note:
-# - Requires Karabiner-Elements to be installed (homebrew.nix)
+# - Requires Karabiner-Elements to be installed via Homebrew casks
 # - Configuration stored in ~/.config/karabiner/
 { lib, ... }:
 {

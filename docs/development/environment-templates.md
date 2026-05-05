@@ -490,6 +490,6 @@ To add new templates:
 ## Resources
 
 - [direnv Documentation](https://direnv.net/)
-- [Development Environment Best Practices](../core/configuration.md)
+- [Configuration Basics](../guides/configuration-basics.md)
 - [Tool Configuration](../customization/packages.md)
-- [Troubleshooting Guide](../core/troubleshooting.md)
+- [Troubleshooting Guide](../help/troubleshooting.md)
