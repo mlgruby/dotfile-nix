@@ -82,7 +82,7 @@ Start Here → Architecture → Configuration → Advanced Topics
 
 - [System Architecture](technical/architecture.md)
 - [Troubleshooting](technical/troubleshooting.md)
-- [Alias System Improvements](../home-manager/aliases/IMPROVEMENTS.md) - How aliases evolved
+- [Refactoring Backlog](refactoring-backlog.md) - Current cleanup backlog
 
 ## 📚 Reference Documentation
 
@@ -174,42 +174,39 @@ docs/
 ├── guides/                      ← Step-by-step guides
 │   ├── system-overview.md
 │   ├── configuration-basics.md
+│   ├── package-management.md
+│   ├── git-setup.md
+│   ├── aws-sso-setup.md
 │   ├── lazywarden-recovery.md
 │   ├── toolchain-ownership.md
 │   ├── personalization.md
-│   ├── development-setup.md
-│   ├── terminal-setup.md
-│   ├── performance.md
-│   ├── monitoring.md
-│   └── security.md
+│   └── terminal-setup.md
 ├── development/                 ← Developer-focused docs
 │   ├── environment-templates.md
 │   ├── python-setup.md
 │   └── cloud-setup.md
 ├── customization/              ← Customization guides
+│   ├── modules.md
+│   ├── packages.md
+│   ├── stylix-optimization.md
 │   ├── themes.md
-│   ├── paths.md
-│   └── shortcuts.md
+│   └── paths.md
 ├── performance/                ← Performance optimization
 │   └── rebuild-optimization.md
 ├── monitoring/                 ← System monitoring
 │   └── system-health.md
-├── reference/                  ← Reference materials
-│   ├── aliases.md
-│   ├── scripts.md
-│   └── configuration-files.md
 ├── technical/                  ← Deep technical docs
 │   ├── architecture.md
-│   ├── troubleshooting.md
-│   └── nix-concepts.md
+│   └── troubleshooting.md
 ├── advanced/                   ← Advanced topics
 │   ├── impermanence-evaluation.md
 │   ├── secrets-management-analysis.md
 │   └── nur-integration-analysis.md
+├── testing/                    ← Validation docs
+│   └── onboarding-test-plan.md
 └── help/                       ← Support and help
     ├── faq.md
-    ├── troubleshooting.md
-    └── community.md
+    └── troubleshooting.md
 ```
 
 ## 🏃‍♂️ Too Busy? Quick Links

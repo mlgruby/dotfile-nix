@@ -288,5 +288,5 @@ All scripts have error checking built in. Common issues:
 ## 📚 Further Reading
 
 - See `../aliases/README.md` for complete alias documentation
-- See `../aliases/IMPROVEMENTS.md` for development history
+- See `../../docs/refactoring-backlog.md` for current cleanup context
 - Check individual script headers for detailed documentation
