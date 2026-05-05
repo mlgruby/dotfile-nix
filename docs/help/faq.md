@@ -216,7 +216,7 @@ See: [Development Environment Templates](../development/environment-templates.md
 3. **Test thoroughly**
 4. **Submit pull request**
 
-See: [Contributing Guidelines](contributing.md)
+See the repository pull request flow and run the checks in [Quick Reference](../getting-started/quick-reference.md).
 
 ### Q: Is this production-ready?
 
@@ -232,4 +232,4 @@ See: [Contributing Guidelines](contributing.md)
 - **Documentation**: [Complete Guide Index](../README.md)
 - **Issues**: Open an issue in your fork/repository
 - **Troubleshooting**: [Technical Guide](../technical/troubleshooting.md)
-- **Community**: [Nix Community Resources](community.md)
+- **Community**: [NixOS Discourse](https://discourse.nixos.org/) and [nix-darwin](https://github.com/nix-darwin/nix-darwin)

@@ -19,7 +19,8 @@
 # Note:
 # - Auth via 'gh auth login'
 # - Additional git config in git.nix
-{...}: {
+{ ... }:
+{
   programs.gh = {
     enable = true;
     settings = {
@@ -32,5 +33,5 @@
 
   # Custom GitHub Workflow Functions moved to zsh.nix
 
-  # GitHub Command Aliases moved to aliases.nix
+  # GitHub command aliases live under aliases/
 }
