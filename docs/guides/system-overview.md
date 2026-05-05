@@ -87,7 +87,7 @@ darwin/
 ```text
 home-manager/
 ├── default.nix           # Main user config
-├── aliases.nix           # Shell shortcuts
+├── aliases/              # Shell shortcuts grouped by domain
 ├── neovim.nix           # Editor config
 └── modules/             # Individual tool configs
     ├── alacritty/       # Terminal
@@ -208,7 +208,7 @@ dotfile/
 │   └── *.nix             # Other system modules
 ├── home-manager/          # User-level configuration
 │   ├── default.nix       # Main user config
-│   ├── aliases.nix       # Shell shortcuts
+│   ├── aliases/          # Shell shortcuts grouped by domain
 │   └── modules/          # Tool-specific configs
 ├── scripts/               # Automation scripts
 │   ├── monitoring/
@@ -318,7 +318,7 @@ Now that you understand the architecture:
 - **[Configuration Basics](configuration-basics.md)** - Learn to modify your setup
 - **[Personalization Guide](personalization.md)** - Make it yours
 - **[Development Setup](../development/environment-templates.md)** - Set up coding environments
-- **[Performance Guide](performance.md)** - Optimize your system
+- **[Performance Guide](../performance/rebuild-optimization.md)** - Optimize your system
 
 ---
 

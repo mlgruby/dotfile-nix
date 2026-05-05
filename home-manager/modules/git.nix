@@ -19,7 +19,7 @@
 #
 # Note:
 # - Identity from active host profile (email can also come from local includeIf)
-# - Additional aliases in aliases.nix
+# - Additional shell aliases live under ../aliases/
 { ... }@args:
 let
   inherit (args) fullName email signingKey;
@@ -104,6 +104,6 @@ in
     ];
   };
 
-  # Shell Integration Aliases moved to aliases.nix
+  # Shell integration aliases live under aliases/
   # ZSH functions moved to zsh.nix
 }

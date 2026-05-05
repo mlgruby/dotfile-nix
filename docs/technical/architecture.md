@@ -90,7 +90,7 @@ darwin/
 ```text
 home-manager/
 ├── default.nix           # Main entry point
-├── aliases.nix           # Shell shortcuts and functions
+├── aliases/              # Shell shortcuts grouped by domain
 ├── neovim.nix           # Editor configuration
 └── modules/             # Individual application configs
     ├── alacritty/       # Terminal emulator

@@ -156,9 +156,9 @@ echo $SHELL
 
 After successful installation, you can:
 
-1. Review the [Configuration Guide](configuration.md)
-2. Check [Troubleshooting](troubleshooting.md) if needed
-3. Explore available [Tools](../tools/git.md)
+1. Review the [Configuration Guide](../guides/configuration-basics.md)
+2. Check [Troubleshooting](../help/troubleshooting.md) if needed
+3. Explore [Git & GitHub Setup](../guides/git-setup.md)
 
 ## Uninstallation
 
