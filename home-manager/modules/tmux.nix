@@ -111,7 +111,7 @@ in
       set -g @resurrect-capture-pane-contents 'on'
 
       # Status modules
-      set -g status-right "#(${statusScript})"
+      set -g status-right "#(bash ${statusScript})"
     '';
   };
 
@@ -121,41 +121,70 @@ in
             #!/usr/bin/env bash
             set -euo pipefail
 
-            # Detect connection: wifi (en0) or ethernet (en4/en5/en6)
-            conn_type="offline"
-            ssid="offline"
-            if ipconfig getifaddr en0 >/dev/null 2>&1; then
-              conn_type="wifi"
-              ssid="wifi"
+            default_iface="$(route -n get default 2>/dev/null | awk '/interface:/ { print $2; exit }' || true)"
+            wifi_active="no"
+            lan_active="no"
+            for iface in $(ifconfig -l 2>/dev/null); do
+              case "$iface" in
+                en0)
+                  if ipconfig getifaddr "$iface" >/dev/null 2>&1; then
+                    wifi_active="yes"
+                  fi
+                  ;;
+                en*)
+                  if ipconfig getifaddr "$iface" >/dev/null 2>&1; then
+                    lan_active="yes"
+                  fi
+                  ;;
+              esac
+            done
+
+            if [ "$wifi_active" = "yes" ] && [ "$lan_active" = "yes" ]; then
+              if [ "$default_iface" = "en0" ]; then
+                network_label="󰖩 wifi · 󰈀 lan"
+              else
+                network_label="󰈀 lan · 󰖩 wifi"
+              fi
+              network_color="#8ec07c"
+            elif [ "$lan_active" = "yes" ]; then
+              network_label="󰈀 lan"
+              network_color="#83a598"
+            elif [ "$wifi_active" = "yes" ]; then
+              network_label="󰖩 wifi"
+              network_color="#8ec07c"
             else
-              for eth in en4 en5 en6; do
-                if ipconfig getifaddr "$eth" >/dev/null 2>&1; then
-                  conn_type="ethernet"
-                  ssid="ethernet"
-                  break
-                fi
-              done
+              network_label="󰖪 offline"
+              network_color="#928374"
             fi
 
+            # Show VPN as on when macOS reports any connected VPN service,
+            # including Tailscale.
             vpn="$(
-              tailscale status --json 2>/dev/null \
-                | python3 -c "import sys,json; d=json.load(sys.stdin); print('on' if d.get('BackendState') == 'Running' else 'off')" \
-                2>/dev/null || echo "off"
+              if scutil --nc list 2>/dev/null \
+                | awk '/\(Connected\)/ { found=1 } END { exit found ? 0 : 1 }'; then
+                echo "on"
+              else
+                echo "off"
+              fi
             )"
 
-
-            disk="$(df -h / 2>/dev/null | awk 'NR==2{print $4" "$5}'  || echo "n/a")"
+            disk="$(
+              df -h /System/Volumes/Data / 2>/dev/null \
+                | awk 'NR==2{print $5 " " $3 "/" $2; exit}' \
+                || echo "n/a"
+            )"
             [ -n "$disk" ] || disk="n/a"
 
             # Network throughput: delta bytes vs previous sample stored in /tmp
-            net="$(python3 -c "
-      import subprocess, time, os
+            net="$(DEFAULT_IFACE="$default_iface" python3 -c "
+      import os, subprocess, time
 
-      cache='/tmp/tmux_net_cache'
+      iface=os.environ.get('DEFAULT_IFACE') or 'en0'
+      cache=f'/tmp/tmux_net_cache_{iface}'
       def get_bytes():
           out = subprocess.run(['netstat','-ib'], capture_output=True, text=True).stdout
           for line in out.split('\n'):
-              if line.startswith('en0') and '<Link#' in line:
+              if line.startswith(iface) and '<Link#' in line:
                   parts = line.split()
                   try: return int(parts[6]), int(parts[9]), time.time()
                   except: pass
@@ -167,8 +196,8 @@ in
               parts = f.read().split()
               rx1, tx1, t1 = int(parts[0]), int(parts[1]), float(parts[2])
           dt = max(t2 - t1, 1)
-          rx_kb = (rx2 - rx1) / dt / 1024
-          tx_kb = (tx2 - tx1) / dt / 1024
+          rx_kb = max(rx2 - rx1, 0) / dt / 1024
+          tx_kb = max(tx2 - tx1, 0) / dt / 1024
           def fmt(k):
               return f'{k/1024:.1f}M' if k >= 1024 else f'{k:.0f}K'
           result = f'↓{fmt(rx_kb)} ↑{fmt(tx_kb)}'
@@ -249,21 +278,6 @@ in
               vpn_color="#b8bb26"
             fi
 
-            case "$conn_type" in
-              wifi)
-                wifi_icon="󰖩"
-                wifi_color="#8ec07c"
-                ;;
-              ethernet)
-                wifi_icon="󰈀"
-                wifi_color="#83a598"
-                ;;
-              offline)
-                wifi_icon="󰖪"
-                wifi_color="#928374"
-                ;;
-            esac
-
             segment() {
               local bg="$1"
               local fg="$2"
@@ -274,9 +288,9 @@ in
 
             printf '%s%s%s%s%s%s%s%s%s#[default]' \
               "$(segment "#3c3836" "#83a598" "#1d2021" "$net")" \
-              "$(segment "#504945" "$wifi_color" "#3c3836" "$wifi_icon $ssid")" \
+              "$(segment "#504945" "$network_color" "#3c3836" "$network_label")" \
               "$(segment "#3c3836" "$vpn_color" "#504945" "$vpn_icon $vpn")" \
-              "$(segment "#504945" "#a89984" "#3c3836" "󰋊 $disk")" \
+              "$(segment "#504945" "#a89984" "#3c3836" " $disk")" \
               "$(segment "#3c3836" "$cpu_color" "#504945" " $cpu")" \
               "$(segment "#504945" "#ebdbb2" "#3c3836" " $mem")" \
               "$(segment "#3c3836" "$battery_color" "#504945" "$batt_icon $battery")" \
