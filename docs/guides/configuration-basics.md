@@ -43,7 +43,9 @@ System-level configurations affect the entire macOS system and all users. These 
    {
      homebrew = {
        enable = true;
-       onActivation.autoUpdate = true;
+       onActivation.autoUpdate = false;
+       onActivation.upgrade = false;
+       onActivation.cleanup = "none";
        brews = [ "git" "starship" ];
        casks = [ "alacritty" "brave-browser" ];
      };
@@ -148,7 +150,7 @@ After making changes, you'll need to rebuild your system. Here are the common co
 # Rebuild the system
 rebuild
 
-# Update and rebuild
+# Update Homebrew, flake inputs, and rebuild
 update
 
 # Clean old generations

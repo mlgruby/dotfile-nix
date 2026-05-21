@@ -29,10 +29,6 @@ in
   # --------------------------------------------------------------------------
   # System Rebuild
   # --------------------------------------------------------------------------
-  rebuild = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" bash ${../scripts/rebuild-system.sh}"; # Rebuild current host; supports --work/--personal
-  rebuild-work = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" bash ${../scripts/rebuild-system.sh} --work"; # Force work host rebuild
-  rebuild-personal = "DOTFILE_DIR=\"${dotfileDir}\" CURRENT_CONFIG_HOST=\"${userConfig.hostname}\" bash ${../scripts/rebuild-system.sh} --personal"; # Force personal host rebuild
-
   rebuild-fast =
     mkTemplateAlias
       ''
@@ -66,11 +62,6 @@ in
       ]; # Dry run to preview what would be rebuilt
 
   # --------------------------------------------------------------------------
-  # System Update
-  # --------------------------------------------------------------------------
-  update = "echo '🔄 Starting system update...' && cd ${dotfileDir} && nix flake update && rebuild && echo '✨ System update complete!'"; # Update flake lockfile and rebuild system
-
-  # --------------------------------------------------------------------------
   # Rollback with Interactive Selection
   # --------------------------------------------------------------------------
   rollback = "${../scripts/system-rollback.sh}"; # Interactively select and rollback to previous system generation
@@ -78,37 +69,7 @@ in
   # --------------------------------------------------------------------------
   # System Cleanup
   # --------------------------------------------------------------------------
-  cleanup =
-    mkTemplateAlias
-      ''
-        printf "Run comprehensive cleanup? This removes old generations/caches. [y/N] " && \
-        read -r cleanup_confirm && \
-        if [[ "$cleanup_confirm" = [Yy] || "$cleanup_confirm" = [Yy][Ee][Ss] ]]; then \
-          echo "🧹 Starting comprehensive system cleanup..." && \
-          echo "🗑️  Running Nix garbage collection..." && \
-          nix-collect-garbage -d --option max-jobs auto --option cores 0 && \
-          echo "✓ Nix garbage collection complete" && \
-          echo "🧹 Cleaning macOS system files..." && \
-          find @homeDir@ -type f -name '.DS_Store' -delete 2>/dev/null || true && \
-          find @homeDir@ -type f -name '._*' -delete 2>/dev/null || true && \
-          echo "🧹 Cleaning package caches..." && \
-          command -v npm &> /dev/null && npm cache clean --force 2>/dev/null || true && \
-          command -v brew &> /dev/null && brew cleanup 2>/dev/null || true && \
-          command -v uv &> /dev/null && @homeDir@/.local/bin/uv cache clean 2>/dev/null || true && \
-          echo "🧹 Optimizing Nix store..." && \
-          nix store optimise --option max-jobs auto --option cores 0 && \
-          echo "✨ Cleanup complete!" && \
-          rl; \
-        else \
-          echo "Cleanup cancelled."; \
-        fi
-      ''
-      [
-        {
-          name = "homeDir";
-          value = homeDir;
-        }
-      ]; # Confirm, then clean old Nix generations, package caches, and macOS temp files
+  cleanup = "bash ${../scripts/cleanup-system.sh}"; # Confirmed cleanup command; supports --docker, --deep, and --help
 
   # --------------------------------------------------------------------------
   # Performance Analysis

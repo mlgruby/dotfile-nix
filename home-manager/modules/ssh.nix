@@ -32,14 +32,14 @@ let
   mkHomelabHost = name: ip: {
     inherit name;
     value = {
-      hostname = ip;
-      user = defaults.ssh.homelabUser;
-      identityFile = defaults.ssh.homelabIdentityFile;
+      HostName = ip;
+      User = defaults.ssh.homelabUser;
+      IdentityFile = defaults.ssh.homelabIdentityFile;
     };
   };
 
   # Generate all homelab hosts from defaults
-  homelabMatchBlocks = builtins.listToAttrs (lib.mapAttrsToList mkHomelabHost defaults.homelabHosts);
+  homelabSettings = builtins.listToAttrs (lib.mapAttrsToList mkHomelabHost defaults.homelabHosts);
 in
 {
   programs.ssh = {
@@ -49,41 +49,37 @@ in
     enableDefaultConfig = false;
 
     # Host-specific configurations
-    matchBlocks = {
+    settings = {
       # Global defaults for all hosts
       "*" = {
-        addKeysToAgent = "yes";
-        compression = true;
-        controlMaster = "auto";
-        controlPersist = "10m";
-        extraOptions = {
-          UseKeychain = "yes";
-        };
-        forwardAgent = false;
-        serverAliveInterval = 60;
-        serverAliveCountMax = 3;
+        AddKeysToAgent = "yes";
+        Compression = true;
+        ControlMaster = "auto";
+        ControlPersist = "10m";
+        ForwardAgent = false;
+        ServerAliveInterval = 60;
+        ServerAliveCountMax = 3;
+        UseKeychain = "yes";
       };
 
       # GitHub configuration for development
       "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/github";
-        identitiesOnly = true;
-        extraOptions = {
-          # Avoid Apple ssh-agent/keychain edge cases after reboot
-          # ("agent refused operation") by forcing direct key usage.
-          IdentityAgent = "none";
-        };
+        HostName = "github.com";
+        User = "git";
+        IdentityFile = "~/.ssh/github";
+        IdentitiesOnly = true;
+        # Avoid Apple ssh-agent/keychain edge cases after reboot
+        # ("agent refused operation") by forcing direct key usage.
+        IdentityAgent = "none";
       };
 
       # Internal/private network hosts
       "*.internal" = {
-        user = "admin";
-        compression = true;
-        serverAliveInterval = 60;
+        User = "admin";
+        Compression = true;
+        ServerAliveInterval = 60;
       };
     }
-    // homelabMatchBlocks; # Merge in all homelab hosts
+    // homelabSettings; # Merge in all homelab hosts
   };
 }

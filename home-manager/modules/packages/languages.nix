@@ -5,9 +5,19 @@
 
 { pkgs, ... }:
 
+let
+  pyright-lsp = pkgs.writeShellScriptBin "pyright-lsp" ''
+    exec ${pkgs.pyright}/bin/pyright-langserver "$@"
+  '';
+in
+
 {
   home.packages = with pkgs; [
-    kotlin-language-server # Kotlin LSP for code intelligence
+    kotlin-language-server # Kotlin LSP
+    pyright # Python LSP (type checking + intelligence)
+    pyright-lsp # Compatibility command for tools expecting pyright-lsp
+    typescript-language-server # TypeScript/JavaScript LSP
+    typescript # TypeScript compiler (required by ts-ls)
     rust-analyzer # Rust LSP for code intelligence
     rustc # Rust compiler
     cargo # Rust package manager and build tool

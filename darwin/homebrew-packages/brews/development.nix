@@ -5,5 +5,6 @@
 [
   "kubevela"
   "neovim"
+  "pi-coding-agent"
   "yamlresume"
 ]
