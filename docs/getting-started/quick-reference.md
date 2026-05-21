@@ -212,11 +212,14 @@ ghrepo
 # Switch to production
 awsp
 
-# Switch to development
+# Switch to development/default
 awsd
 
-# Login to AWS SSO
-awsl
+# Refresh SSO and file credentials for default/dev apps
+awsrd
+
+# Refresh SSO and file credentials for production/prod apps
+awsrp
 
 # Check current status
 awsw

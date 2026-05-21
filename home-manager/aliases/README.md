@@ -29,8 +29,9 @@ aliases/
 | `d` | Docker | `d ps` |
 | `k` | Kubectl | `k get pods` |
 | `cc` | Claude Code | `cc` |
+| `oc` | OpenCode | `oc` |
 | `rebuild` | Rebuild system (supports profile flags) | `rebuild --work` |
-| `cleanup` | Confirm, then clean system | `cleanup` |
+| `cleanup` | Confirm, then clean system; supports `--docker` and `--deep` | `cleanup --help` |
 
 ### Dangerous Operations
 
@@ -47,12 +48,14 @@ aliases/
 - Navigation: `..`, `...`, `~`, `-`
 - File operations: `backup`, `xtract`, `compress`
 - Documentation: `rtfm`, `cheat`, `md`
-- Network: `myip`, `ports`, `flushdns`
+- Network: `myip`, `pubip`, `ipp`, `ports`, `flushdns`
 - Clipboard: `copy`, `paste`
 
 ### 2. Development Tools (dev-tools.nix)
 - Modern CLI: `eza`, `fd`, `duf`, `btm`
 - Claude Code: `cc`, `ccc`, `ccr`
+- OpenCode: `oc`, `occ`, `ocx`
+- Pi Coding Agent: `pil`, `pig`, `pib`
 - Tmux: `tn`, `ta`, `tk`, `t`
 - FZF: `fe`, `fcd`, `fif`, `fkill`
 - Docker: `d`, `dc`, `dsp`, `drm`, `dlog`
@@ -74,13 +77,40 @@ aliases/
 - Finder: `showhidden`, `hidedesktop`
 
 ### 5. Homelab (homelab.nix)
+- Msgvault: `mv`, `mvt`, `mvstats`, `mvaccounts`, `mvsearch`, `mvp`, `mvat`, `mva`, `mvhealth`, `mvscheduler`, `mvvector`, `mvhybrid`, `mvsemantic`, `mvkey`, `mvrotate`, `mvschedule`
 - Lazywarden: `lwdec`, `lw-decrypt`, `lw-restore`
 
 | Alias | Description | Example |
 |-------|-------------|---------|
+| `mv` | Run a msgvault command against the remote archive | `mv stats` |
+| `mvt` | Open the remote msgvault TUI | `mvt` |
+| `mvstats` | Show remote archive stats | `mvstats` |
+| `mvaccounts` | List remote archive accounts | `mvaccounts` |
+| `mvsearch` | Run remote full-text search | `mvsearch "from:example.com has:attachment"` |
+| `mvp` | Fuzzy-pick a search result and open the message | `mvp "visa payment confirmation"` |
+| `mvat` | Fuzzy-pick an attachment-bearing result and open the message | `mvat "visa"` |
+| `mva` | Pick an account, search inside it, then open the selected message | `mva "visa payment confirmation"` |
+| `mvhealth` | Check the remote API health endpoint | `mvhealth` |
+| `mvscheduler` | Show remote scheduled sync status | `mvscheduler` |
+| `mvvector` | Show remote vector index health | `mvvector` |
+| `mvhybrid` | Run remote hybrid search through the API | `mvhybrid "planning offsite"` |
+| `mvsemantic` | Run remote vector search through the API | `mvsemantic "planning offsite"` |
+| `mvkey` | Print the decrypted local msgvault API key | `mvkey` |
+| `mvrotate` | Rotate the local encrypted key and remote server key | `mvrotate` |
+| `mvschedule` | Reconcile remote scheduled sync accounts over SSH | `mvschedule "0 */6 * * *"` |
 | `lwdec` | Short form for `lazywarden-decrypt` | `lwdec backup.zip --output ~/Secure/lazywarden-restore` |
 | `lw-decrypt` | Readable alias for `lazywarden-decrypt` | `lw-decrypt backup.zip --no-attachments` |
 | `lw-restore` | Restore with default secure output directory | `lw-restore backup.zip` |
+
+### Pi Coding Agent
+
+Pi custom local model configuration is managed at `~/.pi/agent/models.json`.
+
+| Alias | Description | Example |
+|-------|-------------|---------|
+| `pil` | Run Pi against LM Studio's local Gemma 4 model | `pil` |
+| `pig` | Short Gemma shorthand for the same LM Studio model | `pig "review this change"` |
+| `pib` | Run Pi against Anthropic Claude Sonnet through Amazon Bedrock | `pib` |
 
 ## Interactive Aliases (FZF-powered)
 

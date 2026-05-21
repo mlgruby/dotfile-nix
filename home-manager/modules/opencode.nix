@@ -18,32 +18,31 @@ in
   home.activation.configureOpenCodeLMStudio = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if ! command -v opencode >/dev/null 2>&1 || [ ! -d "/Applications/LM Studio.app" ]; then
       echo "OpenCode/LM Studio not installed; skipping OpenCode LM Studio config."
-      exit 0
-    fi
+    else
+      mkdir -p "$(dirname "${opencodeConfig}")"
+      if [ ! -s "${opencodeConfig}" ]; then
+        printf '%s\n' '{}' > "${opencodeConfig}"
+      fi
 
-    mkdir -p "$(dirname "${opencodeConfig}")"
-    if [ ! -s "${opencodeConfig}" ]; then
-      printf '%s\n' '{}' > "${opencodeConfig}"
-    fi
-
-    tmp="$(mktemp)"
-    ${pkgs.jq}/bin/jq '
-      ."$schema" = (.["$schema"] // "https://opencode.ai/config.json")
-      | .provider.lmstudio = {
-          "npm": "@ai-sdk/openai-compatible",
-          "name": "LM Studio (local)",
-          "options": {
-            "baseURL": "http://localhost:1234/v1"
-          },
-          "models": {
-            "google/gemma-4-26b-a4b": {
-              "name": "Gemma 4 26B"
+      tmp="$(mktemp)"
+      ${pkgs.jq}/bin/jq '
+        ."$schema" = (.["$schema"] // "https://opencode.ai/config.json")
+        | .provider.lmstudio = {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "LM Studio (local)",
+            "options": {
+              "baseURL": "http://localhost:1234/v1"
+            },
+            "models": {
+              "google/gemma-4-26b-a4b": {
+                "name": "Gemma 4 26B"
+              }
             }
           }
-        }
-      | .model = (.model // "lmstudio/google/gemma-4-26b-a4b")
-    ' "${opencodeConfig}" > "$tmp"
-    install -m 600 "$tmp" "${opencodeConfig}"
-    rm -f "$tmp"
+        | .model = (.model // "lmstudio/google/gemma-4-26b-a4b")
+      ' "${opencodeConfig}" > "$tmp"
+      install -m 600 "$tmp" "${opencodeConfig}"
+      rm -f "$tmp"
+    fi
   '';
 }

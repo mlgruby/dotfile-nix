@@ -106,7 +106,7 @@ dl         # → ~/Downloads
 
 # System Management
 rebuild    # → sudo darwin-rebuild switch --flake .
-update     # → nix flake update && rebuild
+update     # → brew update && brew upgrade && nix flake update && rebuild
 cleanup    # → nix-collect-garbage -d
 
 # Development

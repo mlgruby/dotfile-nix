@@ -11,6 +11,9 @@ let
   profileName = userConfig.profile or "personal";
   common = import ./profiles/common.nix;
   profile = import (./profiles + "/${profileName}.nix");
+  taps = homebrewLib.composeList common.taps profile.extraTaps profile.removeTaps;
+  brews = homebrewLib.composeList common.brews profile.extraBrews profile.removeBrews;
+  casks = homebrewLib.composeList common.casks profile.extraCasks profile.removeCasks;
 in
 {
   nix-homebrew = {
@@ -32,22 +35,31 @@ in
     enable = true;
 
     # Configure taps
-    taps = homebrewLib.composeList common.taps profile.extraTaps profile.removeTaps;
+    taps = taps;
 
     onActivation = {
-      autoUpdate = true;
-      upgrade = true;
-      # Remove old versions
-      cleanup = "zap"; # More aggressive cleanup
+      # Keep rebuilds deterministic and avoid Homebrew cask API fetch failures
+      # during nix-darwin activation. Use the `update` alias for explicit
+      # Homebrew updates/upgrades.
+      autoUpdate = false;
+      upgrade = false;
+      cleanup = "none";
+      extraEnv = {
+        # Homebrew 5.x currently tries to prefetch cask installers during bundle
+        # activation even with upgrades disabled. Keep GUI app upgrades explicit
+        # via `update`/Homebrew instead of making every rebuild network-heavy.
+        HOMEBREW_BUNDLE_CASK_SKIP = builtins.concatStringsSep " " casks;
+        HOMEBREW_NO_ENV_HINTS = "1";
+      };
     };
 
     # Compose common + profile-specific package lists.
-    brews = homebrewLib.composeList common.brews profile.extraBrews profile.removeBrews;
-    casks = homebrewLib.composeList common.casks profile.extraCasks profile.removeCasks;
+    brews = brews;
+    casks = casks;
 
     # Global options
     global = {
-      autoUpdate = true;
+      autoUpdate = false;
       brewfile = true;
     };
 

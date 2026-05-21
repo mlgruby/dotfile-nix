@@ -158,7 +158,8 @@ rebuild-fast     # Use when changes are minimal
 ```bash
 # Full rebuild with all checks
 rebuild          # Standard optimized rebuild
-update           # Update and rebuild
+rebuild --work   # Config-only explicit work rebuild
+update           # Update Homebrew, flake inputs, and rebuild
 ```
 
 ### Large vs Small Changes

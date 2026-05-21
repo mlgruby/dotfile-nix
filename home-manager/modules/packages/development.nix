@@ -12,6 +12,7 @@
     git-extras # Additional Git commands and utilities
     tokei # Code statistics and line counting
     hyperfine # Command-line benchmarking tool
+    opencode # Terminal AI coding agent
     choose # Human-friendly cut/awk alternative
     sd # Modern sed alternative
     grex # Generate regular expressions from examples

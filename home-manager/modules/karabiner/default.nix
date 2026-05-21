@@ -291,6 +291,29 @@
                   }
                 ];
               }
+              {
+                description = "Open Antigravity with Command + Shift + N";
+                manipulators = [
+                  {
+                    type = "basic";
+                    from = {
+                      key_code = "n";
+                      modifiers = {
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
+                      };
+                    };
+                    to = [
+                      {
+                        shell_command = "osascript -e 'tell application \"Antigravity\" to activate'";
+                      }
+                    ];
+                  }
+                ];
+              }
             ];
           };
         }

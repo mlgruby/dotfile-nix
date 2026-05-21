@@ -42,6 +42,20 @@ if [ "$DOTFILES_AUTO_TMUX" = "1" ] && command -v tmux > /dev/null 2>&1; then
   fi
 fi
 
+function dotfiles-sync-tmux-env() {
+  [ -n "$TMUX" ] || return 0
+  command -v tmux > /dev/null 2>&1 || return 0
+
+  if [ -n "${AWS_PROFILE:-}" ]; then
+    tmux set-environment -g AWS_PROFILE "$AWS_PROFILE" 2>/dev/null || true
+  else
+    tmux set-environment -gu AWS_PROFILE 2>/dev/null || true
+  fi
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd dotfiles-sync-tmux-env
+
 function fzf-git-status() {
   local selections
   selections=$(

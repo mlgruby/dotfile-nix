@@ -21,11 +21,14 @@
     linkwarden = "192.168.10.29";
     windmill = "192.168.10.30";
     paperlessng = "192.168.10.20";
+    msgvault = "192.168.10.25";
 
     metric-exporter = "192.168.10.32";
     prometheus = "192.168.10.17";
+    grafana = "192.168.10.18";
+    monitoring = "192.168.10.27";
+    uptime-kuma = "192.168.10.15";
 
-    warracker = "192.168.10.19";
     utility = "192.168.10.9";
     Obsidian-Livesync = "192.168.10.19";
   };

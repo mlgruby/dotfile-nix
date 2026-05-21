@@ -78,7 +78,8 @@ in
   # Network Utilities
   # ==========================================================================
   ipp = "curl https://ipecho.net/plain; echo"; # Show public IP address
-  myip = "curl https://ipecho.net/plain; echo"; # Show public IP address
+  pubip = "curl https://ipecho.net/plain; echo"; # Show public IP address
+  myip = "ifconfig | awk '/^[a-z0-9]+:/ { iface=$1; sub(\":\", \"\", iface) } /^[[:space:]]*inet / && $2 !~ /^127\\./ && iface !~ /^(lo|utun|awdl|llw|bridge)/ { print iface \": \" $2 }'"; # Show local LAN IP addresses
   ping1 = "ping -c 1"; # Ping once
   ping10 = "ping -c 10"; # Ping 10 times
   ports-open = "netstat -tuln"; # Show open network ports

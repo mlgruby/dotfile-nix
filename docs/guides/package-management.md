@@ -127,8 +127,13 @@ nix show-config
 homebrew = {
   enable = true;
   onActivation = {
-    autoUpdate = true;
-    cleanup = "uninstall";
+    autoUpdate = false;
+    upgrade = false;
+    cleanup = "none";
+    extraEnv = {
+      HOMEBREW_BUNDLE_CASK_SKIP = "...";
+      HOMEBREW_NO_ENV_HINTS = "1";
+    };
   };
   
   brews = [
@@ -186,10 +191,34 @@ homebrew.casks = [
 - Tools not available or not appropriate in nixpkgs
 - Global language/build toolchains only when deliberately shared across projects
 
+LM Studio is installed as a Homebrew cask for local model serving. OpenCode is
+configured to use LM Studio's OpenAI-compatible server when both apps are
+installed.
+
+OpenCode is installed from the `anomalyco/tap` Homebrew tap because upstream
+recommends that tap for the most up-to-date terminal agent releases.
+
+msgvault is installed by `home-manager/modules/msgvault.nix` from the upstream
+release installer because it is not available in the pinned nixpkgs package set.
+The activation hook skips installation when `msgvault` is already present.
+The remote TUI API key is committed as an age-encrypted file and decrypted only
+inside the `msgvault-remote` wrapper.
+Use `mvrotate` to generate a new API key, re-encrypt it for the homelab SSH key,
+update the `msgvault` LXC server config over SSH, and restart `msgvault.service`.
+
 **Managing Homebrew**:
 
+Rebuilds skip cask activation to avoid Homebrew downloading large GUI app
+installers during every system switch. Run `update` when you intentionally want
+Homebrew formulae and casks to move forward.
+`rebuild`, `rebuild --work`, and `rebuild --personal` apply the declared
+Homebrew state using the currently available Homebrew metadata. If you add a
+declared formula or cask that Homebrew already knows about, rebuild installs it.
+Use `update` when you want to refresh Homebrew metadata, upgrade installed
+formulae/casks, update flake inputs, and then rebuild.
+
 ```bash
-# Update all packages
+# Update formulae and casks intentionally
 brew update && brew upgrade
 
 # Search for packages
@@ -363,7 +392,7 @@ brew uninstall --cask unwanted-app
 
 ```bash
 # Update everything together
-update  # → nix flake update && rebuild
+update  # → brew update && brew upgrade && nix flake update && rebuild
 ```
 
 #### Selective Updates
@@ -534,7 +563,7 @@ home.packages = with pkgs; [
 ```bash
 # System Management
 rebuild                    # Apply all changes
-update                     # Update and rebuild
+update                     # Update Homebrew, flake inputs, and rebuild
 cleanup                    # Remove old generations
 
 # Package Search

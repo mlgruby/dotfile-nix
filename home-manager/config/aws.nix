@@ -18,8 +18,12 @@
     "default"
     "production"
     "staging"
+    "stg"
     "prod"
+    "prd"
     "dev"
+    "develop"
+    "development"
   ];
 
   ssoProfiles = [
