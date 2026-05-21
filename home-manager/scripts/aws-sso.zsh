@@ -13,6 +13,13 @@ _load_aws_sso() {
   _aws_profile_default="${AWS_SSO_DEFAULT_PROFILE:-default-sso}"
   _aws_profile_production="${AWS_SSO_PRODUCTION_PROFILE:-production-sso}"
   _aws_profile_staging="${AWS_SSO_STAGING_PROFILE:-staging-sso}"
+  _aws_profiles_dev="default dev develop development stg staging"
+  _aws_profiles_prod="production prod prd"
+
+  aws_credential_profile_groups() {
+    echo "dev:  $_aws_profiles_dev"
+    echo "prod: $_aws_profiles_prod"
+  }
 
   # Helper: Parse credentials from AWS CLI env output.
   _aws_credential_value() {
@@ -69,20 +76,122 @@ _load_aws_sso() {
     fi
   }
 
-  # Helper: Write credentials atomically with restrictive permissions.
-  _aws_write_credentials_file() {
-    local content="$1"
+  # Helper: Replace only selected profile sections in ~/.aws/credentials.
+  _aws_upsert_credential_profiles() {
+    local profile_names="$1"
+    local access_key="$2"
+    local secret_key="$3"
+    local session_token="$4"
     local credentials_file="$HOME/.aws/credentials"
     local credentials_dir="$HOME/.aws"
-    local temp_file
+    local temp_file trim_file
 
     mkdir -p "$credentials_dir"
     chmod 700 "$credentials_dir" 2>/dev/null || true
     temp_file="$(mktemp "$credentials_dir/credentials.XXXXXX")" || return 1
     chmod 600 "$temp_file"
-    printf '%s\n' "$content" > "$temp_file"
+
+    if [ -f "$credentials_file" ]; then
+      cp "$credentials_file" "$HOME/.aws/credentials.backup.$(date +%Y%m%d_%H%M%S)"
+      chmod 600 "$HOME/.aws/credentials.backup."* 2>/dev/null || true
+      echo "📋 Backed up existing credentials file"
+
+      awk -v replace_profiles="$profile_names" '
+        BEGIN {
+          split(replace_profiles, names, " ")
+          for (i in names) replace["[" names[i] "]"] = 1
+          skip = 0
+          previous_blank = 0
+        }
+        /^\[[^]]+\][[:space:]]*$/ {
+          skip = ($0 in replace)
+        }
+        !skip {
+          if ($0 == "") {
+            if (!previous_blank) print
+            previous_blank = 1
+          } else {
+            print
+            previous_blank = 0
+          }
+        }
+      ' "$credentials_file" > "$temp_file"
+
+      trim_file="$(mktemp "$credentials_dir/credentials.XXXXXX")" || return 1
+      awk '
+        NF { last = NR }
+        { lines[NR] = $0 }
+        END {
+          for (i = 1; i <= last; i++) print lines[i]
+        }
+      ' "$temp_file" > "$trim_file"
+      mv "$trim_file" "$temp_file"
+
+      # Keep exactly one blank line between preserved content and new sections.
+      [ -s "$temp_file" ] && printf '\n' >> "$temp_file"
+    fi
+
+    local profile_name
+    for profile_name in ${(z)profile_names}; do
+      cat >> "$temp_file" <<EOF
+[$profile_name]
+aws_access_key_id = $access_key
+aws_secret_access_key = $secret_key
+aws_session_token = $session_token
+
+EOF
+    done
+
     mv "$temp_file" "$credentials_file"
     chmod 600 "$credentials_file"
+  }
+
+  # Helper: Parse and write one exported credential set to related profile names.
+  _aws_export_to_profiles() {
+    local source_profile="$1"
+    local profile_names="$2"
+    [ -z "$source_profile" ] && { echo "❌ No profile specified"; return 1; }
+    [ -z "$profile_names" ] && { echo "❌ No target profiles specified"; return 1; }
+
+    echo "📁 Exporting credentials from '$source_profile' to: $profile_names"
+
+    local temp_creds_env export_error export_error_file export_status
+    local attempt max_attempts=5
+    for attempt in {1..5}; do
+      export_error_file="$(mktemp "${TMPDIR:-/tmp}/aws-export-credentials.XXXXXX")" || return 1
+      temp_creds_env=$(aws configure export-credentials --profile "$source_profile" --format env 2>"$export_error_file")
+      export_status=$?
+      export_error="$(cat "$export_error_file")"
+      rm -f "$export_error_file"
+
+      if [ "$export_status" -eq 0 ] && [ -n "$temp_creds_env" ]; then
+        break
+      fi
+
+      [ "$attempt" -lt "$max_attempts" ] && {
+        echo "⏳ Credentials not ready yet for '$source_profile' (attempt $attempt/$max_attempts). Retrying..."
+        sleep 2
+      }
+    done
+
+    if [ -z "$temp_creds_env" ]; then
+      echo "❌ Failed to get credentials for profile '$source_profile'"
+      [ -n "$export_error" ] && echo "   $export_error"
+      echo "💡 Try: aws_sso_login $source_profile"
+      return 1
+    fi
+
+    local access_key secret_key session_token
+    access_key="$(_aws_credential_value "$temp_creds_env" "AWS_ACCESS_KEY_ID")"
+    secret_key="$(_aws_credential_value "$temp_creds_env" "AWS_SECRET_ACCESS_KEY")"
+    session_token="$(_aws_credential_value "$temp_creds_env" "AWS_SESSION_TOKEN")"
+
+    [ -z "$access_key" ] || [ -z "$secret_key" ] || [ -z "$session_token" ] && {
+      echo "❌ Failed to parse credentials"; return 1;
+    }
+
+    _aws_upsert_credential_profiles "$profile_names" "$access_key" "$secret_key" "$session_token" || return 1
+    echo "✅ Credentials written to ~/.aws/credentials for: $profile_names"
   }
 
   # Core SSO login function (single or both).
@@ -164,37 +273,7 @@ _load_aws_sso() {
   aws_export_to_file() {
     local source_profile="${1:-$AWS_PROFILE}"
     local target_profile="${2:-$source_profile}"
-    [ -z "$source_profile" ] && { echo "❌ No profile specified"; return 1; }
-
-    echo "📁 Exporting credentials from '$source_profile' to '$target_profile' in ~/.aws/credentials"
-
-    local temp_creds_env
-    temp_creds_env=$(aws configure export-credentials --profile "$source_profile" --format env 2>/dev/null)
-    if [ $? -ne 0 ] || [ -z "$temp_creds_env" ]; then
-      echo "❌ Failed to get credentials for profile '$source_profile'"
-      echo "💡 Try: aws_sso_login $source_profile"
-      return 1
-    fi
-
-    local access_key secret_key session_token
-    access_key="$(_aws_credential_value "$temp_creds_env" "AWS_ACCESS_KEY_ID")"
-    secret_key="$(_aws_credential_value "$temp_creds_env" "AWS_SECRET_ACCESS_KEY")"
-    session_token="$(_aws_credential_value "$temp_creds_env" "AWS_SESSION_TOKEN")"
-
-    [ -z "$access_key" ] || [ -z "$secret_key" ] || [ -z "$session_token" ] && {
-      echo "❌ Failed to parse credentials"; return 1;
-    }
-
-    [ -f "$HOME/.aws/credentials" ] && {
-      cp "$HOME/.aws/credentials" "$HOME/.aws/credentials.backup.$(date +%Y%m%d_%H%M%S)"
-      chmod 600 "$HOME/.aws/credentials.backup."* 2>/dev/null || true
-      echo "📋 Backed up existing credentials file"
-    }
-
-    _aws_write_credentials_file "[$target_profile]
-aws_access_key_id = $access_key
-aws_secret_access_key = $secret_key
-aws_session_token = $session_token" || return 1
+    _aws_export_to_profiles "$source_profile" "$target_profile" || return 1
 
     echo "✅ Credentials written to ~/.aws/credentials as [$target_profile]"
     local account_id
@@ -206,44 +285,8 @@ aws_session_token = $session_token" || return 1
   # Export both profiles to ~/.aws/credentials file.
   aws_export_both_to_file() {
     echo "📁 Exporting both profiles to ~/.aws/credentials"
-
-    [ -f "$HOME/.aws/credentials" ] && {
-      cp "$HOME/.aws/credentials" "$HOME/.aws/credentials.backup.$(date +%Y%m%d_%H%M%S)"
-      chmod 600 "$HOME/.aws/credentials.backup."* 2>/dev/null || true
-      echo "📋 Backed up existing credentials file"
-    }
-
-    local prod_creds default_creds
-    prod_creds=$(aws configure export-credentials --profile "$_aws_profile_production" --format env 2>/dev/null)
-    default_creds=$(aws configure export-credentials --profile "$_aws_profile_default" --format env 2>/dev/null)
-
-    [ -z "$prod_creds" ] && { echo "❌ Failed to get production credentials"; return 1; }
-    [ -z "$default_creds" ] && { echo "❌ Failed to get default credentials"; return 1; }
-
-    local prod_access prod_secret prod_token default_access default_secret default_token
-    prod_access="$(_aws_credential_value "$prod_creds" "AWS_ACCESS_KEY_ID")"
-    prod_secret="$(_aws_credential_value "$prod_creds" "AWS_SECRET_ACCESS_KEY")"
-    prod_token="$(_aws_credential_value "$prod_creds" "AWS_SESSION_TOKEN")"
-    default_access="$(_aws_credential_value "$default_creds" "AWS_ACCESS_KEY_ID")"
-    default_secret="$(_aws_credential_value "$default_creds" "AWS_SECRET_ACCESS_KEY")"
-    default_token="$(_aws_credential_value "$default_creds" "AWS_SESSION_TOKEN")"
-
-    [ -z "$prod_access" ] || [ -z "$prod_secret" ] || [ -z "$prod_token" ] && {
-      echo "❌ Failed to parse production credentials"; return 1;
-    }
-    [ -z "$default_access" ] || [ -z "$default_secret" ] || [ -z "$default_token" ] && {
-      echo "❌ Failed to parse default credentials"; return 1;
-    }
-
-    _aws_write_credentials_file "[production]
-aws_access_key_id = $prod_access
-aws_secret_access_key = $prod_secret
-aws_session_token = $prod_token
-
-[default]
-aws_access_key_id = $default_access
-aws_secret_access_key = $default_secret
-aws_session_token = $default_token" || return 1
+    _aws_export_to_profiles "$_aws_profile_production" "$_aws_profiles_prod" || return 1
+    _aws_export_to_profiles "$_aws_profile_default" "$_aws_profiles_dev" || return 1
 
     echo "✅ Both profiles written to ~/.aws/credentials"
     echo "🎉 Ready for Scala/Java applications!"
@@ -279,7 +322,7 @@ aws_session_token = $default_token" || return 1
     echo "🚀 Setting production profile and exporting credentials..."
     aws_profile "$_aws_profile_production" && aws_export_creds && {
       echo "📁 Also exporting to ~/.aws/credentials file..."
-      aws_export_to_file "$_aws_profile_production" production
+      _aws_export_to_profiles "$_aws_profile_production" "$_aws_profiles_prod"
     }
   }
 
@@ -287,7 +330,7 @@ aws_session_token = $default_token" || return 1
     echo "🏠 Setting default profile and exporting credentials..."
     aws_profile "$_aws_profile_default" && aws_export_creds && {
       echo "📁 Also exporting to ~/.aws/credentials file..."
-      aws_export_to_file "$_aws_profile_default" default
+      _aws_export_to_profiles "$_aws_profile_default" "$_aws_profiles_dev"
     }
   }
 
@@ -307,11 +350,13 @@ aws_session_token = $default_token" || return 1
   aws_dev() { aws_profile "$_aws_profile_staging"; }
   aws_refresh() { aws_sso_login "${1:-both}"; }
   aws_refresh_both() { aws_sso_login both; }
+  aws_refresh_prod() { aws_sso_login "$_aws_profile_production" && _aws_export_to_profiles "$_aws_profile_production" "$_aws_profiles_prod"; }
+  aws_refresh_default() { aws_sso_login "$_aws_profile_default" && _aws_export_to_profiles "$_aws_profile_default" "$_aws_profiles_dev"; }
   aws_logout() { aws_clear; }
 }
 
 # Lazy wrapper functions that load AWS SSO on first use.
-unalias awsp awsd awse awsef awsf awsc awsl awsr awsw awsb awsall awsprod awsdefault awsprod-trad awsdefault-trad awsrp awsrs awsrd 2>/dev/null || true
+unalias awsp awsd awse awsef awsf awsc awsl awsr awsw awsb awsall awsprod awsdefault awsprod-trad awsdefault-trad awsrp awsrs awsrd awsgroups 2>/dev/null || true
 
 awsp() { _load_aws_sso && aws_prod_env "$@"; }
 awsd() { _load_aws_sso && aws_default_env "$@"; }
@@ -329,6 +374,7 @@ awsprod() { _load_aws_sso && aws_prod "$@"; }
 awsdefault() { _load_aws_sso && aws_profile "${AWS_SSO_DEFAULT_PROFILE:-default-sso}" "$@"; }
 awsprod-trad() { _load_aws_sso && aws_profile production "$@"; }
 awsdefault-trad() { _load_aws_sso && aws_profile default "$@"; }
-awsrp() { _load_aws_sso && aws_sso_login "${AWS_SSO_PRODUCTION_PROFILE:-production-sso}" "$@"; }
+awsrp() { _load_aws_sso && aws_refresh_prod "$@"; }
 awsrs() { _load_aws_sso && aws_sso_login "${AWS_SSO_STAGING_PROFILE:-staging-sso}" "$@"; }
-awsrd() { _load_aws_sso && aws_sso_login "${AWS_SSO_DEFAULT_PROFILE:-default-sso}" "$@"; }
+awsrd() { _load_aws_sso && aws_refresh_default "$@"; }
+awsgroups() { _load_aws_sso && aws_credential_profile_groups "$@"; }

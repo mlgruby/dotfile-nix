@@ -31,6 +31,9 @@ Follow this sequence to master your dotfiles configuration:
 
 ### Level 3: Advanced Topics
 
+- **[Repo Map](architecture/dotfile-map.md)** - How the repository is organized
+- **[Ownership Rules](architecture/ownership-rules.md)** - Where each kind of change belongs
+- **[Profile Surface](architecture/profile-surface.md)** - Work vs personal profile behavior
 - **[Performance Optimization](performance/rebuild-optimization.md)** - Speed up your system
 - **[System Monitoring](monitoring/system-health.md)** - Health checks and maintenance
 - **[Alias System](../home-manager/aliases/README.md)** - Complete alias reference (~220 total)
@@ -80,14 +83,31 @@ Start Here → System Overview → Performance → Monitoring
 Start Here → Architecture → Configuration → Advanced Topics
 ```
 
+- [Repo Map](architecture/dotfile-map.md)
+- [Ownership Rules](architecture/ownership-rules.md)
+- [Profile Surface](architecture/profile-surface.md)
 - [System Architecture](technical/architecture.md)
 - [Troubleshooting](technical/troubleshooting.md)
 - [Refactoring Backlog](refactoring-backlog.md) - Current cleanup backlog
+
+### 🏠 I Want to Operate the Homelab
+
+```text
+Start Here → Homelab Runbooks → Service-Specific Checks
+```
+
+- [Homelab Runbooks](runbooks/homelab/README.md)
+- [Monitoring LXC](runbooks/homelab/monitoring.md)
+- [Msgvault](runbooks/homelab/msgvault.md)
+- [Paperless-ngx](runbooks/homelab/paperlessng.md)
 
 ## 📚 Reference Documentation
 
 ### Quick Access
 
+- **[Repo Map](architecture/dotfile-map.md)** - Maintainer map of the repo
+- **[Ownership Rules](architecture/ownership-rules.md)** - Placement rules for future changes
+- **[Profile Surface](architecture/profile-surface.md)** - Work/personal behavior
 - **[Alias System](../home-manager/aliases/README.md)** - Complete alias reference (~220 total)
 - **[Scripts Guide](../home-manager/scripts/README.md)** - Helper scripts documentation
 - **[Lazywarden Recovery](guides/lazywarden-recovery.md)** - Decrypt Lazywarden backup archives
@@ -167,6 +187,10 @@ See: [Workflow Aliases](../home-manager/aliases/README.md#workflow-shortcuts)
 ```text
 docs/
 ├── README.md                    ← You are here!
+├── architecture/                ← Maintainer map and ownership rules
+│   ├── dotfile-map.md
+│   ├── ownership-rules.md
+│   └── profile-surface.md
 ├── getting-started/             ← New users start here
 │   ├── installation.md
 │   ├── first-steps.md
@@ -204,6 +228,12 @@ docs/
 │   └── nur-integration-analysis.md
 ├── testing/                    ← Validation docs
 │   └── onboarding-test-plan.md
+├── runbooks/                   ← External operational procedures
+│   └── homelab/
+│       ├── README.md
+│       ├── monitoring.md
+│       ├── msgvault.md
+│       └── paperlessng.md
 └── help/                       ← Support and help
     ├── faq.md
     └── troubleshooting.md

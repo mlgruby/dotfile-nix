@@ -83,12 +83,15 @@
       mkDarwinConfiguration =
         validatedConfig:
         darwin.lib.darwinSystem {
-          inherit system;
           specialArgs = {
             userConfig = validatedConfig;
             inherit nixpkgsConfig self;
           };
           modules = [
+            {
+              nixpkgs.hostPlatform = system;
+            }
+
             # Core System Modules
             # Base darwin configuration
             ./darwin/configuration.nix

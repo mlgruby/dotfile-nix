@@ -197,6 +197,14 @@ check_hosts_no_emails() {
   fi
 }
 
+check_tmux_status() {
+  if ./scripts/testing/check-tmux-status.sh; then
+    pass "tmux status guardrail passed"
+  else
+    fail "tmux status guardrail failed"
+  fi
+}
+
 info "running onboarding smoke checks from $ROOT_DIR"
 check_command bash
 check_command rg
@@ -208,6 +216,7 @@ check_nix_flake
 check_script_references
 check_stale_patterns
 check_hosts_no_emails
+check_tmux_status
 
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "onboarding smoke checks passed"
