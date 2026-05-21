@@ -76,6 +76,19 @@ check_eval_ok \
    then "ok"
    else throw "unexpected mkProfile override result"'
 
+check_eval_ok \
+  "Home Manager profile helper exposes profile booleans" \
+  'let
+     work = import ./home-manager/config/profile.nix { userConfig = { profile = "work"; }; };
+     personal = import ./home-manager/config/profile.nix { userConfig = { profile = "personal"; }; };
+   in
+   if work.isWork
+      && !work.isPersonal
+      && personal.isPersonal
+      && !personal.isWork
+   then "ok"
+   else throw "unexpected profile helper result"'
+
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "local Nix helper semantics passed"
   exit 0

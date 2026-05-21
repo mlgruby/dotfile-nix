@@ -9,6 +9,9 @@
   userConfig,
   ...
 }:
+let
+  profile = import ../config/profile.nix { inherit userConfig; };
+in
 {
   programs = {
     zsh = {
@@ -32,8 +35,40 @@
 
       initContent = ''
         source "${../scripts/zsh-integration.zsh}"
+
+        _dotfiles_run_rebuild() {
+          DOTFILE_DIR="${config.home.homeDirectory}/${userConfig.directories.dotfiles}" \
+          CURRENT_CONFIG_HOST="${userConfig.hostname}" \
+          bash "${../scripts/rebuild-system.sh}" "$@" || return $?
+        }
+
+        rebuild() {
+          _dotfiles_run_rebuild "$@"
+        }
+
+        rebuild-work() {
+          rebuild --work "$@"
+        }
+
+        rebuild-personal() {
+          rebuild --personal "$@"
+        }
+
+        update() {
+          local dotfile_dir="${config.home.homeDirectory}/${userConfig.directories.dotfiles}"
+
+          echo "Starting system update..."
+          brew update || return $?
+          brew upgrade || return $?
+
+          cd "$dotfile_dir" || return $?
+          nix flake update || return $?
+          _dotfiles_run_rebuild "$@" || return $?
+
+          echo "System update complete!"
+        }
       ''
-      + lib.optionalString (userConfig.profile == "work") ''
+      + lib.optionalString profile.isWork ''
         source "${../scripts/work.zsh}"
       '';
 

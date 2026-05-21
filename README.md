@@ -101,6 +101,7 @@ The repository is organized into logical, optimized components:
   - Modular program configurations with helper functions
   - Lazy-loaded AWS SSO functions for fast startup
   - Package-only CLI groups under `home-manager/modules/packages/`
+  - Profile-aware behavior through `home-manager/config/profile.nix`
   - Personal preferences and tools
   - Shell and terminal setup
 
@@ -111,6 +112,12 @@ The repository is organized into logical, optimized components:
   - Basic Nix configuration
   - Shell integration
   - Dynamic configurations
+
+- `docs/architecture/` - Maintainer-facing structure and ownership docs
+  - Repo map, ownership rules, and profile surface
+
+- `docs/runbooks/homelab/` - External homelab operations
+  - Monitoring, Msgvault, Paperless, and service migration procedures
 
 ## Prerequisites
 
@@ -345,8 +352,14 @@ dotfile/
 │   └── profiles/               # Work/personal Homebrew overrides
 ├── home-manager/
 │   ├── default.nix             # User environment entry point
+│   ├── aliases/                # Shell aliases split by ownership
+│   ├── config/                 # Shared declarative facts
 │   ├── modules/package-groups.nix
+│   ├── scripts/                # Home Manager-installed helper scripts
 │   └── modules/packages/       # Package-only Home Manager CLI groups
+├── docs/
+│   ├── architecture/           # Repo map, ownership, profile surface
+│   └── runbooks/homelab/       # External homelab operating procedures
 ├── scripts/                    # Organized scripts
 │   ├── install/
 │   │   ├── pre-nix-installation.sh    # Installation script
@@ -369,7 +382,7 @@ rebuild   # Uses hostname resolved from active host in hosts.nix
           # Optional: rebuild --work | rebuild --personal
 rebuild-work      # Explicit work target
 rebuild-personal  # Explicit personal target
-update    # Update flake inputs and rebuild
+update    # Update Homebrew metadata/packages, flake inputs, and rebuild
 cleanup   # Clean old Nix generations
 ```
 
@@ -387,8 +400,10 @@ ghprc     # Checkout PR
 ghprl     # List PRs
 
 # Cloud (lazy-loaded for fast startup)
-awsp      # Switch AWS profile
-awsf      # Ultimate AWS workflow
+awsd      # Default/dev SSO + file credentials
+awsp      # Production/prod SSO + file credentials
+awsrd     # Refresh default/dev SSO + file credentials
+awsrp     # Refresh production/prod SSO + file credentials
 ```
 
 ## Documentation

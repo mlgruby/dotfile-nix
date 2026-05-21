@@ -503,25 +503,27 @@ These are **not** standard AWS CLI commands, but convenient shortcuts defined in
 | `awsall` | Complete AWS setup | Login to both SSO profiles + export credentials |
 | `awsprod` | Switch to production | Set production-sso profile |
 | `awsdefault` | Switch to default | Set default-sso profile |
-| `awsp` | Production environment | Switch to production + export credentials |
-| `awsd` | Default environment | Switch to default + export credentials |
+| `awsp` | Production environment | Switch to production + export credentials to `production`, `prod`, and `prd` |
+| `awsd` | Default environment | Switch to default + export credentials to `default`, `dev`, `develop`, `development`, `stg`, and `staging` |
 
 #### **SSO Login Commands**
 
 | Alias | Function | Description |
 |-------|----------|-------------|
 | `awsl` | Quick SSO login | Login to both SSO profiles |
-| `awslp` | Login production | Login to production-sso only |
-| `awsld` | Login default | Login to default-sso only |
-| `awslb` | Login both | Login to both profiles |
+| `awsrp` | Refresh production | Login to production-sso and refresh `production`, `prod`, and `prd` in `~/.aws/credentials` |
+| `awsrd` | Refresh default | Login to default-sso and refresh `default`, `dev`, `develop`, `development`, `stg`, and `staging` in `~/.aws/credentials` |
+| `awsrs` | Refresh staging | Login to staging-sso only |
+| `awsr` | Refresh both | Login to both SSO profiles |
 
 #### **Credential Management**
 
 | Alias | Function | Description |
 |-------|----------|-------------|
 | `awse` | Export credentials | Export current profile to environment variables |
-| `awsef` | Export to file | Export credentials to ~/.aws/credentials |
-| `awsb` | Export both profiles | Export both profiles to credentials file |
+| `awsef` | Export to file | Export credentials to one named profile in `~/.aws/credentials` without replacing unrelated profiles |
+| `awsb` | Export both profiles | Export default and production profile groups to credentials file |
+| `awsgroups` | Show credential groups | Print the dev/prod profile names that `awsd`, `awsrd`, `awsp`, and `awsrp` write |
 | `awsc` | Clear credentials | Clear all AWS credentials and sessions |
 
 #### **Utility Commands**
