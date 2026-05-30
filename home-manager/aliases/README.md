@@ -7,7 +7,7 @@ Quick reference guide for all available shell aliases.
 ```
 aliases/
 ├── core.nix          # Essential shell navigation and utilities
-├── dev-tools.nix     # Development tools (Docker, K8s, Terraform, etc.)
+├── dev-tools.nix     # Development tools (Docker, K8s, OpenTofu, etc.)
 ├── git.nix           # Git workflows and GitHub CLI
 ├── homelab.nix       # Homelab and self-hosted service aliases
 ├── platform.nix      # macOS/Linux system management
@@ -60,7 +60,7 @@ aliases/
 - FZF: `fe`, `fcd`, `fif`, `fkill`
 - Docker: `d`, `dc`, `dsp`, `drm`, `dlog`
 - Kubernetes: `k`, `kgp`, `klogs`, `kexec`
-- Terraform: `tf`, `tfin`, `tfp`, `tfa`
+- OpenTofu: `tofu`, `tf`, `tfin`, `tfp`, `tfa`
 
 ### 3. Git Workflows (git.nix)
 - Basic: `gs`, `gaa`, `gcm`, `gp`, `gl`
@@ -139,6 +139,7 @@ cat config.yaml | yaml        # Pretty-print YAML
 # Clipboard
 echo "text" | copy            # Copy to clipboard
 paste | grep "pattern"        # Search clipboard
+bwp                           # Fuzzy-pick Bitwarden item and copy password
 
 # Process search
 psg nginx                     # Find nginx processes
@@ -182,7 +183,7 @@ kexec pod-name -- /bin/sh  # Exec into pod
 ### Interactive Discovery
 - `alias-find` - Fuzzy search all aliases (interactive with fzf)
 - `alias-quick` - Quick reference of most used aliases
-- `alias-help [category]` - Show documentation (categories: all, core, git, dev, docker, k8s, terraform, quick)
+- `alias-help [category]` - Show documentation (categories: all, core, git, dev, docker, k8s, opentofu, quick)
 - `alias-search <keyword>` - Search aliases by keyword
 - `alias-list` - List all aliases alphabetically
 - `alias-count` - Count total aliases

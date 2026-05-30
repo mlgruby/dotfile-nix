@@ -11,6 +11,8 @@
 }:
 let
   profile = import ../config/profile.nix { inherit userConfig; };
+  sshDefaults = import ../config/ssh.nix;
+  bitwardenAgent = sshDefaults.ssh.bitwardenAgent;
 in
 {
   programs = {
@@ -31,9 +33,18 @@ in
         CARGO_HOME = "$HOME/.cargo";
         RUSTUP_HOME = "$HOME/.rustup";
         PATH = "$HOME/.local/bin:$HOME/.docker/bin:$HOME/.cargo/bin:/Library/TeX/texbin:/opt/homebrew/opt/gnu-getopt/bin:/opt/homebrew/opt/python@3.12/libexec/bin:$HOME/bin:$PATH";
+      }
+      // lib.optionalAttrs bitwardenAgent.enable {
+        DOTFILES_BITWARDEN_SSH_AGENT = "1";
+        BITWARDEN_SSH_AUTH_SOCK = bitwardenAgent.socketPath;
       };
 
       initContent = ''
+        ${lib.optionalString bitwardenAgent.enable ''
+          export DOTFILES_BITWARDEN_SSH_AGENT="1"
+          export BITWARDEN_SSH_AUTH_SOCK="${bitwardenAgent.socketPath}"
+        ''}
+
         source "${../scripts/zsh-integration.zsh}"
 
         _dotfiles_run_rebuild() {

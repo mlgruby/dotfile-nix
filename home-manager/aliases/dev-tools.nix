@@ -11,7 +11,7 @@ let
   tmuxAliases = import ./dev-tools/tmux.nix { };
   fzfAliases = import ./dev-tools/fzf.nix { };
   dockerAliases = import ./dev-tools/docker.nix { };
-  terraformAliases = import ./dev-tools/terraform.nix { };
+  opentofuAliases = import ./dev-tools/opentofu.nix { };
   kubernetesAliases = import ./dev-tools/kubernetes.nix { };
 in
 modernCliAliases
@@ -19,5 +19,5 @@ modernCliAliases
 // tmuxAliases
 // fzfAliases
 // dockerAliases
-// terraformAliases
+// opentofuAliases
 // kubernetesAliases

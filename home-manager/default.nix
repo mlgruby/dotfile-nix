@@ -63,6 +63,12 @@
   ...
 }:
 let
+  pipxPackage = pkgs.python312Packages.pipx.overridePythonAttrs (_old: {
+    # pipx 1.8.0 has upstream tests that expect older packaging spacing for URL specs.
+    # The installed CLI is fine, but the check phase currently breaks local rebuilds.
+    doCheck = false;
+  });
+
   mkRebuildWrapper = name: args: {
     inherit name;
     value = {
@@ -118,7 +124,7 @@ in
 
     packages = with pkgs; [
       direnv
-      pipx
+      pipxPackage
       markdownlint-cli
       # Python Development Environment
       # System-wide Python 3.12 via Homebrew

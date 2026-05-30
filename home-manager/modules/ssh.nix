@@ -27,6 +27,7 @@
 
 let
   defaults = import ../config/ssh.nix;
+  bitwardenAgent = defaults.ssh.bitwardenAgent;
 
   # Helper function to create homelab SSH host config
   mkHomelabHost = name: ip: {
@@ -34,6 +35,8 @@ let
     value = {
       HostName = ip;
       User = defaults.ssh.homelabUser;
+    }
+    // lib.optionalAttrs (!bitwardenAgent.enable) {
       IdentityFile = defaults.ssh.homelabIdentityFile;
     };
   };
@@ -52,13 +55,21 @@ in
     settings = {
       # Global defaults for all hosts
       "*" = {
-        AddKeysToAgent = "yes";
         Compression = true;
         ControlMaster = "auto";
         ControlPersist = "10m";
         ForwardAgent = false;
         ServerAliveInterval = 60;
         ServerAliveCountMax = 3;
+      }
+      // lib.optionalAttrs bitwardenAgent.enable {
+        AddKeysToAgent = "no";
+        IdentityFile = "none";
+        IdentityAgent = bitwardenAgent.socketPath;
+        UseKeychain = "no";
+      }
+      // lib.optionalAttrs (!bitwardenAgent.enable) {
+        AddKeysToAgent = "yes";
         UseKeychain = "yes";
       };
 
@@ -66,6 +77,8 @@ in
       "github.com" = {
         HostName = "github.com";
         User = "git";
+      }
+      // lib.optionalAttrs (!bitwardenAgent.enable) {
         IdentityFile = "~/.ssh/github";
         IdentitiesOnly = true;
         # Avoid Apple ssh-agent/keychain edge cases after reboot

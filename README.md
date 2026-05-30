@@ -227,17 +227,26 @@ After the script completes and the first build is successful, **open a new termi
 
 ## SSH Setup & Validation
 
-The installation script includes intelligent SSH key management:
+The installation script includes intelligent SSH key management for bootstrap
+and fallback use:
 
 - **Detects existing SSH keys** and lets you choose which to use
 - **Creates GitHub-specific key** at `~/.ssh/github` (via symlink or new key)
 - **Automatically uploads** your public key to GitHub
 - **Configures SSH properly** for seamless GitHub authentication
 
+SSH is configured to prefer the Bitwarden Desktop SSH Agent when enabled. Nix
+sets `IdentityAgent ~/.bitwarden-ssh-agent.sock`, omits per-host `IdentityFile`
+entries, exports the matching shell environment, and provides `bwssh` to list
+keys exposed by the agent. The only manual step is enabling **Settings → SSH
+Agent → Enable SSH agent** in the Bitwarden Desktop app after signing in to
+Vaultwarden.
+
 **Validate your SSH setup anytime:**
 
 ```bash
 ./scripts/setup/validate-ssh.sh
+bwssh
 ```
 
 This will check:

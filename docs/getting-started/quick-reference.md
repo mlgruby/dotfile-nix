@@ -278,6 +278,12 @@ source ~/.zshrc
 # Git authentication issues? Test SSH
 ssh -T git@github.com
 
+# Bitwarden SSH Agent keys visible to SSH
+bwssh
+
+# Fuzzy-pick a Bitwarden item and copy its password
+bwp
+
 # AWS credentials expired? Re-login
 awsl
 ```

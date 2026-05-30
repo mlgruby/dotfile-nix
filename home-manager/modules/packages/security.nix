@@ -7,6 +7,7 @@
 
 {
   home.packages = with pkgs; [
+    bitwarden-cli # Bitwarden password manager CLI (bw)
     sops # Encrypted secrets editor
     age # Modern file encryption tool
   ];

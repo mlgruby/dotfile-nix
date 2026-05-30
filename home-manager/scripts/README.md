@@ -128,7 +128,7 @@ alias-help
 alias-help git
 alias-help docker
 alias-help k8s
-alias-help terraform
+alias-help opentofu
 alias-help core
 alias-help dev
 
@@ -144,7 +144,7 @@ alias-help dev
 - `dev` - Development tools
 - `docker` - Docker-specific
 - `k8s` - Kubernetes-specific
-- `terraform` - Terraform-specific
+- `opentofu` - OpenTofu-specific
 
 **Requirements:** bat (optional, for syntax highlighting)
 

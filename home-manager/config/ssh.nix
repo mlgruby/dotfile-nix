@@ -1,5 +1,10 @@
 {
   ssh = {
+    bitwardenAgent = {
+      enable = true;
+      socketPath = "~/.bitwarden-ssh-agent.sock";
+    };
+
     homelabIdentityFile = "~/.ssh/nuc_homelab_id_ed25519";
     homelabUser = "root";
   };
@@ -22,12 +27,11 @@
     windmill = "192.168.10.30";
     paperlessng = "192.168.10.20";
     msgvault = "192.168.10.25";
+    vaultwarden = "192.168.10.15";
+    infisical = "192.168.10.17";
 
     metric-exporter = "192.168.10.32";
-    prometheus = "192.168.10.17";
-    grafana = "192.168.10.18";
     monitoring = "192.168.10.27";
-    uptime-kuma = "192.168.10.15";
 
     utility = "192.168.10.9";
     Obsidian-Livesync = "192.168.10.19";

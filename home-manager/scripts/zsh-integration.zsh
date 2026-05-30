@@ -1,7 +1,18 @@
 # Interactive Zsh helpers sourced by home-manager/modules/zsh.nix.
 
-# Ensure shells use macOS launchd ssh-agent socket.
-if command -v launchctl > /dev/null 2>&1; then
+# Prefer Bitwarden SSH Agent when enabled. The Desktop app owns this socket, so
+# fall back to macOS launchd ssh-agent if the vault is locked or the app is not running.
+if [ "${DOTFILES_BITWARDEN_SSH_AGENT:-0}" = "1" ]; then
+  bitwarden_ssh_sock="${BITWARDEN_SSH_AUTH_SOCK:-~/.bitwarden-ssh-agent.sock}"
+  bitwarden_ssh_sock="${bitwarden_ssh_sock/#\~/$HOME}"
+  if [ -n "$bitwarden_ssh_sock" ] && [ -S "$bitwarden_ssh_sock" ]; then
+    export SSH_AUTH_SOCK="$bitwarden_ssh_sock"
+  fi
+  unset bitwarden_ssh_sock
+fi
+
+# Ensure shells use macOS launchd ssh-agent socket when Bitwarden is unavailable.
+if [ -z "${SSH_AUTH_SOCK:-}" ] && command -v launchctl > /dev/null 2>&1; then
   launchd_ssh_sock="$(launchctl getenv SSH_AUTH_SOCK 2>/dev/null || true)"
   if [ -n "$launchd_ssh_sock" ] && [ -S "$launchd_ssh_sock" ]; then
     export SSH_AUTH_SOCK="$launchd_ssh_sock"
@@ -55,6 +66,59 @@ function dotfiles-sync-tmux-env() {
 
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd dotfiles-sync-tmux-env
+
+function bwp() {
+  if ! command -v bw > /dev/null 2>&1; then
+    echo "bw is required for bwp" >&2
+    return 127
+  fi
+  if ! command -v jq > /dev/null 2>&1; then
+    echo "jq is required for bwp" >&2
+    return 127
+  fi
+  if ! command -v fzf > /dev/null 2>&1; then
+    echo "fzf is required for bwp" >&2
+    return 127
+  fi
+  if ! command -v pbcopy > /dev/null 2>&1; then
+    echo "pbcopy is required for bwp" >&2
+    return 127
+  fi
+
+  local bw_status selected item_id item_name password
+  bw_status="$(bw status 2> /dev/null | jq -r '.status // "unknown"' 2> /dev/null)"
+  if [ "$bw_status" != "unlocked" ]; then
+    echo "Bitwarden vault is $bw_status. Run: bw unlock" >&2
+    return 1
+  fi
+
+  selected="$(
+    bw list items --search "${*:-}" 2> /dev/null |
+      jq -r '.[] | select(.login.password != null and .login.password != "") |
+        [
+          .id,
+          (.name // ""),
+          (.login.username // ""),
+          ((.login.uris // []) | map(.uri // "") | join(", "))
+        ] | @tsv' |
+      fzf --with-nth=2,3,4 --delimiter=$'\t' --header="Copy Bitwarden password"
+  )"
+
+  [ -n "$selected" ] || return 130
+
+  item_id="$(printf '%s\n' "$selected" | cut -f1)"
+  item_name="$(printf '%s\n' "$selected" | cut -f2)"
+  password="$(bw get password "$item_id" 2> /dev/null)"
+
+  if [ -z "$password" ]; then
+    echo "No password found for selected item" >&2
+    return 1
+  fi
+
+  printf '%s' "$password" | pbcopy
+  unset password
+  echo "Copied password for: $item_name"
+}
 
 function fzf-git-status() {
   local selections
