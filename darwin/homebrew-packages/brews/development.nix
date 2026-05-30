@@ -3,6 +3,7 @@
 # Prefer Home Manager for user-level CLI tools. Keep tools here only when their
 # Homebrew installation is the deliberate global source of truth.
 [
+  "infisical"
   "kubevela"
   "neovim"
   "pi-coding-agent"

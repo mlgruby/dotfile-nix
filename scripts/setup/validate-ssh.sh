@@ -77,9 +77,24 @@ echo -e "${BLUE}🔍 SSH Configuration Validator${NC}"
 echo -e "${BLUE}==============================${NC}"
 echo ""
 
+GITHUB_IDENTITY_AGENT=$(ssh -G github.com 2>/dev/null | awk 'tolower($1) == "identityagent" { print $2; exit }' || true)
+USING_BITWARDEN_AGENT=false
+if [[ "$GITHUB_IDENTITY_AGENT" == *".bitwarden-ssh-agent.sock" ]]; then
+    USING_BITWARDEN_AGENT=true
+fi
+
 # Check if SSH key exists
 echo -e "${BLUE}1. Checking SSH key...${NC}"
-if [ -f "$HOME/.ssh/github" ] && [ -f "$HOME/.ssh/github.pub" ]; then
+if [ "$USING_BITWARDEN_AGENT" = true ]; then
+    echo -e "${GREEN}✓ SSH is configured to use Bitwarden SSH Agent${NC}"
+    echo -e "${BLUE}  IdentityAgent: $GITHUB_IDENTITY_AGENT${NC}"
+    if SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock" ssh-add -l >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ Bitwarden SSH Agent is reachable and exposing keys${NC}"
+    else
+        echo -e "${YELLOW}⚠ Bitwarden SSH Agent is configured but no keys are visible${NC}"
+        echo -e "${BLUE}  Enable Bitwarden Desktop → Settings → SSH Agent, unlock the vault, then run: bwssh${NC}"
+    fi
+elif [ -f "$HOME/.ssh/github" ] && [ -f "$HOME/.ssh/github.pub" ]; then
     echo -e "${GREEN}✓ SSH key found at ~/.ssh/github${NC}"
     
     # Check key type
@@ -115,6 +130,9 @@ if [ -f "$HOME/.ssh/config" ]; then
         # Show the configuration
         echo -e "${BLUE}  GitHub SSH configuration:${NC}"
         awk '/^Host github.com/,/^Host / { if (/^Host / && !/github.com/) exit; print "    " $0 }' "$HOME/.ssh/config"
+        if [ "$USING_BITWARDEN_AGENT" = true ]; then
+            echo -e "${GREEN}✓ GitHub resolves to Bitwarden SSH Agent${NC}"
+        fi
     else
         echo -e "${YELLOW}⚠ SSH config exists but no GitHub configuration found${NC}"
         echo -e "${BLUE}  Add this to ~/.ssh/config:${NC}"
@@ -145,22 +163,14 @@ else
     echo -e "${BLUE}  Troubleshooting steps:${NC}"
     echo -e "${BLUE}    1. Check if SSH key is uploaded to GitHub${NC}"
     echo -e "${BLUE}    2. Verify SSH key is loaded: ssh-add -l${NC}"
-    echo -e "${BLUE}    3. Test with specific key: ssh -i ~/.ssh/github -T git@github.com${NC}"
+    if [ "$USING_BITWARDEN_AGENT" = true ]; then
+        echo -e "${BLUE}    3. Verify Bitwarden keys: bwssh${NC}"
+    else
+        echo -e "${BLUE}    3. Test with specific key: ssh -i ~/.ssh/github -T git@github.com${NC}"
+    fi
 fi
 
 echo ""
-
-# Check home-manager SSH configuration
-echo -e "${BLUE}4. Checking home-manager SSH configuration...${NC}"
-if [ -f "$HOME/.config/home-manager/modules/programs.nix" ]; then
-    if grep -q "identityFile.*github" "$HOME/.config/home-manager/modules/programs.nix"; then
-        echo -e "${GREEN}✓ home-manager SSH configuration points to ~/.ssh/github${NC}"
-    else
-        echo -e "${YELLOW}⚠ home-manager SSH configuration may not be configured correctly${NC}"
-    fi
-else
-    echo -e "${YELLOW}⚠ home-manager programs.nix not found${NC}"
-fi
 
 # Find dotfiles directory
 DOTFILES_DIR=""
@@ -170,6 +180,20 @@ for possible_dir in "dotfile" "dotfiles" "nix-config" "nix-darwin" ".dotfiles"; 
         break
     fi
 done
+
+# Check home-manager SSH configuration
+echo -e "${BLUE}4. Checking home-manager SSH configuration...${NC}"
+if [ -n "$DOTFILES_DIR" ] && [ -f "$DOTFILES_DIR/home-manager/modules/ssh.nix" ]; then
+    if [ "$USING_BITWARDEN_AGENT" = true ]; then
+        echo -e "${GREEN}✓ home-manager SSH configuration uses Bitwarden SSH Agent${NC}"
+    elif grep -q "IdentityFile.*github" "$DOTFILES_DIR/home-manager/modules/ssh.nix"; then
+        echo -e "${GREEN}✓ home-manager SSH configuration points to ~/.ssh/github${NC}"
+    else
+        echo -e "${YELLOW}⚠ home-manager SSH configuration may not be configured correctly${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠ dotfile home-manager SSH module not found${NC}"
+fi
 
 FLAKE_HOSTNAME=""
 if [ -n "$DOTFILES_DIR" ]; then
@@ -192,22 +216,26 @@ echo -e "${BLUE}Summary and Recommendations:${NC}"
 echo -e "${BLUE}===========================${NC}"
 
 # Check if everything is working
-if [ -f "$HOME/.ssh/github" ] && ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
     echo -e "${GREEN}🎉 SSH setup is working correctly!${NC}"
 else
     echo -e "${YELLOW}🔧 SSH setup needs attention:${NC}"
     echo ""
     echo -e "${BLUE}Quick fixes:${NC}"
     
-    if [ ! -f "$HOME/.ssh/github" ]; then
+    if [ "$USING_BITWARDEN_AGENT" = true ]; then
+        echo -e "${BLUE}  • Enable/unlock Bitwarden Desktop SSH Agent, then run: bwssh${NC}"
+    elif [ ! -f "$HOME/.ssh/github" ]; then
         echo -e "${BLUE}  • Create or symlink SSH key to ~/.ssh/github${NC}"
     fi
     
-    if ! ssh-add -l | grep -q "$(ssh-keygen -l -f "$HOME/.ssh/github.pub" 2>/dev/null | awk '{print $2}')" 2>/dev/null; then
+    if [ "$USING_BITWARDEN_AGENT" != true ] && ! ssh-add -l | grep -q "$(ssh-keygen -l -f "$HOME/.ssh/github.pub" 2>/dev/null | awk '{print $2}')" 2>/dev/null; then
         echo -e "${BLUE}  • Add key to SSH agent: ssh-add ~/.ssh/github${NC}"
     fi
     
-    echo -e "${BLUE}  • Upload public key to GitHub: gh ssh-key add ~/.ssh/github.pub${NC}"
+    if [ "$USING_BITWARDEN_AGENT" != true ]; then
+        echo -e "${BLUE}  • Upload public key to GitHub: gh ssh-key add ~/.ssh/github.pub${NC}"
+    fi
     if [ -n "$DOTFILES_DIR" ]; then
         if [ -n "$FLAKE_HOSTNAME" ]; then
             echo -e "${BLUE}  • Rebuild system: cd $DOTFILES_DIR && sudo darwin-rebuild switch --flake .#$FLAKE_HOSTNAME${NC}"

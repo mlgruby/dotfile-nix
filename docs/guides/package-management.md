@@ -77,7 +77,7 @@ Package-only Home Manager modules are split by purpose:
 
 ```text
 home-manager/modules/packages/
-├── cloud.nix        # AWS, Kubernetes, Terraform helpers
+├── cloud.nix        # AWS, Ansible, Kubernetes, OpenTofu helpers
 ├── development.nix  # linters, benchmarking, analysis tools
 ├── languages.nix    # language servers and global language tooling
 ├── security.nix     # sops, age
@@ -546,7 +546,7 @@ home.packages = with pkgs; [
   python3 nodejs rustc
   
   # Cloud & Infrastructure  
-  awscli2 terraform kubectl
+  ansible awscli2 opentofu kubectl
   
   # Documentation & Productivity
   markdownlint-cli pandoc
@@ -573,7 +573,7 @@ brew search --casks vscode # Find Homebrew casks
 
 # Package Information
 nix info nixpkgs#git       # Nix package details
-brew info terraform        # Homebrew package info
+brew info opentofu         # Homebrew package info
 
 # Development Environments
 setup-dev-env python       # Create Python environment

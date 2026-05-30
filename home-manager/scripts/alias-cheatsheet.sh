@@ -3,7 +3,7 @@
 #
 # Usage: alias-cheatsheet.sh [category]
 #
-# Categories: all, core, git, dev, docker, k8s, terraform
+# Categories: all, core, git, dev, docker, k8s, opentofu
 #
 # Description:
 #   Shows a quick reference cheat sheet for shell aliases.
@@ -11,8 +11,8 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-README_PATH="$SCRIPT_DIR/../aliases/README.md"
+DOTFILE_DIR="${DOTFILE_DIR:-$HOME/Documents/dotfile}"
+README_PATH="$DOTFILE_DIR/home-manager/aliases/README.md"
 CATEGORY="${1:-all}"
 
 # Colors for output
@@ -33,10 +33,10 @@ Categories:
   ${GREEN}all${NC}       - Show full README (default)
   ${GREEN}core${NC}      - Core shell aliases
   ${GREEN}git${NC}       - Git workflow aliases
-  ${GREEN}dev${NC}       - Development tools (Docker, K8s, Terraform)
+  ${GREEN}dev${NC}       - Development tools (Docker, K8s, OpenTofu)
   ${GREEN}docker${NC}    - Docker-specific aliases
   ${GREEN}k8s${NC}       - Kubernetes-specific aliases
-  ${GREEN}terraform${NC} - Terraform-specific aliases
+  ${GREEN}opentofu${NC}  - OpenTofu-specific aliases
   ${GREEN}quick${NC}     - Quick reference (most used)
 
 Examples:
@@ -44,6 +44,10 @@ Examples:
   $(basename "$0") git      # Show git aliases only
   $(basename "$0") quick    # Show most used aliases
 EOF
+}
+
+list_aliases() {
+    zsh -ic alias 2>/dev/null
 }
 
 show_quick_reference() {
@@ -111,27 +115,27 @@ show_category() {
     case "$category" in
         core)
             echo -e "${CYAN}Core Shell Aliases${NC}\n"
-            alias | grep -E "^(c=|x=|h=|r=|rl=|l=|ll=|la=|ls=|\.\.=|backup=|xtract=|compress=|psg=|pkillf=|size=|copy=|paste=|json=|yaml=|path=|now=|today=|myip=|ports=)" | sort
+            list_aliases | grep -E "^(c=|x=|h=|r=|rl=|l=|ll=|la=|ls=|\.\.=|backup=|xtract=|compress=|psg=|pkillf=|size=|copy=|paste=|json=|yaml=|path=|now=|today=|myip=|ports=)" | sort
             ;;
         git)
             echo -e "${CYAN}Git Workflow Aliases${NC}\n"
-            alias | grep -E "^(gs=|gaa=|gcm=|gp=|gl=|gco=|gcob=|gbd=|gst=|grb=|glog=|gd=|gcb=|fshow=|fstash=|quick)" | sort
+            list_aliases | grep -E "^(gs=|gaa=|gcm=|gp=|gl=|gco=|gcob=|gbd=|gst=|grb=|glog=|gd=|gcb=|fshow=|fstash=|quick)" | sort
             ;;
         docker)
             echo -e "${CYAN}Docker Aliases${NC}\n"
-            alias | grep -E "^(d=|dc=|dsp=|drm=|dimg=|dlog=|dexec=)" | sort
+            list_aliases | grep -E "^(d=|dc=|dsp=|drm=|dimg=|dlog=|dexec=)" | sort
             ;;
         k8s|kubernetes)
             echo -e "${CYAN}Kubernetes Aliases${NC}\n"
-            alias | grep -E "^(k=|kgp=|kgs=|kgd=|kgn=|kdp=|kds=|klogs=|kexec=|kctx=|kns=|kaf=|kpf=|kfp=)" | sort
+            list_aliases | grep -E "^(k=|kgp=|kgs=|kgd=|kgn=|kdp=|kds=|klogs=|kexec=|kctx=|kns=|kaf=|kpf=|kfp=)" | sort
             ;;
-        terraform)
-            echo -e "${CYAN}Terraform Aliases${NC}\n"
-            alias | grep -E "^(tf=|tfin=|tfp=|tfa=|tfd=|tfwst=|tfwsw=|tfwls=)" | sort
+        opentofu|tofu)
+            echo -e "${CYAN}OpenTofu Aliases${NC}\n"
+            list_aliases | grep -E "^(tofu=|tf=|tfin=|tfp=|tfa=|tfd=|tfwst=|tfwsw=|tfwls=)" | sort
             ;;
         dev)
             echo -e "${CYAN}Development Tools Aliases${NC}\n"
-            alias | grep -E "^(d=|dc=|k=|tf=|tn=|ta=|tk=|fe=|fcd=|fif=|lsa=|lst=|fdh=|fa=)" | sort
+            list_aliases | grep -E "^(d=|dc=|k=|tofu=|tf=|tn=|ta=|tk=|fe=|fcd=|fif=|lsa=|lst=|fdh=|fa=)" | sort
             ;;
         quick)
             show_quick_reference

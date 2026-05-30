@@ -160,7 +160,7 @@ The system uses a **hybrid approach** for optimal compatibility and performance:
 environment.systemPackages = with pkgs; [
   git curl wget jq       # Development tools
   python3 nodejs        # Language runtimes
-  awscli2 terraform     # Cloud tools
+  awscli2 opentofu      # Cloud tools
 ];
 ```
 

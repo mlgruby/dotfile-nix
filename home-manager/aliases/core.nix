@@ -158,5 +158,10 @@ in
   alias-quick = "${../scripts/alias-cheatsheet.sh} quick"; # Show quick reference of most used aliases
   alias-list = "alias | sort"; # List all aliases alphabetically
   alias-count = "alias | wc -l"; # Count total aliases
+
+  # ==========================================================================
+  # SSH Agent
+  # ==========================================================================
+  bwssh = "SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock ssh-add -l"; # List keys exposed by Bitwarden SSH Agent
 }
 // (mkUserDirAliases userConfig.directories homeDir)

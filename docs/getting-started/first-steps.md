@@ -53,12 +53,19 @@ git config --list | grep user
 # Test SSH keys (if GitHub setup was completed)
 ssh -T git@github.com
 
+# If using Bitwarden SSH Agent, verify the Desktop app exposes keys
+bwssh
+
 # Test AWS SSO (if configured)
 awsl  # AWS SSO login
 
 # Check available aliases
 alias | grep -E "^(rebuild|cleanup|health)"
 ```
+
+For Bitwarden-managed SSH keys, enable **Settings → SSH Agent → Enable SSH
+agent** in Bitwarden Desktop first. The dotfiles configure the shell and SSH
+client to use `~/.bitwarden-ssh-agent.sock`.
 
 ### 3. Apply Your First Rebuild
 

@@ -109,18 +109,18 @@ nix flake update
 
 ## Common Error Messages
 
-### "Unable to create new symlink" for Terraform
+### "Unable to create new symlink" for OpenTofu
 
 This usually means:
 
-1. Existing terraform symlink
+1. Existing `tofu` symlink
 2. Permission issues with `/usr/local/bin`
 
 Solution:
 
 ```bash
 # Remove existing symlink
-sudo unlink /usr/local/bin/terraform
+sudo unlink /usr/local/bin/tofu
 
 # Fix permissions
 sudo chown -R $(whoami):admin /usr/local/bin

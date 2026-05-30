@@ -38,7 +38,7 @@ home.packages = with pkgs; [
   # Cloud Tools
   awscli2
   google-cloud-sdk
-  terraform
+  opentofu
 
   # Utilities
   btop       # System monitor

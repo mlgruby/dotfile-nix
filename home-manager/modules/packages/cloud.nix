@@ -7,10 +7,12 @@
 
 {
   home.packages = with pkgs; [
+    ansible # Automation and configuration management
     awscli2 # AWS CLI v2
     aws-iam-authenticator # AWS IAM authentication for Kubernetes
     kubernetes-helm # Kubernetes package manager
-    terraform-docs # Generate docs from Terraform modules
-    tflint # Terraform linter
+    opentofu # OpenTofu infrastructure as code CLI
+    terraform-docs # Generate docs from Terraform/OpenTofu modules
+    tflint # Terraform/OpenTofu linter
   ];
 }

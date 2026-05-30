@@ -10,7 +10,7 @@
 # - helpers.nix: Helper functions for alias generation
 # - core.nix: Essential shell aliases (~40 aliases)
 # - git.nix: Git workflow aliases (~80 aliases)
-# - dev-tools.nix: Docker, Terraform, k8s, modern CLI tools (~70 aliases)
+# - dev-tools.nix: Docker, OpenTofu, k8s, modern CLI tools (~70 aliases)
 # - homelab.nix: Homelab/self-hosted service aliases
 # - platform.nix: macOS/Linux specific aliases (~30 aliases)
 #

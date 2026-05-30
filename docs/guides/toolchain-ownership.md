@@ -55,7 +55,7 @@ Python app      -> uv / .python-version / project devshell
 Node app        -> package manager + project config / devshell
 Go service      -> go.mod + project devshell when needed
 JVM service     -> Maven/Gradle wrapper or project devshell
-Infra project   -> project-pinned Terraform/Kubernetes tooling
+Infra project   -> project-pinned OpenTofu/Kubernetes tooling
 ```
 
 Global tools should be a convenient baseline, not the source of truth for every

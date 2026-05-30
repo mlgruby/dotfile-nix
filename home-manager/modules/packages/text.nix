@@ -1,4 +1,4 @@
-# Text, document, JSON, and YAML tools managed by Home Manager.
+# Text, document, media, JSON, and YAML tools managed by Home Manager.
 #
 # Package-only module: prefer programs.* when Home Manager has a first-class
 # configuration module for a tool.
@@ -9,6 +9,7 @@
   home.packages = with pkgs; [
     pandoc # Universal document converter
     marp-cli # Markdown presentation deck renderer
+    ffmpeg # Audio and video conversion toolkit
     poppler-utils # PDF utilities such as pdftotext and pdfinfo
     glow # Terminal markdown renderer
     yq-go # YAML processor
