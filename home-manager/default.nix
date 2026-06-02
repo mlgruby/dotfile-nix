@@ -150,6 +150,11 @@ in
 
   gtk.gtk4.theme = null;
 
+  # Stylix currently reports release 26.05 while Home Manager reports 26.11.
+  # Keep the targets enabled, but avoid noisy release warnings until Stylix
+  # publishes matching 26.11 release metadata.
+  stylix.enableReleaseChecks = false;
+
   # Optimized Stylix Target Configuration
   # Conservative approach using only confirmed working targets
   # Based on applications we have configured and Stylix documentation
