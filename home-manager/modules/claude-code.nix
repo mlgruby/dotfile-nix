@@ -53,16 +53,25 @@ let
       MAX_THINKING_TOKENS = claude.maxThinkingTokens;
 
       # Model selection - defaults use EU endpoints for GDPR compliance
-      # Sonnet: Balanced speed and capability (default)
+      # Primary model for agentic tasks (overridable via --model or /model)
       ANTHROPIC_MODEL = claude.models.default;
-      # Haiku: Fast responses, lower cost (for simple tasks)
-      ANTHROPIC_SMALL_FAST_MODEL = claude.models.fast;
-      # Opus: Most capable (for complex reasoning)
+      # Haiku-class model for background/fast operations
+      ANTHROPIC_DEFAULT_HAIKU_MODEL = claude.models.fast;
+      # Opus-class model for complex reasoning tasks
       ANTHROPIC_DEFAULT_OPUS_MODEL = claude.models.opus;
     };
 
     model = claude.model;
     effortLevel = claude.effortLevel;
+    autoCompactEnabled = true;
+    availableModels = claude.availableModels;
+    modelOverrides = claude.modelOverrides;
+
+    # Plugins managed by nix so they survive settings.json resets.
+    # Claude Code mutates this file when installing/removing plugins.
+    enabledPlugins = claude.enabledPlugins;
+    extraKnownMarketplaces = claude.extraKnownMarketplaces;
+
     statusLine = {
       type = "command";
       command = "bash \"${statuslinePath}\"";

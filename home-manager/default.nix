@@ -189,6 +189,7 @@ in
     tmux.enable = true; # ENABLED: Native Stylix support
 
     # Disable unsupported or conflicting targets
+    gtk.enable = false; # DISABLED: Keep gtk.gtk4.theme explicitly unmanaged
     vim.enable = false; # DISABLED: Using Neovim instead
     firefox.enable = false; # DISABLED: Not our primary browser
   };

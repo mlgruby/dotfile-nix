@@ -18,4 +18,5 @@
   "vlc"
   "whatsapp"
   # "steam"
+#  "agentsview"
 ]
