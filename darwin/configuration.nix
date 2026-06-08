@@ -193,6 +193,7 @@
   # Replaces manual theme configurations across applications
   stylix = {
     enable = true;
+    enableReleaseChecks = false; # Stylix release metadata currently lags nix-darwin.
 
     # Gruvbox Dark theme (matches your current manual configs)
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
