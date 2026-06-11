@@ -26,7 +26,6 @@
     linkwarden = "192.168.10.29";
     windmill = "192.168.10.30";
     paperlessng = "192.168.10.20";
-    msgvault = "192.168.10.25";
     vaultwarden = "192.168.10.15";
     infisical = "192.168.10.17";
 

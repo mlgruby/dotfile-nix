@@ -198,18 +198,10 @@ installed.
 OpenCode is installed from the `anomalyco/tap` Homebrew tap because upstream
 recommends that tap for the most up-to-date terminal agent releases.
 
-msgvault is installed by `home-manager/modules/msgvault.nix` from the upstream
-release installer because it is not available in the pinned nixpkgs package set.
-The activation hook skips installation when `msgvault` is already present.
-The remote TUI API key is committed as an age-encrypted file and decrypted only
-inside the `msgvault-remote` wrapper.
-Use `mvrotate` to generate a new API key, re-encrypt it for the homelab SSH key,
-update the `msgvault` LXC server config over SSH, and restart `msgvault.service`.
-
 **Managing Homebrew**:
 
-Rebuilds skip cask activation to avoid Homebrew downloading large GUI app
-installers during every system switch. Run `update` when you intentionally want
+Rebuilds apply the declared Homebrew formulae and casks without upgrading
+existing packages. Run `update` when you intentionally want
 Homebrew formulae and casks to move forward.
 `rebuild`, `rebuild --work`, and `rebuild --personal` apply the declared
 Homebrew state using the currently available Homebrew metadata. If you add a

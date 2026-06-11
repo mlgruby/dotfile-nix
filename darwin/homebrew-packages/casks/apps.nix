@@ -5,7 +5,7 @@
 [
   "bitwarden"
   "brave-browser"
-  "claude"
+#  "claude"
   "discord"
   "google-chrome"
   "insync"

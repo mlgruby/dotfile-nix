@@ -6,7 +6,7 @@
   # ~/.claude/settings.json without changing these template values.
   maxOutputTokens = "16384";
   maxThinkingTokens = "8192";
-  model = "eu.anthropic.claude-sonnet-4-6";
+  model = "sonnet";
   effortLevel = "low";
 
   # EU geo inference endpoints keep the default model path GDPR-friendly.
@@ -16,6 +16,7 @@
     default = "eu.anthropic.claude-sonnet-4-6";
     fast = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
     opus = "eu.anthropic.claude-opus-4-8";
+    fable = "eu.anthropic.claude-fable-5";
   };
 
   # Allowlist for the /model picker UI in Claude Code.
@@ -28,13 +29,12 @@
     "haiku"
   ];
 
-  # Maps standard model IDs → EU Bedrock inference profile IDs.
-  # Picker shows standard names; runtime routes to EU endpoints for GDPR compliance.
-  # Opus 4.5 maps to latest eu opus (4-8) — Bedrock version suffix not recognized by picker.
-  modelOverrides = {
-    "claude-sonnet-4-6" = "eu.anthropic.claude-sonnet-4-6";
-    "claude-opus-4-5" = "eu.anthropic.claude-opus-4-8";
-    "claude-haiku-4-5" = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
+  # Friendly names for Bedrock-pinned model families in the /model picker.
+  modelNames = {
+    default = "Sonnet 4.6";
+    fast = "Haiku 4.5";
+    opus = "Opus 4.8";
+    fable = "Fable 5";
   };
 
   # Plugins restored on every nix rebuild — survive settings.json resets.

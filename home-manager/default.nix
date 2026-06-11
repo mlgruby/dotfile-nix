@@ -94,9 +94,9 @@ in
     ./modules/github.nix
     ./modules/gpg.nix
     ./modules/claude-code.nix
+    ./modules/coding-agents.nix
     ./modules/opencode.nix
     ./modules/pi.nix
-    ./modules/msgvault.nix
     ./modules/programs/btop.nix
     ./modules/programs/eza.nix
     ./modules/programs/bat.nix
@@ -195,20 +195,9 @@ in
   };
 
   # Install shell helper scripts and profile-aware rebuild wrappers.
-  home.file =
-    builtins.listToAttrs [
-      (mkRebuildWrapper "bin/rebuild" "")
-      (mkRebuildWrapper "bin/rebuild-work" "--work")
-      (mkRebuildWrapper "bin/rebuild-personal" "--personal")
-    ]
-    // {
-      ".local/bin/msgvault-rotate-key" = {
-        source = ./scripts/msgvault-rotate-key.sh;
-        executable = true;
-      };
-      ".local/bin/msgvault-schedule-sync" = {
-        source = ./scripts/msgvault-schedule-sync.sh;
-        executable = true;
-      };
-    };
+  home.file = builtins.listToAttrs [
+    (mkRebuildWrapper "bin/rebuild" "")
+    (mkRebuildWrapper "bin/rebuild-work" "--work")
+    (mkRebuildWrapper "bin/rebuild-personal" "--personal")
+  ];
 }
