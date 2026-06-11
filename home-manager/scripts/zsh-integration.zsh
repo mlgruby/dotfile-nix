@@ -1,5 +1,9 @@
 # Interactive Zsh helpers sourced by home-manager/modules/zsh.nix.
 
+# Match filesystem paths and command names regardless of letter case.
+# For example, `cd wo<Tab>` completes a directory named `Work`.
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
 # Prefer Bitwarden SSH Agent when enabled. The Desktop app owns this socket, so
 # fall back to macOS launchd ssh-agent if the vault is locked or the app is not running.
 if [ "${DOTFILES_BITWARDEN_SSH_AGENT:-0}" = "1" ]; then

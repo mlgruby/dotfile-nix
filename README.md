@@ -117,7 +117,7 @@ The repository is organized into logical, optimized components:
   - Repo map, ownership rules, and profile surface
 
 - `docs/runbooks/homelab/` - External homelab operations
-  - Monitoring, Msgvault, Paperless, and service migration procedures
+  - Monitoring, Paperless, and service migration procedures
 
 ## Prerequisites
 

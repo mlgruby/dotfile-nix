@@ -43,12 +43,11 @@ in
       # Homebrew updates/upgrades.
       autoUpdate = false;
       upgrade = false;
-      cleanup = "none";
+      # Treat the composed Nix package lists as the source of truth. Packages
+      # removed from those lists are uninstalled on the next rebuild, while
+      # application preferences and user data are preserved.
+      cleanup = "uninstall";
       extraEnv = {
-        # Homebrew 5.x currently tries to prefetch cask installers during bundle
-        # activation even with upgrades disabled. Keep GUI app upgrades explicit
-        # via `update`/Homebrew instead of making every rebuild network-heavy.
-        HOMEBREW_BUNDLE_CASK_SKIP = builtins.concatStringsSep " " casks;
         HOMEBREW_NO_ENV_HINTS = "1";
       };
     };

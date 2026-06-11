@@ -11,7 +11,6 @@ configuration in Home Manager modules instead.
 
 - `monitoring` (`192.168.10.27`) - consolidated Prometheus, Grafana,
   Alertmanager, and Uptime Kuma host.
-- `msgvault` (`192.168.10.25`) - remote mail archive API and TUI backend.
 - `paperlessng` (`192.168.10.20`) - Paperless-ngx document service.
 
 Host aliases are declared in `home-manager/config/ssh.nix`.

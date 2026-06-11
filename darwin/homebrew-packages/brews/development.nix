@@ -6,6 +6,5 @@
   "infisical"
   "kubevela"
   "neovim"
-  "pi-coding-agent"
   "yamlresume"
 ]

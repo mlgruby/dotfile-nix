@@ -55,8 +55,6 @@ workstation automation.
 - `home-manager/config/ssh.nix` - homelab host inventory.
 - `home-manager/modules/ssh.nix` - SSH client config generated from inventory.
 - `home-manager/aliases/homelab.nix` - short homelab entrypoints.
-- `home-manager/modules/msgvault.nix` and `home-manager/scripts/msgvault-*` -
-  reusable local msgvault client integration.
 
 ## Runbooks And Operational Artifacts
 

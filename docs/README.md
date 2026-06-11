@@ -98,7 +98,6 @@ Start Here → Homelab Runbooks → Service-Specific Checks
 
 - [Homelab Runbooks](runbooks/homelab/README.md)
 - [Monitoring LXC](runbooks/homelab/monitoring.md)
-- [Msgvault](runbooks/homelab/msgvault.md)
 - [Paperless-ngx](runbooks/homelab/paperlessng.md)
 
 ## 📚 Reference Documentation
@@ -232,7 +231,6 @@ docs/
 │   └── homelab/
 │       ├── README.md
 │       ├── monitoring.md
-│       ├── msgvault.md
 │       └── paperlessng.md
 └── help/                       ← Support and help
     ├── faq.md

@@ -25,6 +25,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -53,19 +54,26 @@ let
       MAX_THINKING_TOKENS = claude.maxThinkingTokens;
 
       # Model selection - defaults use EU endpoints for GDPR compliance
-      # Primary model for agentic tasks (overridable via --model or /model)
-      ANTHROPIC_MODEL = claude.models.default;
+      # Pin sonnet family explicitly — alias otherwise resolves to CC's built-in Bedrock default
+      ANTHROPIC_DEFAULT_SONNET_MODEL = claude.models.default;
+      ANTHROPIC_DEFAULT_SONNET_MODEL_NAME = claude.modelNames.default;
       # Haiku-class model for background/fast operations
       ANTHROPIC_DEFAULT_HAIKU_MODEL = claude.models.fast;
+      ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME = claude.modelNames.fast;
       # Opus-class model for complex reasoning tasks
       ANTHROPIC_DEFAULT_OPUS_MODEL = claude.models.opus;
+      ANTHROPIC_DEFAULT_OPUS_MODEL_NAME = claude.modelNames.opus;
+      # Claude Code 2.1.153 does not yet recognize a native Fable family alias.
+      # Expose Fable through the supported custom-model picker slot instead.
+      ANTHROPIC_CUSTOM_MODEL_OPTION = claude.models.fable;
+      ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = claude.modelNames.fable;
+      ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "EU Bedrock Fable model";
     };
 
     model = claude.model;
     effortLevel = claude.effortLevel;
     autoCompactEnabled = true;
     availableModels = claude.availableModels;
-    modelOverrides = claude.modelOverrides;
 
     # Plugins managed by nix so they survive settings.json resets.
     # Claude Code mutates this file when installing/removing plugins.
@@ -81,7 +89,8 @@ let
 in
 {
   # Claude Code default settings template.
-  # The live settings file must remain mutable because Claude plugins edit it.
+  # The live settings file remains mutable because Claude plugins edit it.
+  # Activation merges only Nix-owned Bedrock defaults into that live file.
   # Location: ~/.claude/settings.default.json
   # Docs: https://docs.anthropic.com/claude-code/configuration
   home.file.".claude/settings.default.json".text = settings;
@@ -95,6 +104,23 @@ in
     if [ ! -e "$HOME/.claude/settings.json" ]; then
       install -m 600 "$HOME/.claude/settings.default.json" "$HOME/.claude/settings.json"
     fi
+
+    settings_tmp="$(mktemp)"
+    ${pkgs.jq}/bin/jq --slurpfile defaults "$HOME/.claude/settings.default.json" '
+      .awsAuthRefresh = $defaults[0].awsAuthRefresh
+      | .env = ((.env // {}) + $defaults[0].env)
+      | del(.env.ANTHROPIC_MODEL)
+      | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL)
+      | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL_NAME)
+      | .model = $defaults[0].model
+      | .effortLevel = $defaults[0].effortLevel
+      | .autoCompactEnabled = $defaults[0].autoCompactEnabled
+      | .availableModels = $defaults[0].availableModels
+      | del(.modelOverrides)
+      | del(.skipDangerousModePermissionPrompt)
+    ' "$HOME/.claude/settings.json" > "$settings_tmp"
+    install -m 600 "$settings_tmp" "$HOME/.claude/settings.json"
+    rm -f "$settings_tmp"
 
     if [ ! -e "$HOME/.claude/statusline.sh" ]; then
       install -m 755 "${./claude-code/statusline.sh}" "$HOME/.claude/statusline.sh"
