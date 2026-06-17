@@ -97,6 +97,7 @@ in
     ./modules/coding-agents.nix
     ./modules/opencode.nix
     ./modules/pi.nix
+    ./modules/antigravity.nix
     ./modules/programs/btop.nix
     ./modules/programs/eza.nix
     ./modules/programs/bat.nix
