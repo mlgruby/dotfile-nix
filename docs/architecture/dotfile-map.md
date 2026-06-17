@@ -66,7 +66,6 @@ workstation automation.
 ## Testing And Guardrails
 
 - `scripts/testing/` - smoke tests and repository guardrails.
-- `.github/workflows/onboarding-checks.yml` - GitHub onboarding checks.
 - `nix flake check --no-build` - primary Nix evaluation check.
 
 ## Archive
