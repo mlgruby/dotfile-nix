@@ -49,6 +49,7 @@ in
       cleanup = "uninstall";
       extraEnv = {
         HOMEBREW_NO_ENV_HINTS = "1";
+        HOMEBREW_NO_REQUIRE_TAP_TRUST = "1";
       };
     };
 
