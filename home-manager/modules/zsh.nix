@@ -19,6 +19,9 @@ in
     zsh = {
       enable = true;
       enableCompletion = true;
+      completionInit = ''
+        source "${../scripts/zsh-completion-init.zsh}"
+      '';
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
