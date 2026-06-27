@@ -176,6 +176,7 @@
                   }
                 ];
               }
+              /*
               {
                 description = "Open Codex with Command + Shift + X";
                 manipulators = [
@@ -199,6 +200,7 @@
                   }
                 ];
               }
+              */
               {
                 description = "Open DataGrip with Command + Shift + D";
                 manipulators = [
@@ -291,6 +293,7 @@
                   }
                 ];
               }
+              /*
               {
                 description = "Open Antigravity with Command + Shift + N";
                 manipulators = [
@@ -314,6 +317,7 @@
                   }
                 ];
               }
+              */
             ];
           };
         }

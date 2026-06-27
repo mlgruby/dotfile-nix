@@ -5,4 +5,5 @@
 [
   "infisical/get-cli"
   "nguyenphutrong/tap"
+  "steipete/tap"
 ]

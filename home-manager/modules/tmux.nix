@@ -14,7 +14,7 @@
 # - Gruvbox theme integration
 #
 # Key Bindings:
-# Prefix: Ctrl-a
+# Prefix: Ctrl-b
 #
 # Window Management:
 #   h         : Split horizontal
@@ -45,7 +45,7 @@
 # - Uses Nix-managed tmux plugins
 #
 # Note:
-# - Uses Ctrl+a prefix
+# - Uses Ctrl-b prefix
 # - Mouse mode enabled
 # - Vi keys supported
 {
@@ -61,7 +61,7 @@ in
 {
   programs.tmux = {
     enable = true;
-    shortcut = "a"; # Prefix: Ctrl-a
+    shortcut = "b"; # Prefix: Ctrl-b
     baseIndex = 1; # Start windows at 1
     escapeTime = 0; # Remove delay
 
@@ -96,18 +96,20 @@ in
       bind q confirm-before -p "Kill session #S? (y/n)" kill-session
 
       # Navigation (no prefix needed)
-      bind -n M-Left select-pane -L
-      bind -n M-Right select-pane -R
-      bind -n M-Up select-pane -U
-      bind -n M-Down select-pane -D
+      # DISABLED: Conflict with Herdr
+      # bind -n M-Left select-pane -L
+      # bind -n M-Right select-pane -R
+      # bind -n M-Up select-pane -U
+      # bind -n M-Down select-pane -D
       bind -n S-Left previous-window
       bind -n S-Right next-window
 
       # Resizing
-      bind -n M-S-Left resize-pane -L 2
-      bind -n M-S-Right resize-pane -R 2
-      bind -n M-S-Up resize-pane -U 2
-      bind -n M-S-Down resize-pane -D 2
+      # DISABLED: Conflict with Herdr
+      # bind -n M-S-Left resize-pane -L 2
+      # bind -n M-S-Right resize-pane -R 2
+      # bind -n M-S-Up resize-pane -U 2
+      # bind -n M-S-Down resize-pane -D 2
 
       # Config reload
       bind r source-file $HOME/.config/tmux/tmux.conf \; display "Config reloaded!"
