@@ -52,6 +52,9 @@ let
       CLAUDE_CODE_MAX_OUTPUT_TOKENS = claude.maxOutputTokens;
       # Max tokens for extended thinking/reasoning
       MAX_THINKING_TOKENS = claude.maxThinkingTokens;
+      # Compact proactively instead of waiting for a provider-specific context limit.
+      CLAUDE_CODE_AUTO_COMPACT_WINDOW = "200000";
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "90";
 
       # Model selection - defaults use EU endpoints for GDPR compliance
       # Pin sonnet family explicitly — alias otherwise resolves to CC's built-in Bedrock default

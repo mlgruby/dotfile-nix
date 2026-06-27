@@ -27,7 +27,7 @@ in
     tmp="$(mktemp)"
     ${pkgs.jq}/bin/jq '
       .statusLine = {
-        "type": "",
+        "type": "command",
         "command": "${statuslinePath}",
         "enabled": true
       }

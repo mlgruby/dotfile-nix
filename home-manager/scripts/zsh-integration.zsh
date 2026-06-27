@@ -43,7 +43,7 @@ if command -v uv > /dev/null 2>&1; then
 fi
 
 function tm() {
-  tmux attach-session -t main 2>/dev/null || tmux new-session -s main
+  tmux attach-session -t main 2>/dev/null || tmux new-session -s main herdr
 }
 
 function main() {
@@ -54,6 +54,15 @@ function main() {
 if [ "$DOTFILES_AUTO_TMUX" = "1" ] && command -v tmux > /dev/null 2>&1; then
   if [ -z "$TMUX" ]; then
     tm
+  fi
+fi
+
+# Auto-launch Herdr only for terminals that explicitly opt in.
+# Herdr can spawn child shells, so guard against recursively launching it again.
+if [ "$DOTFILES_AUTO_HERDR" = "1" ] && command -v herdr > /dev/null 2>&1; then
+  if [ -z "${DOTFILES_AUTO_HERDR_STARTED:-}" ]; then
+    export DOTFILES_AUTO_HERDR_STARTED="1"
+    herdr
   fi
 fi
 
@@ -241,4 +250,92 @@ function ghprcheck() {
   local pr
   pr=$(gh pr list --state open | fzf) &&
     [ -n "$pr" ] && echo "$pr" | awk '{print $1}' | xargs gh pr checks
+}
+
+function agy-resume() {
+  local conversations_dir="$HOME/.gemini/antigravity-cli/conversations"
+  local brain_dir="$HOME/.gemini/antigravity-cli/brain"
+  local show_all=false
+
+  for arg in "$@"; do
+    if [ "$arg" = "-a" ] || [ "$arg" = "--all" ]; then
+      show_all=true
+    fi
+  done
+
+  if [ ! -d "$conversations_dir" ] || [ -z "$(ls -A "$conversations_dir"/*.db 2>/dev/null)" ]; then
+    echo "No Antigravity conversations found." >&2
+    return 1
+  fi
+
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf is required to resume conversations interactively." >&2
+    return 127
+  fi
+
+  local selected
+  selected=$(
+    for db_path in "$conversations_dir"/*.db; do
+      [ -f "$db_path" ] || continue
+      local uuid
+      uuid=$(basename "$db_path" .db)
+
+      # Extract CWD from sqlite db
+      local session_cwd=""
+      session_cwd=$(sqlite3 "$db_path" "select data from trajectory_metadata_blob;" 2>/dev/null | grep -oaE 'file:///[a-zA-Z0-9_/.-]+' | head -n 1 | sed 's/file:\/\///' || true)
+
+      # Filter by current directory unless show_all is true
+      if [ "$show_all" = "false" ] && [ "$session_cwd" != "$PWD" ]; then
+        continue
+      fi
+
+      local transcript="$brain_dir/$uuid/.system_generated/logs/transcript.jsonl"
+      local preview=""
+      if [ -f "$transcript" ] && command -v jq >/dev/null 2>&1; then
+        preview=$(jq -r 'select(.type == "USER_INPUT") | .content' "$transcript" 2>/dev/null | grep -v 'USER_REQUEST' | grep -v 'ADDITIONAL_METADATA' | grep -v 'USER_SETTINGS_CHANGE' | grep -v '^$' | head -n 1)
+      fi
+      local mtime
+      mtime=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$db_path")
+
+      if [ "$show_all" = "true" ] && [ -n "$session_cwd" ]; then
+        local short_cwd="${session_cwd/#$HOME/\~}"
+        printf "%s | %-30s | %-50s | %s\n" "$mtime" "$short_cwd" "${preview:-(No preview available)}" "$uuid"
+      else
+        printf "%s | %-50s | %s\n" "$mtime" "${preview:-(No preview available)}" "$uuid"
+      fi
+    done |
+    sort -r |
+    fzf --header="Select Antigravity conversation to resume (use --all to show all)"
+  )
+
+  if [ -n "$selected" ]; then
+    local uuid
+    uuid=$(echo "$selected" | awk -F ' | ' '{print $NF}' | tr -d ' ')
+    agy --conversation "$uuid"
+  fi
+}
+
+function opencode-resume() {
+  if ! command -v opencode >/dev/null 2>&1; then
+    echo "opencode CLI is not installed." >&2
+    return 127
+  fi
+
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf is required to resume sessions interactively." >&2
+    return 127
+  fi
+
+  local selected
+  selected=$(opencode session list | fzf --header="Select OpenCode session to resume")
+  if [ -n "$selected" ]; then
+    local uuid
+    uuid=$(echo "$selected" | grep -oE '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' | head -n 1)
+    if [ -n "$uuid" ]; then
+      opencode -s "$uuid"
+    else
+      # Fallback to the first word if no UUID is found
+      opencode -s "$(echo "$selected" | awk '{print $1}')"
+    fi
+  fi
 }

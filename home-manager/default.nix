@@ -94,10 +94,10 @@ in
     ./modules/github.nix
     ./modules/gpg.nix
     ./modules/claude-code.nix
-    ./modules/coding-agents.nix
     ./modules/opencode.nix
     ./modules/pi.nix
     ./modules/antigravity.nix
+    ./modules/codex.nix
     ./modules/programs/btop.nix
     ./modules/programs/eza.nix
     ./modules/programs/bat.nix
@@ -106,6 +106,7 @@ in
     ./modules/programs/bottom.nix
     ./modules/lazygit.nix
     ./modules/alacritty
+    ./modules/herdr.nix
     ./modules/karabiner
     ./modules/rectangle.nix
     ./modules/ssh.nix
