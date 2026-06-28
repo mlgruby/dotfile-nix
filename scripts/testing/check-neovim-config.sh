@@ -26,6 +26,8 @@ rg -q 'JetBrainsMonoNL Nerd Font Mono' home-manager/modules/alacritty/config.tom
   || fail 'Alacritty does not use JetBrainsMonoNL Nerd Font Mono'
 rg -Uq 'monospace = \[[[:space:]]*"JetBrainsMonoNL Nerd Font Mono"[^]]*"FiraCode Nerd Font"' \
   home-manager/modules/fonts.nix || fail 'Fira Code is not the monospace fallback font'
+rg -Fq 'opts.ensure_installed = {}' home-manager/config/nvim/lua/plugins/languages.lua \
+  || fail 'Mason automatic package installation is not disabled'
 
 for extra in python rust go java kotlin nix docker terraform markdown yaml json; do
   rg -q "lazyvim.plugins.extras.lang.${extra}" home-manager/config/nvim/lazyvim.json \

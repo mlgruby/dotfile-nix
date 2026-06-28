@@ -41,6 +41,7 @@ in
     dockerfile-language-server
     terraform-ls
     marksman
+    tree-sitter
 
     # Rust
     rust-analyzer # Rust LSP for code intelligence
