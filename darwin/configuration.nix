@@ -206,7 +206,7 @@
       monospace = {
         # Use minimal Nix package for Stylix compatibility, but rely on Homebrew for actual fonts
         package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font";
+        name = "JetBrainsMonoNL Nerd Font Mono";
       };
       sansSerif = {
         package = pkgs.inter;

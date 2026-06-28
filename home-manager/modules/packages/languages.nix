@@ -20,6 +20,7 @@ in
 
     # Kotlin
     kotlin-language-server # Kotlin LSP
+    ktlint # Kotlin formatter and linter
 
     # Python LSP
     pyright # Python LSP (type checking + intelligence)
@@ -28,6 +29,18 @@ in
     # TypeScript/JavaScript
     typescript-language-server # TypeScript/JavaScript LSP
     typescript # TypeScript compiler (required by ts-ls)
+
+    # Additional language servers used by Neovim
+    gopls
+    jdt-language-server
+    nixd
+    lua-language-server
+    yaml-language-server
+    bash-language-server
+    vscode-langservers-extracted
+    dockerfile-language-server
+    terraform-ls
+    marksman
 
     # Rust
     rust-analyzer # Rust LSP for code intelligence
@@ -38,10 +51,18 @@ in
 
     # Go
     go # Go compiler and toolchain
+    gofumpt # Go formatter
 
     # JavaScript/Node
     nodejs # Node.js runtime
     bun # Fast JS runtime, bundler, package manager
+
+    # Cross-language formatters and linters used by Neovim
+    ruff
+    shfmt
+    stylua
+    prettier
+    hadolint
 
     # Build tools
     cmake # Cross-platform build system

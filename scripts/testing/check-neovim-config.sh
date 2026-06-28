@@ -24,6 +24,8 @@ rg -q 'ellisonleao/gruvbox.nvim' home-manager/config/nvim/lua/plugins/theme.lua 
   || fail 'Gruvbox is not configured for Neovim'
 rg -q 'JetBrainsMonoNL Nerd Font Mono' home-manager/modules/alacritty/config.toml \
   || fail 'Alacritty does not use JetBrainsMonoNL Nerd Font Mono'
+rg -Uq 'monospace = \[[[:space:]]*"JetBrainsMonoNL Nerd Font Mono"[^]]*"FiraCode Nerd Font"' \
+  home-manager/modules/fonts.nix || fail 'Fira Code is not the monospace fallback font'
 
 for extra in python rust go java kotlin nix docker terraform markdown yaml json; do
   rg -q "lazyvim.plugins.extras.lang.${extra}" home-manager/config/nvim/lazyvim.json \
@@ -32,7 +34,7 @@ done
 
 for tool in pyright typescript-language-server rust-analyzer gopls jdt-language-server \
   kotlin-language-server nixd lua-language-server bash-language-server ruff shfmt stylua prettier; do
-  rg -q "(^|[[:space:]])${tool}([[:space:]#]|$)" home-manager/modules/packages/languages.nix \
+  rg -q "${tool}" home-manager/modules/packages/languages.nix \
     || fail "declarative language tool missing: ${tool}"
 done
 

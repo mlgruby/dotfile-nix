@@ -53,7 +53,7 @@
             "Times New Roman"          # Universal fallback
         ];
         monospace = [ 
-          "JetBrainsMono Nerd Font"  # Primary coding (via Homebrew)
+          "JetBrainsMonoNL Nerd Font Mono" # Primary coding, no ligatures
           "FiraCode Nerd Font"       # Alternative with ligatures (via Homebrew)
           "Hack Nerd Font"           # Clean option (via Homebrew)
           "SauceCodePro Nerd Font"   # Adobe Source Code Pro (via Homebrew)
@@ -75,8 +75,8 @@
     FONTCONFIG_PATH = "$HOME/.nix-profile/etc/fonts";
     
     # Application font preferences (using Homebrew fonts)
-    TERMINAL_FONT = "JetBrainsMono Nerd Font";
-    EDITOR_FONT = "JetBrainsMono Nerd Font";
+    TERMINAL_FONT = "JetBrainsMonoNL Nerd Font Mono";
+    EDITOR_FONT = "JetBrainsMonoNL Nerd Font Mono";
     UI_FONT = "Inter";
     
     # Font rendering optimization
@@ -114,7 +114,7 @@
       <alias>
         <family>monospace</family>
         <prefer>
-          <family>JetBrainsMono Nerd Font</family>
+          <family>JetBrainsMonoNL Nerd Font Mono</family>
           <family>FiraCode Nerd Font</family>
           <family>Hack Nerd Font</family>
           <family>SauceCodePro Nerd Font</family>
@@ -161,12 +161,12 @@
 
       <match target="pattern">
         <test qual="any" name="family"><string>Consolas</string></test>
-        <edit name="family" mode="assign" binding="same"><string>JetBrainsMono Nerd Font</string></edit>
+        <edit name="family" mode="assign" binding="same"><string>JetBrainsMonoNL Nerd Font Mono</string></edit>
       </match>
 
       <match target="pattern">
         <test qual="any" name="family"><string>Monaco</string></test>
-        <edit name="family" mode="assign" binding="same"><string>JetBrainsMono Nerd Font</string></edit>
+        <edit name="family" mode="assign" binding="same"><string>JetBrainsMonoNL Nerd Font Mono</string></edit>
       </match>
 
       <!-- System font mappings -->
@@ -191,7 +191,7 @@
       All fonts managed via Homebrew for optimal macOS integration.
       
              ## Primary Fonts:
-       - JetBrainsMono Nerd Font (coding/terminal)
+       - JetBrainsMonoNL Nerd Font Mono (coding/terminal)
        - Inter (UI/sans-serif)  
        - Source Serif 4 (documents)
       
@@ -230,7 +230,7 @@
              echo "📝 Typography:"
        echo "  Sans: Inter font sample (UI)"
        echo "  Serif: Source Serif 4 sample (documents)"
-       echo "  Mono: JetBrainsMono Nerd Font sample (code)"
+       echo "  Mono: JetBrainsMonoNL Nerd Font Mono sample (code)"
       echo
       
       echo "Available Homebrew Fonts:"
