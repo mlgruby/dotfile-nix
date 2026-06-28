@@ -467,9 +467,11 @@ This configuration was developed with the assistance of [Cursor](https://cursor.
 
 ## Important Notes
 
-- **Neovim:** The Neovim configuration (`home-manager/neovim.nix`) uses an
-  activation script to bootstrap a [LazyVim](https://www.lazyvim.org/) starter
-  configuration into `~/.config/nvim` if that directory does not exist.
-  Subsequent Neovim configuration changes should be made manually within
-  `~/.config/nvim`. For a fully declarative setup, `programs.neovim` would need
-  significant refactoring.
+- **Neovim:** Home Manager installs Neovim and deploys the
+  [LazyVim](https://www.lazyvim.org/) configuration from
+  `home-manager/config/nvim`. The repository is the source of truth; do not edit
+  `~/.config/nvim` or run unrecorded plugin updates there. To update LazyVim,
+  update the tracked `lazy-lock.json` in a controlled checkout, review its diff,
+  run `bash scripts/testing/check-neovim-config.sh`, and deploy via `rebuild`.
+  The managed UI uses Gruvbox in terminals configured with JetBrainsMonoNL Nerd
+  Font Mono and Fira Code as the monospace fallback.
