@@ -14,7 +14,17 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Home Manager makes the tracked config read-only. Seed a writable runtime lock
+-- from Git on every startup so the repository remains the source of truth while
+-- lazy.nvim can record first-run installation state.
+local uv = vim.uv or vim.loop
+local config_lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json"
+local state_lockfile = vim.fn.stdpath("state") .. "/lazy-lock.json"
+vim.fn.mkdir(vim.fn.stdpath("state"), "p")
+assert(uv.fs_copyfile(config_lockfile, state_lockfile))
+
 require("lazy").setup({
+  lockfile = state_lockfile,
   spec = {
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     { import = "plugins" },

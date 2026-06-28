@@ -28,6 +28,10 @@ rg -Uq 'monospace = \[[[:space:]]*"JetBrainsMonoNL Nerd Font Mono"[^]]*"FiraCode
   home-manager/modules/fonts.nix || fail 'Fira Code is not the monospace fallback font'
 rg -Fq 'opts.ensure_installed = {}' home-manager/config/nvim/lua/plugins/languages.lua \
   || fail 'Mason automatic package installation is not disabled'
+rg -Fq 'lockfile = state_lockfile' home-manager/config/nvim/lua/config/lazy.lua \
+  || fail 'Lazy does not use a writable runtime lock file'
+rg -Fq 'uv.fs_copyfile(config_lockfile, state_lockfile)' home-manager/config/nvim/lua/config/lazy.lua \
+  || fail 'runtime lock file is not seeded from the tracked lock file'
 
 for extra in python rust go java kotlin nix docker terraform markdown yaml json; do
   rg -q "lazyvim.plugins.extras.lang.${extra}" home-manager/config/nvim/lazyvim.json \
