@@ -24,6 +24,20 @@ current activation script that clones a mutable LazyVim starter is removed. This
 eliminates the split ownership where Home Manager bootstraps a directory and
 then silently stops managing it.
 
+## GitOps Constraints
+
+The Git repository is the sole source of truth for the editor configuration and
+tooling. Neovim, LazyVim configuration, plugin pins, language tools and editor
+defaults are declared in tracked Nix or Lua files. The implementation must not
+use imperative package installation, manually edit `~/.config/nvim`, or depend
+on untracked live-machine state.
+
+Deployment flows through the existing Nix rebuild wrapper. Every source change
+is evaluated and reviewed from the Git diff before it is applied. Runtime checks
+may read the deployed files and Neovim state, but must not repair them in place.
+Future changes, including LazyVim updates, are performed by updating the tracked
+lock file and rebuilding rather than running an unrecorded live update.
+
 ## Language Coverage
 
 LazyVim language extras and supporting packages cover:
@@ -79,6 +93,8 @@ The implementation is accepted when:
 6. A health report is captured and any remaining material warnings are reported.
 7. The repository working tree contains only the intended Neovim and design
    changes.
+8. The deployed Neovim configuration corresponds to tracked repository content;
+   no required configuration exists only in `~/.config/nvim`.
 
 ## Non-goals
 
