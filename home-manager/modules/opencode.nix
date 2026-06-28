@@ -16,6 +16,8 @@ let
   opencodeConfig = "${config.home.homeDirectory}/.config/opencode/opencode.json";
 in
 {
+  programs.opencode.enable = true;
+
   home.activation.configureOpenCodeLMStudio = lib.hm.dag.entryAfter [ "installCodingAgents" ] ''
     if [ ! -x "${opencodeBin}" ] || [ ! -d "/Applications/LM Studio.app" ]; then
       echo "OpenCode/LM Studio not installed; skipping OpenCode LM Studio config."

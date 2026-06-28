@@ -10,6 +10,8 @@ let
   json = pkgs.formats.json { };
 in
 {
+  programs.pi-coding-agent.enable = true;
+
   home.file.".pi/agent/models.json".source = json.generate "pi-models.json" {
     providers = {
       lmstudio = {

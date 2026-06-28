@@ -31,11 +31,10 @@ in
       sessionVariables = {
         NIX_PATH = "$HOME/.nix-defexpr/channels:$NIX_PATH";
         FPATH = "$HOME/.zsh/completion:$FPATH";
-        PYTHON_CONFIGURE_OPTS = "--enable-framework";
-        UV_PYTHON_PREFERENCE = "system";
+        UV_PYTHON_PREFERENCE = "managed";
         CARGO_HOME = "$HOME/.cargo";
         RUSTUP_HOME = "$HOME/.rustup";
-        PATH = "$HOME/.local/bin:$HOME/.docker/bin:$HOME/.cargo/bin:/Library/TeX/texbin:/opt/homebrew/opt/gnu-getopt/bin:/opt/homebrew/opt/python@3.12/libexec/bin:$HOME/bin:$PATH";
+        PATH = "$HOME/.local/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$PATH";
       }
       // lib.optionalAttrs bitwardenAgent.enable {
         DOTFILES_BITWARDEN_SSH_AGENT = "1";
@@ -76,6 +75,7 @@ in
           brew upgrade || return $?
 
           cd "$dotfile_dir" || return $?
+          nix flake update --flake "$dotfile_dir/home-manager/agent-extras" || return $?
           nix flake update || return $?
           _dotfiles_run_rebuild "$@" || return $?
 

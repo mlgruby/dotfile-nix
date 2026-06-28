@@ -16,6 +16,8 @@ let
   codexConfig = "${config.home.homeDirectory}/.codex/config.toml";
 in
 {
+  programs.codex.enable = true;
+
   home.activation.configureCodexStatusline = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$(dirname "${codexConfig}")"
     if [ ! -s "${codexConfig}" ]; then
