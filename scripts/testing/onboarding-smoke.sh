@@ -205,6 +205,14 @@ check_tmux_status() {
   fi
 }
 
+check_neovim_config() {
+  if ./scripts/testing/check-neovim-config.sh; then
+    pass "Neovim configuration guardrail passed"
+  else
+    fail "Neovim configuration guardrail failed"
+  fi
+}
+
 info "running onboarding smoke checks from $ROOT_DIR"
 check_command bash
 check_command rg
@@ -217,6 +225,7 @@ check_script_references
 check_stale_patterns
 check_hosts_no_emails
 check_tmux_status
+check_neovim_config
 
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "onboarding smoke checks passed"
