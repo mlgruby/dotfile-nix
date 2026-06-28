@@ -20,6 +20,10 @@ rg -q 'config/nvim' home-manager/neovim.nix || fail 'tracked config is not deplo
 test -f home-manager/config/nvim/init.lua || fail 'tracked init.lua is missing'
 test -f home-manager/config/nvim/lazy-lock.json || fail 'tracked lazy-lock.json is missing'
 test ! -e home-manager/scripts/install-lazyvim.sh || fail 'imperative bootstrap remains'
+rg -q 'ellisonleao/gruvbox.nvim' home-manager/config/nvim/lua/plugins/theme.lua \
+  || fail 'Gruvbox is not configured for Neovim'
+rg -q 'JetBrainsMonoNL Nerd Font Mono' home-manager/modules/alacritty/config.toml \
+  || fail 'Alacritty does not use JetBrainsMonoNL Nerd Font Mono'
 
 for extra in python rust go java kotlin nix docker terraform markdown yaml json; do
   rg -q "lazyvim.plugins.extras.lang.${extra}" home-manager/config/nvim/lazyvim.json \
