@@ -7,11 +7,6 @@
 
 {
   home.packages = with pkgs; [
-    codex # OpenAI Codex CLI
-    claude-code # Claude Code CLI; configuration remains in modules/claude-code.nix
-    antigravity-cli # Antigravity CLI; statusline configuration remains in modules/antigravity.nix
-    opencode # OpenCode CLI; LM Studio configuration remains in modules/opencode.nix
-    pi-coding-agent # Pi Coding Agent CLI; local model configuration remains in modules/pi.nix
     httpie # Modern HTTP client
     shellcheck # Shell script linting
     git-extras # Additional Git commands and utilities

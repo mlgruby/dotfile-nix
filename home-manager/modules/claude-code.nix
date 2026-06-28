@@ -96,6 +96,8 @@ in
   # Activation merges only Nix-owned Bedrock defaults into that live file.
   # Location: ~/.claude/settings.default.json
   # Docs: https://docs.anthropic.com/claude-code/configuration
+  programs.claude-code.enable = true;
+
   home.file.".claude/settings.default.json".text = settings;
   home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.claude"

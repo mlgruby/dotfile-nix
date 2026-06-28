@@ -63,6 +63,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Agent skills and plugin marketplaces — pinned via child flake; update with:
+    #   cd home-manager/agent-extras && nix flake update
+    #   nix flake update agent-extras
+    agent-extras.url = "path:./home-manager/agent-extras";
+
   };
 
   outputs =
@@ -73,6 +78,7 @@
       home-manager,
       nix-homebrew,
       stylix,
+      agent-extras,
       ...
     }:
     let
@@ -109,6 +115,15 @@
                 # User-specific Arguments
                 extraSpecialArgs = {
                   userConfig = validatedConfig;
+                  inherit (agent-extras.inputs)
+                    compound-engineering
+                    hyperframes-skills
+                    mattpocock-skills
+                    caveman-skill
+                    everyskill
+                    claude-plugins-official
+                    codex-plugin-cc
+                    ;
                   inherit (validatedConfig)
                     username
                     fullName

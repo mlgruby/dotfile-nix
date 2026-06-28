@@ -14,5 +14,7 @@
     opentofu # OpenTofu infrastructure as code CLI
     terraform-docs # Generate docs from Terraform/OpenTofu modules
     tflint # Terraform/OpenTofu linter
+    infisical # Secrets management CLI
+    kubevela # KubeVela application platform CLI
   ];
 }

@@ -91,16 +91,60 @@ in
         { }
     );
 
-    # Global Ignores
-    # Files to ignore in all repositories
     ignores = [
-      ".DS_Store" # macOS metadata
-      "*.swp" # Vim swap files
-      ".env" # Environment variables
-      ".direnv" # Direnv cache
-      "node_modules" # Node.js dependencies
-      ".vscode" # VS Code settings
-      ".idea" # IntelliJ settings
+      # macOS
+      ".DS_Store"
+      ".AppleDouble"
+      ".LSOverride"
+
+      # Editors
+      "*.swp"
+      "*.swo"
+      "*~"
+      ".vscode/"
+      ".idea/"
+      "*.iml"
+
+      # Env / secrets
+      ".env"
+      ".env.local"
+      ".env.*.local"
+
+      # Direnv
+      ".direnv/"
+      ".envrc.local"
+
+      # Node
+      "node_modules/"
+      ".npm"
+      ".pnpm-store/"
+
+      # Python
+      "__pycache__/"
+      "*.pyc"
+      "*.pyo"
+      ".venv/"
+      ".uv/"
+
+      # Nix
+      "result"
+      "result-*"
+
+      # Build artefacts
+      "dist/"
+      "build/"
+      "target/"
+      "*.o"
+      "*.a"
+
+      # Logs
+      "*.log"
+      "npm-debug.log*"
+
+      # Misc
+      ".cache/"
+      "*.bak"
+      "*.tmp"
     ];
   };
 

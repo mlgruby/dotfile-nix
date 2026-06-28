@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "agent-extras": {
+      "inputs": {
+        "caveman-skill": "caveman-skill",
+        "claude-plugins-official": "claude-plugins-official",
+        "codex-plugin-cc": "codex-plugin-cc",
+        "compound-engineering": "compound-engineering",
+        "everyskill": "everyskill",
+        "hyperframes-skills": "hyperframes-skills",
+        "mattpocock-skills": "mattpocock-skills"
+      },
+      "locked": {
+        "path": "./home-manager/agent-extras",
+        "type": "path"
+      },
+      "original": {
+        "path": "./home-manager/agent-extras",
+        "type": "path"
+      },
+      "parent": []
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -85,6 +105,70 @@
         "type": "github"
       }
     },
+    "caveman-skill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781272264,
+        "narHash": "sha256-FbmfhFaPs/SnSZdfNdErdIUHXt1FfBzErpPpLy8kdIc=",
+        "owner": "JuliusBrussee",
+        "repo": "caveman",
+        "rev": "25d22f864ad68cc447a4cb93aefde918aa4aec9f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JuliusBrussee",
+        "repo": "caveman",
+        "type": "github"
+      }
+    },
+    "claude-plugins-official": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782583500,
+        "narHash": "sha256-fLyiL/gk46vdu/3wkTaBhNzuPEAnMQNRS8FZvtr724k=",
+        "owner": "anthropics",
+        "repo": "claude-plugins-official",
+        "rev": "30a213f9b39e3c40b0073bb5b41081da9f2b6634",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anthropics",
+        "repo": "claude-plugins-official",
+        "type": "github"
+      }
+    },
+    "codex-plugin-cc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782236175,
+        "narHash": "sha256-KJNJyAYVBsA6On/mrx9GSSQmjrwCHfQZAr+c3BZYUc0=",
+        "owner": "openai",
+        "repo": "codex-plugin-cc",
+        "rev": "80c31f99570876c3ef40327838b0a2ca1ae2cd9c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "openai",
+        "repo": "codex-plugin-cc",
+        "type": "github"
+      }
+    },
+    "compound-engineering": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782632880,
+        "narHash": "sha256-FNqM8T37Alg480zom6Kgu0LqYNdv6CsKHWbXv3o4CGU=",
+        "owner": "EveryInc",
+        "repo": "compound-engineering-plugin",
+        "rev": "afc5e010e69a135e726ae9713781db5af11203cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "EveryInc",
+        "repo": "compound-engineering-plugin",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -102,6 +186,22 @@
       "original": {
         "owner": "lnl7",
         "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "everyskill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782327394,
+        "narHash": "sha256-/VHlVSiKAeaN5JjpMHOqH3z9bzUP7dXQ0VDhv6fSro0=",
+        "owner": "EveryInc",
+        "repo": "everyskill",
+        "rev": "e918150a8badf09c6de1550eecd181591685bf0c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "EveryInc",
+        "repo": "everyskill",
         "type": "github"
       }
     },
@@ -195,6 +295,38 @@
         "type": "github"
       }
     },
+    "hyperframes-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782582898,
+        "narHash": "sha256-pf9c0unmnXKwVTpE3TSr+KFBhudbEeKyRLWcm3KeCgc=",
+        "owner": "heygen-com",
+        "repo": "hyperframes",
+        "rev": "3351fb1a6d7f0202d07db9bf9ad335fd0d1ec344",
+        "type": "github"
+      },
+      "original": {
+        "owner": "heygen-com",
+        "repo": "hyperframes",
+        "type": "github"
+      }
+    },
+    "mattpocock-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782388103,
+        "narHash": "sha256-efsb/AXAmEvcjoknbExBeEHFB28o2c2Nk8muWwNNQFQ=",
+        "owner": "mattpocock",
+        "repo": "skills",
+        "rev": "5d78bd0903420f97c791f834201e550c765699f8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mattpocock",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "nix-homebrew": {
       "inputs": {
         "brew-src": "brew-src"
@@ -256,6 +388,7 @@
     },
     "root": {
       "inputs": {
+        "agent-extras": "agent-extras",
         "darwin": "darwin",
         "home-manager": "home-manager",
         "nix-homebrew": "nix-homebrew",
