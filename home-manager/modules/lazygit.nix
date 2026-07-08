@@ -124,7 +124,7 @@
           viewResetOptions = "D";
           fetch = "f";
           toggleTreeView = "`";
-          openMergeTool = "M";
+          openMergeOptions = "M";
           openStatusFilter = "<c-b>";
         };
         
@@ -162,7 +162,7 @@
           pasteCommits = "v";
           tagCommit = "T";
           checkoutCommit = "<space>";
-          resetCherryPick = "<c-R>";
+          resetCherryPick = "<c-r>";
           copyCommitHash = "y";
           openLogMenu = "<c-l>";
         };

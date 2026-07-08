@@ -10,9 +10,8 @@
   ...
 }:
 let
-  profile = import ../config/profile.nix { inherit userConfig; };
-  sshDefaults = import ../config/ssh.nix;
-  bitwardenAgent = sshDefaults.ssh.bitwardenAgent;
+  profile = config.homelab.profile;
+  bitwardenAgent = config.programs.ssh.custom.bitwardenAgent;
 in
 {
   programs = {
@@ -34,7 +33,7 @@ in
         UV_PYTHON_PREFERENCE = "managed";
         CARGO_HOME = "$HOME/.cargo";
         RUSTUP_HOME = "$HOME/.rustup";
-        PATH = "$HOME/.local/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$PATH";
+        PATH = "$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$PATH";
       }
       // lib.optionalAttrs bitwardenAgent.enable {
         DOTFILES_BITWARDEN_SSH_AGENT = "1";
@@ -42,6 +41,8 @@ in
       };
 
       initContent = ''
+        export PATH="$HOME/.npm-global/bin:$PATH"
+
         ${lib.optionalString bitwardenAgent.enable ''
           export DOTFILES_BITWARDEN_SSH_AGENT="1"
           export BITWARDEN_SSH_AUTH_SOCK="${bitwardenAgent.socketPath}"

@@ -86,6 +86,7 @@ in
 {
   imports = [
     # Core modules
+    ./modules/profile.nix
     ./modules/tmux.nix
     ./modules/zsh.nix
     ./modules/starship.nix
@@ -150,6 +151,8 @@ in
       enable = true;
       nix-direnv.enable = true;
     };
+
+    claude-code.enable = true;
   };
 
   gtk.gtk4.theme = null;

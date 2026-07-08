@@ -7,21 +7,6 @@
 # - Manages automatic AWS SSO credential refresh
 # - Sets environment variables for Bedrock API access
 #
-# How it works:
-# - Creates ~/.claude/settings.default.json with Bedrock/statusline configuration
-# - Creates ~/.claude/statusline.default.sh with the default statusline script
-# - Bootstraps mutable Claude files only if missing so Claude can mutate them
-# - Uses EU region endpoints for GDPR compliance
-# - Auto-refreshes AWS SSO credentials when they expire
-#
-# Integration:
-# - Requires AWS SSO login (aws sso login --profile default-sso)
-# - Works with aws-sso.nix for credential management
-# - Model IDs are centralized in ../config/claude.nix
-#
-# Usage:
-# - Run 'claude' in terminal to start Claude Code
-# - Credentials auto-refresh via awsAuthRefresh command
 {
   config,
   lib,
@@ -29,59 +14,69 @@
   ...
 }:
 let
-  claude = import ../config/claude.nix;
-  aws = import ../config/aws.nix;
-  inherit (aws) region;
+  cfg = config.programs.claude-code.bedrock;
   statuslinePath = "${config.home.homeDirectory}/.claude/statusline.sh";
   settings = builtins.toJSON {
     # AWS SSO auto-refresh command
-    # Runs automatically when Bedrock returns credential errors
-    awsAuthRefresh = "aws sso login --profile ${claude.awsProfile}";
+    awsAuthRefresh = "aws sso login --profile ${cfg.awsProfile}";
 
-    # Environment variables scoped to Claude Code only
-    # These don't leak to other processes or shells
     env = {
-      # AWS profile for Bedrock API calls
-      AWS_PROFILE = claude.awsProfile;
-      # Region must support the selected Bedrock inference profile
-      AWS_REGION = region;
+      AWS_PROFILE = cfg.awsProfile;
+      AWS_REGION = cfg.awsRegion;
 
-      # Enable Bedrock as the backend (instead of direct Anthropic API)
-      CLAUDE_CODE_USE_BEDROCK = claude.useBedrock;
-      # Max tokens in model response
-      CLAUDE_CODE_MAX_OUTPUT_TOKENS = claude.maxOutputTokens;
-      # Max tokens for extended thinking/reasoning
-      MAX_THINKING_TOKENS = claude.maxThinkingTokens;
-      # Compact proactively instead of waiting for a provider-specific context limit.
+      CLAUDE_CODE_USE_BEDROCK = "1";
+      CLAUDE_CODE_MAX_OUTPUT_TOKENS = "16384";
+      MAX_THINKING_TOKENS = "8192";
       CLAUDE_CODE_AUTO_COMPACT_WINDOW = "200000";
-      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "90";
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
 
-      # Model selection - defaults use EU endpoints for GDPR compliance
-      # Pin sonnet family explicitly — alias otherwise resolves to CC's built-in Bedrock default
-      ANTHROPIC_DEFAULT_SONNET_MODEL = claude.models.default;
-      ANTHROPIC_DEFAULT_SONNET_MODEL_NAME = claude.modelNames.default;
-      # Haiku-class model for background/fast operations
-      ANTHROPIC_DEFAULT_HAIKU_MODEL = claude.models.fast;
-      ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME = claude.modelNames.fast;
-      # Opus-class model for complex reasoning tasks
-      ANTHROPIC_DEFAULT_OPUS_MODEL = claude.models.opus;
-      ANTHROPIC_DEFAULT_OPUS_MODEL_NAME = claude.modelNames.opus;
-      # Claude Code 2.1.153 does not yet recognize a native Fable family alias.
-      # Expose Fable through the supported custom-model picker slot instead.
-      ANTHROPIC_CUSTOM_MODEL_OPTION = claude.models.fable;
-      ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = claude.modelNames.fable;
+      ANTHROPIC_DEFAULT_SONNET_MODEL = cfg.models.default;
+      ANTHROPIC_DEFAULT_SONNET_MODEL_NAME = cfg.modelNames.default;
+      ANTHROPIC_DEFAULT_HAIKU_MODEL = cfg.models.fast;
+      ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME = cfg.modelNames.fast;
+      ANTHROPIC_DEFAULT_OPUS_MODEL = cfg.models.opus;
+      ANTHROPIC_DEFAULT_OPUS_MODEL_NAME = cfg.modelNames.opus;
+      ANTHROPIC_CUSTOM_MODEL_OPTION = cfg.models.fable;
+      ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = cfg.modelNames.fable;
       ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "EU Bedrock Fable model";
     };
 
-    model = claude.model;
-    effortLevel = claude.effortLevel;
+    model = cfg.model;
+    effortLevel = "low";
     autoCompactEnabled = true;
-    availableModels = claude.availableModels;
+    availableModels = [ "sonnet" "opus" "haiku" ];
 
-    # Plugins managed by nix so they survive settings.json resets.
-    # Claude Code mutates this file when installing/removing plugins.
-    enabledPlugins = claude.enabledPlugins;
-    extraKnownMarketplaces = claude.extraKnownMarketplaces;
+    enabledPlugins = {
+      "superpowers@claude-plugins-official" = true;
+      "frontend-design@claude-plugins-official" = true;
+      "context7@claude-plugins-official" = true;
+      "code-review@claude-plugins-official" = true;
+      "code-simplifier@claude-plugins-official" = true;
+      "skill-creator@claude-plugins-official" = true;
+      "claude-md-management@claude-plugins-official" = true;
+      "ralph-loop@claude-plugins-official" = true;
+      "security-guidance@claude-plugins-official" = true;
+      "claude-code-setup@claude-plugins-official" = true;
+      "pr-review-toolkit@claude-plugins-official" = true;
+      "codex@openai-codex" = true;
+      "caveman@caveman" = true;
+      "rust-analyzer-lsp@claude-plugins-official" = true;
+      "pyright-lsp@claude-plugins-official" = true;
+    };
+    extraKnownMarketplaces = {
+      openai-codex = {
+        source = {
+          source = "github";
+          repo = "openai/codex-plugin-cc";
+        };
+      };
+      caveman = {
+        source = {
+          source = "github";
+          repo = "JuliusBrussee/caveman";
+        };
+      };
+    };
 
     statusLine = {
       type = "command";
@@ -91,44 +86,99 @@ let
   };
 in
 {
-  # Claude Code default settings template.
-  # The live settings file remains mutable because Claude plugins edit it.
-  # Activation merges only Nix-owned Bedrock defaults into that live file.
-  # Location: ~/.claude/settings.default.json
-  # Docs: https://docs.anthropic.com/claude-code/configuration
-  programs.claude-code.enable = true;
+  options.programs.claude-code.bedrock = {
+    awsProfile = lib.mkOption {
+      type = lib.types.str;
+      default = "default-sso";
+      description = "AWS SSO profile name for Bedrock access";
+    };
+    awsRegion = lib.mkOption {
+      type = lib.types.str;
+      default = "eu-west-1";
+      description = "AWS Region for Bedrock access";
+    };
+    model = lib.mkOption {
+      type = lib.types.str;
+      default = "sonnet";
+      description = "Selected model family";
+    };
+    models = {
+      default = lib.mkOption {
+        type = lib.types.str;
+        default = "global.anthropic.claude-sonnet-5";
+        description = "Bedrock model ID for Sonnet";
+      };
+      fast = lib.mkOption {
+        type = lib.types.str;
+        default = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
+        description = "Bedrock model ID for Haiku";
+      };
+      opus = lib.mkOption {
+        type = lib.types.str;
+        default = "eu.anthropic.claude-opus-4-8";
+        description = "Bedrock model ID for Opus";
+      };
+      fable = lib.mkOption {
+        type = lib.types.str;
+        default = "eu.anthropic.claude-fable-5";
+        description = "Bedrock model ID for Fable";
+      };
+    };
+    modelNames = {
+      default = lib.mkOption {
+        type = lib.types.str;
+        default = "Sonnet 5";
+        description = "Friendly name for Sonnet";
+      };
+      fast = lib.mkOption {
+        type = lib.types.str;
+        default = "Haiku 4.5";
+        description = "Friendly name for Haiku";
+      };
+      opus = lib.mkOption {
+        type = lib.types.str;
+        default = "Opus 4.8";
+        description = "Friendly name for Opus";
+      };
+      fable = lib.mkOption {
+        type = lib.types.str;
+        default = "Fable 5";
+        description = "Friendly name for Fable";
+      };
+    };
+  };
 
-  home.file.".claude/settings.default.json".text = settings;
-  home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "$HOME/.claude"
+  config = lib.mkIf config.programs.claude-code.enable {
+    home.file.".claude/settings.default.json".text = settings;
+    home.activation.ensureClaudeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      mkdir -p "$HOME/.claude"
 
-    if [ -L "$HOME/.claude/settings.json" ]; then
-      rm "$HOME/.claude/settings.json"
-    fi
+      if [ -L "$HOME/.claude/settings.json" ]; then
+        rm "$HOME/.claude/settings.json"
+      fi
 
-    if [ ! -e "$HOME/.claude/settings.json" ]; then
-      install -m 600 "$HOME/.claude/settings.default.json" "$HOME/.claude/settings.json"
-    fi
+      if [ ! -e "$HOME/.claude/settings.json" ]; then
+        install -m 600 "$HOME/.claude/settings.default.json" "$HOME/.claude/settings.json"
+      fi
 
-    settings_tmp="$(mktemp)"
-    ${pkgs.jq}/bin/jq --slurpfile defaults "$HOME/.claude/settings.default.json" '
-      .awsAuthRefresh = $defaults[0].awsAuthRefresh
-      | .env = ((.env // {}) + $defaults[0].env)
-      | del(.env.ANTHROPIC_MODEL)
-      | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL)
-      | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL_NAME)
-      | .model = $defaults[0].model
-      | .effortLevel = $defaults[0].effortLevel
-      | .autoCompactEnabled = $defaults[0].autoCompactEnabled
-      | .availableModels = $defaults[0].availableModels
-      | del(.modelOverrides)
-      | del(.skipDangerousModePermissionPrompt)
-    ' "$HOME/.claude/settings.json" > "$settings_tmp"
-    install -m 600 "$settings_tmp" "$HOME/.claude/settings.json"
-    rm -f "$settings_tmp"
+      settings_tmp="$(mktemp)"
+      ${pkgs.jq}/bin/jq --slurpfile defaults "$HOME/.claude/settings.default.json" '
+        .awsAuthRefresh = $defaults[0].awsAuthRefresh
+        | .env = ((.env // {}) + $defaults[0].env)
+        | del(.env.ANTHROPIC_MODEL)
+        | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL)
+        | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL_NAME)
+        | .model = $defaults[0].model
+        | .effortLevel = $defaults[0].effortLevel
+        | .autoCompactEnabled = $defaults[0].autoCompactEnabled
+        | .availableModels = $defaults[0].availableModels
+        | del(.modelOverrides)
+        | del(.skipDangerousModePermissionPrompt)
+      ' "$HOME/.claude/settings.json" > "$settings_tmp"
+      install -m 600 "$settings_tmp" "$HOME/.claude/settings.json"
+      rm -f "$settings_tmp"
 
-    if [ ! -e "$HOME/.claude/statusline.sh" ]; then
       install -m 755 "${./claude-code/statusline.sh}" "$HOME/.claude/statusline.sh"
-    fi
-  '';
+    '';
+  };
 }
