@@ -49,10 +49,10 @@ dynamic_title = true
 
 [font]
 # JetBrains Mono NL Nerd Font: monospaced glyphs and no coding ligatures.
-normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Regular" }
-bold = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
-italic = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Italic" }
-bold_italic = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold Italic" }
+normal = { family = "JetBrainsMono NFM", style = "Regular" }
+bold = { family = "JetBrainsMono NFM", style = "Bold" }
+italic = { family = "JetBrainsMono NFM", style = "Italic" }
+bold_italic = { family = "JetBrainsMono NFM", style = "Bold Italic" }
 size = 16.0
 
 [cursor]

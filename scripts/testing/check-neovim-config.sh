@@ -22,9 +22,9 @@ test -f home-manager/config/nvim/lazy-lock.json || fail 'tracked lazy-lock.json 
 test ! -e home-manager/scripts/install-lazyvim.sh || fail 'imperative bootstrap remains'
 rg -q 'ellisonleao/gruvbox.nvim' home-manager/config/nvim/lua/plugins/theme.lua \
   || fail 'Gruvbox is not configured for Neovim'
-rg -q 'JetBrainsMonoNL Nerd Font Mono' home-manager/modules/alacritty/config.toml \
-  || fail 'Alacritty does not use JetBrainsMonoNL Nerd Font Mono'
-rg -Uq 'monospace = \[[[:space:]]*"JetBrainsMonoNL Nerd Font Mono"[^]]*"FiraCode Nerd Font"' \
+rg -q 'JetBrainsMono NFM' home-manager/modules/alacritty/config.toml \
+  || fail 'Alacritty does not use JetBrainsMono NFM'
+rg -Uq 'monospace = \[[[:space:]]*"JetBrainsMono NFM"[^]]*"FiraCode Nerd Font"' \
   home-manager/modules/fonts.nix || fail 'Fira Code is not the monospace fallback font'
 rg -Fq 'opts.ensure_installed = {}' home-manager/config/nvim/lua/plugins/languages.lua \
   || fail 'Mason automatic package installation is not disabled'

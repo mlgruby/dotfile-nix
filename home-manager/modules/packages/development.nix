@@ -16,5 +16,6 @@
     sd # Modern sed alternative
     grex # Generate regular expressions from examples
     duckdb # Embedded analytical database CLI
+    postgresql # PostgreSQL client tools (psql, pg_dump, pg_restore)
   ];
 }

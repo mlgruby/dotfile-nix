@@ -69,18 +69,9 @@ in
         }
 
         update() {
-          local dotfile_dir="${config.home.homeDirectory}/${userConfig.directories.dotfiles}"
-
-          echo "Starting system update..."
-          brew update || return $?
-          brew upgrade || return $?
-
-          cd "$dotfile_dir" || return $?
-          nix flake update --flake "$dotfile_dir/home-manager/agent-extras" || return $?
-          nix flake update || return $?
-          _dotfiles_run_rebuild "$@" || return $?
-
-          echo "System update complete!"
+          DOTFILE_DIR="${config.home.homeDirectory}/${userConfig.directories.dotfiles}" \
+          CURRENT_CONFIG_HOST="${userConfig.hostname}" \
+          bash "${../scripts/update-system.sh}" "$@"
         }
       ''
       + lib.optionalString profile.isWork ''

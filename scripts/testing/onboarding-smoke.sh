@@ -213,8 +213,24 @@ check_neovim_config() {
   fi
 }
 
+check_repository_guardrails() {
+  local check
+  for check in \
+    ./scripts/testing/check-docs-stale-patterns.sh \
+    ./scripts/testing/check-nix-helper-semantics.sh \
+    ./scripts/testing/check-nix-policy-ownership.sh \
+    ./scripts/testing/check-package-ownership.sh; do
+    if "$check"; then
+      pass "repository guardrail passed: $check"
+    else
+      fail "repository guardrail failed: $check"
+    fi
+  done
+}
+
 info "running onboarding smoke checks from $ROOT_DIR"
 check_command bash
+check_command jq
 check_command rg
 check_command nix
 check_required_files
@@ -226,6 +242,7 @@ check_stale_patterns
 check_hosts_no_emails
 check_tmux_status
 check_neovim_config
+check_repository_guardrails
 
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "onboarding smoke checks passed"

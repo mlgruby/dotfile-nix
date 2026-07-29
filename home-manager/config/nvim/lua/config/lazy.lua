@@ -21,7 +21,9 @@ local uv = vim.uv or vim.loop
 local config_lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json"
 local state_lockfile = vim.fn.stdpath("state") .. "/lazy-lock.json"
 vim.fn.mkdir(vim.fn.stdpath("state"), "p")
+uv.fs_unlink(state_lockfile)
 assert(uv.fs_copyfile(config_lockfile, state_lockfile))
+uv.fs_chmod(state_lockfile, 420) -- 0644 in octal (rw-r--r--)
 
 require("lazy").setup({
   lockfile = state_lockfile,

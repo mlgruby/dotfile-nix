@@ -27,8 +27,10 @@ let
       CLAUDE_CODE_USE_BEDROCK = "1";
       CLAUDE_CODE_MAX_OUTPUT_TOKENS = "16384";
       MAX_THINKING_TOKENS = "8192";
-      CLAUDE_CODE_AUTO_COMPACT_WINDOW = "200000";
-      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
+      # Use Sonnet 5's 1M context for compaction calculations. Claude Code
+      # caps this value at the active model's actual context window.
+      CLAUDE_CODE_AUTO_COMPACT_WINDOW = "1000000";
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "90";
 
       ANTHROPIC_DEFAULT_SONNET_MODEL = cfg.models.default;
       ANTHROPIC_DEFAULT_SONNET_MODEL_NAME = cfg.modelNames.default;
@@ -105,7 +107,7 @@ in
     models = {
       default = lib.mkOption {
         type = lib.types.str;
-        default = "global.anthropic.claude-sonnet-5";
+        default = "eu.anthropic.claude-sonnet-5[1m]";
         description = "Bedrock model ID for Sonnet";
       };
       fast = lib.mkOption {
@@ -115,7 +117,7 @@ in
       };
       opus = lib.mkOption {
         type = lib.types.str;
-        default = "eu.anthropic.claude-opus-4-8";
+        default = "eu.anthropic.claude-opus-5";
         description = "Bedrock model ID for Opus";
       };
       fable = lib.mkOption {
@@ -137,7 +139,7 @@ in
       };
       opus = lib.mkOption {
         type = lib.types.str;
-        default = "Opus 4.8";
+        default = "Opus 5";
         description = "Friendly name for Opus";
       };
       fable = lib.mkOption {
