@@ -62,7 +62,9 @@ nix flake update --flake "$DOTFILE_DIR/home-manager/agent-extras"
 nix flake update --flake "$DOTFILE_DIR"
 
 echo "Stage 2/5: running repository checks"
-nix develop --command ./scripts/testing/onboarding-smoke.sh --strict-shellcheck
+nix develop --command ./scripts/testing/onboarding-smoke.sh \
+  --strict-shellcheck \
+  --skip-flake-check
 
 echo "Stage 3/5: building every configured host"
 nix flake check --option sandbox relaxed

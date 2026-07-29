@@ -6,13 +6,27 @@
 # Usage:
 #   ./scripts/testing/onboarding-smoke.sh
 #   ./scripts/testing/onboarding-smoke.sh --strict-shellcheck
+#   ./scripts/testing/onboarding-smoke.sh --strict-shellcheck --skip-flake-check
 
 set -euo pipefail
 
 REQUIRE_SHELLCHECK=0
-if [[ "${1:-}" == "--strict-shellcheck" ]]; then
-  REQUIRE_SHELLCHECK=1
-fi
+SKIP_FLAKE_CHECK=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --strict-shellcheck)
+      REQUIRE_SHELLCHECK=1
+      ;;
+    --skip-flake-check)
+      SKIP_FLAKE_CHECK=1
+      ;;
+    *)
+      printf 'Unknown argument: %s\n' "$arg" >&2
+      exit 2
+      ;;
+  esac
+done
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
@@ -120,6 +134,11 @@ check_shellcheck() {
 }
 
 check_nix_flake() {
+  if [[ "$SKIP_FLAKE_CHECK" -eq 1 ]]; then
+    info "flake check runs as a separate validation stage; skipping here"
+    return
+  fi
+
   if ! command -v nix >/dev/null 2>&1; then
     fail "nix not installed; cannot run flake check"
     return

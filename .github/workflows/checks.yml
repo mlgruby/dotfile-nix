@@ -20,7 +20,9 @@ jobs:
         uses: DeterminateSystems/determinate-nix-action@v3
 
       - name: Run repository checks
-        run: nix develop --command ./scripts/testing/onboarding-smoke.sh --strict-shellcheck
+        run: >-
+          nix develop --command ./scripts/testing/onboarding-smoke.sh
+          --strict-shellcheck --skip-flake-check
 
       - name: Build flake checks
         run: nix flake check --option sandbox relaxed

@@ -197,6 +197,7 @@
         packages = with nixpkgs.legacyPackages.${system}; [
           nixfmt
           shellcheck
+          ripgrep
           jq
           git
         ];
