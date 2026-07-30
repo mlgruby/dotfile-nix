@@ -25,7 +25,6 @@ if [ -n "$vpn_label" ]; then
 fi
 
 append_segment "#3c3836" "$aws_color" "$aws_status"
-append_segment "#504945" "#83a598" "$k8s_status"
 append_segment "#3c3836" "#d5c4a1" "$nix_status"
 append_segment "#504945" "$disk_color" "󰋊 $disk"
 append_segment "#3c3836" "$cpu_color" "$cpu_status"

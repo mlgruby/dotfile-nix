@@ -1,0 +1,28 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: macos-15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Run repository checks
+        run: >-
+          nix develop --command ./scripts/testing/onboarding-smoke.sh
+          --strict-shellcheck --skip-flake-check
+
+      - name: Build flake checks
+        run: nix flake check --option sandbox relaxed

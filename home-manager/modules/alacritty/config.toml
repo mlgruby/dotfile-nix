@@ -48,11 +48,11 @@ blur = true
 dynamic_title = true
 
 [font]
-# JetBrains Mono with all variants for rich text support
-normal = { family = "JetBrainsMono NF", style = "Regular" }
-bold = { family = "JetBrainsMono NF", style = "Bold" }
-italic = { family = "JetBrainsMono NF", style = "Italic" }
-bold_italic = { family = "JetBrainsMono NF", style = "Bold Italic" }
+# JetBrains Mono NL Nerd Font: monospaced glyphs and no coding ligatures.
+normal = { family = "JetBrainsMono NFM", style = "Regular" }
+bold = { family = "JetBrainsMono NFM", style = "Bold" }
+italic = { family = "JetBrainsMono NFM", style = "Italic" }
+bold_italic = { family = "JetBrainsMono NFM", style = "Bold Italic" }
 size = 16.0
 
 [cursor]

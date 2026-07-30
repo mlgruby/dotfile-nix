@@ -56,8 +56,9 @@
       "cgroups" # Better resource management
     ];
 
-    # Sandbox settings for better isolation and caching
-    sandbox = true; # Enable sandboxing (macOS default)
+    # Keep normal builds sandboxed while allowing trusted Darwin derivations
+    # with custom sandbox profiles (for example marksman) to opt out.
+    sandbox = "relaxed";
 
     # Build optimization
     builders-use-substitutes = true; # Allow builders to use substitutes

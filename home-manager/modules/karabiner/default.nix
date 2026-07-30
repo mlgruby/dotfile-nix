@@ -16,11 +16,11 @@
 # Shortcuts:
 # - Command + Shift + Enter -> Alacritty (Terminal)
 # - Command + Shift + I     -> IntelliJ IDEA
-# - Command + Option + P    -> PyCharm
+# - Command + Shift + P     -> PyCharm
 # - Command + Shift + S     -> Slack
-# - Command + Shift + C     -> Cursor
+# - Command + Shift + K     -> Claude
 # - Command + Shift + X     -> Codex
-# - Command + Shift + D     -> DataGrip
+# - Command + Shift + D     -> Beekeeper Studio
 # - Command + Shift + A     -> Calendar
 # - Command + Shift + G     -> Google Chrome
 # - Command + Shift + B     -> Brave Browser
@@ -85,6 +85,29 @@
                 ];
               }
               {
+                description = "Open Claude with Command + Shift + K";
+                manipulators = [
+                  {
+                    type = "basic";
+                    from = {
+                      key_code = "k";
+                      modifiers = {
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
+                      };
+                    };
+                    to = [
+                      {
+                        shell_command = "osascript -e 'tell application \"Claude\" to activate'";
+                      }
+                    ];
+                  }
+                ];
+              }
+              {
                 description = "Open IntelliJ with Command + Shift + I";
                 manipulators = [
                   {
@@ -108,7 +131,7 @@
                 ];
               }
               {
-                description = "Open PyCharm with Command + Option + P";
+                description = "Open PyCharm with Command + Shift + P";
                 manipulators = [
                   {
                     type = "basic";
@@ -117,7 +140,7 @@
                       modifiers = {
                         mandatory = [
                           "command"
-                          "option"
+                          "shift"
                         ];
                         optional = [ "any" ];
                       };
@@ -154,30 +177,6 @@
                 ];
               }
               {
-                description = "Open Cursor with Command + Shift + C";
-                manipulators = [
-                  {
-                    type = "basic";
-                    from = {
-                      key_code = "c";
-                      modifiers = {
-                        mandatory = [
-                          "command"
-                          "shift"
-                        ];
-                        optional = [ "any" ];
-                      };
-                    };
-                    to = [
-                      {
-                        shell_command = "osascript -e 'tell application \"Cursor\" to activate'";
-                      }
-                    ];
-                  }
-                ];
-              }
-              /*
-              {
                 description = "Open Codex with Command + Shift + X";
                 manipulators = [
                   {
@@ -200,9 +199,8 @@
                   }
                 ];
               }
-              */
               {
-                description = "Open DataGrip with Command + Shift + D";
+                description = "Open Beekeeper Studio with Command + Shift + D";
                 manipulators = [
                   {
                     type = "basic";
@@ -218,7 +216,7 @@
                     };
                     to = [
                       {
-                        shell_command = "osascript -e 'tell application \"DataGrip\" to activate'";
+                        shell_command = "osascript -e 'tell application \"Beekeeper Studio\" to activate'";
                       }
                     ];
                   }

@@ -26,7 +26,8 @@ in
     # Handle existing Homebrew installations
     autoMigrate = true;
 
-    # Ensure taps are managed only by Nix
+    # Custom taps are composed declaratively below, but remain mutable because
+    # their Git repositories are not pinned as flake inputs.
     mutableTaps = true;
   };
 

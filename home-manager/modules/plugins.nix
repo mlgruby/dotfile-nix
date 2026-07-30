@@ -8,11 +8,11 @@
 # Update pins:
 #   cd home-manager/agent-extras && nix flake update claude-plugins-official codex-plugin-cc
 #   nix flake update agent-extras
-{ claude-plugins-official, codex-plugin-cc, caveman-skill, ... }:
+{ agentSources, ... }:
 let
-  official = claude-plugins-official;
-  codex = codex-plugin-cc;
-  caveman = caveman-skill;
+  official = agentSources.claude-plugins-official;
+  codex = agentSources.codex-plugin-cc;
+  caveman = agentSources.caveman-skill;
 in
 {
   programs.claude-code.plugins = [

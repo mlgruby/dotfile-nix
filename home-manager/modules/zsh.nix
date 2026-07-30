@@ -10,9 +10,8 @@
   ...
 }:
 let
-  profile = import ../config/profile.nix { inherit userConfig; };
-  sshDefaults = import ../config/ssh.nix;
-  bitwardenAgent = sshDefaults.ssh.bitwardenAgent;
+  profile = config.homelab.profile;
+  bitwardenAgent = config.programs.ssh.custom.bitwardenAgent;
 in
 {
   programs = {
@@ -34,7 +33,7 @@ in
         UV_PYTHON_PREFERENCE = "managed";
         CARGO_HOME = "$HOME/.cargo";
         RUSTUP_HOME = "$HOME/.rustup";
-        PATH = "$HOME/.local/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$PATH";
+        PATH = "$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$PATH";
       }
       // lib.optionalAttrs bitwardenAgent.enable {
         DOTFILES_BITWARDEN_SSH_AGENT = "1";
@@ -42,6 +41,8 @@ in
       };
 
       initContent = ''
+        export PATH="$HOME/.npm-global/bin:$PATH"
+
         ${lib.optionalString bitwardenAgent.enable ''
           export DOTFILES_BITWARDEN_SSH_AGENT="1"
           export BITWARDEN_SSH_AUTH_SOCK="${bitwardenAgent.socketPath}"
@@ -68,18 +69,9 @@ in
         }
 
         update() {
-          local dotfile_dir="${config.home.homeDirectory}/${userConfig.directories.dotfiles}"
-
-          echo "Starting system update..."
-          brew update || return $?
-          brew upgrade || return $?
-
-          cd "$dotfile_dir" || return $?
-          nix flake update --flake "$dotfile_dir/home-manager/agent-extras" || return $?
-          nix flake update || return $?
-          _dotfiles_run_rebuild "$@" || return $?
-
-          echo "System update complete!"
+          DOTFILE_DIR="${config.home.homeDirectory}/${userConfig.directories.dotfiles}" \
+          CURRENT_CONFIG_HOST="${userConfig.hostname}" \
+          bash "${../scripts/update-system.sh}" "$@"
         }
       ''
       + lib.optionalString profile.isWork ''

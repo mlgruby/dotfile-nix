@@ -112,6 +112,7 @@ in
 
       # Direnv
       ".direnv/"
+      ".envrc"
       ".envrc.local"
 
       # Node

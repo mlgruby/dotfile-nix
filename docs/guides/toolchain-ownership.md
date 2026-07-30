@@ -20,31 +20,34 @@ In practice:
   expect them.
 - Use Homebrew casks for GUI apps, fonts, and vendor-managed desktop software.
 
-## Current Global Toolchains
+## Current Home Manager Toolchains
 
-These are intentionally kept in Homebrew for now:
+These are installed as user-level Nix packages:
 
 ```text
 uv
 poetry
-python@3.12
+python 3.12
 go
-node
+nodejs
 maven
 cmake
 pkg-config
-kafka
+apacheKafka
 neovim
-yamlresume
-coreutils
-gnu-getopt
-gnupg
-mas
 ```
 
-This does not mean they must stay there forever. It means they should only move
-after checking how they are used by IDEs, work repos, shell PATH, and project
-tooling.
+Exact project versions should still come from project flakes, dev shells, or
+language-specific version files.
+
+## Current Homebrew Development Tools
+
+Homebrew owns only tools that are unavailable or currently broken in nixpkgs:
+
+```text
+herdr
+yamlresume
+```
 
 ## Project-Local First
 
@@ -98,19 +101,8 @@ Keep a tool in Homebrew when:
 - the Homebrew version is intentionally the compatibility baseline
 - the Nix package would be surprising or brittle on macOS
 
-Examples:
-
-```text
-node
-go
-python@3.12
-uv
-poetry
-cmake
-pkg-config
-gnupg
-mas
-```
+The current examples are `herdr`, whose nixpkgs build is broken on
+aarch64-darwin, and `yamlresume`, which is not in nixpkgs.
 
 ## Before Moving A Toolchain
 

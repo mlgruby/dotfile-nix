@@ -116,8 +116,11 @@ fi
 
 echo "Building system configuration for target: $target_host"
 cd "$DOTFILE_DIR"
+# The daemon receives this setting declaratively after activation, while this
+# option also covers the bootstrap build that creates the next generation.
 sudo darwin-rebuild switch \
   --flake ".#$target_host" \
+  --option sandbox relaxed \
   --option connect-timeout "${NIX_CONNECT_TIMEOUT:-15}" \
   --option download-attempts "${NIX_DOWNLOAD_ATTEMPTS:-5}" \
   "${extra_args[@]}"

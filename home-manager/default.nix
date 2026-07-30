@@ -57,17 +57,14 @@
 # - Changes require rebuild
 {
   config,
+  lib,
   pkgs,
   username,
   userConfig,
   ...
 }:
 let
-  pipxPackage = pkgs.python312Packages.pipx.overridePythonAttrs (_old: {
-    # pipx 1.8.0 has upstream tests that expect older packaging spacing for URL specs.
-    # The installed CLI is fine, but the check phase currently breaks local rebuilds.
-    doCheck = false;
-  });
+  compatibilityPackages = import ./lib/compatibility-packages.nix { inherit lib pkgs; };
 
   mkRebuildWrapper = name: args: {
     inherit name;
@@ -86,6 +83,7 @@ in
 {
   imports = [
     # Core modules
+    ./modules/profile.nix
     ./modules/tmux.nix
     ./modules/zsh.nix
     ./modules/starship.nix
@@ -127,8 +125,8 @@ in
     stateVersion = "24.05";
 
     packages = with pkgs; [
-      direnv
-      pipxPackage
+      compatibilityPackages.direnv
+      compatibilityPackages.pipx
       markdownlint-cli
       # Python Development Environment
       # System-wide Python 3.12 via Homebrew
@@ -148,8 +146,11 @@ in
 
     direnv = {
       enable = true;
+      package = compatibilityPackages.direnv;
       nix-direnv.enable = true;
     };
+
+    claude-code.enable = true;
   };
 
   gtk.gtk4.theme = null;

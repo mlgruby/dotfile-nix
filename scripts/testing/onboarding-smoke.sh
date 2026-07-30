@@ -6,13 +6,27 @@
 # Usage:
 #   ./scripts/testing/onboarding-smoke.sh
 #   ./scripts/testing/onboarding-smoke.sh --strict-shellcheck
+#   ./scripts/testing/onboarding-smoke.sh --strict-shellcheck --skip-flake-check
 
 set -euo pipefail
 
 REQUIRE_SHELLCHECK=0
-if [[ "${1:-}" == "--strict-shellcheck" ]]; then
-  REQUIRE_SHELLCHECK=1
-fi
+SKIP_FLAKE_CHECK=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --strict-shellcheck)
+      REQUIRE_SHELLCHECK=1
+      ;;
+    --skip-flake-check)
+      SKIP_FLAKE_CHECK=1
+      ;;
+    *)
+      printf 'Unknown argument: %s\n' "$arg" >&2
+      exit 2
+      ;;
+  esac
+done
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
@@ -120,6 +134,11 @@ check_shellcheck() {
 }
 
 check_nix_flake() {
+  if [[ "$SKIP_FLAKE_CHECK" -eq 1 ]]; then
+    info "flake check runs as a separate validation stage; skipping here"
+    return
+  fi
+
   if ! command -v nix >/dev/null 2>&1; then
     fail "nix not installed; cannot run flake check"
     return
@@ -205,8 +224,32 @@ check_tmux_status() {
   fi
 }
 
+check_neovim_config() {
+  if ./scripts/testing/check-neovim-config.sh; then
+    pass "Neovim configuration guardrail passed"
+  else
+    fail "Neovim configuration guardrail failed"
+  fi
+}
+
+check_repository_guardrails() {
+  local check
+  for check in \
+    ./scripts/testing/check-docs-stale-patterns.sh \
+    ./scripts/testing/check-nix-helper-semantics.sh \
+    ./scripts/testing/check-nix-policy-ownership.sh \
+    ./scripts/testing/check-package-ownership.sh; do
+    if "$check"; then
+      pass "repository guardrail passed: $check"
+    else
+      fail "repository guardrail failed: $check"
+    fi
+  done
+}
+
 info "running onboarding smoke checks from $ROOT_DIR"
 check_command bash
+check_command jq
 check_command rg
 check_command nix
 check_required_files
@@ -217,6 +260,8 @@ check_script_references
 check_stale_patterns
 check_hosts_no_emails
 check_tmux_status
+check_neovim_config
+check_repository_guardrails
 
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "onboarding smoke checks passed"

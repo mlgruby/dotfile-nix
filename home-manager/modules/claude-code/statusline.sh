@@ -183,7 +183,8 @@ if [ -n "$CWD" ]; then
     NOW=$(date +%s)
     CACHE_AGE=999999
     if [ -f "$CACHE_FILE" ]; then
-      CACHE_MTIME=$(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)
+      # Prefer GNU stat (provided by Nix), then fall back to macOS/BSD stat.
+      CACHE_MTIME=$(stat -c %Y "$CACHE_FILE" 2>/dev/null || /usr/bin/stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)
       CACHE_AGE=$((NOW - CACHE_MTIME))
     fi
 

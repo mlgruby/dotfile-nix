@@ -19,11 +19,6 @@
       url = "github:JuliusBrussee/caveman";
       flake = false;
     };
-    everyskill = {
-      url = "github:EveryInc/everyskill";
-      flake = false;
-    };
-
     # Plugin marketplaces
     claude-plugins-official = {
       url = "github:anthropics/claude-plugins-official";
@@ -35,5 +30,7 @@
     };
   };
 
-  outputs = _: { };
+  outputs = inputs: {
+    sources = removeAttrs inputs [ "self" ];
+  };
 }

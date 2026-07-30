@@ -13,9 +13,9 @@
   # These map to env vars (ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_HAIKU_MODEL,
   # ANTHROPIC_DEFAULT_OPUS_MODEL) — runtime wiring for which model handles each role.
   models = {
-    default = "eu.anthropic.claude-sonnet-4-6";
+    default = "global.anthropic.claude-sonnet-5";
     fast = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
-    opus = "eu.anthropic.claude-opus-4-8";
+    opus = "eu.anthropic.claude-opus-5";
     fable = "eu.anthropic.claude-fable-5";
   };
 
@@ -31,9 +31,9 @@
 
   # Friendly names for Bedrock-pinned model families in the /model picker.
   modelNames = {
-    default = "Sonnet 4.6";
+    default = "Sonnet 5";
     fast = "Haiku 4.5";
-    opus = "Opus 4.8";
+    opus = "Opus 5";
     fable = "Fable 5";
   };
 

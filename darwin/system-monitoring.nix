@@ -150,29 +150,6 @@ in
     '';
   };
 
-  # System packages for monitoring
-  environment.systemPackages = with pkgs; [
-    # Basic monitoring tools
-    htop # Interactive process viewer
-    # iotop # I/O monitoring - not available on macOS ARM64
-    # iostat # I/O statistics - built-in macOS command
-    lsof # List open files
-
-    # Network monitoring
-    nmap # Network scanner
-    netcat # Network utility
-
-    # System utilities
-    tree # Directory structure
-    watch # Command monitoring
-
-    # Log analysis
-    jq # JSON processing for log parsing
-
-    # Performance analysis
-    hyperfine # Command-line benchmarking
-  ];
-
   # Environment variables for monitoring
   environment.variables = {
     # Monitoring configuration

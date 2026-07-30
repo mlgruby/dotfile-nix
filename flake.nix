@@ -91,7 +91,7 @@
         darwin.lib.darwinSystem {
           specialArgs = {
             userConfig = validatedConfig;
-            inherit nixpkgsConfig self;
+            inherit self;
           };
           modules = [
             {
@@ -115,15 +115,7 @@
                 # User-specific Arguments
                 extraSpecialArgs = {
                   userConfig = validatedConfig;
-                  inherit (agent-extras.inputs)
-                    compound-engineering
-                    hyperframes-skills
-                    mattpocock-skills
-                    caveman-skill
-                    everyskill
-                    claude-plugins-official
-                    codex-plugin-cc
-                    ;
+                  agentSources = agent-extras.sources;
                   inherit (validatedConfig)
                     username
                     fullName
@@ -134,17 +126,7 @@
                     ;
                 };
                 # User Configuration
-                users.${validatedConfig.username} =
-                  { lib, ... }:
-                  {
-                    imports = [ ./home-manager/default.nix ];
-                    home = {
-                      username = lib.mkForce validatedConfig.username;
-                      homeDirectory = lib.mkForce "/Users/${validatedConfig.username}";
-                      stateVersion = "24.05";
-                    };
-                    programs.home-manager.enable = true;
-                  };
+                users.${validatedConfig.username}.imports = [ ./home-manager/default.nix ];
               };
             }
 
@@ -167,18 +149,8 @@
 
       nixpkgsConfig = {
         config.allowUnfree = true;
-        overlays = [
-          (_final: prev: {
-            direnv = prev.direnv.overrideAttrs (_old: {
-              # direnv's zsh test can hang on aarch64-darwin during local rebuilds.
-              doCheck = false;
-            });
-          })
-        ];
       };
-    in
-    {
-      # Darwin system configurations generated from hosts.nix entries.
+
       darwinConfigurations = builtins.listToAttrs (
         builtins.map (validatedConfig: {
           name = validatedConfig.hostname;
@@ -186,8 +158,49 @@
         }) validatedConfigsChecked
       );
 
+      agentSourceCheck =
+        let
+          requiredSources = [
+            "compound-engineering"
+            "hyperframes-skills"
+            "mattpocock-skills"
+            "caveman-skill"
+            "claude-plugins-official"
+            "codex-plugin-cc"
+          ];
+          missingSources = builtins.filter (
+            name: !(builtins.hasAttr name agent-extras.sources)
+          ) requiredSources;
+        in
+        assert missingSources == [ ];
+        nixpkgs.legacyPackages.${system}.runCommand "agent-sources-check" { } ''
+          touch "$out"
+        '';
+    in
+    {
+      # Darwin system configurations generated from hosts.nix entries.
+      inherit darwinConfigurations;
+
+      checks.${system} =
+        builtins.mapAttrs (_hostname: configuration: configuration.system) darwinConfigurations
+        // {
+          agent-sources = agentSourceCheck;
+        };
+
       # Formatters
       # Use nixfmt directly (nixfmt-rfc-style is an alias).
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt;
+
+      # Development shell for editing and testing this repository
+      devShells.${system}.default = nixpkgs.legacyPackages.${system}.mkShell {
+        name = "dotfiles-dev-shell";
+        packages = with nixpkgs.legacyPackages.${system}; [
+          nixfmt
+          shellcheck
+          ripgrep
+          jq
+          git
+        ];
+      };
     };
 }

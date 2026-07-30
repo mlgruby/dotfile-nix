@@ -51,11 +51,10 @@
 {
   config,
   pkgs,
-  userConfig,
   ...
 }:
 let
-  profile = import ../config/profile.nix { inherit userConfig; };
+  profile = config.homelab.profile;
   statusScript = "${config.home.homeDirectory}/.config/tmux/status-right.sh";
 in
 {

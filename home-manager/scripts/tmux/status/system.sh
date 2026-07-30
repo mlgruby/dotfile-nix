@@ -15,15 +15,6 @@ tmux_status_collect_system() {
     disk_color="#fabd2f"
   fi
 
-  k8s_status="$(
-    if command -v kubectl >/dev/null 2>&1; then
-      context="$(kubectl config current-context 2>/dev/null || true)"
-      namespace="$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null || true)"
-      [ -n "$namespace" ] || namespace="default"
-      [ -n "$context" ] && printf '󱃾 %s/%s' "$context" "$namespace"
-    fi
-  )"
-
   nix_generation="$(
     readlink /nix/var/nix/profiles/system 2>/dev/null \
       | sed -n 's/^system-\([0-9][0-9]*\)-link$/\1/p' \

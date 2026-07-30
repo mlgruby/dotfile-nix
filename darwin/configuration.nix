@@ -20,7 +20,7 @@
 #
 # 3. macOS Integration:
 # - TouchID for sudo
-# - Nix application aliases in /Applications/Nix Apps
+# - Nix application bundles in /Applications/Nix Apps
 #
 # 4. Development Environment:
 # Post-activation scripts:
@@ -44,20 +44,12 @@
 {
   config,
   pkgs,
-  lib,
   userConfig,
   ...
 }:
 {
   # Set correct GID for nixbld group
   ids.gids.nixbld = 350;
-
-  # Allow installation of non-free packages
-  nixpkgs = {
-    config = {
-      allowUnfree = true;
-    };
-  };
 
   # System-wide packages installed via Nix
   environment.systemPackages = [
@@ -73,8 +65,6 @@
     pkgs.curl # URL data transfer
     pkgs.wget # File retrieval
     pkgs.gnutls # TLS/SSL support
-    pkgs.tree # Directory visualization
-
     # Build Environment
     # Required for compiling Python and other software
     pkgs.openssl # Cryptography
@@ -91,32 +81,10 @@
   };
 
   # Application Management & System Configuration
-  # Creates aliases in /Applications/Nix Apps for GUI applications
+  # nix-darwin synchronizes GUI applications into /Applications/Nix Apps.
   # This makes apps appear in Spotlight and Finder
   system = {
     activationScripts = {
-      applications.text =
-        let
-          env = pkgs.buildEnv {
-            name = "system-applications";
-            paths = config.environment.systemPackages;
-            pathsToLink = [ "/Applications" ];
-          };
-        in
-        pkgs.lib.mkForce ''
-          # Clean up and recreate Nix Apps directory
-          echo "setting up /Applications..." >&2
-          rm -rf /Applications/Nix\ Apps
-          mkdir -p /Applications/Nix\ Apps
-          # Create aliases for all Nix-installed applications
-          find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
-          while read -r src; do
-              app_name=$(basename "$src")
-              echo "copying $src" >&2
-              ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
-          done
-        '';
-
       xcodeCheck.text = ''
         echo "Setting up development tools (Xcode Check)..."
 
@@ -150,7 +118,7 @@
     };
 
     # System state version
-    stateVersion = lib.mkForce 4;
+    stateVersion = 4;
 
     # Set the primary user for nix-darwin
     primaryUser = userConfig.username;
@@ -206,7 +174,7 @@
       monospace = {
         # Use minimal Nix package for Stylix compatibility, but rely on Homebrew for actual fonts
         package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font";
+        name = "JetBrainsMono NFM";
       };
       sansSerif = {
         package = pkgs.inter;

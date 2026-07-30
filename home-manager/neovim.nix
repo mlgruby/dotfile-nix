@@ -1,10 +1,16 @@
+{ ... }:
 {
-  lib,
-  ...
-}:
-{
-  # Bootstrap LazyVim once, but leave ~/.config/nvim mutable afterwards.
-  home.activation.installLazyVim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    bash "${./scripts/install-lazyvim.sh}" || echo "LazyVim installation encountered issues"
-  '';
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+    withPython3 = true;
+    withRuby = false;
+  };
+
+  xdg.configFile."nvim" = {
+    source = ./config/nvim;
+    recursive = true;
+  };
 }
