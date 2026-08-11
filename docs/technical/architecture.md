@@ -184,7 +184,7 @@ environment.systemPackages = with pkgs; [
 ```nix
 homebrew = {
   brews = [ "mas" "mackup" ];
-  casks = [ "brave-browser" "docker-desktop" "visual-studio-code" ];
+  casks = [ "brave-browser" "orbstack" "visual-studio-code" ];
 };
 ```
 

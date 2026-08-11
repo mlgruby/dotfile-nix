@@ -1,5 +1,8 @@
 # Work-profile Zsh helpers.
 
+export DEVCONTAINER_GITHUB_ACTOR="$(gh api user --jq .login)"
+export DEVCONTAINER_GITHUB_TOKEN="$(gh auth token)"
+
 function setup-vortexa-kube() {
   echo "Setting up Vortexa Kubernetes contexts..."
 

@@ -60,7 +60,7 @@ project-local tooling.
 |----------|---------------|---------------|------------------|
 | **Development JDKs** | temurin@11/17 | ❌ | Homebrew cask |
 | **Development Tools** | cursor | ❌ | Homebrew cask |
-| | docker-desktop | ❌ | Homebrew cask, macOS integration |
+| | orbstack | ❌ | Homebrew cask, macOS integration |
 | | jetbrains-toolbox | ❌ | Homebrew cask |
 | | postman | ❌ | Homebrew cask |
 | | visual-studio-code | ❌ | Homebrew cask |

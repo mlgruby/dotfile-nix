@@ -7,9 +7,7 @@ let
 in
 {
   # Claude Code
-  cc = "claude"; # Claude Code shorthand
   ccc = "claude --continue"; # Continue the latest Claude Code conversation
-  ccr = "claude --resume"; # Resume a Claude Code conversation
 
   # OpenCode
   oc = "opencode"; # OpenCode shorthand

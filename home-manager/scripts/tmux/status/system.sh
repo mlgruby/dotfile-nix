@@ -32,7 +32,6 @@ tmux_status_collect_system() {
   [ -n "$cpu" ] || cpu="n/a"
 
   cpu_status=" $cpu"
-  [ -n "$load_avg" ] && cpu_status="$cpu_status · 󰓅 $load_avg"
 
   mem="$(
     vm_stat 2>/dev/null | awk '
@@ -111,7 +110,7 @@ tmux_status_collect_system() {
   logical_cpus="$(sysctl -n hw.logicalcpu 2>/dev/null || echo 0)"
   if [ -n "$load_avg" ] && [ "$logical_cpus" -gt 0 ] 2>/dev/null; then
     load_pressure="$(
-      awk -v load="$load_avg" -v cpus="$logical_cpus" 'BEGIN { printf "%.0f", (load / cpus) * 100 }' \
+      awk -v ld_val="$load_avg" -v cpus="$logical_cpus" 'BEGIN { printf "%.0f", (ld_val / cpus) * 100 }' 2>/dev/null \
         || echo 0
     )"
     if [ "$load_pressure" -ge 100 ] 2>/dev/null; then

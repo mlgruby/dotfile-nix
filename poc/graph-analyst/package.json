@@ -1,0 +1,15 @@
+{
+  "name": "graph-analyst-poc",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Read-only Pi SDK agent for answering repository questions from Graphify",
+  "scripts": {
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "0.81.1",
+    "@earendil-works/pi-coding-agent": "0.81.1",
+    "@modelcontextprotocol/sdk": "^1.17.0"
+  }
+}
