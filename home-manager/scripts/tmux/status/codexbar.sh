@@ -17,10 +17,10 @@ calculate_claude_todays_cost() {
     local matched_files
     matched_files=$(find "$HOME/.claude/projects" -type f -name "*.jsonl" -mtime -1 2>/dev/null || true)
     if [ -n "$matched_files" ]; then
-      cost_total=$(echo "$matched_files" | xargs grep -h "$today" 2>/dev/null | jq -r '
-        select(.message != null and .message.usage != null) |
-        ((.message.usage.input_tokens // 0) * 0.000003) + ((.message.usage.output_tokens // 0) * 0.000015)
-      ' 2>/dev/null | awk '{s+=$1} END {printf "%.2f", s}' 2>/dev/null || echo "0.00")
+      cost_total=$(echo "$matched_files" | xargs grep -h "$today" 2>/dev/null | jq -s -r '
+        [ .[] | select(.message != null and .message.usage != null) |
+        ((.message.usage.input_tokens // 0) * 0.000003) + ((.message.usage.output_tokens // 0) * 0.000015) ] | add // 0
+      ' 2>/dev/null | awk '{printf "%.2f", $1}' 2>/dev/null || echo "0.00")
     fi
   fi
 
@@ -38,10 +38,10 @@ update_cache() {
   local claude_cost claude_str full_status
   local codex_num g5h_num gw_num
 
-  # Clean, crisp text badges in brand colors
-  openai_logo="#[fg=#10a37f]CX#[fg=#fe8019]"
-  gemini_logo="#[fg=#4285f4]AGY#[fg=#fe8019]"
-  claude_logo="#[fg=#d97757]CC#[fg=#fe8019]"
+  # Keys styled in official brand colors, values in high-contrast Gruvbox cream (#ebdbb2)
+  openai_logo="#[fg=#10a37f]CX #[fg=#ebdbb2]"
+  gemini_logo="#[fg=#4285f4]AGY #[fg=#ebdbb2]"
+  claude_logo="#[fg=#d97757]CC #[fg=#ebdbb2]"
 
   # Fetch Codex quota
   codex_json=$(codexbar usage --provider codex --format json 2>/dev/null || echo "[]")
@@ -49,9 +49,9 @@ update_cache() {
   if [ -n "$codex_used" ] && [ "$codex_used" != "null" ]; then
     codex_num=$(echo "$codex_used" | awk '{print int($1)}')
     codex_rem=$(( 100 - codex_num ))
-    codex_str="${openai_logo} ${codex_rem}%"
+    codex_str="${openai_logo}${codex_rem}%"
   else
-    codex_str="${openai_logo} --%"
+    codex_str="${openai_logo}--%"
   fi
 
   # Fetch Antigravity (Gemini) quota
@@ -64,14 +64,14 @@ update_cache() {
     gw_num=$(echo "$gemini_w_used" | awk '{print int($1)}')
     g5h_rem=$(( 100 - g5h_num ))
     gw_rem=$(( 100 - gw_num ))
-    agy_str="${gemini_logo} 5h:${g5h_rem}% W:${gw_rem}%"
+    agy_str="${gemini_logo}5h:${g5h_rem}% W:${gw_rem}%"
   else
-    agy_str="${gemini_logo} --%"
+    agy_str="${gemini_logo}--%"
   fi
 
   # Calculate Claude today's cost
   claude_cost=$(calculate_claude_todays_cost)
-  claude_str="${claude_logo} \$${claude_cost}"
+  claude_str="${claude_logo}\$${claude_cost}"
 
   full_status="${codex_str} │ ${agy_str} │ ${claude_str}"
   echo "$full_status" > "${CACHE_FILE}.tmp" && mv "${CACHE_FILE}.tmp" "$CACHE_FILE"
@@ -96,6 +96,6 @@ tmux_status_collect_codexbar() {
   if [ -f "$CACHE_FILE" ]; then
     codexbar_status=$(cat "$CACHE_FILE")
   else
-    codexbar_status="#[fg=#10a37f]CX#[fg=#fe8019] --% │ #[fg=#4285f4]AGY#[fg=#fe8019] --% │ #[fg=#d97757]CC#[fg=#fe8019] \$0.00"
+    codexbar_status="#[fg=#10a37f]CX #[fg=#ebdbb2]--% │ #[fg=#4285f4]AGY #[fg=#ebdbb2]--% │ #[fg=#d97757]CC #[fg=#ebdbb2]\$0.00"
   fi
 }
