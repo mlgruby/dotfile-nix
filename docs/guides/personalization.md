@@ -231,7 +231,7 @@ programs.git = {
   # Existing apps
   "brave-browser"
   "visual-studio-code"
-  "docker-desktop"
+  "orbstack"
   
   # Add your preferences
   "spotify"

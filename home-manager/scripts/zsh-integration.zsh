@@ -50,6 +50,38 @@ function main() {
   tm "$@"
 }
 
+# Claude Code launchers. Keep the dangerous permission bypass opt-in for every
+# session, including resumed sessions, and default to the normal permission
+# checks when stdin is not interactive.
+function _claude_permission_args() {
+  CLAUDE_PERMISSION_ARGS=()
+
+  if [ ! -t 0 ] || [ ! -t 1 ]; then
+    return 0
+  fi
+
+  local answer
+  printf 'Run Claude with --dangerously-skip-permissions? [y/N] '
+  read -r answer
+  case "$answer" in
+    y | Y | yes | YES)
+      CLAUDE_PERMISSION_ARGS=(--dangerously-skip-permissions)
+      ;;
+  esac
+}
+
+function cc() {
+  local -a CLAUDE_PERMISSION_ARGS
+  _claude_permission_args
+  command claude "${CLAUDE_PERMISSION_ARGS[@]}" "$@"
+}
+
+function ccr() {
+  local -a CLAUDE_PERMISSION_ARGS
+  _claude_permission_args
+  command claude --resume "${CLAUDE_PERMISSION_ARGS[@]}" "$@"
+}
+
 # Auto-attach only for terminals that explicitly opt in, such as Alacritty.
 if [ "$DOTFILES_AUTO_TMUX" = "1" ] && command -v tmux > /dev/null 2>&1; then
   if [ -z "$TMUX" ]; then

@@ -138,9 +138,21 @@ in
     ".config/tmux/status/vpn.sh".source = ../scripts/tmux/status/vpn.sh;
     ".config/tmux/status/aws.sh".source = ../scripts/tmux/status/aws.sh;
     ".config/tmux/status/system.sh".source = ../scripts/tmux/status/system.sh;
+    ".config/tmux/status/codexbar.sh" = {
+      source = ../scripts/tmux/status/codexbar.sh;
+      executable = true;
+    };
+    ".config/tmux/status/logos/openai.svg".source = ../scripts/tmux/status/logos/openai.svg;
+    ".config/tmux/status/logos/gemini.svg".source = ../scripts/tmux/status/logos/gemini.svg;
+    ".config/tmux/status/logos/claude.svg".source = ../scripts/tmux/status/logos/claude.svg;
     ".config/tmux/status/status-right.sh" = {
       source = ../scripts/tmux/status/status-right.sh;
       executable = true;
     };
   };
+
+  home.packages = with pkgs; [
+    chafa
+    jq
+  ];
 }

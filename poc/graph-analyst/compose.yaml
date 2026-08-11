@@ -1,0 +1,32 @@
+services:
+  graphify-mcp:
+    build:
+      context: ./graphify
+    restart: unless-stopped
+    volumes:
+      - ../../graphify-out/graph.json:/data/graph.json:ro
+    networks:
+      - analyst
+
+  graph-analyst:
+    build:
+      context: .
+    depends_on:
+      - graphify-mcp
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?Set GEMINI_API_KEY in the shell or a local .env file}
+      GRAPHIFY_MCP_URL: http://graphify-mcp:8080/mcp
+      GRAPHIFY_API_KEY: ${GRAPHIFY_API_KEY:-}
+      REPO_ROOT: /workspace
+      PI_MODEL: ${PI_MODEL:-gemini-3.6-flash}
+      PORT: 8080
+    ports:
+      - "${ANALYST_PORT:-8080}:8080"
+    volumes:
+      - ../..:/workspace:ro
+    networks:
+      - analyst
+
+networks:
+  analyst:
+    driver: bridge

@@ -79,7 +79,7 @@ rebuild
 | Type | Location | Examples |
 |------|----------|----------|
 | **CLI Tools** | `home-manager/modules/packages/*.nix` | `fd`, `duf`, `shellcheck`, `awscli2` |
-| **GUI Apps** | `homebrew.casks` | `brave-browser`, `docker-desktop` |
+| **GUI Apps** | `homebrew.casks` | `brave-browser`, `orbstack` |
 | **Global runtimes/build tools** | `darwin/homebrew-packages/brews/toolchains.nix` | `node`, `go`, `cmake` |
 | **Project tooling** | Template-specific | Language runtimes, debuggers |
 

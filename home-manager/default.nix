@@ -137,6 +137,13 @@ in
   };
 
   programs = {
+    ssh.custom = let
+      sshConfig = import ./config/ssh.nix;
+    in {
+      inherit (sshConfig.ssh) bitwardenAgent homelabIdentityFile homelabUser;
+      inherit (sshConfig) homelabHosts;
+    };
+
     zsh = {
       enable = true;
       shellAliases = import ./aliases { inherit pkgs config userConfig; };

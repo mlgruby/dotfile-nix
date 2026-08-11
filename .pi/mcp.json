@@ -1,0 +1,22 @@
+{
+  "settings": {
+    "toolPrefix": "mcp",
+    "requestTimeoutMs": 30000,
+    "maxRetries": 3
+  },
+  "mcpServers": {
+    "graphify-local": {
+      "transport": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "graphifyy[mcp]",
+        "python",
+        "-m",
+        "graphify.serve",
+        "graphify-out/graph.json"
+      ],
+      "lifecycle": "eager"
+    }
+  }
+}

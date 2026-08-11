@@ -161,7 +161,7 @@ homebrew.casks = [
   
   # Development
   "visual-studio-code"
-  "docker-desktop"
+  "orbstack"
   "postman"
   
   # Productivity

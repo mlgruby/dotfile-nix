@@ -47,6 +47,7 @@ in
 
     # Rust
     rust-analyzer # Rust LSP for code intelligence
+    cargo-nextest # High-performance Rust test runner
 
     # Go
     gofumpt # Go formatter

@@ -26,11 +26,20 @@ let
 
       CLAUDE_CODE_USE_BEDROCK = "1";
       CLAUDE_CODE_MAX_OUTPUT_TOKENS = "16384";
+      # Keep large shell logs from consuming the conversation context.
+      BASH_MAX_OUTPUT_LENGTH = "10000";
+      # Bound parallel and repeated work so one session cannot fan out
+      # indefinitely and multiply token usage.
+      CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = "2";
+      CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION = "6";
+      CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION = "25";
       MAX_THINKING_TOKENS = "8192";
-      # Use Sonnet 5's 1M context for compaction calculations. Claude Code
-      # caps this value at the active model's actual context window.
-      CLAUDE_CODE_AUTO_COMPACT_WINDOW = "1000000";
-      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "90";
+      # Keep Claude Code on the standard context and compact before sessions
+      # become large. The percentage is applied to this 200K calculation window.
+      CLAUDE_CODE_DISABLE_1M_CONTEXT = "1";
+      CLAUDE_CODE_AUTO_COMPACT_WINDOW = "200000";
+      # Compact at 60% of the standard context, around 120K tokens.
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
 
       ANTHROPIC_DEFAULT_SONNET_MODEL = cfg.models.default;
       ANTHROPIC_DEFAULT_SONNET_MODEL_NAME = cfg.modelNames.default;
@@ -107,7 +116,7 @@ in
     models = {
       default = lib.mkOption {
         type = lib.types.str;
-        default = "eu.anthropic.claude-sonnet-5[1m]";
+        default = "eu.anthropic.claude-sonnet-5";
         description = "Bedrock model ID for Sonnet";
       };
       fast = lib.mkOption {

@@ -130,7 +130,7 @@ environment.systemPackages = with pkgs; [
 # Native macOS integration
 homebrew = {
   brews = [ "mas" "gnu-getopt" ];
-  casks = [ "brave-browser" "docker-desktop" ];
+  casks = [ "brave-browser" "orbstack" ];
 };
 ```
 
