@@ -50,6 +50,15 @@ in
 
         source "${../scripts/zsh-integration.zsh}"
 
+        ${lib.optionalString profile.isWork ''
+          # Optional devcontainer-auto integration for the Work profile. The
+          # hook is installed outside this repository and should not make shell
+          # startup fail when absent.
+          if [ -r "$HOME/.config/devcontainer-auto/zsh-hook" ]; then
+            source "$HOME/.config/devcontainer-auto/zsh-hook"
+          fi
+        ''}
+
         _dotfiles_run_rebuild() {
           DOTFILE_DIR="${config.home.homeDirectory}/${userConfig.directories.dotfiles}" \
           CURRENT_CONFIG_HOST="${userConfig.hostname}" \
