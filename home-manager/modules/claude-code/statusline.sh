@@ -18,6 +18,7 @@ OUT_TOK=$(echo "$input" | jq -r '.context_window.current_usage.output_tokens // 
 CR_TOK=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_input_tokens // 0')
 CW_TOK=$(echo "$input" | jq -r '.context_window.current_usage.cache_creation_input_tokens // 0')
 COST_RAW=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+SESSION_ID=$(echo "$input" | jq -r '.session_id // empty')
 TOTAL_DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
 API_TIME=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
 LINES_ADD=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
@@ -79,6 +80,53 @@ CW_FMT=$(fmt_k "$CW_TOK")
 
 # Cost.
 COST_FMT=$(printf '$%.2f' "$COST_RAW")
+
+# Publish Claude Code's authoritative session cost for the tmux daily total.
+# Keep one local file per session so another Claude session cannot overwrite it.
+# Fixed path: the tmux server may have a different TMPDIR inherited from when
+# it started, so both processes must use an explicit shared location.
+CLAUDE_COST_DIR="/tmp/claude-cost-cache"
+mkdir -p "$CLAUDE_COST_DIR"
+CLAUDE_COST_DAY=$(date +%Y-%m-%d)
+CLAUDE_COST_CACHE="${CLAUDE_COST_DIR}/claude-${CLAUDE_COST_DAY}-${SESSION_ID:-unknown}.json"
+CLAUDE_COST_LOCK="${CLAUDE_COST_CACHE}.lock"
+CLAUDE_COST_TMP="${CLAUDE_COST_CACHE}.$$"
+if mkdir "$CLAUDE_COST_LOCK" 2>/dev/null; then
+  trap 'rmdir "$CLAUDE_COST_LOCK" 2>/dev/null || true' EXIT
+  PREVIOUS_TOTAL=$(jq -r '.session_total // 0' "$CLAUDE_COST_CACHE" 2>/dev/null || echo 0)
+  PREVIOUS_DAY_COST=$(jq -r '.cost // 0' "$CLAUDE_COST_CACHE" 2>/dev/null || echo 0)
+  if [ ! -f "$CLAUDE_COST_CACHE" ]; then
+    # If this session crossed midnight, use its last known cumulative total as
+    # today's baseline so yesterday's spend is not counted again.
+    PREVIOUS_TOTAL=$(find "$CLAUDE_COST_DIR" -maxdepth 1 -type f -name "claude-*-${SESSION_ID:-unknown}.json" -print 2>/dev/null \
+      | while IFS= read -r previous_file; do jq -r '.session_total // 0' "$previous_file" 2>/dev/null; done \
+      | sort -n | tail -1)
+    PREVIOUS_TOTAL=${PREVIOUS_TOTAL:-0}
+    PREVIOUS_DAY_COST=0
+  fi
+  if awk -v current="$COST_RAW" -v previous="$PREVIOUS_TOTAL" 'BEGIN { exit !(current >= previous) }'; then
+    EFFECTIVE_TOTAL="$COST_RAW"
+  else
+    EFFECTIVE_TOTAL="$PREVIOUS_TOTAL"
+  fi
+  DELTA=$(awk -v current="$EFFECTIVE_TOTAL" -v previous="$PREVIOUS_TOTAL" 'BEGIN { d = current - previous; if (d < 0) d = 0; printf "%.10f", d }')
+  COST_TO_PUBLISH=$(awk -v day="$PREVIOUS_DAY_COST" -v delta="$DELTA" 'BEGIN { printf "%.10f", day + delta }')
+  if jq -n \
+    --arg cost "$COST_TO_PUBLISH" \
+    --arg total "$EFFECTIVE_TOTAL" \
+    --arg session "$SESSION_ID" \
+    --arg cwd "$CWD" \
+    --arg day "$CLAUDE_COST_DAY" \
+    --arg updated "$(date +%s)" \
+    '{cost: ($cost | tonumber), session_total: ($total | tonumber), session_id: $session, cwd: $cwd, day: $day, updated_at: ($updated | tonumber)}' \
+    > "$CLAUDE_COST_TMP" 2>/dev/null; then
+    mv -f "$CLAUDE_COST_TMP" "$CLAUDE_COST_CACHE"
+  else
+    rm -f "$CLAUDE_COST_TMP"
+  fi
+  rmdir "$CLAUDE_COST_LOCK" 2>/dev/null || true
+  trap - EXIT
+fi
 
 # Timing.
 fmt_dur() {

@@ -33,7 +33,12 @@ tmux_status_collect_system() {
 
   cpu_status=" $cpu"
 
-  mem="$(
+  mem_total_gb="$(
+    sysctl -n hw.memsize 2>/dev/null \
+      | awk '{ if ($1 > 0) printf "%.0f", $1 / 1024 / 1024 / 1024 }' \
+      || true
+  )"
+  mem_used_gb="$(
     vm_stat 2>/dev/null | awk '
       /page size of/ { pageSize = $8 }
       /Pages active/ { active = $3 }
@@ -47,39 +52,21 @@ tmux_status_collect_system() {
         gsub(/\./, "", wired);
         used = (active + inactive + speculative + wired) * pageSize / 1024 / 1024 / 1024;
         if (used > 0) {
-          printf "%.1fG", used;
+          printf "%.1f", used;
         }
       }
     ' \
     || true
   )"
-  [ -n "$mem" ] || mem="n/a"
-  mem_color="#ebdbb2"
-  mem_pressure="$(
-    vm_stat 2>/dev/null | awk '
-      /page size of/ { pageSize = $8 }
-      /Pages active/ { active = $3 }
-      /Pages inactive/ { inactive = $3 }
-      /Pages speculative/ { speculative = $3 }
-      /Pages wired down/ { wired = $4 }
-      /Pages free/ { free = $3 }
-      /Pages purgeable/ { purgeable = $3 }
-      /Pages compressed/ { compressed = $3 }
-      END {
-        gsub(/\./, "", active);
-        gsub(/\./, "", inactive);
-        gsub(/\./, "", speculative);
-        gsub(/\./, "", wired);
-        gsub(/\./, "", free);
-        gsub(/\./, "", purgeable);
-        gsub(/\./, "", compressed);
-        used = active + inactive + speculative + wired + compressed;
-        total = used + free + purgeable;
-        if (total > 0) printf "%.0f", (used / total) * 100;
-      }
-    ' \
-    || true
-  )"
+  if [ -n "$mem_used_gb" ] && [ -n "$mem_total_gb" ]; then
+    mem="${mem_used_gb}G/${mem_total_gb}G"
+  else
+    mem="n/a"
+  fi
+  mem_color="#b8bb26"
+  mem_pressure="$(awk -v used="$mem_used_gb" -v total="$mem_total_gb" \
+    'BEGIN { if (used > 0 && total > 0) printf "%.0f", (used / total) * 100 }' \
+    2>/dev/null || true)"
   if [ "$mem_pressure" -ge 90 ] 2>/dev/null; then
     mem_color="#fb4934"
   elif [ "$mem_pressure" -ge 75 ] 2>/dev/null; then
