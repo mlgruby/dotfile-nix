@@ -14,6 +14,11 @@ tmux_status_collect_system() {
   elif [ "$disk_value" -ge 75 ] 2>/dev/null; then
     disk_color="#fabd2f"
   fi
+  # Percent is enough until space is critical; then show the capacity needed
+  # to judge how much data must be removed.
+  if [ "$disk_value" -lt 90 ] 2>/dev/null; then
+    disk="${disk_value}%"
+  fi
 
   nix_generation="$(
     readlink /nix/var/nix/profiles/system 2>/dev/null \
@@ -38,38 +43,29 @@ tmux_status_collect_system() {
       | awk '{ if ($1 > 0) printf "%.0f", $1 / 1024 / 1024 / 1024 }' \
       || true
   )"
-  mem_used_gb="$(
-    vm_stat 2>/dev/null | awk '
-      /page size of/ { pageSize = $8 }
-      /Pages active/ { active = $3 }
-      /Pages inactive/ { inactive = $3 }
-      /Pages speculative/ { speculative = $3 }
-      /Pages wired down/ { wired = $4 }
-      END {
-        gsub(/\./, "", active);
-        gsub(/\./, "", inactive);
-        gsub(/\./, "", speculative);
-        gsub(/\./, "", wired);
-        used = (active + inactive + speculative + wired) * pageSize / 1024 / 1024 / 1024;
-        if (used > 0) {
-          printf "%.1f", used;
-        }
-      }
-    ' \
-    || true
+  # macOS keeps spare RAM busy as cache. Its own free-memory percentage is a
+  # more useful signal than summing active and inactive VM pages.
+  mem_free_percent="$(
+    memory_pressure -Q 2>/dev/null \
+      | awk -F': ' '/System-wide memory free percentage/ { gsub(/%/, "", $2); print $2; exit }' \
+      || true
   )"
-  if [ -n "$mem_used_gb" ] && [ -n "$mem_total_gb" ]; then
-    mem="${mem_used_gb}G/${mem_total_gb}G"
+  mem_used_percent=""
+  mem_used_gb=""
+  if [[ "$mem_free_percent" =~ ^[0-9]+$ ]] && [ -n "$mem_total_gb" ]; then
+    mem_used_percent=$(( 100 - mem_free_percent ))
+    mem_used_gb="$(awk -v total="$mem_total_gb" -v used="$mem_used_percent" 'BEGIN { printf "%.0f", total * used / 100 }')"
+    mem="${mem_used_percent}%"
+    if [ "$mem_used_percent" -ge 90 ]; then
+      mem="${mem} ${mem_used_gb}G/${mem_total_gb}G"
+    fi
   else
     mem="n/a"
   fi
   mem_color="#b8bb26"
-  mem_pressure="$(awk -v used="$mem_used_gb" -v total="$mem_total_gb" \
-    'BEGIN { if (used > 0 && total > 0) printf "%.0f", (used / total) * 100 }' \
-    2>/dev/null || true)"
-  if [ "$mem_pressure" -ge 90 ] 2>/dev/null; then
+  if [ "$mem_used_percent" -ge 90 ] 2>/dev/null; then
     mem_color="#fb4934"
-  elif [ "$mem_pressure" -ge 75 ] 2>/dev/null; then
+  elif [ "$mem_used_percent" -ge 75 ] 2>/dev/null; then
     mem_color="#fabd2f"
   fi
 

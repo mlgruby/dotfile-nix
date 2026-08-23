@@ -34,8 +34,6 @@ let
     value = {
       HostName = ip;
       User = cfg.homelabUser;
-    }
-    // lib.optionalAttrs (!bitwardenAgent.enable) {
       IdentityFile = cfg.homelabIdentityFile;
     };
   };

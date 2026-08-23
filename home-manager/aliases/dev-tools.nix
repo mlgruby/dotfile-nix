@@ -4,10 +4,10 @@
 #
 # This file is intentionally only an aggregator. Keep each tool family in its
 # own module so daily aliases stay easy to scan and refactor safely.
-{ helpers, ... }:
+{ helpers, pkgs, ... }:
 let
   modernCliAliases = import ./dev-tools/modern-cli.nix { };
-  agentAliases = import ./dev-tools/agents.nix { };
+  agentAliases = import ./dev-tools/agents.nix { inherit pkgs; };
   tmuxAliases = import ./dev-tools/tmux.nix { };
   fzfAliases = import ./dev-tools/fzf.nix { };
   dockerAliases = import ./dev-tools/docker.nix { };

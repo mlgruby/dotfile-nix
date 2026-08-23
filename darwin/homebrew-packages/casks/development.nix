@@ -5,8 +5,7 @@
 [
   "orbstack"
   "jetbrains-toolbox"
-  "postman"
-  "temurin@11"
   "temurin@17"
   "visual-studio-code"
+  "codex"
 ]

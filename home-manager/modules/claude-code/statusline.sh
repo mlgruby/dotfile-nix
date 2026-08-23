@@ -4,6 +4,13 @@
 # Claude reads JSON status data on stdin and renders a two-line statusline with
 # model, working directory, context usage, token counts, timing, and rate
 # limits.
+#
+# Cost ownership (keep this separate from the tmux coding-agent bar):
+# - This statusline must use Claude Code's native `.cost.total_cost_usd` input.
+# - That value is the current Claude session's cumulative native cost and may be
+#   $0.00 when Claude Code does not expose a cost for the user's billing plan.
+# - Do not call `ccusage` here. Log-derived daily costs belong in the tmux bar
+#   (`home-manager/scripts/tmux/status/codexbar.sh`) and the `cau-*` aliases.
 set -euo pipefail
 
 input=$(cat)
@@ -78,7 +85,7 @@ OUT_FMT=$(fmt_k "$OUT_TOK")
 CR_FMT=$(fmt_k "$CR_TOK")
 CW_FMT=$(fmt_k "$CW_TOK")
 
-# Cost.
+# Claude Code's native cumulative cost for the current session.
 COST_FMT=$(printf '$%.2f' "$COST_RAW")
 
 # Publish Claude Code's authoritative session cost for the tmux daily total.
@@ -263,7 +270,7 @@ ROW1=""
 [ -n "$GIT_PART" ] && ROW1="${ROW1} ${GIT_PART}"
 [ -n "$PLUGIN_PART" ] && ROW1="${ROW1} | ${PLUGIN_PART}"
 
-# Row 2: usage, tokens, cost, timing, limits.
+# Row 2: usage, tokens, native session cost, timing, limits.
 ROW2="${BAR_C}${BAR}${R} ${BAR_C}${PCT}%${R}"
 [ -n "$WARN_PART" ] && ROW2="${ROW2} ${WARN_PART}"
 ROW2="${ROW2} | ${DIM}in:${IN_FMT} out:${OUT_FMT} cr:${CR_FMT} cw:${CW_FMT}${R} | ${GOLD}${COST_FMT}${R}"

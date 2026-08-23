@@ -1,9 +1,10 @@
 # home-manager/aliases/dev-tools/agents.nix
 #
 # Aliases for interactive coding agents and agent CLIs.
-{ ... }:
+{ pkgs, ... }:
 let
   aws = import ../../config/aws.nix;
+  ccusageSummary = "${pkgs.python3}/bin/python3 ${../../scripts/ccusage-summary.py}";
 in
 {
   # Claude Code
@@ -26,10 +27,22 @@ in
   cx = "codex"; # Codex shorthand
   cxr = "codex resume"; # Resume a Codex session
 
-  # Antigravity (Google) — binary is agy
-  ag = "agy"; # Antigravity shorthand
-  agc = "agy --continue"; # Continue last Antigravity conversation
+  # Antigravity (Google) — ag and agc are defined as interactive functions in zsh-integration.zsh
   agr = "agy-resume"; # Resume an Antigravity session
+
+  # Coding-agent usage (ccusage; reports use current pricing when available)
+  cau-t = "ccusage daily --since \"$(date +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # Today across all supported agents
+  cau-w = "ccusage weekly --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # Rolling 7 days across all supported agents
+  cau-m = "ccusage monthly --since \"$(date -v1d +%Y-%m-%d 2>/dev/null || date -d \"$(date +%Y-%m-01)\" +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # This month across all supported agents
+  cau-tt = "${ccusageSummary} today"; # Today totals per agent plus grand total
+  cau-wt = "${ccusageSummary} week"; # Rolling 7-day totals per agent plus grand total
+  cau-mt = "${ccusageSummary} month"; # This-month totals per agent plus grand total
+  cau-s = "ccusage session"; # Usage grouped by conversation/session
+  cau-cc = "ccusage claude daily --since \"$(date +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Claude today by model
+  cau-cx = "ccusage codex daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Codex rolling 7 days by model
+  cau-ag = "ccusage gemini daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Gemini/AGY rolling 7 days by model
+  cau-pi = "ccusage pi daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Pi rolling 7 days by model
+  cau-b = "ccusage claude blocks --active"; # Active Claude 5-hour block
 
   # Herdr (Agent Multiplexer)
   he = "herdr"; # Launch/attach herdr session

@@ -3,11 +3,11 @@
     "caveman-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1783076931,
-        "narHash": "sha256-VqRHx3/4SSCnEh3cUJ/he5saIfwNhS0hOzoH/wwtU2o=",
+        "lastModified": 1786908402,
+        "narHash": "sha256-NBq3XCbvvw89pHdSKr2z4KZWS4yaG+O0eR37SjJ8EMc=",
         "owner": "JuliusBrussee",
         "repo": "caveman",
-        "rev": "0d95a81d35a9f2d123a5e9430d1cfc43d55f1bb0",
+        "rev": "766dce6b1394ebb56a3090748d5a0240a5aefb36",
         "type": "github"
       },
       "original": {
@@ -19,11 +19,11 @@
     "claude-plugins-official": {
       "flake": false,
       "locked": {
-        "lastModified": 1785024298,
-        "narHash": "sha256-hiT99I/lYd75vQ9W4BLlIcB1t2gyzx+4OOMCiKguOiQ=",
+        "lastModified": 1786924993,
+        "narHash": "sha256-c5vpzHdEDNQ47nhOfGp5gy7jE3gB/BoRYBe06lYjsVU=",
         "owner": "anthropics",
         "repo": "claude-plugins-official",
-        "rev": "d31456c6571a94b6aaa68ee33f5f2dc0149ebddf",
+        "rev": "8864c9d619547417e9bd9305df0b4fc078f89b08",
         "type": "github"
       },
       "original": {
@@ -51,11 +51,11 @@
     "compound-engineering": {
       "flake": false,
       "locked": {
-        "lastModified": 1784916832,
-        "narHash": "sha256-3ch1W6QVilyZBAeQTOVA2iBe3BwOwYr0T4v2IRPm2Mg=",
+        "lastModified": 1786938317,
+        "narHash": "sha256-zc+pb1FMBnlQl071pcISs1Yq6z52trSyplOp6qjjV8k=",
         "owner": "EveryInc",
         "repo": "compound-engineering-plugin",
-        "rev": "a9f6d530d4446d805a3100387dedd86268d7e695",
+        "rev": "d6ae46457b3364ca1a3d6eb9954613217000c0ec",
         "type": "github"
       },
       "original": {
@@ -67,11 +67,11 @@
     "hyperframes-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1785053570,
-        "narHash": "sha256-xs95qgek4iqQQlXcb9Tk52ozqjipaXhkexnvOX58Ids=",
+        "lastModified": 1786903298,
+        "narHash": "sha256-HkpyWgTQhz00ShClteaLjO2/dAY/QMl50mNdPCzeNZY=",
         "owner": "heygen-com",
         "repo": "hyperframes",
-        "rev": "5c5179bb123895b184d83b2823073830f4fdfaf4",
+        "rev": "67edb01bf4aa2f5931e838e46e14e0f51a5809ee",
         "type": "github"
       },
       "original": {
@@ -83,11 +83,11 @@
     "mattpocock-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1784629731,
-        "narHash": "sha256-o/H9s3t6ahBqFwpkOMBOTwpsvb33pgvpI9n0PA+uLYM=",
+        "lastModified": 1786953262,
+        "narHash": "sha256-CJNC5fORkc+FGd+FlCXG6rZcVv2MCqCNHCVC0AW623Q=",
         "owner": "mattpocock",
         "repo": "skills",
-        "rev": "ed37663cc5fbef691ddfecd080dff42f7e7e350d",
+        "rev": "9c9f36ccd3995266cd675468af71639c8dde1ec5",
         "type": "github"
       },
       "original": {

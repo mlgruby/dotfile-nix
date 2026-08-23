@@ -1,4 +1,5 @@
 # Interactive Zsh helpers sourced by home-manager/modules/zsh.nix.
+setopt interactive_comments
 
 # Match filesystem paths and command names regardless of letter case.
 # For example, `cd wo<Tab>` completes a directory named `Work`.
@@ -38,7 +39,9 @@ if command -v uv > /dev/null 2>&1; then
       printf '%s\n' "$uv_meta" > "$uv_completion_meta"
   fi
 
-  [ -r "$uv_completion_cache" ] && source "$uv_completion_cache"
+  if (( $+functions[compdef] )) && [ -r "$uv_completion_cache" ]; then
+    source "$uv_completion_cache"
+  fi
   unset uv_completion_cache uv_completion_meta uv_path uv_meta
 fi
 
@@ -80,6 +83,38 @@ function ccr() {
   local -a CLAUDE_PERMISSION_ARGS
   _claude_permission_args
   command claude --resume "${CLAUDE_PERMISSION_ARGS[@]}" "$@"
+}
+
+# Antigravity launchers. Keep the dangerous permission bypass opt-in for every
+# session, including resumed sessions, and default to the normal permission
+# checks when stdin is not interactive.
+function _agy_permission_args() {
+  AGY_PERMISSION_ARGS=()
+
+  if [ ! -t 0 ] || [ ! -t 1 ]; then
+    return 0
+  fi
+
+  local answer
+  printf 'Run Antigravity with --dangerously-skip-permissions? [y/N] '
+  read -r answer
+  case "$answer" in
+    y | Y | yes | YES)
+      AGY_PERMISSION_ARGS=(--dangerously-skip-permissions)
+      ;;
+  esac
+}
+
+function ag() {
+  local -a AGY_PERMISSION_ARGS
+  _agy_permission_args
+  command agy "${AGY_PERMISSION_ARGS[@]}" "$@"
+}
+
+function agc() {
+  local -a AGY_PERMISSION_ARGS
+  _agy_permission_args
+  command agy --continue "${AGY_PERMISSION_ARGS[@]}" "$@"
 }
 
 # Auto-attach only for terminals that explicitly opt in, such as Alacritty.
@@ -285,9 +320,11 @@ function ghprcheck() {
 }
 
 function agy-resume() {
+  setopt local_options typesetsilent interactive_comments
   local conversations_dir="$HOME/.gemini/antigravity-cli/conversations"
   local brain_dir="$HOME/.gemini/antigravity-cli/brain"
   local show_all=false
+  local arg selected uuid db_path transcript preview session_cwd mtime_epoch mtime_fmt clean_preview short_cwd
 
   for arg in "$@"; do
     if [ "$arg" = "-a" ] || [ "$arg" = "--all" ]; then
@@ -305,45 +342,55 @@ function agy-resume() {
     return 127
   fi
 
-  local selected
   selected=$(
     for db_path in "$conversations_dir"/*.db; do
       [ -f "$db_path" ] || continue
-      local uuid
       uuid=$(basename "$db_path" .db)
 
-      # Extract CWD from sqlite db
-      local session_cwd=""
+      transcript="$brain_dir/$uuid/.system_generated/logs/transcript.jsonl"
+      [ -f "$transcript" ] || continue
+
+      preview=""
+      if command -v jq >/dev/null 2>&1; then
+        preview=$(jq -r 'select(.type == "USER_INPUT") | .content' "$transcript" 2>/dev/null | grep -v 'USER_REQUEST' | grep -v 'ADDITIONAL_METADATA' | grep -v 'USER_SETTINGS_CHANGE' | grep -v '^$' | head -n 1)
+      fi
+      [ -n "$preview" ] || continue
+
       session_cwd=$(sqlite3 "$db_path" "select data from trajectory_metadata_blob;" 2>/dev/null | grep -oaE 'file:///[a-zA-Z0-9_/.-]+' | head -n 1 | sed 's/file:\/\///' || true)
 
-      # Filter by current directory unless show_all is true
       if [ "$show_all" = "false" ] && [ "$session_cwd" != "$PWD" ]; then
         continue
       fi
 
-      local transcript="$brain_dir/$uuid/.system_generated/logs/transcript.jsonl"
-      local preview=""
-      if [ -f "$transcript" ] && command -v jq >/dev/null 2>&1; then
-        preview=$(jq -r 'select(.type == "USER_INPUT") | .content' "$transcript" 2>/dev/null | grep -v 'USER_REQUEST' | grep -v 'ADDITIONAL_METADATA' | grep -v 'USER_SETTINGS_CHANGE' | grep -v '^$' | head -n 1)
+      if stat --version >/dev/null 2>&1; then
+        mtime_epoch=$(stat -c "%Y" "$db_path" 2>/dev/null || echo 0)
+        mtime_fmt=$(stat -c "%y" "$db_path" 2>/dev/null | cut -c 1-16)
+      else
+        mtime_epoch=$(/usr/bin/stat -f "%m" "$db_path" 2>/dev/null || echo 0)
+        mtime_fmt=$(/usr/bin/stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$db_path" 2>/dev/null || echo "Unknown")
       fi
-      local mtime
-      mtime=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$db_path")
+      [ -n "$mtime_fmt" ] || mtime_fmt="Unknown"
+      clean_preview=$(printf "%s" "$preview" | tr -d '\r\n' | tr '\t' ' ' | cut -c 1-80)
 
       if [ "$show_all" = "true" ] && [ -n "$session_cwd" ]; then
-        local short_cwd="${session_cwd/#$HOME/\~}"
-        printf "%s | %-30s | %-50s | %s\n" "$mtime" "$short_cwd" "${preview:-(No preview available)}" "$uuid"
+        short_cwd="${session_cwd/#$HOME/\~}"
+        printf "%s\t%s | %-25s | %-60s | %s\n" "$mtime_epoch" "$mtime_fmt" "$short_cwd" "$clean_preview" "$uuid"
       else
-        printf "%s | %-50s | %s\n" "$mtime" "${preview:-(No preview available)}" "$uuid"
+        printf "%s\t%s | %-75s | %s\n" "$mtime_epoch" "$mtime_fmt" "$clean_preview" "$uuid"
       fi
     done |
-    sort -r |
-    fzf --header="Select Antigravity conversation to resume (use --all to show all)"
+    sort -k1,1nr |
+    cut -f2- |
+    fzf --no-sort --prompt="Resume Antigravity > " --header="Select conversation (use -a / --all to show all directories)"
   )
 
   if [ -n "$selected" ]; then
-    local uuid
-    uuid=$(echo "$selected" | awk -F ' | ' '{print $NF}' | tr -d ' ')
-    agy --conversation "$uuid"
+    uuid="${selected##*| }"
+    uuid="${uuid## }"
+    uuid="${uuid%% }"
+    local -a AGY_PERMISSION_ARGS
+    _agy_permission_args
+    command agy --conversation "$uuid" "${AGY_PERMISSION_ARGS[@]}"
   fi
 }
 
@@ -366,7 +413,6 @@ function opencode-resume() {
     if [ -n "$uuid" ]; then
       opencode -s "$uuid"
     else
-      # Fallback to the first word if no UUID is found
       opencode -s "$(echo "$selected" | awk '{print $1}')"
     fi
   fi

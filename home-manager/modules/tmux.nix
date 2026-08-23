@@ -84,6 +84,9 @@ in
       set -ag terminal-overrides ",xterm-256color:RGB"
       set -g allow-passthrough all
       set -g update-environment "DISPLAY KRB5CCNAME SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY DOCKER_CONFIG AWS_PROFILE AWS_DEFAULT_REGION AWS_REGION"
+      # Do not inherit Codex/sandbox color suppression into agent panes.
+      set-environment -gu NO_COLOR
+      set-environment -g COLORTERM "truecolor"
 
       # Pane Management
       bind h split-window -h -c "#{pane_current_path}"

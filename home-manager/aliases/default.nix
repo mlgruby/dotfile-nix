@@ -39,7 +39,7 @@ let
   # Import alias modules
   coreAliases = import ./core.nix commonArgs;
   gitAliases = import ./git.nix { };
-  devToolsAliases = import ./dev-tools.nix { inherit helpers; };
+  devToolsAliases = import ./dev-tools.nix { inherit helpers pkgs; };
   homelabAliases = import ./homelab.nix { inherit config; };
   platformAliases = import ./platform.nix commonArgs;
 in

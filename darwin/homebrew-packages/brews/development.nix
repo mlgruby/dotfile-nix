@@ -5,5 +5,4 @@
 [
   "herdr" # nixpkgs build broken on aarch64-darwin (DarwinSdkNotFound in Zig/Ghostty dep)
   "gcx" # Grafana Cloud eXporter; available from the grafana/grafana tap
-  "yamlresume" # Not in nixpkgs
 ]
