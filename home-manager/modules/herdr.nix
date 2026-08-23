@@ -3,7 +3,7 @@
 # Herdr (Agent Multiplexer) Configuration
 #
 # Purpose:
-# - Configures theme and custom colors (Gruvbox)
+# - Configures the built-in Gruvbox theme
 # - Defines navigation, layout, and workspace keybindings
 #
 # Integration:
@@ -21,10 +21,6 @@
   xdg.configFile."herdr/config.toml".text = ''
     [theme]
     name = "gruvbox"
-
-    [theme.custom]
-    surface_dim = "#504945"
-    accent = "#a89984"
 
     [keys]
     prefix = "ctrl+a"

@@ -16,5 +16,6 @@
     tflint # Terraform/OpenTofu linter
     infisical # Secrets management CLI
     kubevela # KubeVela application platform CLI
+    cloudflared # Cloudflare Tunnel and Zero Trust CLI
   ];
 }

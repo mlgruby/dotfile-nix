@@ -15,7 +15,7 @@
     choose # Human-friendly cut/awk alternative
     sd # Modern sed alternative
     grex # Generate regular expressions from examples
-    duckdb # Embedded analytical database CLI
+    ccusage # Claude Code usage and cost reporting
     postgresql # PostgreSQL client tools (psql, pg_dump, pg_restore)
   ];
 }

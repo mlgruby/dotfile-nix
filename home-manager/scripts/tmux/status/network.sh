@@ -20,22 +20,12 @@ tmux_status_collect_network() {
     esac
   done
 
-  if [ "$wifi_active" = "yes" ] && [ "$lan_active" = "yes" ]; then
-    if [ "$default_iface" = "en0" ]; then
-      network_label="󰖩 wifi · 󰈀 lan"
-    else
-      network_label="󰈀 lan · 󰖩 wifi"
-    fi
-    network_color="#8ec07c"
-  elif [ "$lan_active" = "yes" ]; then
-    network_label="󰈀 lan"
-    network_color="#83a598"
-  elif [ "$wifi_active" = "yes" ]; then
-    network_label="󰖩 wifi"
-    network_color="#8ec07c"
-  else
+  # Transport is not useful when connected; reserve bar space for actionable
+  # information. Only surface network state when neither Wi-Fi nor LAN is up.
+  network_label=""
+  network_color="#fb4934"
+  if [ "$wifi_active" != "yes" ] && [ "$lan_active" != "yes" ]; then
     network_label="󰖪 offline"
-    network_color="#928374"
   fi
 
   net="$(DEFAULT_IFACE="$default_iface" python3 -c "

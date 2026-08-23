@@ -92,12 +92,10 @@ in
     ./modules/github.nix
     ./modules/gpg.nix
     ./modules/claude-code.nix
-    ./modules/skills.nix
     ./modules/plugins.nix
     ./modules/opencode.nix
     ./modules/pi.nix
     ./modules/antigravity.nix
-    ./modules/codex.nix
     ./modules/programs/btop.nix
     ./modules/programs/eza.nix
     ./modules/programs/bat.nix
@@ -112,6 +110,7 @@ in
     ./modules/ssh.nix
     ./modules/programs/terminal-tools.nix
     ./modules/directory-tools.nix
+    ./modules/time-machine.nix
     ./modules/package-groups.nix
     ./modules/xdg.nix
     ./modules/fonts.nix

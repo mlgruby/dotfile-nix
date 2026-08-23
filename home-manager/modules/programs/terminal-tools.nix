@@ -113,9 +113,9 @@
       enable = true; # Enable automatic file type detection and formatting
     };
 
-    # Command-not-found configuration
+    # Command-not-found configuration (disabled on Flakes/macOS where channel DB does not exist)
     command-not-found = {
-      enable = true; # Suggest packages when commands are not found
+      enable = false;
     };
   };
 }
