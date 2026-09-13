@@ -55,10 +55,12 @@
         autoRefresh = true;
         fetchAll = true;
         autoStageResolvedConflicts = true;
-        paging = {
-          colorArg = "always";
-          pager = "delta --dark --paging=never";
-        };
+        diffRenderers = [
+          {
+            command = "delta --dark --paging=never";
+            colorArg = "always";
+          }
+        ];
         branchLogCmd = "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --";
         allBranchesLogCmds = ["git log --graph --all --color=always --abbrev-commit --decorate --date=relative  --pretty=medium"];
         overrideGpg = false;
