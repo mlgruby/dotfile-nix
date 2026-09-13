@@ -17,5 +17,6 @@
     grex # Generate regular expressions from examples
     ccusage # Claude Code usage and cost reporting
     postgresql # PostgreSQL client tools (psql, pg_dump, pg_restore)
+    delta # Syntax-highlighting pager for git and lazygit diffs
   ];
 }
