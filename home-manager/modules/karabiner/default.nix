@@ -62,7 +62,7 @@
             };
             rules = [
               {
-                description = "Open Alacritty with Command + Shift + Enter";
+                description = "Open Ghostty with Command + Shift + Enter";
                 manipulators = [
                   {
                     type = "basic";
@@ -78,7 +78,7 @@
                     };
                     to = [
                       {
-                        shell_command = "osascript -e 'tell application \"Alacritty\" to activate'";
+                        shell_command = "osascript -e 'tell application \"Ghostty\" to activate'";
                       }
                     ];
                   }

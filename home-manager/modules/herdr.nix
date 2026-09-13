@@ -19,8 +19,29 @@
 }:
 {
   xdg.configFile."herdr/config.toml".text = ''
+    onboarding = false
+
     [theme]
     name = "gruvbox"
+
+    # UI Settings
+    [ui]
+    agent_panel_sort = "priority"
+    status_indicators = "symbols"
+    tab_bar_position = "top"
+    tab_bar_right = []
+    hide_tab_bar_when_single_tab = true
+
+    # Notifications when background agents finish or request approval
+    [ui.toast]
+    delivery = "terminal"
+
+    # Persistent agent conversations & terminal history
+    [session]
+    resume_agents_on_restore = true
+
+    [experimental]
+    pane_history = true
 
     [keys]
     prefix = "ctrl+a"
@@ -51,5 +72,23 @@
     settings = "prefix+comma"
     split_vertical = "prefix+v"
     split_horizontal = "prefix+h"
+
+    # Indexed Tab & Workspace Jumps with prefix (Ctrl+a 1..9)
+    switch_tab = "prefix+1..9"
+    switch_workspace = "prefix+shift+1..9"
+
+    # Shortcut: prefix + p to toggle/open GitHub PR Preview split pane
+    [[keys.command]]
+    key = "prefix+p"
+    type = "shell"
+    command = "herdr plugin action invoke juninaba.herdr-pr-preview open"
+
+    # Shortcut: prefix + u to open Agents Usage (costs & token burns) modal popup
+    [[keys.command]]
+    key = "prefix+u"
+    type = "popup"
+    command = "herdr plugin pane open --plugin gecm.agents-usage --entrypoint usage"
+    width = "85%"
+    height = "80%"
   '';
 }

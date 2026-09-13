@@ -104,6 +104,7 @@ in
     ./modules/programs/bottom.nix
     ./modules/lazygit.nix
     ./modules/alacritty
+    ./modules/ghostty.nix
     ./modules/herdr.nix
     ./modules/karabiner
     ./modules/rectangle.nix
@@ -111,6 +112,7 @@ in
     ./modules/programs/terminal-tools.nix
     ./modules/directory-tools.nix
     ./modules/time-machine.nix
+    ./modules/tailscale-automator.nix
     ./modules/package-groups.nix
     ./modules/xdg.nix
     ./modules/fonts.nix
