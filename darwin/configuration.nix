@@ -43,10 +43,26 @@
 # - Hostname must be valid (letters, numbers, hyphens only)
 {
   config,
+  lib,
   pkgs,
   userConfig,
   ...
 }:
+let
+  # nix-darwin owns /Applications/Nix Apps. Discover GUI bundles from the
+  # Home Manager package set so app packages do not need individual entries.
+  homePackages = config.home-manager.users.${userConfig.username}.home.packages;
+  guiPackages = lib.filter (
+    package:
+    let
+      applicationsDir = "${package}/Applications";
+    in
+    builtins.pathExists applicationsDir
+    && builtins.any (name: lib.hasSuffix ".app" name) (
+      lib.attrNames (builtins.readDir applicationsDir)
+    )
+  ) homePackages;
+in
 {
   # Set correct GID for nixbld group
   ids.gids.nixbld = 350;
@@ -71,7 +87,7 @@
     pkgs.readline # Line editing
     pkgs.sqlite # Database
     pkgs.zlib # Compression
-  ];
+  ] ++ guiPackages;
 
   # Networking Configuration
   networking = {

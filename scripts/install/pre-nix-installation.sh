@@ -40,7 +40,7 @@
 #
 # File Structure:
 # --------------
-# ~/Documents/dotfile/
+# ~/dotfile/
 # ├── nix/
 # │   ├── nix.conf           # Nix configuration
 # │   ├── zshrc              # Shell configuration
@@ -71,7 +71,7 @@
 # ├── darwin/
 # └── home-manager/
 #
-# ~/Documents/dotfile/ (Your configuration repository)
+# ~/dotfile/ (Your configuration repository)
 #
 # Requirements:
 # ------------
@@ -103,7 +103,7 @@
 # Maintenance:
 # -----------
 # To update your system after installation:
-# 1. cd ~/Documents/dotfile
+# 1. cd ~/dotfile
 # 2. git pull
 # 3. darwin-rebuild switch --flake .#ss-mbp
 

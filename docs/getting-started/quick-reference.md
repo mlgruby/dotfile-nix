@@ -65,10 +65,10 @@ which kotlin-language-server  # Kotlin LSP
 
 ```bash
 # Add CLI tool (prefer Home Manager package modules)
-vim ~/Documents/dotfile/home-manager/modules/packages/system.nix
+vim ~/dotfile/home-manager/modules/packages/system.nix
 
 # Add GUI app or macOS integration
-vim ~/Documents/dotfile/darwin/homebrew-packages/casks/apps.nix
+vim ~/dotfile/darwin/homebrew-packages/casks/apps.nix
 
 # Apply changes
 rebuild
@@ -301,7 +301,7 @@ perf-analyze
 journalctl -u nix-daemon
 
 # Reset to known good state
-cd ~/Documents/dotfile && git stash && rebuild
+cd ~/dotfile && git stash && rebuild
 ```
 
 ## ⌨️ Keyboard Shortcuts

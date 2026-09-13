@@ -118,7 +118,7 @@ fileSystems."/nix" = {
 
 home.persistence."/Users/${username}/persistent" = {
   directories = [
-    "Documents/dotfile"     # This repository
+    "dotfile"               # This repository
     "Development"           # Workspace
     "Downloads"            # Downloads
     ".ssh"                 # SSH keys
@@ -206,7 +206,7 @@ home.persistence."/Users/${username}/.local/impermanence-test" = {
 home.persistence."/Users/${username}/persistent" = {
   directories = [
     # Development
-    "Documents/dotfile"
+    "dotfile"
     "Development"
     
     # Configuration  

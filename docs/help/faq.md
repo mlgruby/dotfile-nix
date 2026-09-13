@@ -62,7 +62,7 @@ See: [Personalization Guide](../guides/personalization.md)
 
 ```nix
 directories = {
-  dotfiles = "config/dotfiles";  # Instead of Documents/dotfile
+  dotfiles = "config/dotfiles";  # Instead of dotfile
   workspace = "projects";        # Instead of Development
   # Add custom directories
   personal = "projects/personal";

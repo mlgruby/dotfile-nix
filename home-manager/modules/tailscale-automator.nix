@@ -26,6 +26,11 @@ let
     fi
 
     if [ "$IS_HOME" = true ]; then
+      # Disconnect macOS Network Extension service
+      if /usr/sbin/scutil --nc list 2>/dev/null | grep -Eiq '\(Connected\).*Tailscale'; then
+        /usr/sbin/scutil --nc stop "Tailscale" 2>/dev/null || true
+      fi
+
       # Disconnect CLI if connected
       if /opt/homebrew/bin/tailscale status &>/dev/null; then
         /opt/homebrew/bin/tailscale down 2>/dev/null || true

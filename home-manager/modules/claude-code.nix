@@ -20,7 +20,7 @@ let
     # AWS SSO auto-refresh command
     awsAuthRefresh = "aws sso login --profile ${cfg.awsProfile}";
 
-    env = {
+    env = lib.filterAttrs (_: v: v != null) {
       AWS_PROFILE = cfg.awsProfile;
       AWS_REGION = cfg.awsRegion;
 
@@ -28,18 +28,14 @@ let
       CLAUDE_CODE_MAX_OUTPUT_TOKENS = "16384";
       # Keep large shell logs from consuming the conversation context.
       BASH_MAX_OUTPUT_LENGTH = "10000";
-      # Bound parallel and repeated work so one session cannot fan out
-      # indefinitely and multiply token usage.
-      CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = "2";
-      CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION = "6";
       CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION = "25";
-      MAX_THINKING_TOKENS = "8192";
+      MAX_THINKING_TOKENS = cfg.maxThinkingTokens;
       # Keep Claude Code on the standard context and compact before sessions
       # become large. The percentage is applied to this 200K calculation window.
       CLAUDE_CODE_DISABLE_1M_CONTEXT = "1";
       CLAUDE_CODE_AUTO_COMPACT_WINDOW = "200000";
-      # Compact at 60% of the standard context, around 120K tokens.
-      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
+      # Compact at 90% of the standard context, around 180K tokens.
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "90";
 
       ANTHROPIC_DEFAULT_SONNET_MODEL = cfg.models.default;
       ANTHROPIC_DEFAULT_SONNET_MODEL_NAME = cfg.modelNames.default;
@@ -49,11 +45,12 @@ let
       ANTHROPIC_DEFAULT_OPUS_MODEL_NAME = cfg.modelNames.opus;
       ANTHROPIC_CUSTOM_MODEL_OPTION = cfg.models.fable;
       ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = cfg.modelNames.fable;
-      ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "EU Bedrock Fable model";
+      ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION =
+        if cfg.models.fable != null then "EU Bedrock Fable model" else null;
     };
 
     model = cfg.model;
-    effortLevel = "low";
+    effortLevel = cfg.effortLevel;
     autoCompactEnabled = true;
     availableModels = [ "sonnet" "opus" "haiku" ];
 
@@ -113,46 +110,62 @@ in
       default = "sonnet";
       description = "Selected model family";
     };
+    effortLevel = lib.mkOption {
+      type = lib.types.enum [
+        "low"
+        "medium"
+        "high"
+        "xhigh"
+        "max"
+      ];
+      default = "low";
+      description = "Default reasoning effort level for Claude models (low, medium, high, xhigh, max)";
+    };
+    maxThinkingTokens = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Max thinking tokens for legacy models (null to let adaptive thinking handle it)";
+    };
     models = {
       default = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "eu.anthropic.claude-sonnet-5";
-        description = "Bedrock model ID for Sonnet";
+        description = "Bedrock model ID for Sonnet (null to let Claude Code resolve latest default)";
       };
       fast = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
-        description = "Bedrock model ID for Haiku";
+        description = "Bedrock model ID for Haiku (null to let Claude Code resolve latest default)";
       };
       opus = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "eu.anthropic.claude-opus-5";
-        description = "Bedrock model ID for Opus";
+        description = "Bedrock model ID for Opus (null to let Claude Code resolve latest default)";
       };
       fable = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "eu.anthropic.claude-fable-5";
-        description = "Bedrock model ID for Fable";
+        description = "Bedrock model ID for Fable (null to omit)";
       };
     };
     modelNames = {
       default = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "Sonnet 5";
         description = "Friendly name for Sonnet";
       };
       fast = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "Haiku 4.5";
         description = "Friendly name for Haiku";
       };
       opus = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "Opus 5";
         description = "Friendly name for Opus";
       };
       fable = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = "Fable 5";
         description = "Friendly name for Fable";
       };
@@ -179,8 +192,10 @@ in
         | del(.env.ANTHROPIC_MODEL)
         | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL)
         | del(.env.ANTHROPIC_DEFAULT_FABLE_MODEL_NAME)
-        | .model = $defaults[0].model
-        | .effortLevel = $defaults[0].effortLevel
+        | del(.env.CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS)
+        | del(.env.CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION)
+        | .model = (.model // $defaults[0].model)
+        | .effortLevel = (.effortLevel // $defaults[0].effortLevel)
         | .autoCompactEnabled = $defaults[0].autoCompactEnabled
         | .availableModels = $defaults[0].availableModels
         | del(.modelOverrides)

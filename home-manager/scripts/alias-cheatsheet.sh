@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-DOTFILE_DIR="${DOTFILE_DIR:-$HOME/Documents/dotfile}"
+DOTFILE_DIR="${DOTFILE_DIR:-$HOME/dotfile}"
 README_PATH="$DOTFILE_DIR/home-manager/aliases/README.md"
 CATEGORY="${1:-all}"
 

@@ -13,11 +13,10 @@
 # Note:
 # - Requires Rectangle.app (installed via homebrew.nix)
 # - Configuration stored in ~/Library/Application Support/Rectangle/
-# home-manager/modules/rectangle.nix - Optimized Rectangle Configuration
-{...}: {
-  # Rectangle Configuration
-  # Manages window positions and shortcuts
-  home.file."Library/Application Support/Rectangle/RectangleConfig.json".text = ''
+# - Written as a regular file (0600) via activation because Rectangle refuses to load symlinks
+{ lib, pkgs, ... }:
+let
+  rectangleConfig = pkgs.writeText "RectangleConfig.json" ''
     {
       "bundleId": "com.knollsoft.Rectangle",
       "defaults": {
@@ -52,5 +51,15 @@
       },
       "version": "92"
     }
+  '';
+in
+{
+  home.activation.ensureRectangleConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "$HOME/Library/Application Support/Rectangle"
+    find "$HOME/Library/Application Support/Rectangle" -maxdepth 1 -type l -name "RectangleConfig*.json" -delete 2>/dev/null || true
+    if [ -L "$HOME/Library/Application Support/Rectangle/RectangleConfig.json" ]; then
+      rm -f "$HOME/Library/Application Support/Rectangle/RectangleConfig.json"
+    fi
+    install -m 600 "${rectangleConfig}" "$HOME/Library/Application Support/Rectangle/RectangleConfig.json"
   '';
 }

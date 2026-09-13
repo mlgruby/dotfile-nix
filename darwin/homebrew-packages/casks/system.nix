@@ -3,7 +3,7 @@
 # Use this file for terminal apps, input/window managers, network agents, and
 # utilities that need normal macOS app installation behavior.
 [
-  "alacritty"
+  "ghostty"
   "karabiner-elements"
   "rectangle"
   "tailscale-app"
