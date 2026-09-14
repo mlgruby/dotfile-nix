@@ -123,11 +123,11 @@
     "claude-plugins-official": {
       "flake": false,
       "locked": {
-        "lastModified": 1789053138,
-        "narHash": "sha256-HTfdhkDMgf7IdjqR7c6uaZ3ha1oH4p0TGPAAQPsc8dI=",
+        "lastModified": 1789340901,
+        "narHash": "sha256-aDBAfdm8zaRIHaMuMPL9tD7cjoy266fribVMAxPC2po=",
         "owner": "anthropics",
         "repo": "claude-plugins-official",
-        "rev": "3b600518a637492d37c9877aeb49c2a55d939c04",
+        "rev": "022b3c274938ddfb9fd928fc582eb9b9ed0f537f",
         "type": "github"
       },
       "original": {
@@ -155,11 +155,11 @@
     "compound-engineering": {
       "flake": false,
       "locked": {
-        "lastModified": 1789026562,
-        "narHash": "sha256-LMsKoD3ngyBDh+sRTa4cQuwWjKjzweN7nzXgx3ytFF4=",
+        "lastModified": 1789353705,
+        "narHash": "sha256-RNspbgse7coIcizdfFNI1QlhCCFl61ddaf3S1cLO/Eo=",
         "owner": "EveryInc",
         "repo": "compound-engineering-plugin",
-        "rev": "9ac32720f1c52b1fe4e760a79978647d53c9b429",
+        "rev": "fd8abda7f64ead2f410da2cfd86c0c8e7cbf8187",
         "type": "github"
       },
       "original": {
@@ -267,11 +267,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789071706,
-        "narHash": "sha256-S+oyh2YSP9V5bSjWbbK0N7GxdxxMwgBfUOtUdVcAWc4=",
+        "lastModified": 1789352311,
+        "narHash": "sha256-E9hlcRNSRQ1vb+UicOusX/ucroGlBAz/pYhCBorLOn4=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "150f9ce4ddd41544ea42eb9d6043a75bd615fa24",
+        "rev": "cfcda3f99334c8459fa4cd46cce87502e0b48f0a",
         "type": "github"
       },
       "original": {
@@ -283,11 +283,11 @@
     "hyperframes-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1789068929,
-        "narHash": "sha256-l6mdbhlA792lO2boAhvvvSCjG0YKKQ5UTp4KGMkPoo0=",
+        "lastModified": 1789351339,
+        "narHash": "sha256-k6jUYRNnXpffuYJN7UjUIXVlupuhfKSZQTzuKvamcQU=",
         "owner": "heygen-com",
         "repo": "hyperframes",
-        "rev": "8820a01090692020ef6c5d4fb70fdc06b4b3bd81",
+        "rev": "10e8447ac0dfe6144cc224435e7399d45d7a126d",
         "type": "github"
       },
       "original": {
@@ -332,11 +332,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1789012029,
-        "narHash": "sha256-1CBkBf+Nhggykzlx0jvXrj5rk20btl+tK8Fa8Ml/BL4=",
+        "lastModified": 1789264731,
+        "narHash": "sha256-llGJbC0CcU8DfROr6mZjRJgMLQd/SKwfpzxJH/2lHO4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d5dfd8e6716dde34398bc14bc87c10dece9c8c68",
+        "rev": "02f5696b0e6097e589076d886b317b83ff0437d7",
         "type": "github"
       },
       "original": {

@@ -45,4 +45,9 @@
   bmt = "btm --tree"; # Show process tree
   bmb = "btm --battery"; # Show battery info
   bmn = "btm --network_legend"; # Show network legend
+
+  # px0 (code navigator & symbol graph visualizer)
+  nav = "px0 ."; # Launch code navigator for current project
+  navo = "px0 -no-open ."; # Launch navigator without opening browser
+  px = "px0 ."; # Convenient shorthand
 }
