@@ -62,6 +62,29 @@
             };
             rules = [
               {
+                description = "Capture screenshot to ~/Screenshots and copy absolute path to clipboard with Command + Shift + 4";
+                manipulators = [
+                  {
+                    type = "basic";
+                    from = {
+                      key_code = "4";
+                      modifiers = {
+                        mandatory = [
+                          "command"
+                          "shift"
+                        ];
+                        optional = [ "any" ];
+                      };
+                    };
+                    to = [
+                      {
+                        shell_command = "$HOME/bin/capture-and-copy-screenshot || /bin/bash $HOME/dotfile/home-manager/scripts/screenshots/capture-and-copy-path.sh";
+                      }
+                    ];
+                  }
+                ];
+              }
+              {
                 description = "Open Ghostty with Command + Shift + Enter";
                 manipulators = [
                   {

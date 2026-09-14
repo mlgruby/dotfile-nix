@@ -207,10 +207,15 @@ in
     firefox.enable = false; # DISABLED: Not our primary browser
   };
 
-  # Install shell helper scripts and profile-aware rebuild wrappers.
-  home.file = builtins.listToAttrs [
+  # Install shell helper scripts, screenshot utility, and profile-aware rebuild wrappers.
+  home.file = (builtins.listToAttrs [
     (mkRebuildWrapper "bin/rebuild" "")
     (mkRebuildWrapper "bin/rebuild-work" "--work")
     (mkRebuildWrapper "bin/rebuild-personal" "--personal")
-  ];
+  ]) // {
+    "bin/capture-and-copy-screenshot" = {
+      source = ./scripts/screenshots/capture-and-copy-path.sh;
+      executable = true;
+    };
+  };
 }

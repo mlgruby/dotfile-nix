@@ -50,4 +50,7 @@
   nav = "px0 ."; # Launch code navigator for current project
   navo = "px0 -no-open ."; # Launch navigator without opening browser
   px = "px0 ."; # Convenient shorthand
+
+  # Screenshots & Clipboard Images
+  pbimg = "f=\"$HOME/Screenshots/clip_$(date +%Y%m%d_%H%M%S).png\" && pngpaste \"$f\" && printf '%s' \"$f\" | pbcopy && echo \"$f\"";
 }

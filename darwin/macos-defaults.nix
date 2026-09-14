@@ -67,6 +67,11 @@
       askForPasswordDelay = 0; # Immediate password requirement
     };
 
+    screencapture = {
+      location = "~/Screenshots";
+      show-thumbnail = false;
+    };
+
     CustomUserPreferences = {
       NSGlobalDomain = {
         AppleLanguages = [ "en-GB" ];

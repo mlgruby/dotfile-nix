@@ -39,5 +39,6 @@ in
     postgresql # PostgreSQL client tools (psql, pg_dump, pg_restore)
     delta # Syntax-highlighting pager for git and lazygit diffs
     px0 # Local code navigator and symbol visualizer
+    pngpaste # Paste clipboard images directly to files from terminal
   ];
 }
