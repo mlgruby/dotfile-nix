@@ -596,3 +596,59 @@ function p() {
     herdr workspace focus "$ws_id" >/dev/null 2>&1
   fi
 }
+
+# ==============================================================================
+# Agent Ergonomics: Command Buffer & Re-run to Clipboard
+# ==============================================================================
+
+# Run any command, display output live on screen, and copy ANSI-stripped output to macOS clipboard.
+function cb() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: cb <command...>"
+    return 1
+  fi
+
+  local tmpfile
+  tmpfile="$(mktemp /tmp/cb_output.XXXXXX)"
+
+  # Run command live and tee to temporary file
+  "$@" 2>&1 | tee "$tmpfile"
+  local exit_code="${pipestatus[1]:-${PIPESTATUS[0]:-0}}"
+
+  # Strip ANSI color/escape sequences and copy clean text to clipboard
+  sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$tmpfile" | pbcopy
+  local lines
+  lines="$(wc -l < "$tmpfile" | tr -d ' ')"
+  rm -f "$tmpfile"
+
+  echo "📋 Output copied to clipboard ($lines lines)"
+  return "$exit_code"
+}
+
+# Re-run the last command from history, display live, and copy ANSI-stripped output to macOS clipboard.
+function rc() {
+  local last_cmd
+  last_cmd="$(fc -ln -1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+  if [ -z "$last_cmd" ] || [ "$last_cmd" = "rc" ]; then
+    echo "No previous command to re-run."
+    return 1
+  fi
+
+  echo "➜ Re-running: $last_cmd"
+
+  local tmpfile
+  tmpfile="$(mktemp /tmp/rc_output.XXXXXX)"
+
+  eval "$last_cmd" 2>&1 | tee "$tmpfile"
+  local exit_code="${pipestatus[1]:-${PIPESTATUS[0]:-0}}"
+
+  sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$tmpfile" | pbcopy
+  local lines
+  lines="$(wc -l < "$tmpfile" | tr -d ' ')"
+  rm -f "$tmpfile"
+
+  echo "📋 Output copied to clipboard ($lines lines)"
+  return "$exit_code"
+}
+
