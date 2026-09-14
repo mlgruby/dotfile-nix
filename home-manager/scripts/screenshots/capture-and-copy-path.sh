@@ -29,5 +29,11 @@ if /usr/sbin/screencapture -i "$FILE"; then
     if [ -f "$SOUND" ]; then
       /usr/bin/afplay "$SOUND"
     fi
+
+    # Auto-prune screenshots older than 3 days by safely moving to macOS Trash in background
+    (
+      find "$SHOT_DIR" -type f \( -name "Screenshot *.png" -o -name "clip_*.png" \) -mtime +3 -print0 2>/dev/null \
+        | xargs -0 -r /usr/bin/trash 2>/dev/null || true
+    ) &
   fi
 fi

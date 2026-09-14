@@ -53,4 +53,5 @@
 
   # Screenshots & Clipboard Images
   pbimg = "f=\"$HOME/Screenshots/clip_$(date +%Y%m%d_%H%M%S).png\" && pngpaste \"$f\" && printf '%s' \"$f\" | pbcopy && echo \"$f\"";
+  cshot = "find \"$HOME/Screenshots\" -type f -name '*.png' -print0 | xargs -0 -r /usr/bin/trash && echo 'Screenshots moved to Trash.'";
 }
