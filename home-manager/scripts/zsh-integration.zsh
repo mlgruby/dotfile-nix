@@ -628,9 +628,17 @@ function cb() {
 # Re-run the last command from history, display live, and copy ANSI-stripped output to macOS clipboard.
 function rc() {
   local last_cmd
-  last_cmd="$(fc -ln -1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  # Look backwards in history for the last command that wasn't rc, r, or rl
+  local i=1
+  while [ $i -le 10 ]; do
+    last_cmd="$(fc -ln -$i -$i 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    if [ -n "$last_cmd" ] && [ "$last_cmd" != "rc" ] && [ "$last_cmd" != "r" ] && [ "$last_cmd" != "rl" ] && [ "$last_cmd" != "r && rl" ]; then
+      break
+    fi
+    i=$((i + 1))
+  done
 
-  if [ -z "$last_cmd" ] || [ "$last_cmd" = "rc" ]; then
+  if [ -z "$last_cmd" ]; then
     echo "No previous command to re-run."
     return 1
   fi
