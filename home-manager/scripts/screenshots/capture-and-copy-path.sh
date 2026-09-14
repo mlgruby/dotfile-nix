@@ -21,10 +21,13 @@ if /usr/sbin/screencapture -i "$FILE"; then
   if [ -f "$FILE" ]; then
     printf '%s' "$FILE" | /usr/bin/pbcopy
 
-    # Play native macOS screen capture shutter sound
+    # Play native macOS camera shutter / screen capture sound
     SOUND="/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif"
+    if [ ! -f "$SOUND" ]; then
+      SOUND="/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Shutter.aif"
+    fi
     if [ -f "$SOUND" ]; then
-      /usr/bin/afplay "$SOUND" &
+      /usr/bin/afplay "$SOUND"
     fi
   fi
 fi
