@@ -75,7 +75,7 @@ Customize your directory layout in `hosts.nix`:
 
 ```nix
 directories = {
-  dotfiles = "config/dotfiles";     # Instead of Documents/dotfile
+  dotfiles = "config/dotfiles";     # Instead of dotfile
   workspace = "projects";           # Instead of Development
   downloads = "Downloads";
   documents = "Documents";
@@ -100,7 +100,7 @@ directories = {
 
 ```bash
 # Navigation
-dotfile    # → ~/Documents/dotfile
+dotfile    # → ~/dotfile
 ws / dev   # → ~/Development
 dl         # → ~/Downloads
 

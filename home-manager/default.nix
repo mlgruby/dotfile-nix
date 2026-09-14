@@ -104,6 +104,7 @@ in
     ./modules/programs/bottom.nix
     ./modules/lazygit.nix
     ./modules/alacritty
+    ./modules/ghostty.nix
     ./modules/herdr.nix
     ./modules/karabiner
     ./modules/rectangle.nix
@@ -111,6 +112,7 @@ in
     ./modules/programs/terminal-tools.nix
     ./modules/directory-tools.nix
     ./modules/time-machine.nix
+    ./modules/tailscale-automator.nix
     ./modules/package-groups.nix
     ./modules/xdg.nix
     ./modules/fonts.nix
@@ -205,10 +207,15 @@ in
     firefox.enable = false; # DISABLED: Not our primary browser
   };
 
-  # Install shell helper scripts and profile-aware rebuild wrappers.
-  home.file = builtins.listToAttrs [
+  # Install shell helper scripts, screenshot utility, and profile-aware rebuild wrappers.
+  home.file = (builtins.listToAttrs [
     (mkRebuildWrapper "bin/rebuild" "")
     (mkRebuildWrapper "bin/rebuild-work" "--work")
     (mkRebuildWrapper "bin/rebuild-personal" "--personal")
-  ];
+  ]) // {
+    "bin/capture-and-copy-screenshot" = {
+      source = ./scripts/screenshots/capture-and-copy-path.sh;
+      executable = true;
+    };
+  };
 }

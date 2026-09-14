@@ -213,7 +213,7 @@ To use Nix shells/flakes on their local machines, developers only need to instal
 ```bash
 curl -sSf https://raw.githubusercontent.com/<org>/<repo>/develop/scripts/setup-dev-env.sh | bash
 ```
-*(Alternatively, run the local copy of the script: [setup-dev-env.sh](file:///Users/satyasheel/Documents/dotfile/scripts/setup-dev-env.sh))*
+*(Alternatively, run the local copy of the script: [setup-dev-env.sh](scripts/setup-dev-env.sh))*
 
 ---
 

@@ -54,6 +54,13 @@
         autoFetch = true;
         autoRefresh = true;
         fetchAll = true;
+        autoStageResolvedConflicts = true;
+        diffRenderers = [
+          {
+            command = "delta --dark --paging=never";
+            colorArg = "always";
+          }
+        ];
         branchLogCmd = "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --";
         allBranchesLogCmds = ["git log --graph --all --color=always --abbrev-commit --decorate --date=relative  --pretty=medium"];
         overrideGpg = false;
@@ -136,7 +143,7 @@
           rebaseBranch = "r";
           renameBranch = "R";
           mergeIntoCurrentBranch = "M";
-          viewGitFlowOptions = "i";
+          viewGitFlowOptions = ""; # disabled to prevent error popups
           fastForward = "f";
           createTag = "T";
           pushTag = "P";
@@ -237,6 +244,22 @@
           description = "open PR in browser";
           context = "global";
           loadingText = "opening PR...";
+          output = "terminal";
+        }
+        {
+          key = "<c-s>";
+          command = "gh pr checks";
+          description = "view PR CI checks status";
+          context = "global";
+          loadingText = "fetching PR checks...";
+          output = "terminal";
+        }
+        {
+          key = "<c-d>";
+          command = "gh pr diff";
+          description = "view PR diff";
+          context = "global";
+          loadingText = "fetching PR diff...";
           output = "terminal";
         }
       ];

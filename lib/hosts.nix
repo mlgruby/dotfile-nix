@@ -25,7 +25,7 @@ let
       profile = mergedConfig.profile or "personal";
       signingKey = mergedConfig.signingKey or "";
       directories = mergedDirectories // {
-        dotfiles = mergedDirectories.dotfiles or "Documents/dotfile";
+        dotfiles = mergedDirectories.dotfiles or "dotfile";
         workspace = mergedDirectories.workspace or "Development";
         downloads = mergedDirectories.downloads or "Downloads";
         documents = mergedDirectories.documents or "Documents";

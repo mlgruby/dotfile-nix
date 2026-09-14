@@ -45,4 +45,13 @@
   bmt = "btm --tree"; # Show process tree
   bmb = "btm --battery"; # Show battery info
   bmn = "btm --network_legend"; # Show network legend
+
+  # px0 (code navigator & symbol graph visualizer)
+  nav = "px0 ."; # Launch code navigator for current project
+  navo = "px0 -no-open ."; # Launch navigator without opening browser
+  px = "px0 ."; # Convenient shorthand
+
+  # Screenshots & Clipboard Images
+  pbimg = "f=\"$HOME/Screenshots/clip_$(date +%Y%m%d_%H%M%S).png\" && pngpaste \"$f\" && printf '%s' \"$f\" | pbcopy && echo \"$f\"";
+  cshot = "find \"$HOME/Screenshots\" -type f -name '*.png' -print0 | xargs -0 -r /usr/bin/trash && echo 'Screenshots moved to Trash.'";
 }

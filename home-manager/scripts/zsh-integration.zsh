@@ -417,3 +417,246 @@ function opencode-resume() {
     fi
   fi
 }
+
+# Herdr Workspace launcher:
+# Opens or creates a Herdr space for a project with an automatic split layout:
+# - Left pane: Interactive shell
+# - Right pane: Context-specific agent (Claude for Work, Codex or Antigravity for Personal)
+function p() {
+  if ! command -v herdr >/dev/null 2>&1; then
+    echo "herdr CLI is not installed." >&2
+    return 127
+  fi
+
+  local target_dir="$1"
+
+  if [ -z "$target_dir" ]; then
+    if command -v fzf >/dev/null 2>&1; then
+      target_dir=$(
+        {
+          find "$HOME/Documents/Work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|^|Work: |'
+          find "$HOME/Documents/Personal" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|^|Personal: |'
+          [ -d "$HOME/dotfile" ] && echo "Personal: $HOME/dotfile"
+        } |
+        fzf --prompt="Open Project in Herdr > " --header="Select project repository (Work or Personal)" |
+        sed -E 's/^(Work|Personal): //'
+      )
+    else
+      target_dir="$PWD"
+    fi
+  fi
+
+  [ -z "$target_dir" ] && return 0
+
+  local abs_path
+  abs_path="$(cd "$target_dir" 2>/dev/null && pwd)"
+  if [ -z "$abs_path" ] || [ ! -d "$abs_path" ]; then
+    echo "Directory not found: $target_dir" >&2
+    return 1
+  fi
+
+  local label
+  label="$(basename "$abs_path")"
+
+  # Create Herdr workspace (Tab 1 is created automatically)
+  local ws_json
+  ws_json="$(herdr workspace create --cwd "$abs_path" --label "$label")"
+  local ws_id
+  ws_id="$(echo "$ws_json" | jq -r '.result.workspace.workspace_id // empty')"
+  local tab1_id
+  tab1_id="$(echo "$ws_json" | jq -r '.result.tab.tab_id // empty')"
+
+  # Tab 1: Always dev shell
+  if [ -n "$tab1_id" ]; then
+    herdr tab rename "$tab1_id" "dev" >/dev/null 2>&1
+  fi
+
+  if [[ "$abs_path" == *"/Documents/Work"* ]]; then
+    # =========================================================================
+    # WORK REPO LAYOUT (3 Tabs)
+    # =========================================================================
+    # Tab 2: Claude Code (resumes latest session)
+    local tab2_json
+    tab2_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "cc" --focus)"
+    local tab2_pane
+    tab2_pane="$(echo "$tab2_json" | jq -r '.result.root_pane.pane_id // empty')"
+    local tab2_id
+    tab2_id="$(echo "$tab2_json" | jq -r '.result.tab.tab_id // empty')"
+    if [ -n "$tab2_pane" ]; then
+      herdr pane run "$tab2_pane" "claude --continue"
+
+      # Check if an active open PR exists on this branch
+      local has_pr
+      has_pr="$(cd "$abs_path" && gh pr view --json number -q .number 2>/dev/null || true)"
+      if [ -n "$has_pr" ]; then
+        # Split right pane for GitHub PR Preview (status & live CI checks)
+        herdr plugin pane open \
+          --plugin "juninaba.herdr-pr-preview" \
+          --entrypoint "preview" \
+          --target-pane "$tab2_pane" \
+          --placement split \
+          --direction right \
+          --no-focus \
+          --env "HERDR_WORKSPACE_ID=$ws_id" \
+          --env "HERDR_PR_STATUS_WORKTREE_PATH=$abs_path" >/dev/null 2>&1
+      fi
+      # Keep focus on Claude's input pane
+      herdr pane focus "$tab2_pane" >/dev/null 2>&1
+    fi
+
+    # Tab 3: Lazygit
+    local tab3_json
+    tab3_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "git" --no-focus)"
+    local tab3_pane
+    tab3_pane="$(echo "$tab3_json" | jq -r '.result.root_pane.pane_id // empty')"
+    if [ -n "$tab3_pane" ]; then
+      herdr pane run "$tab3_pane" "lazygit"
+    fi
+
+    # Focus Tab 2 (Claude Code) by default
+    if [ -n "$tab2_id" ]; then
+      herdr tab focus "$tab2_id" >/dev/null 2>&1
+    fi
+
+  else
+    # =========================================================================
+    # PERSONAL REPO LAYOUT (4 Tabs)
+    # Tab 1: dev shell (already renamed above)
+    # Tab 2: AGY (Antigravity session resume via agr)
+    # Tab 3: CXR (Codex resume session)
+    # Tab 4: lg (Lazygit)
+    # =========================================================================
+
+    # Check if an active open PR exists on this branch
+    local has_pr
+    has_pr="$(cd "$abs_path" && gh pr view --json number -q .number 2>/dev/null || true)"
+
+    # Tab 2: Antigravity (AGY resume)
+    local tab2_json
+    tab2_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "agy" --focus)"
+    local tab2_pane
+    tab2_pane="$(echo "$tab2_json" | jq -r '.result.root_pane.pane_id // empty')"
+    local tab2_id
+    tab2_id="$(echo "$tab2_json" | jq -r '.result.tab.tab_id // empty')"
+    if [ -n "$tab2_pane" ]; then
+      herdr pane run "$tab2_pane" "agr"
+
+      if [ -n "$has_pr" ]; then
+        herdr plugin pane open \
+          --plugin "juninaba.herdr-pr-preview" \
+          --entrypoint "preview" \
+          --target-pane "$tab2_pane" \
+          --placement split \
+          --direction right \
+          --no-focus \
+          --env "HERDR_WORKSPACE_ID=$ws_id" \
+          --env "HERDR_PR_STATUS_WORKTREE_PATH=$abs_path" >/dev/null 2>&1
+      fi
+      herdr pane focus "$tab2_pane" >/dev/null 2>&1
+    fi
+
+    # Tab 3: Codex (CXR)
+    local tab3_json
+    tab3_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "cxr" --no-focus)"
+    local tab3_pane
+    tab3_pane="$(echo "$tab3_json" | jq -r '.result.root_pane.pane_id // empty')"
+    if [ -n "$tab3_pane" ]; then
+      herdr pane run "$tab3_pane" "cxr"
+
+      if [ -n "$has_pr" ]; then
+        herdr plugin pane open \
+          --plugin "juninaba.herdr-pr-preview" \
+          --entrypoint "preview" \
+          --target-pane "$tab3_pane" \
+          --placement split \
+          --direction right \
+          --no-focus \
+          --env "HERDR_WORKSPACE_ID=$ws_id" \
+          --env "HERDR_PR_STATUS_WORKTREE_PATH=$abs_path" >/dev/null 2>&1
+      fi
+      herdr pane focus "$tab3_pane" >/dev/null 2>&1
+    fi
+
+    # Tab 4: Lazygit (lg)
+    local tab4_json
+    tab4_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "lg" --no-focus)"
+    local tab4_pane
+    tab4_pane="$(echo "$tab4_json" | jq -r '.result.root_pane.pane_id // empty')"
+    if [ -n "$tab4_pane" ]; then
+      herdr pane run "$tab4_pane" "lazygit"
+    fi
+
+    # Focus Tab 2 (Antigravity) by default
+    if [ -n "$tab2_id" ]; then
+      herdr tab focus "$tab2_id" >/dev/null 2>&1
+    fi
+  fi
+
+  if [ -n "$ws_id" ]; then
+    herdr workspace focus "$ws_id" >/dev/null 2>&1
+  fi
+}
+
+# ==============================================================================
+# Agent Ergonomics: Command Buffer & Re-run to Clipboard
+# ==============================================================================
+
+# Run any command, display output live on screen, and copy ANSI-stripped output to macOS clipboard.
+function cb() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: cb <command...>"
+    return 1
+  fi
+
+  local tmpfile
+  tmpfile="$(mktemp /tmp/cb_output.XXXXXX)"
+
+  # Run command live and tee to temporary file
+  "$@" 2>&1 | tee "$tmpfile"
+  local exit_code="${pipestatus[1]:-${PIPESTATUS[0]:-0}}"
+
+  # Strip ANSI color/escape sequences and copy clean text to clipboard
+  sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$tmpfile" | pbcopy
+  local lines
+  lines="$(wc -l < "$tmpfile" | tr -d ' ')"
+  rm -f "$tmpfile"
+
+  echo "📋 Output copied to clipboard ($lines lines)"
+  return "$exit_code"
+}
+
+# Re-run the last command from history, display live, and copy ANSI-stripped output to macOS clipboard.
+function rc() {
+  local last_cmd
+  # Look backwards in history for the last command that wasn't rc, r, or rl
+  local i=1
+  while [ $i -le 10 ]; do
+    last_cmd="$(fc -ln -$i -$i 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    if [ -n "$last_cmd" ] && [ "$last_cmd" != "rc" ] && [ "$last_cmd" != "r" ] && [ "$last_cmd" != "rl" ] && [ "$last_cmd" != "r && rl" ]; then
+      break
+    fi
+    i=$((i + 1))
+  done
+
+  if [ -z "$last_cmd" ]; then
+    echo "No previous command to re-run."
+    return 1
+  fi
+
+  echo "➜ Re-running: $last_cmd"
+
+  local tmpfile
+  tmpfile="$(mktemp /tmp/rc_output.XXXXXX)"
+
+  eval "$last_cmd" 2>&1 | tee "$tmpfile"
+  local exit_code="${pipestatus[1]:-${PIPESTATUS[0]:-0}}"
+
+  sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$tmpfile" | pbcopy
+  local lines
+  lines="$(wc -l < "$tmpfile" | tr -d ' ')"
+  rm -f "$tmpfile"
+
+  echo "📋 Output copied to clipboard ($lines lines)"
+  return "$exit_code"
+}
+

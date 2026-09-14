@@ -30,6 +30,12 @@ run_regular_cleanup() {
   find "$HOME" -type f -name ".DS_Store" -delete 2>/dev/null || true
   find "$HOME" -type f -name "._*" -delete 2>/dev/null || true
 
+  echo "Cleaning screenshots..."
+  if [ -d "$HOME/Screenshots" ]; then
+    find "$HOME/Screenshots" -type f -name "*.png" -print0 2>/dev/null | xargs -0 -r /usr/bin/trash 2>/dev/null || true
+  fi
+  find "$HOME/Desktop" -type f -name "Screenshot *.png" -print0 2>/dev/null | xargs -0 -r /usr/bin/trash 2>/dev/null || true
+
   echo "Cleaning package caches..."
   if command -v npm >/dev/null 2>&1; then
     npm cache clean --force 2>/dev/null || true

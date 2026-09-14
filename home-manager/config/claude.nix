@@ -5,7 +5,7 @@
   # Keep repo defaults conservative. Temporary live experiments can override
   # ~/.claude/settings.json without changing these template values.
   maxOutputTokens = "16384";
-  maxThinkingTokens = "8192";
+  maxThinkingTokens = null;
   model = "sonnet";
   effortLevel = "low";
 

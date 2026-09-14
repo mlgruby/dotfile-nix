@@ -35,7 +35,8 @@ import = [
 [ env ]
 # Ensure proper color support
 TERM = "xterm-256color"
-# Only Alacritty should auto-attach to the persistent tmux workspace.
+# Alacritty auto-attaches to the persistent tmux workspace; tm() starts Herdr
+# inside the main session when it does not already exist.
 DOTFILES_AUTO_TMUX = "1"
 
 [window]

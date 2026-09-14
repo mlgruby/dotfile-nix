@@ -341,6 +341,13 @@ tmux_status_collect_codexbar() {
   # Quota refreshes can make provider calls, so tmux always returns immediately.
   # The lock prevents its five-second redraw from spawning duplicate refreshes.
   if [ ! -f "$CACHE_FILE" ] || (( now - mtime > CACHE_AGE_LIMIT )); then
+    if [ -d "$LOCK_DIR" ]; then
+      local lock_mtime
+      lock_mtime=$(python3 -c "import os; print(int(os.path.getmtime('$LOCK_DIR')))" 2>/dev/null || echo 0)
+      if (( now - lock_mtime > 120 )); then
+        rmdir "$LOCK_DIR" 2>/dev/null || true
+      fi
+    fi
     if mkdir "$LOCK_DIR" 2>/dev/null; then
       (
         trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT

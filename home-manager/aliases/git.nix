@@ -31,6 +31,7 @@
   # ==========================================================================
   # LazyGit Integration
   # ==========================================================================
+  lg = "lazygit"; # Open lazygit
   lgc = "lazygit -w $(pwd)"; # Open lazygit in current directory
   lgf = "lazygit -f $(find . -type d -name '.git' -exec dirname {} \\; | fzf)"; # Fuzzy find and open git repo in lazygit
   lgs = "lazygit status"; # Show lazygit status
@@ -106,7 +107,9 @@
   # Diff Operations
   # ==========================================================================
   gd = "git diff"; # Show unstaged changes
-  gdc = "git diff --cached"; # Show staged changes
+  gdc = "git diff --cached | pbcopy && echo '📋 Staged diff copied to clipboard'"; # Copy staged diff to clipboard
+  gdu = "git diff | pbcopy && echo '📋 Unstaged diff copied to clipboard'"; # Copy unstaged diff to clipboard
+  gdl = "git diff HEAD~1 | pbcopy && echo '📋 Last commit diff copied to clipboard'"; # Copy last commit diff to clipboard
   gdh = "git diff HEAD"; # Show all changes since last commit
   gdt = "git diff-tree --no-commit-id --name-only -r"; # Show files changed in commit - usage: gdt <commit-hash>
 

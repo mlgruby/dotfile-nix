@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-DOTFILE_DIR="${DOTFILE_DIR:-$HOME/Documents/dotfile}"
+DOTFILE_DIR="${DOTFILE_DIR:-$HOME/dotfile}"
 CURRENT_CONFIG_HOST="${CURRENT_CONFIG_HOST:-}"
 HOSTS_FILE="$DOTFILE_DIR/hosts.nix"
 

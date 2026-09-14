@@ -88,7 +88,7 @@ print_vm_checklist() {
   cat <<'EOF'
 
 Manual VM checklist (fresh macOS snapshot)
-1. Clone repo to ~/Documents/dotfile.
+1. Clone repo to ~/dotfile.
 2. Run setup in non-interactive mode:
    DOTFILES_REPO_URL=<your-repo-raw-url> ./setup.sh --yes
 3. Confirm host config values:

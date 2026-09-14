@@ -141,12 +141,12 @@ fi
 DOT="${FG_GRAY} | ${R}"
 
 
-# ─── VCS directly from git (bypasses JSON parsing entirely) ──────────────────
+# ─── VCS directly from git (fast diff check without directory crawl) ──────────
 GIT_DIR="${CWD:-.}"
 VCS_BRANCH=$(git -C "$GIT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 if [ -n "$VCS_BRANCH" ]; then
   VCS_TYPE="git"
-  if git -C "$GIT_DIR" status --porcelain 2>/dev/null | grep -q .; then
+  if ! git -C "$GIT_DIR" diff --quiet 2>/dev/null || ! git -C "$GIT_DIR" diff --cached --quiet 2>/dev/null; then
     VCS_DIRTY="true"
   else
     VCS_DIRTY="false"
@@ -378,7 +378,7 @@ format_sandbox() {
   # .sandbox.enabled remains the primary source, so this self-corrects once the
   # payload field is populated upstream. See issue #321.
   if [ "$SANDBOX" != "true" ]; then
-    if [ -r "$SANDBOX_LOG" ] && grep -q 'enabling terminal sandbox' "$SANDBOX_LOG" 2>/dev/null; then
+    if [ -r "$SANDBOX_LOG" ] && head -n 50 "$SANDBOX_LOG" 2>/dev/null | grep -q 'enabling terminal sandbox'; then
       SANDBOX="true"
     fi
   fi

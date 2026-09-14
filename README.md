@@ -315,7 +315,7 @@ gh auth login
 
 ## Applying Changes
 
-After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/Documents/dotfile` directory:
+After the initial setup, to apply any changes you make to the configuration files in this repository, run the following command from the `~/dotfile` directory:
 
 ```bash
 sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix>

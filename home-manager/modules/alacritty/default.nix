@@ -11,7 +11,7 @@
 # - Overrides theme import with a Nix store path
 #
 # Note:
-# - Package from Homebrew
+# - Package managed by Nix/Home Manager
 { pkgs, ... }:
 let
   baseSettings = builtins.fromTOML (builtins.readFile ./config.toml);
@@ -19,7 +19,7 @@ in
 {
   programs.alacritty = {
     enable = true;
-    package = null;
+    package = pkgs.alacritty;
     settings = baseSettings // {
       general.import = [ "${pkgs.alacritty-theme}/share/alacritty-theme/gruvbox_dark.toml" ];
     };

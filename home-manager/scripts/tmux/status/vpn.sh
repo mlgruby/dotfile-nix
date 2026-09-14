@@ -27,11 +27,11 @@ tmux_status_collect_vpn() {
     vpn_label="󰸏 VPN"
   fi
 
-  if printf '%s\n' "$connected_vpns" | grep -Eiq 'tailscale'; then
+  if tailscale status &>/dev/null; then
     vpn_label="${vpn_label:+$vpn_label · }󰖂 MESH"
   fi
 
-  if [ -z "$vpn_label" ] && [ -n "$connected_vpns" ]; then
+  if [ -z "$vpn_label" ] && printf '%s\n' "$connected_vpns" | grep -v -Eiq 'tailscale'; then
     vpn_label="󰖂 VPN"
   fi
 }

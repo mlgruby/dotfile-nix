@@ -23,7 +23,7 @@ The dotfile system now supports dynamic path configuration through the `hosts.ni
   # Directory Configuration
   directories = {
     # Dotfiles repository location (relative to home directory)
-    dotfiles = "Documents/dotfile";
+    dotfiles = "dotfile";
     
     # Development workspace (where you keep your projects)
     workspace = "Development";
@@ -41,7 +41,7 @@ The dotfile system now supports dynamic path configuration through the `hosts.ni
 
 | Directory | Default | Purpose | Alias Generated |
 |-----------|---------|---------|-----------------|
-| `dotfiles` | `Documents/dotfile` | Location of this dotfile repository | `dotfile` |
+| `dotfiles` | `dotfile` | Location of this dotfile repository | `dotfile` |
 | `workspace` | `Development` | Main development workspace | `ws`, `dev` |
 | `downloads` | `Downloads` | Downloads folder | `dl` |
 | `documents` | `Documents` | Documents folder | `docs` |
@@ -53,7 +53,7 @@ You can add custom directories to the configuration:
 ```nix
 directories = {
   # Core directories (required)
-  dotfiles = "Documents/dotfile";
+  dotfiles = "dotfile";
   workspace = "Development";
   downloads = "Downloads";
   documents = "Documents";
@@ -74,7 +74,7 @@ The system automatically generates navigation aliases for all configured directo
 
 ```bash
 # Core aliases
-dotfile  # cd ~/Documents/dotfile
+dotfile  # cd ~/dotfile
 ws       # cd ~/Development
 dev      # cd ~/Development (alternative)
 dl       # cd ~/Downloads

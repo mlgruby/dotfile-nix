@@ -9,8 +9,16 @@
 # - This statusline must use Claude Code's native `.cost.total_cost_usd` input.
 # - That value is the current Claude session's cumulative native cost and may be
 #   $0.00 when Claude Code does not expose a cost for the user's billing plan.
+#   On Bedrock it is always absent, so the segment hides itself rather than
+#   rendering a meaningless zero.
 # - Do not call `ccusage` here. Log-derived daily costs belong in the tmux bar
 #   (`home-manager/scripts/tmux/status/codexbar.sh`) and the `cau-*` aliases.
+#   The daily total is deliberately absent from this line: one bar owns it.
+#
+# Presentation: gruvbox truecolor with the same hex values as codexbar.sh, so
+# the statusline and the tmux bar directly above it share one palette instead of
+# stacking two different greens. Glyphs assume JetBrainsMono Nerd Font, which
+# fonts.nix installs and ghostty.nix/alacritty select.
 set -euo pipefail
 
 input=$(cat)
@@ -36,38 +44,87 @@ RL7_RAW=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // 0')
 RL5=$(printf '%.0f' "$RL5_RAW")
 RL7=$(printf '%.0f' "$RL7_RAW")
 
-# Colors.
-R=$'\033[0m'
-DIM=$'\033[2m'
-BOLD=$'\033[1m'
-GREEN=$'\033[32m'
-YELLOW=$'\033[33m'
-RED=$'\033[31m'
-GOLD=$'\033[38;5;220m'
-ORANGE=$'\033[38;5;172m'
-CYAN=$'\033[36m'
+# Colors: gruvbox, truecolor where the terminal advertises it, 256-color
+# otherwise. `printf -v` keeps this to zero subshells.
+COLOR_MODE=256
+case "${COLORTERM:-}" in
+  truecolor | 24bit) COLOR_MODE=truecolor ;;
+esac
+[ -n "${NO_COLOR:-}" ] && COLOR_MODE=none
+
+set_fg() {
+  local name="$1" triplet="$2" index="$3"
+  case "$COLOR_MODE" in
+    truecolor) printf -v "$name" '\033[38;2;%sm' "$triplet" ;;
+    256) printf -v "$name" '\033[38;5;%sm' "$index" ;;
+    *) printf -v "$name" '%s' '' ;;
+  esac
+}
+
+set_fg FG '235;219;178' 223     # #ebdbb2
+set_fg DIM '146;131;116' 245    # #928374
+set_fg SEP '189;174;147' 250    # #bdae93
+set_fg GREEN '184;187;38' 142   # #b8bb26
+set_fg AMBER '250;189;47' 214   # #fabd2f
+set_fg RED '251;73;52' 167      # #fb4934
+set_fg BLUE '131;165;152' 109   # #83a598
+set_fg PURPLE '211;134;155' 175 # #d3869b
+set_fg AQUA '142;192;124' 108   # #8ec07c
+set_fg CLAUDE '217;119;87' 173  # #d97757 - the Claude mark's own orange
+
+if [ "$COLOR_MODE" = none ]; then
+  R=""
+  BOLD=""
+  UL=""
+else
+  R=$'\033[0m'
+  BOLD=$'\033[1m'
+  UL=$'\033[4m'
+fi
+
+# Nerd Font glyphs. The model mark is the same codicon codexbar.sh uses for
+# Claude, so both bars label the same thing with the same symbol.
+G_MODEL=""
+G_DIR=""
+G_BRANCH=""
+G_CLOCK=""
+G_COST=""
+G_MODE=""
+G_WARN=""
+
+# Separator: one dim interpunct, not a pipe fence.
+S="${SEP} · ${R}"
 
 # Context bar color.
 if [ "$PCT" -ge 80 ]; then
   BAR_C="$RED"
 elif [ "$PCT" -ge 50 ]; then
-  BAR_C="$YELLOW"
+  BAR_C="$AMBER"
 else
   BAR_C="$GREEN"
 fi
 
-# Progress bar (10 chars).
-FILLED=$((PCT * 10 / 100))
-EMPTY=$((10 - FILLED))
+# Progress bar (8 chars). Clamp so a >100% reading cannot produce a negative
+# empty count and a malformed bar.
+BAR_WIDTH=8
+PCT_CLAMPED="$PCT"
+[ "$PCT_CLAMPED" -gt 100 ] && PCT_CLAMPED=100
+[ "$PCT_CLAMPED" -lt 0 ] && PCT_CLAMPED=0
+FILLED=$(((PCT_CLAMPED * BAR_WIDTH + 50) / 100))
+# Reserve the extremes for the extremes: an empty bar must mean 0% and a full
+# bar must mean 100%, so 12% keeps one block and 87% keeps one gap.
+[ "$FILLED" -eq 0 ] && [ "$PCT_CLAMPED" -gt 0 ] && FILLED=1
+[ "$FILLED" -eq "$BAR_WIDTH" ] && [ "$PCT_CLAMPED" -lt 100 ] && FILLED=$((BAR_WIDTH - 1))
+EMPTY=$((BAR_WIDTH - FILLED))
 BAR=""
 i=0
 while [ "$i" -lt "$FILLED" ]; do
-  BAR="${BAR}█"
+  BAR="${BAR}▰"
   i=$((i + 1))
 done
 i=0
 while [ "$i" -lt "$EMPTY" ]; do
-  BAR="${BAR}░"
+  BAR="${BAR}▱"
   i=$((i + 1))
 done
 
@@ -135,36 +192,55 @@ if mkdir "$CLAUDE_COST_LOCK" 2>/dev/null; then
   trap - EXIT
 fi
 
-# Timing.
+# Cost segment. Hidden when zero: on Bedrock the native cost is never populated,
+# and a gold $0.00 spends the brightest colour on the least useful field.
+COST_PART=""
+if awk -v c="$COST_RAW" 'BEGIN { exit !(c > 0) }'; then
+  COST_PART="${AMBER}${G_COST} ${COST_FMT}${R}"
+fi
+
+# Timing. Sub-hour durations keep their seconds so a 4m30s turn is not rounded
+# to a flat 4m.
 fmt_dur() {
   local s="$1"
   if [ "$s" -lt 60 ]; then
     printf '%ds' "$s"
   elif [ "$s" -lt 3600 ]; then
-    printf '%dm' $((s / 60))
+    if [ $((s % 60)) -gt 0 ]; then
+      printf '%dm%ds' $((s / 60)) $((s % 60))
+    else
+      printf '%dm' $((s / 60))
+    fi
+  elif [ $(((s % 3600) / 60)) -gt 0 ]; then
+    printf '%dh%dm' $((s / 3600)) $(((s % 3600) / 60))
   else
-    printf '%dh %dm' $((s / 3600)) $(((s % 3600) / 60))
+    printf '%dh' $((s / 3600))
   fi
 }
 ELAPSED_S=$(((TOTAL_DURATION_MS + 500) / 1000))
 API_S=$(((API_TIME + 500) / 1000))
 ELAPSED_FMT=$(fmt_dur "$ELAPSED_S")
-API_FMT=$(fmt_dur "$API_S")
-TIME_PART="${DIM}⊙${R} ${ELAPSED_FMT} ${DIM}(api ${API_FMT})${R}"
+# One clock only. The old `session <1m` segment reported the same
+# TOTAL_DURATION_MS as this one, two segments apart.
+TIME_PART="${DIM}${G_CLOCK} ${ELAPSED_FMT}${R}"
+if [ "$API_S" -gt 0 ]; then
+  TIME_PART="${TIME_PART}${DIM} (api $(fmt_dur "$API_S"))${R}"
+fi
 
-# Session duration.
-SESSION_PART=""
-if [ "$TOTAL_DURATION_MS" -gt 0 ] 2>/dev/null; then
-  SESS_MINS=$((TOTAL_DURATION_MS / 60000))
-  if [ "$SESS_MINS" -lt 1 ]; then
-    SESSION_PART="${DIM}session <1m${R}"
-  elif [ "$SESS_MINS" -lt 60 ]; then
-    SESSION_PART="${DIM}session ${SESS_MINS}m${R}"
-  else
-    SESS_H=$((SESS_MINS / 60))
-    SESS_M=$((SESS_MINS % 60))
-    SESSION_PART="${DIM}session ${SESS_H}h${SESS_M}m${R}"
+# Token counts. Hidden entirely while every counter is zero.
+TOKENS_PART=""
+if [ "$IN_TOK" -gt 0 ] || [ "$OUT_TOK" -gt 0 ] || [ "$CR_TOK" -gt 0 ] || [ "$CW_TOK" -gt 0 ]; then
+  TOKENS_PART="${DIM}↑${IN_FMT} ↓${OUT_FMT}${R}"
+  CACHE_PARTS=""
+  [ "$CR_TOK" -gt 0 ] && CACHE_PARTS="cr ${CR_FMT}"
+  if [ "$CW_TOK" -gt 0 ]; then
+    if [ -n "$CACHE_PARTS" ]; then
+      CACHE_PARTS="${CACHE_PARTS} cw ${CW_FMT}"
+    else
+      CACHE_PARTS="cw ${CW_FMT}"
+    fi
   fi
+  [ -n "$CACHE_PARTS" ] && TOKENS_PART="${TOKENS_PART} ${DIM}(${CACHE_PARTS})${R}"
 fi
 
 # Lines changed.
@@ -176,7 +252,7 @@ fi
 # Large context warning.
 WARN_PART=""
 if [ "$EXCEEDS_200K" = "true" ]; then
-  WARN_PART="${RED}${BOLD}⚠ >200k${R}"
+  WARN_PART="${RED}${BOLD}${G_WARN} >200k${R}"
 fi
 
 # Rate limits (only show when >0%).
@@ -191,7 +267,7 @@ if [ "$RL5" -gt 0 ] || [ "$RL7" -gt 0 ]; then
       RL_PARTS="7d:${RL7}%"
     fi
   fi
-  RL_PART=" | ${DIM}${RL_PARTS}${R}"
+  RL_PART="${DIM}${RL_PARTS}${R}"
 fi
 
 # Caveman badge (active plugin name).
@@ -204,35 +280,43 @@ if [ -f "$FLAG" ] && [ ! -L "$FLAG" ]; then
       PLUGIN_PART=""
       ;;
     full | "")
-      PLUGIN_PART="${ORANGE}Caveman: FULL${R}"
+      PLUGIN_PART="${CLAUDE}${G_MODE} CAVEMAN FULL${R}"
       ;;
     ultra)
-      PLUGIN_PART="${ORANGE}Caveman: ULTRA${R}"
+      PLUGIN_PART="${CLAUDE}${G_MODE} CAVEMAN ULTRA${R}"
       ;;
     lite)
-      PLUGIN_PART="${ORANGE}Caveman: LITE${R}"
+      PLUGIN_PART="${CLAUDE}${G_MODE} CAVEMAN LITE${R}"
       ;;
     *)
       SUFFIX=$(printf '%s' "$MODE" | tr '[:lower:]' '[:upper:]')
-      PLUGIN_PART="${ORANGE}Caveman: ${SUFFIX}${R}"
+      PLUGIN_PART="${CLAUDE}${G_MODE} CAVEMAN ${SUFFIX}${R}"
       ;;
   esac
 fi
 
 # Row 1: model | cwd | plugin.
 MODEL_PART=""
-[ -n "$MODEL" ] && MODEL_PART="${BOLD}[${MODEL}]${R}"
+[ -n "$MODEL" ] && MODEL_PART="${CLAUDE}${BOLD}${G_MODEL} ${MODEL}${R}"
 
 CWD_PART=""
 GIT_PART=""
 if [ -n "$CWD" ]; then
   CWD_SHORT="${CWD/#$HOME/\~}"
-  CWD_PART="${CYAN}${CWD_SHORT}${R}"
+  CWD_PART="${BLUE}${G_DIR} ${CWD_SHORT}${R}"
   BRANCH=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
 
+  # `gh` resolves the repository from its own working directory, which is
+  # whatever cwd Claude Code spawned this script with - not necessarily $CWD.
+  # Pin it with -R so the lookup works from anywhere.
+  REPO_URL=$(git -C "$CWD" remote get-url origin 2>/dev/null | sed 's|git@github.com:|https://github.com/|;s|\.git$||' || true)
+  REPO_SLUG=""
+  case "$REPO_URL" in
+    https://github.com/*) REPO_SLUG="${REPO_URL#https://github.com/}" ;;
+  esac
+
   # Active PR for current branch, cached briefly to avoid statusline latency.
-  if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "develop" ] && [ "$BRANCH" != "HEAD" ] && command -v gh >/dev/null 2>&1; then
-    SESSION_ID=$(echo "$input" | jq -r '.session_id // empty')
+  if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "develop" ] && [ "$BRANCH" != "HEAD" ] && [ -n "$REPO_SLUG" ] && command -v gh > /dev/null 2>&1; then
     CACHE_BRANCH=$(printf '%s' "$BRANCH" | tr '/:' '--')
     CACHE_FILE="/tmp/claude-pr-cache-${SESSION_ID:-default}-${CACHE_BRANCH}"
     NOW=$(date +%s)
@@ -243,39 +327,48 @@ if [ -n "$CWD" ]; then
       CACHE_AGE=$((NOW - CACHE_MTIME))
     fi
 
+    # Cache "no PR" as an explicit sentinel. A failed `gh` call (expired auth,
+    # network blip) must not be cached as an authoritative absence, or the link
+    # disappears for a minute for no visible reason.
+    PR_NONE="none"
     if [ "$CACHE_AGE" -gt 60 ]; then
-      PR_NUM=$(gh pr list --state open --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
-      printf '%s' "${PR_NUM:-}" > "$CACHE_FILE"
+      if PR_NUM=$(gh pr list -R "$REPO_SLUG" --state open --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null); then
+        printf '%s' "${PR_NUM:-$PR_NONE}" > "$CACHE_FILE"
+      else
+        PR_NUM=$(cat "$CACHE_FILE" 2>/dev/null || true)
+      fi
     else
       PR_NUM=$(cat "$CACHE_FILE" 2>/dev/null || true)
     fi
+    [ "${PR_NUM:-}" = "$PR_NONE" ] && PR_NUM=""
 
     if [ -n "${PR_NUM:-}" ]; then
-      REPO_URL=$(git -C "$CWD" remote get-url origin 2>/dev/null | sed 's|git@github.com:|https://github.com/|;s|\.git$||' || true)
-      if [ -n "$REPO_URL" ]; then
-        PR_URL="${REPO_URL}/pull/${PR_NUM}"
-        GIT_PART="${DIM}(${BRANCH} ${R}${CYAN}\033]8;;${PR_URL}\033\\#${PR_NUM}\033]8;;\033\\${R}${DIM})${R}"
-      fi
+      PR_URL="${REPO_URL}/pull/${PR_NUM}"
+      # OSC 8 hyperlink, built from real escapes so the final printf needs no
+      # backslash interpretation (which would mangle paths containing one).
+      OSC8_OPEN=$'\033]8;;'"${PR_URL}"$'\033\\'
+      OSC8_CLOSE=$'\033]8;;\033\\'
+      GIT_PART="${PURPLE}${G_BRANCH} ${BRANCH}${R} ${AQUA}${UL}${OSC8_OPEN}#${PR_NUM}${OSC8_CLOSE}${R}"
     fi
   fi
 
   if [ -n "$BRANCH" ] && [ -z "$GIT_PART" ]; then
-    GIT_PART="${DIM}(${BRANCH})${R}"
+    GIT_PART="${PURPLE}${G_BRANCH} ${BRANCH}${R}"
   fi
 fi
 
 ROW1=""
 [ -n "$MODEL_PART" ] && ROW1="${MODEL_PART}"
-[ -n "$CWD_PART" ] && ROW1="${ROW1} | ${CWD_PART}"
-[ -n "$GIT_PART" ] && ROW1="${ROW1} ${GIT_PART}"
-[ -n "$PLUGIN_PART" ] && ROW1="${ROW1} | ${PLUGIN_PART}"
+[ -n "$CWD_PART" ] && ROW1="${ROW1}${S}${CWD_PART}"
+[ -n "$GIT_PART" ] && ROW1="${ROW1}${S}${GIT_PART}"
+[ -n "$PLUGIN_PART" ] && ROW1="${ROW1}${S}${PLUGIN_PART}"
 
-# Row 2: usage, tokens, native session cost, timing, limits.
-ROW2="${BAR_C}${BAR}${R} ${BAR_C}${PCT}%${R}"
+# Row 2: usage, tokens, native session cost, timing, limits. Every segment
+# beyond the context bar hides itself when it has nothing to report.
+ROW2="${BAR_C}${BAR} ${PCT}%${R}"
 [ -n "$WARN_PART" ] && ROW2="${ROW2} ${WARN_PART}"
-ROW2="${ROW2} | ${DIM}in:${IN_FMT} out:${OUT_FMT} cr:${CR_FMT} cw:${CW_FMT}${R} | ${GOLD}${COST_FMT}${R}"
-ROW2="${ROW2} | ${TIME_PART}${RL_PART}"
-[ -n "$SESSION_PART" ] && ROW2="${ROW2} | ${SESSION_PART}"
-[ -n "$LINES_PART" ] && ROW2="${ROW2} | ${LINES_PART}"
+for segment in "$TOKENS_PART" "$COST_PART" "$TIME_PART" "$LINES_PART" "$RL_PART"; do
+  [ -n "$segment" ] && ROW2="${ROW2}${S}${segment}"
+done
 
-printf '%b\n%b\n' "$ROW1" "$ROW2"
+printf '%s\n%s\n' "$ROW1" "$ROW2"

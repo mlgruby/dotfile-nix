@@ -28,7 +28,7 @@ everything is correct:
 
 ```bash
 # Navigate to your dotfiles
-cd ~/Documents/dotfile
+cd ~/dotfile
 
 # Edit your host configuration
 vim hosts.nix
@@ -163,7 +163,7 @@ source ~/.zshrc
 
 ```bash
 # Reset to clean state (this is safe)
-cd ~/Documents/dotfile
+cd ~/dotfile
 git stash
 git pull
 rebuild

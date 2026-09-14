@@ -66,7 +66,7 @@ project-local tooling.
 | | visual-studio-code | ❌ | Homebrew cask |
 | **Browsers** | brave-browser | ❌ | Homebrew cask |
 | | google-chrome | ❌ | Homebrew cask |
-| **System Tools** | alacritty | ❌ | Homebrew cask; Home Manager manages config only |
+| **System Tools** | alacritty | ✅ | Nix/Home Manager |
 | | karabiner-elements | ❌ | Homebrew cask, macOS integration |
 | | rectangle | ❌ | Homebrew cask, macOS integration |
 | **Productivity** | bitwarden | ❌ | Homebrew cask |

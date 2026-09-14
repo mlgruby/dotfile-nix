@@ -41,7 +41,8 @@ in
       };
 
       initContent = ''
-        export PATH="$HOME/.npm-global/bin:$PATH"
+        # Ensure complete PATH including Nix profiles and standard macOS system bins
+        export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
         ${lib.optionalString bitwardenAgent.enable ''
           export DOTFILES_BITWARDEN_SSH_AGENT="1"
