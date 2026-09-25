@@ -205,6 +205,7 @@ in
     gtk.enable = false; # DISABLED: Keep gtk.gtk4.theme explicitly unmanaged
     vim.enable = false; # DISABLED: Using Neovim instead
     firefox.enable = false; # DISABLED: Not our primary browser
+    rofi.enable = false; # DISABLED: Linux launcher, unused on macOS
   };
 
   # Install shell helper scripts, screenshot utility, and profile-aware rebuild wrappers.
