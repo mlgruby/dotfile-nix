@@ -19,30 +19,25 @@ FILE="$SHOT_DIR/Screenshot $TIMESTAMP.png"
 # If user cancels (e.g. hits Escape), screencapture exits non-zero without creating a file.
 if /usr/sbin/screencapture -i "$FILE"; then
   if [ -f "$FILE" ]; then
-    # Multi-representation pasteboard:
-    # 1. Plain text file path (for terminals & CLI AI agents like agy / Claude / Codex)
-    # 2. Raw PNG image binary (for web apps, chat, Slack, Discord, Google Docs, Figma)
-    # 3. File URL (for Finder, file pickers, drag & drop)
-    /usr/bin/osascript -l JavaScript - "$FILE" <<'EOF' || printf '%s' "$FILE" | /usr/bin/pbcopy
-function run(argv) {
-  ObjC.import("AppKit");
-  var filePath = argv[0];
-  var pb = $.NSPasteboard.generalPasteboard;
-  pb.clearContents;
+    # Multi-representation pasteboard via compiled Swift helper (image data + file path string):
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    HELPER="$HOME/bin/copy-screenshot-pasteboard"
+    SWIFT_SRC="$SCRIPT_DIR/copy-screenshot-pasteboard.swift"
 
-  var item = $.NSPasteboardItem.alloc.init;
-  item.setStringForType($(filePath), $.NSPasteboardTypeString);
+    # Auto-compile helper if missing or if source was updated
+    if [ ! -x "$HELPER" ] || [ -f "$SWIFT_SRC" -a "$SWIFT_SRC" -nt "$HELPER" ]; then
+      if [ -f "$SWIFT_SRC" ] && command -v swiftc >/dev/null 2>&1; then
+        mkdir -p "$HOME/bin"
+        swiftc -O "$SWIFT_SRC" -o "$HELPER" 2>/dev/null || true
+      fi
+    fi
 
-  var fileUrl = $.NSURL.fileURLWithPath($(filePath));
-  var imgData = $.NSData.dataWithContentsOfURL(fileUrl);
-  if (imgData) {
-    item.setDataForType(imgData, $.NSPasteboardTypePNG);
-  }
-  item.setStringForType(fileUrl.absoluteString, $.NSPasteboardTypeFileURL);
-
-  pb.writeObjects($([item]));
-}
-EOF
+    # Populate pasteboard using native Swift binary, falling back to pbcopy if unavailable
+    if [ -x "$HELPER" ]; then
+      "$HELPER" "$FILE" || printf '%s' "$FILE" | /usr/bin/pbcopy
+    else
+      printf '%s' "$FILE" | /usr/bin/pbcopy
+    fi
 
     # Auto-prune screenshots older than 3 days by safely moving to macOS Trash in background
     (
