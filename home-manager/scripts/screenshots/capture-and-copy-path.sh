@@ -19,16 +19,30 @@ FILE="$SHOT_DIR/Screenshot $TIMESTAMP.png"
 # If user cancels (e.g. hits Escape), screencapture exits non-zero without creating a file.
 if /usr/sbin/screencapture -i "$FILE"; then
   if [ -f "$FILE" ]; then
-    printf '%s' "$FILE" | /usr/bin/pbcopy
+    # Multi-representation pasteboard:
+    # 1. Plain text file path (for terminals & CLI AI agents like agy / Claude / Codex)
+    # 2. Raw PNG image binary (for web apps, chat, Slack, Discord, Google Docs, Figma)
+    # 3. File URL (for Finder, file pickers, drag & drop)
+    /usr/bin/osascript -l JavaScript - "$FILE" <<'EOF' || printf '%s' "$FILE" | /usr/bin/pbcopy
+function run(argv) {
+  ObjC.import("AppKit");
+  var filePath = argv[0];
+  var pb = $.NSPasteboard.generalPasteboard;
+  pb.clearContents;
 
-    # Play native macOS camera shutter / screen capture sound
-    SOUND="/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif"
-    if [ ! -f "$SOUND" ]; then
-      SOUND="/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Shutter.aif"
-    fi
-    if [ -f "$SOUND" ]; then
-      /usr/bin/afplay "$SOUND"
-    fi
+  var item = $.NSPasteboardItem.alloc.init;
+  item.setStringForType($(filePath), $.NSPasteboardTypeString);
+
+  var fileUrl = $.NSURL.fileURLWithPath($(filePath));
+  var imgData = $.NSData.dataWithContentsOfURL(fileUrl);
+  if (imgData) {
+    item.setDataForType(imgData, $.NSPasteboardTypePNG);
+  }
+  item.setStringForType(fileUrl.absoluteString, $.NSPasteboardTypeFileURL);
+
+  pb.writeObjects($([item]));
+}
+EOF
 
     # Auto-prune screenshots older than 3 days by safely moving to macOS Trash in background
     (
