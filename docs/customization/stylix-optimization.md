@@ -26,6 +26,7 @@ Stylix provides system-wide theming using base16 color schemes. Our configuratio
 | `alacritty` | ❌ Disabled | Complex custom config in `config.toml` with manual Gruvbox theme import, opacity settings, and window management would conflict |
 | `vim` | ❌ Disabled | Using Neovim instead of Vim |
 | `firefox` | ❌ Disabled | Not our primary browser, prefer manual theming for Homebrew apps |
+| `rofi` | ❌ Disabled | Linux-only launcher, unused on macOS |
 
 ### Configuration Details
 
@@ -56,6 +57,7 @@ stylix.targets = {
   # Disabled Applications
   vim.enable = false;              # Using Neovim instead
   firefox.enable = false;          # Not primary browser
+  rofi.enable = false;             # Linux-only launcher, unused on macOS
 };
 ```
 
