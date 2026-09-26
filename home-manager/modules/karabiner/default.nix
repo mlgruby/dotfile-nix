@@ -78,7 +78,7 @@
                     };
                     to = [
                       {
-                        shell_command = "$HOME/bin/capture-and-copy-screenshot || /bin/bash $HOME/dotfile/home-manager/scripts/screenshots/capture-and-copy-path.sh";
+                        shell_command = "$HOME/bin/capture-and-copy-screenshot";
                       }
                     ];
                   }

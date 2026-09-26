@@ -205,17 +205,22 @@ in
     gtk.enable = false; # DISABLED: Keep gtk.gtk4.theme explicitly unmanaged
     vim.enable = false; # DISABLED: Using Neovim instead
     firefox.enable = false; # DISABLED: Not our primary browser
+    rofi.enable = false; # DISABLED: Linux launcher, unused on macOS
   };
 
-  # Install shell helper scripts, screenshot utility, and profile-aware rebuild wrappers.
+  # Install shell helper scripts and profile-aware rebuild wrappers.
   home.file = (builtins.listToAttrs [
     (mkRebuildWrapper "bin/rebuild" "")
     (mkRebuildWrapper "bin/rebuild-work" "--work")
     (mkRebuildWrapper "bin/rebuild-personal" "--personal")
-  ]) // {
-    "bin/capture-and-copy-screenshot" = {
-      source = ./scripts/screenshots/capture-and-copy-path.sh;
-      executable = true;
-    };
-  };
+  ]);
+
+  # Build standalone native Swift screenshot utility
+  home.activation.buildScreenshotUtility = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "$HOME/bin"
+    if [ -x /usr/bin/swiftc ]; then
+      /usr/bin/swiftc -O ${./scripts/screenshots/capture-and-copy-screenshot.swift} -o "$HOME/bin/capture-and-copy-screenshot"
+      chmod +x "$HOME/bin/capture-and-copy-screenshot"
+    fi
+  '';
 }
