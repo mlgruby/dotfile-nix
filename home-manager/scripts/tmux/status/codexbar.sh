@@ -42,6 +42,40 @@ quota_color() {
   fi
 }
 
+file_mtime() {
+  stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0
+}
+
+parse_epoch_seconds() {
+  local raw="$1"
+  [ -n "$raw" ] && [ "$raw" != "null" ] || return 1
+
+  if [[ "$raw" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "${raw%.*}"
+    return 0
+  fi
+
+  if [[ "$raw" =~ ^([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(\.[0-9]+)?(Z|[+-][0-9]{2}:?[0-9]{2})?$ ]]; then
+    local dt="${BASH_REMATCH[1]}"
+    local tz="${BASH_REMATCH[3]}"
+    if [[ -z "$tz" || "$tz" == "Z" ]]; then
+      local epoch
+      epoch=$(date -j -u -f "%Y-%m-%dT%H:%M:%S" "$dt" "+%s" 2>/dev/null) && {
+        echo "$epoch"
+        return 0
+      }
+    fi
+  fi
+
+  local fallback
+  fallback=$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$raw" "+%s" 2>/dev/null || date -d "$raw" "+%s" 2>/dev/null) && {
+    echo "$fallback"
+    return 0
+  }
+
+  return 1
+}
+
 reset_countdown() {
   local resets_at="${1:-}"
 
@@ -50,37 +84,35 @@ reset_countdown() {
     return
   fi
 
-  python3 - "$resets_at" <<'PY'
-from datetime import datetime, timezone
-import math
-import sys
+  local reset_epoch
+  reset_epoch=$(parse_epoch_seconds "$resets_at") || {
+    printf '?'
+    return
+  }
 
-raw = sys.argv[1]
-try:
-    reset = datetime.fromtimestamp(float(raw), tz=timezone.utc)
-except ValueError:
-    try:
-        reset = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-        if reset.tzinfo is None:
-            reset = reset.replace(tzinfo=timezone.utc)
-    except ValueError:
-        print("?", end="")
-        raise SystemExit
+  local now
+  now=$(date +%s)
+  local seconds=$(( reset_epoch - now ))
+  if (( seconds <= 0 )); then
+    printf 'now'
+    return
+  fi
 
-seconds = max(0, math.ceil((reset - datetime.now(timezone.utc)).total_seconds()))
-total_minutes = math.ceil(seconds / 60)
-days, total_minutes = divmod(total_minutes, 24 * 60)
-hours, minutes = divmod(total_minutes, 60)
+  local total_minutes=$(( (seconds + 59) / 60 ))
+  local days=$(( total_minutes / 1440 ))
+  local rem_min=$(( total_minutes % 1440 ))
+  local hours=$(( rem_min / 60 ))
+  local minutes=$(( rem_min % 60 ))
 
-if days:
-    print(f"{days}d {hours}h", end="")
-elif hours:
-    print(f"{hours}h {minutes}m", end="")
-elif minutes:
-    print(f"{minutes}m", end="")
-else:
-    print("now", end="")
-PY
+  if (( days > 0 )); then
+    printf '%dd %dh' "$days" "$hours"
+  elif (( hours > 0 )); then
+    printf '%dh %dm' "$hours" "$minutes"
+  elif (( minutes > 0 )); then
+    printf '%dm' "$minutes"
+  else
+    printf 'now'
+  fi
 }
 
 reset_is_within() {
@@ -90,24 +122,12 @@ reset_is_within() {
   [ -n "$resets_at" ] && [ "$resets_at" != "null" ] || return 1
   [[ "$threshold_seconds" =~ ^[0-9]+$ ]] || return 1
 
-  python3 - "$resets_at" "$threshold_seconds" <<'PY'
-from datetime import datetime, timezone
-import sys
-
-raw, threshold = sys.argv[1:]
-try:
-    reset = datetime.fromtimestamp(float(raw), tz=timezone.utc)
-except ValueError:
-    try:
-        reset = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-        if reset.tzinfo is None:
-            reset = reset.replace(tzinfo=timezone.utc)
-    except ValueError:
-        raise SystemExit(1)
-
-remaining = (reset - datetime.now(timezone.utc)).total_seconds()
-raise SystemExit(0 if 0 <= remaining <= int(threshold) else 1)
-PY
+  local reset_epoch
+  reset_epoch=$(parse_epoch_seconds "$resets_at") || return 1
+  local now
+  now=$(date +%s)
+  local remaining=$(( reset_epoch - now ))
+  (( remaining >= 0 && remaining <= threshold_seconds ))
 }
 
 quota_value() {
@@ -335,7 +355,7 @@ tmux_status_collect_codexbar() {
   local mtime=0
 
   if [ -f "$CACHE_FILE" ]; then
-    mtime=$(python3 -c "import os; print(int(os.path.getmtime('$CACHE_FILE')))" 2>/dev/null || echo 0)
+    mtime=$(file_mtime "$CACHE_FILE")
   fi
 
   # Quota refreshes can make provider calls, so tmux always returns immediately.
@@ -343,7 +363,7 @@ tmux_status_collect_codexbar() {
   if [ ! -f "$CACHE_FILE" ] || (( now - mtime > CACHE_AGE_LIMIT )); then
     if [ -d "$LOCK_DIR" ]; then
       local lock_mtime
-      lock_mtime=$(python3 -c "import os; print(int(os.path.getmtime('$LOCK_DIR')))" 2>/dev/null || echo 0)
+      lock_mtime=$(file_mtime "$LOCK_DIR")
       if (( now - lock_mtime > 120 )); then
         rmdir "$LOCK_DIR" 2>/dev/null || true
       fi
