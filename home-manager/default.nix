@@ -221,7 +221,9 @@ in
   home.activation.buildScreenshotUtility = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/bin"
     SWIFT_COMPILER=""
-    if [ -x /usr/bin/swiftc ] && env -u DEVELOPER_DIR -u SDKROOT /usr/bin/swiftc --version >/dev/null 2>&1; then
+    if [ -x /Library/Developer/CommandLineTools/usr/bin/swiftc ] && /Library/Developer/CommandLineTools/usr/bin/swiftc --version >/dev/null 2>&1; then
+      SWIFT_COMPILER=/Library/Developer/CommandLineTools/usr/bin/swiftc
+    elif [ -x /usr/bin/swiftc ] && env -u DEVELOPER_DIR -u SDKROOT /usr/bin/swiftc --version >/dev/null 2>&1; then
       SWIFT_COMPILER=/usr/bin/swiftc
     elif command -v swiftc >/dev/null 2>&1 && env -u DEVELOPER_DIR -u SDKROOT swiftc --version >/dev/null 2>&1; then
       SWIFT_COMPILER=$(command -v swiftc)
@@ -241,7 +243,6 @@ mkdir -p "$SHOT_DIR"
 FILE="$SHOT_DIR/Screenshot $(date '+%Y-%m-%d at %H.%M.%S').png"
 if /usr/sbin/screencapture -i -x "$FILE" && [ -s "$FILE" ]; then
   osascript -e "set the clipboard to (read (POSIX file \"$FILE\") as «class PNG »)" 2>/dev/null || true
-  printf "%s" "$FILE" | pbcopy
   afplay "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif" 2>/dev/null || true
 fi
 EOF
