@@ -1,7 +1,17 @@
 # Work-profile Zsh helpers.
 
-export DEVCONTAINER_GITHUB_ACTOR="$(gh api user --jq .login)"
-export DEVCONTAINER_GITHUB_TOKEN="$(gh auth token)"
+# Lazy helper to load GitHub credentials for devcontainers on-demand
+# Avoid ambiently exporting high-privilege GitHub tokens into every interactive shell environment
+function devcontainer-auth() {
+  if command -v gh >/dev/null 2>&1; then
+    export DEVCONTAINER_GITHUB_ACTOR="$(gh api user --jq .login 2>/dev/null || true)"
+    export DEVCONTAINER_GITHUB_TOKEN="$(gh auth token 2>/dev/null || true)"
+    echo "Exported DEVCONTAINER_GITHUB_ACTOR and DEVCONTAINER_GITHUB_TOKEN."
+  else
+    echo "gh CLI not found." >&2
+    return 1
+  fi
+}
 
 function setup-vortexa-kube() {
   echo "Setting up Vortexa Kubernetes contexts..."

@@ -109,6 +109,10 @@ in
       ".env"
       ".env.local"
       ".env.*.local"
+      ".env.backup*"
+      ".env.*.backup*"
+      "*.backup*"
+      "*.bak"
 
       # Direnv
       ".direnv/"

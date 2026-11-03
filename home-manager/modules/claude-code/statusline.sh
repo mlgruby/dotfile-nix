@@ -149,8 +149,8 @@ COST_FMT=$(printf '$%.2f' "$COST_RAW")
 # Keep one local file per session so another Claude session cannot overwrite it.
 # Fixed path: the tmux server may have a different TMPDIR inherited from when
 # it started, so both processes must use an explicit shared location.
-CLAUDE_COST_DIR="/tmp/claude-cost-cache"
-mkdir -p "$CLAUDE_COST_DIR"
+CLAUDE_COST_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/claude-cost"
+mkdir -p "$CLAUDE_COST_DIR" && chmod 700 "$CLAUDE_COST_DIR" 2>/dev/null || true
 CLAUDE_COST_DAY=$(date +%Y-%m-%d)
 CLAUDE_COST_CACHE="${CLAUDE_COST_DIR}/claude-${CLAUDE_COST_DAY}-${SESSION_ID:-unknown}.json"
 CLAUDE_COST_LOCK="${CLAUDE_COST_CACHE}.lock"
@@ -317,8 +317,10 @@ if [ -n "$CWD" ]; then
 
   # Active PR for current branch, cached briefly to avoid statusline latency.
   if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "develop" ] && [ "$BRANCH" != "HEAD" ] && [ -n "$REPO_SLUG" ] && command -v gh > /dev/null 2>&1; then
-    CACHE_BRANCH=$(printf '%s' "$BRANCH" | tr '/:' '--')
-    CACHE_FILE="/tmp/claude-pr-cache-${SESSION_ID:-default}-${CACHE_BRANCH}"
+    CACHE_BRANCH=$(printf '%s' "$BRANCH" | tr '/:' '--' | tr -d '\000-\037\177')
+    PR_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/claude-pr"
+    mkdir -p "$PR_CACHE_DIR" && chmod 700 "$PR_CACHE_DIR" 2>/dev/null || true
+    CACHE_FILE="${PR_CACHE_DIR}/claude-pr-${SESSION_ID:-default}-${CACHE_BRANCH}"
     NOW=$(date +%s)
     CACHE_AGE=999999
     if [ -f "$CACHE_FILE" ]; then
@@ -342,7 +344,7 @@ if [ -n "$CWD" ]; then
     fi
     [ "${PR_NUM:-}" = "$PR_NONE" ] && PR_NUM=""
 
-    if [ -n "${PR_NUM:-}" ]; then
+    if [ -n "${PR_NUM:-}" ] && [[ "${PR_NUM}" =~ ^[0-9]+$ ]]; then
       PR_URL="${REPO_URL}/pull/${PR_NUM}"
       # OSC 8 hyperlink, built from real escapes so the final printf needs no
       # backslash interpretation (which would mangle paths containing one).

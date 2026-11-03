@@ -27,7 +27,7 @@ NC='\033[0m' # No Color
 DEFAULT_REPO_URL="https://raw.githubusercontent.com/mlgruby/dotfile-nix/main"
 REPO_URL="${DOTFILES_REPO_URL:-$DEFAULT_REPO_URL}"
 SCRIPT_NAME="scripts/install/pre-nix-installation.sh"
-TEMP_DIR="/tmp/nix-darwin-setup"
+TEMP_DIR=""
 
 # Utility functions
 log_info() {
@@ -110,10 +110,12 @@ main() {
     else
         resolve_repo_url "$1"
 
-        # Create temporary directory
-        log_info "Creating temporary directory..."
-        mkdir -p "$TEMP_DIR"
+        # Create secure temporary directory
+        log_info "Creating secure temporary directory..."
+        TEMP_DIR=$(mktemp -d -t nix-darwin-setup.XXXXXXXX) || handle_error "Failed to create secure temporary directory"
+        trap 'if [[ -n "$TEMP_DIR" && -d "$TEMP_DIR" && "$USING_LOCAL_SCRIPT" != "true" ]]; then rm -rf "$TEMP_DIR"; fi' EXIT
         cd "$TEMP_DIR"
+        mkdir -p "$(dirname "$SCRIPT_NAME")"
 
         # Download the installation script
         log_info "Downloading installation script..."
@@ -191,10 +193,11 @@ main() {
     fi
     
     # Cleanup
-    if [[ "$USING_LOCAL_SCRIPT" != "true" ]]; then
+    if [[ "$USING_LOCAL_SCRIPT" != "true" && -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
         log_info "Cleaning up temporary files..."
         cd "$HOME"
         rm -rf "$TEMP_DIR"
+        TEMP_DIR=""
     fi
     
     echo ""

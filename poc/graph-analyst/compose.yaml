@@ -20,8 +20,9 @@ services:
       REPO_ROOT: /workspace
       PI_MODEL: ${PI_MODEL:-gemini-3.6-flash}
       PORT: 8080
+    restart: unless-stopped
     ports:
-      - "${ANALYST_PORT:-8080}:8080"
+      - "127.0.0.1:${ANALYST_PORT:-8080}:8080"
     volumes:
       - ../..:/workspace:ro
     networks:

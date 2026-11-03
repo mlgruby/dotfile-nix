@@ -86,6 +86,12 @@ NUM_COLOR="${FG_BRIGHT_WHITE}${B}"
   ' 2>/dev/null || printf "idle\n0\n\nfalse\n\n\nfalse\nfalse\n0\n0\n0\n\n\n80\n\n\n\n0\n0\n0\n0\n100\n-1\n0\n"
 )"
 
+# Sanitize untrusted input strings against terminal escape / control character injection
+VCS_BRANCH="$(printf '%s' "$VCS_BRANCH" | tr -d '\000-\037\177' | tr '\\' '/')"
+CWD="$(printf '%s' "$CWD" | tr -d '\000-\037\177' | tr '\\' '/')"
+MODEL_NAME="$(printf '%s' "$MODEL_NAME" | tr -d '\000-\037\177')"
+MODEL_ID="$(printf '%s' "$MODEL_ID" | tr -d '\000-\037\177')"
+
 
 # ─── Icons & Glyphs (Configurable Fallback) ──────────────────────────────────
 USE_NERD_FONTS=${USE_NERD_FONTS:-true}

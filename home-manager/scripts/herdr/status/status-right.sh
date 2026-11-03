@@ -10,14 +10,19 @@ fi
 raw="$(bash "$TMUX_STATUS" 2>/dev/null || true)"
 [ -z "$raw" ] && exit 0
 
-python3 - <<PY
-import re, sys
+HERDR_RAW="$raw" python3 - <<'PY'
+import os, re, sys
 
-raw = """$raw"""
+raw = os.environ.get("HERDR_RAW", "")
 
 def hex_to_rgb(h):
     h = h.lstrip('#')
-    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    if len(h) == 6:
+        try:
+            return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+        except ValueError:
+            pass
+    return (255, 255, 255)
 
 def tmux_to_ansi(text):
     def repl(m):

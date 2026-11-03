@@ -14,10 +14,12 @@
 # - Pricing is fetched online first, with ccusage's embedded offline pricing as
 #   fallback. These estimates can differ from Claude's native billing payload.
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH="/Users/satyasheel/.local/bin:/Users/satyasheel/.nix-profile/bin:/etc/profiles/per-user/satyasheel/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CACHE_FILE="${CODEXBAR_STATUS_CACHE_FILE:-/tmp/codexbar_status.cache}"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux"
+mkdir -p "$CACHE_DIR" && chmod 700 "$CACHE_DIR" 2>/dev/null || true
+CACHE_FILE="${CODEXBAR_STATUS_CACHE_FILE:-$CACHE_DIR/codexbar_status.cache}"
 LOCK_DIR="${CACHE_FILE}.lock"
 CACHE_AGE_LIMIT=60 # 1 minute; the refresh itself runs asynchronously
 
@@ -43,7 +45,17 @@ quota_color() {
 }
 
 file_mtime() {
-  stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0
+  local out
+  if stat --version >/dev/null 2>&1; then
+    out=$(stat -c %Y "$1" 2>/dev/null || echo 0)
+  else
+    out=$(/usr/bin/stat -f %m "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0)
+  fi
+  if [[ "$out" =~ ^[0-9]+$ ]]; then
+    echo "$out"
+  else
+    echo 0
+  fi
 }
 
 parse_epoch_seconds() {
@@ -231,25 +243,44 @@ cost_color() {
 }
 
 read_claude_cost() {
-  local today raw_json raw_cost
+  local today since_date raw_json raw_cost
 
   today=$(date +%Y-%m-%d)
-  # Prefer current pricing while online; fall back to embedded pricing when
-  # the network or pricing endpoint is unavailable.
+  since_date="${today//-/}"
+  # Pass --since so ccusage only scans today's JSONL entries (~0.5s instead of
+  # scanning the entire multi-GB history and hitting the timeout).
+  # Prefer current pricing while online; fall back to embedded pricing +
+  # token-based estimate for newer models (e.g. claude-opus-5-5 / sonnet-5-5)
+  # when offline.
   if command -v timeout >/dev/null 2>&1; then
-    raw_json=$(timeout 8 ccusage claude daily --json 2>/dev/null || true)
+    raw_json=$(timeout 12 ccusage claude daily --json --since "$since_date" 2>/dev/null || true)
   else
-    raw_json=$(ccusage claude daily --json 2>/dev/null || true)
+    raw_json=$(ccusage claude daily --json --since "$since_date" 2>/dev/null || true)
   fi
   if [ -z "$raw_json" ] || ! printf '%s' "$raw_json" | jq -e . >/dev/null 2>&1; then
-    raw_json=$(ccusage claude daily --json --offline 2>/dev/null || echo '{}')
+    raw_json=$(ccusage claude daily --json --offline --since "$since_date" 2>/dev/null || echo '{}')
   fi
   raw_cost=$(printf '%s' "$raw_json" |
     jq -r --arg today "$today" '
+      def model_cost:
+        if (.cost // 0) > 0 then .cost
+        elif (.modelName // "" | test("opus"; "i")) then
+          ((.inputTokens // 0) * 5 + (.cacheCreationTokens // 0) * 6.25 + (.cacheReadTokens // 0) * 0.5 + (.outputTokens // 0) * 25) / 1000000
+        elif (.modelName // "" | test("sonnet"; "i")) then
+          ((.inputTokens // 0) * 3 + (.cacheCreationTokens // 0) * 3.75 + (.cacheReadTokens // 0) * 0.3 + (.outputTokens // 0) * 15) / 1000000
+        elif (.modelName // "" | test("haiku"; "i")) then
+          ((.inputTokens // 0) * 1 + (.cacheCreationTokens // 0) * 1.25 + (.cacheReadTokens // 0) * 0.1 + (.outputTokens // 0) * 5) / 1000000
+        else 0 end;
+      def day_cost:
+        if (.totalCost // .costUSD // .cost // 0) > 0 then
+          (.totalCost // .costUSD // .cost // 0)
+        elif (.modelBreakdowns | type) == "array" then
+          ([.modelBreakdowns[] | model_cost] | add // 0)
+        else 0 end;
       if (.data | type) == "array" then
-        ([.data[] | select(.date == $today) | (.totalCost // .costUSD // .cost // 0)] | add // 0)
+        ([.data[] | select(.date == $today) | day_cost] | add // 0)
       elif (.daily | type) == "array" then
-        ([.daily[] | select(.date == $today) | (.totalCost // .costUSD // .cost // 0)] | add // 0)
+        ([.daily[] | select(.date == $today) | day_cost] | add // 0)
       else 0 end
     ' 2>/dev/null || echo 0)
 
@@ -263,8 +294,9 @@ update_cache() {
   local openai_logo gemini_logo claude_logo
   local cx_color agy_5h_color agy_week_color cc_color
   local codex_window codex_used codex_reset codex_rem codex_value codex_str
-  local agy_json agy_5h_window agy_w_window
+  local agy_json agy_5h_window agy_w_window agy_argon_window
   local gemini_5h_used gemini_5h_reset gemini_w_used gemini_w_reset
+  local argon_used argon_reset argon_str
   local g5h_rem gw_rem g5h_value gw_value agy_str
   local claude_cost claude_str full_status
   local codex_num g5h_num gw_num
@@ -314,10 +346,33 @@ update_cache() {
         }
     ][0] // empty
   ' 2>/dev/null || true)
+  agy_argon_window=$(echo "$agy_json" | jq -c '
+    [ .command.data.groups[]?
+      | select(.name | test("argon"; "i"))
+      | .buckets[]?
+      | select((.id | test("argon"; "i")) or .window == "weekly")
+      | {
+          usedPercent: ((1 - (.remaining_fraction // 0)) * 100),
+          resetsAt: .reset_time
+        }
+    ][0] // empty
+  ' 2>/dev/null || true)
   gemini_5h_used=$(echo "$agy_5h_window" | jq -r '.usedPercent // empty' 2>/dev/null || true)
   gemini_5h_reset=$(echo "$agy_5h_window" | jq -r '.resetsAt // empty' 2>/dev/null || true)
   gemini_w_used=$(echo "$agy_w_window" | jq -r '.usedPercent // empty' 2>/dev/null || true)
   gemini_w_reset=$(echo "$agy_w_window" | jq -r '.resetsAt // empty' 2>/dev/null || true)
+  argon_used=$(echo "$agy_argon_window" | jq -r '.usedPercent // empty' 2>/dev/null || true)
+  argon_reset=$(echo "$agy_argon_window" | jq -r '.resetsAt // empty' 2>/dev/null || true)
+
+  argon_str=""
+  if [ -n "$argon_used" ] && [ "$argon_used" != "null" ]; then
+    local argon_num argon_rem argon_color argon_value
+    argon_num=$(echo "$argon_used" | awk '{print int($1)}')
+    argon_rem=$(( 100 - argon_num ))
+    argon_color=$(quota_color "$argon_rem")
+    argon_value=$(quota_value "$argon_rem" "$argon_reset" 129600)
+    argon_str=" Ar:#[fg=${argon_color}]${argon_value}#[fg=#ebdbb2]"
+  fi
 
   if [ -n "$gemini_5h_used" ] && [ "$gemini_5h_used" != "null" ] && [ -n "$gemini_w_used" ] && [ "$gemini_w_used" != "null" ]; then
     g5h_num=$(echo "$gemini_5h_used" | awk '{print int($1)}')
@@ -331,13 +386,17 @@ update_cache() {
     g5h_value=$(quota_value "$g5h_rem" "$gemini_5h_reset" 3600)
     gw_value=$(quota_value "$gw_rem" "$gemini_w_reset" 129600)
     if [ "$gw_rem" -eq 0 ]; then
-      # A depleted weekly quota blocks AGY regardless of the 5-hour window.
-      agy_str="${gemini_logo}#[fg=${agy_week_color}]${gw_value}#[fg=#ebdbb2]"
+      # A depleted weekly quota blocks Flash/Pro regardless of the 5-hour window.
+      agy_str="${gemini_logo}#[fg=#ebdbb2]W:#[fg=${agy_week_color}]${gw_value}#[fg=#ebdbb2]${argon_str}"
     else
-      agy_str="${gemini_logo}#[fg=#ebdbb2]5h:#[fg=${agy_5h_color}]${g5h_value}#[fg=#ebdbb2] W:#[fg=${agy_week_color}]${gw_value}#[fg=#ebdbb2]"
+      agy_str="${gemini_logo}#[fg=#ebdbb2]5h:#[fg=${agy_5h_color}]${g5h_value}#[fg=#ebdbb2] W:#[fg=${agy_week_color}]${gw_value}#[fg=#ebdbb2]${argon_str}"
     fi
   else
-    agy_str="${gemini_logo}#[fg=${MUTED}]--%#[fg=#ebdbb2]"
+    if [ -n "$argon_str" ]; then
+      agy_str="${gemini_logo}#[fg=${MUTED}]--%#[fg=#ebdbb2]${argon_str}"
+    else
+      agy_str="${gemini_logo}#[fg=${MUTED}]--%#[fg=#ebdbb2]"
+    fi
   fi
 
   # ccusage aggregates Claude's local session logs for terminal-wide daily cost.

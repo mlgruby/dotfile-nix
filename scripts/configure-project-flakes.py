@@ -89,21 +89,27 @@ def process_directory(base_dir):
         print(f"  [CONFIG] {project_name} -> {', '.join(packages)}")
         
         # Write flake.nix
+        safe_project_name = project_name.replace('\\', '\\\\').replace('"', '\\"').replace('$', '\\$')
         pkg_lines = "\n".join(f"          {pkg}" for pkg in packages)
-        flake_content = FLAKE_TEMPLATE.format(project_name=project_name, packages=pkg_lines)
+        flake_content = FLAKE_TEMPLATE.format(project_name=safe_project_name, packages=pkg_lines)
         with open(flake_path, "w") as f:
             f.write(flake_content)
             
-        # Write .envrc
+        # Write .envrc only if missing
+        created_envrc = False
         if not os.path.exists(envrc_path):
             with open(envrc_path, "w") as f:
                 f.write("use flake\n")
+            created_envrc = True
                 
-        # Run direnv allow
-        try:
-            subprocess.run(["direnv", "allow"], cwd=project_path, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except subprocess.CalledProcessError:
-            print(f"  [WARN] Failed to authorize direnv in {project_name}")
+        # Only run direnv allow if we created the verified "use flake" file
+        if created_envrc:
+            try:
+                subprocess.run(["direnv", "allow"], cwd=project_path, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                print(f"  [WARN] Failed to authorize direnv in {project_name}")
+        else:
+            print(f"  [NOTE] Pre-existing .envrc preserved in {project_name}; run 'direnv allow' manually after review.")
 
 if __name__ == "__main__":
     process_directory(PERSONAL_DIR)
