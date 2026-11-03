@@ -5,59 +5,81 @@ let fileManager = FileManager.default
 let home = fileManager.homeDirectoryForCurrentUser
 let shotDir = home.appendingPathComponent("Screenshots")
 
-// 1. Ensure ~/Screenshots directory exists
 try? fileManager.createDirectory(at: shotDir, withIntermediateDirectories: true)
 
-// 2. Generate timestamped file path
 let formatter = DateFormatter()
 formatter.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
 let timestamp = formatter.string(from: Date())
 let fileURL = shotDir.appendingPathComponent("Screenshot \(timestamp).png")
-let filePath = fileURL.path
 
-// 3. Launch macOS interactive selection
 let process = Process()
 process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
-process.arguments = ["-i", filePath]
+process.arguments = ["-i", "-x", fileURL.path]
 
 do {
     try process.run()
-    process.waitUntilExit()
 } catch {
     exit(1)
 }
 
-// 4. User pressed Escape or canceled selection
-guard process.terminationStatus == 0, fileManager.fileExists(atPath: filePath) else {
-    exit(0)
+// Wait until either screencapture exits OR the PNG file is completely written (ends with 12-byte PNG IEND chunk).
+// /usr/sbin/screencapture calls MDItemSetAttributes (Spotlight mds) after closing the PNG file, which can hang
+// for 60+ seconds when mds is busy and block the clipboard update if we wait for process exit first.
+let pngIEND = Data([0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82])
+var capturedData: Data? = nil
+
+while process.isRunning {
+    if let data = try? Data(contentsOf: fileURL),
+       data.count > 24,
+       data.suffix(12) == pngIEND {
+        capturedData = data
+        break
+    }
+    usleep(20_000)
 }
 
-// 5. Dual-representation clipboard:
-//    - public.utf8-plain-text (file path for CLI / terminal agents like Antigravity, Claude, Codex)
-//    - public.png (raw image binary for web apps, Slack, ChatGPT, Discord, Notion)
-//    - public.file-url (file URL for Finder and drag-and-drop)
-if let imgData = try? Data(contentsOf: fileURL) {
-    let pb = NSPasteboard.general
-    pb.clearContents()
+if capturedData == nil {
+    process.waitUntilExit()
+    guard process.terminationStatus == 0,
+          fileManager.fileExists(atPath: fileURL.path),
+          let data = try? Data(contentsOf: fileURL),
+          !data.isEmpty else {
+        exit(0)
+    }
+    capturedData = data
+}
+
+if let imageData = capturedData {
+    let pasteboard = NSPasteboard.general
+    pasteboard.clearContents()
 
     let item = NSPasteboardItem()
-    item.setString(filePath, forType: .string)
-    item.setData(imgData, forType: .png)
+    item.setData(imageData, forType: .png)
     item.setString(fileURL.absoluteString, forType: .fileURL)
+    item.setString(fileURL.path, forType: .string)
+    pasteboard.writeObjects([item])
 
-    pb.writeObjects([item])
+    let soundPaths = [
+        "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif",
+        "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Shutter.aif"
+    ]
+    if let soundPath = soundPaths.first(where: { fileManager.fileExists(atPath: $0) }) {
+        let soundProcess = Process()
+        soundProcess.executableURL = URL(fileURLWithPath: "/usr/bin/afplay")
+        soundProcess.arguments = [soundPath]
+        try? soundProcess.run()
+    }
 }
 
-// 6. Native macOS Trash auto-pruning for screenshots older than 3 days
-let threeDaysAgo = Date().addingTimeInterval(-3 * 24 * 3600)
+let cutoff = Date().addingTimeInterval(-3 * 24 * 60 * 60)
 if let files = try? fileManager.contentsOfDirectory(
     at: shotDir,
     includingPropertiesForKeys: [.contentModificationDateKey]
 ) {
     for file in files where file.lastPathComponent.hasPrefix("Screenshot ") && file.pathExtension == "png" {
-        if let attrs = try? file.resourceValues(forKeys: [.contentModificationDateKey]),
-           let modDate = attrs.contentModificationDate,
-           modDate < threeDaysAgo {
+        if let values = try? file.resourceValues(forKeys: [.contentModificationDateKey]),
+           let modified = values.contentModificationDate,
+           modified < cutoff {
             try? fileManager.trashItem(at: file, resultingItemURL: nil)
         }
     }

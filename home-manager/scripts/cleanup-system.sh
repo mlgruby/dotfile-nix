@@ -42,7 +42,8 @@ run_regular_cleanup() {
   fi
 
   if command -v brew >/dev/null 2>&1; then
-    brew cleanup --prune=all 2>/dev/null || true
+    HOMEBREW_NO_CLEANUP_FORMULAE="${HOMEBREW_NO_CLEANUP_FORMULAE:+$HOMEBREW_NO_CLEANUP_FORMULAE,}herdr" \
+      brew cleanup --prune=all 2>/dev/null || true
   fi
 
   if command -v uv >/dev/null 2>&1; then
