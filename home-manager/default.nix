@@ -232,8 +232,7 @@ in
         -o "$HOME/bin/capture-and-copy-screenshot"
       chmod +x "$HOME/bin/capture-and-copy-screenshot"
     else
-      echo "warning: Swift compiler unavailable; installing screenshot Bash fallback"
-      ln -sf ${./scripts/screenshots/capture-and-copy-path.sh} "$HOME/bin/capture-and-copy-screenshot"
+      echo "warning: Swift compiler unavailable; screenshot utility build skipped"
     fi
   '';
 }
