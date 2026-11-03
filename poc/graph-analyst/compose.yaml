@@ -15,6 +15,7 @@ services:
       - graphify-mcp
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY:?Set GEMINI_API_KEY in the shell or a local .env file}
+      ANALYST_API_KEY: ${ANALYST_API_KEY:-}
       GRAPHIFY_MCP_URL: http://graphify-mcp:8080/mcp
       GRAPHIFY_API_KEY: ${GRAPHIFY_API_KEY:-}
       REPO_ROOT: /workspace

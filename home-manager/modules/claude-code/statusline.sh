@@ -303,8 +303,10 @@ CWD_PART=""
 GIT_PART=""
 if [ -n "$CWD" ]; then
   CWD_SHORT="${CWD/#$HOME/\~}"
-  CWD_PART="${BLUE}${G_DIR} ${CWD_SHORT}${R}"
+  CWD_DISPLAY="$(printf '%s' "$CWD_SHORT" | tr -d '\000-\037\177')"
+  CWD_PART="${BLUE}${G_DIR} ${CWD_DISPLAY}${R}"
   BRANCH=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+  BRANCH_DISPLAY="$(printf '%s' "$BRANCH" | tr -d '\000-\037\177')"
 
   # `gh` resolves the repository from its own working directory, which is
   # whatever cwd Claude Code spawned this script with - not necessarily $CWD.
@@ -350,12 +352,12 @@ if [ -n "$CWD" ]; then
       # backslash interpretation (which would mangle paths containing one).
       OSC8_OPEN=$'\033]8;;'"${PR_URL}"$'\033\\'
       OSC8_CLOSE=$'\033]8;;\033\\'
-      GIT_PART="${PURPLE}${G_BRANCH} ${BRANCH}${R} ${AQUA}${UL}${OSC8_OPEN}#${PR_NUM}${OSC8_CLOSE}${R}"
+      GIT_PART="${PURPLE}${G_BRANCH} ${BRANCH_DISPLAY}${R} ${AQUA}${UL}${OSC8_OPEN}#${PR_NUM}${OSC8_CLOSE}${R}"
     fi
   fi
 
-  if [ -n "$BRANCH" ] && [ -z "$GIT_PART" ]; then
-    GIT_PART="${PURPLE}${G_BRANCH} ${BRANCH}${R}"
+  if [ -n "$BRANCH_DISPLAY" ] && [ -z "$GIT_PART" ]; then
+    GIT_PART="${PURPLE}${G_BRANCH} ${BRANCH_DISPLAY}${R}"
   fi
 fi
 

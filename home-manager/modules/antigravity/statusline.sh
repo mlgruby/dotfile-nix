@@ -88,9 +88,11 @@ NUM_COLOR="${FG_BRIGHT_WHITE}${B}"
 
 # Sanitize untrusted input strings against terminal escape / control character injection
 VCS_BRANCH="$(printf '%s' "$VCS_BRANCH" | tr -d '\000-\037\177' | tr '\\' '/')"
-CWD="$(printf '%s' "$CWD" | tr -d '\000-\037\177' | tr '\\' '/')"
-MODEL_NAME="$(printf '%s' "$MODEL_NAME" | tr -d '\000-\037\177')"
-MODEL_ID="$(printf '%s' "$MODEL_ID" | tr -d '\000-\037\177')"
+# Preserve CWD for filesystem lookups, but strip control characters
+CWD="$(printf '%s' "$CWD" | tr -d '\000-\037\177')"
+CWD_DISPLAY="$(printf '%s' "$CWD" | tr '\\' '/')"
+MODEL_NAME="$(printf '%s' "$MODEL_NAME" | tr -d '\000-\037\177' | tr '\\' '/')"
+MODEL_ID="$(printf '%s' "$MODEL_ID" | tr -d '\000-\037\177' | tr '\\' '/')"
 
 
 # ─── Icons & Glyphs (Configurable Fallback) ──────────────────────────────────
@@ -465,15 +467,15 @@ join_with_space() {
 # ─── Define Component Variants ───────────────────────────────────────────────
 
 # --- CWD Path Variants ---
-CWD_WIDE_VAL=$(shorten_path "$CWD" 25)
+CWD_WIDE_VAL=$(shorten_path "$CWD_DISPLAY" 25)
 DIR_WIDE=""
 [ -n "$CWD_WIDE_VAL" ] && DIR_WIDE="${FG_CYAN}${ICON_FOLDER} ${R}${CWD_WIDE_VAL}${R}"
 
-CWD_MED_VAL=$(shorten_path "$CWD" 15)
+CWD_MED_VAL=$(shorten_path "$CWD_DISPLAY" 15)
 DIR_MED=""
 [ -n "$CWD_MED_VAL" ] && DIR_MED="${FG_CYAN}${ICON_FOLDER} ${R}${CWD_MED_VAL}${R}"
 
-CWD_NARROW_VAL=$(shorten_path "$CWD" 0)
+CWD_NARROW_VAL=$(shorten_path "$CWD_DISPLAY" 0)
 DIR_NARROW=""
 [ -n "$CWD_NARROW_VAL" ] && DIR_NARROW="${FG_CYAN}${ICON_FOLDER} ${R}${CWD_NARROW_VAL}${R}"
 

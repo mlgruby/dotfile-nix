@@ -14,7 +14,7 @@
 # - Pricing is fetched online first, with ccusage's embedded offline pricing as
 #   fallback. These estimates can differ from Claude's native billing payload.
 
-export PATH="/Users/satyasheel/.local/bin:/Users/satyasheel/.nix-profile/bin:/etc/profiles/per-user/satyasheel/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/${USER:-$(id -un 2>/dev/null || true)}/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux"

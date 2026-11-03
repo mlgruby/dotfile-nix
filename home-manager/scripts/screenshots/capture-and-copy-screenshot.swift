@@ -10,7 +10,14 @@ try? fileManager.createDirectory(at: shotDir, withIntermediateDirectories: true)
 let formatter = DateFormatter()
 formatter.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
 let timestamp = formatter.string(from: Date())
-let fileURL = shotDir.appendingPathComponent("Screenshot \(timestamp).png")
+
+// Ensure each capture uses a unique filename that does not already exist
+var fileURL = shotDir.appendingPathComponent("Screenshot \(timestamp).png")
+var counter = 1
+while fileManager.fileExists(atPath: fileURL.path) {
+    fileURL = shotDir.appendingPathComponent("Screenshot \(timestamp) (\(counter)).png")
+    counter += 1
+}
 
 let process = Process()
 process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")

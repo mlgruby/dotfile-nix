@@ -232,7 +232,20 @@ in
         -o "$HOME/bin/capture-and-copy-screenshot"
       chmod +x "$HOME/bin/capture-and-copy-screenshot"
     else
-      echo "warning: Swift compiler unavailable; screenshot utility build skipped"
+      echo "warning: Swift compiler unavailable; installing shell screenshot fallback"
+      cat <<'EOF' > "$HOME/bin/capture-and-copy-screenshot"
+#!/usr/bin/env bash
+set -euo pipefail
+SHOT_DIR="$HOME/Screenshots"
+mkdir -p "$SHOT_DIR"
+FILE="$SHOT_DIR/Screenshot $(date '+%Y-%m-%d at %H.%M.%S').png"
+if /usr/sbin/screencapture -i -x "$FILE" && [ -s "$FILE" ]; then
+  osascript -e "set the clipboard to (read (POSIX file \"$FILE\") as «class PNG »)" 2>/dev/null || true
+  printf "%s" "$FILE" | pbcopy
+  afplay "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif" 2>/dev/null || true
+fi
+EOF
+      chmod +x "$HOME/bin/capture-and-copy-screenshot"
     fi
   '';
 }
