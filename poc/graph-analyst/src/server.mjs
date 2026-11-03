@@ -126,10 +126,28 @@ const searchRepository = defineTool({
       "--glob",
       "!*.pem",
       "--glob",
+      "!*.backup*",
+      "--glob",
+      "!*.bak",
+      "--glob",
+      "!*id_rsa*",
+      "--glob",
+      "!*id_ed25519*",
+      "--glob",
+      "!.direnv/**",
+      "--glob",
+      "!.claude/**",
+      "--glob",
+      "!*.sqlite",
+      "--glob",
+      "!*.log",
+      "--glob",
       "!node_modules/**",
       "--max-count",
       "20",
+      "-e",
       params.query,
+      "--",
       ".",
     ];
 
@@ -272,6 +290,10 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+const MAX_BODY_BYTES = 64 * 1024; // 64 KB
+const MAX_QUESTION_CHARS = 4000;
+const analystApiKey = process.env.ANALYST_API_KEY || "";
+
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/healthz") {
     return json(res, 200, { ok: true, model: `google/${modelId}` });
@@ -281,14 +303,44 @@ const server = http.createServer(async (req, res) => {
     return json(res, 404, { error: "Use POST /ask or GET /healthz" });
   }
 
+  // Optional API key enforcement if ANALYST_API_KEY is configured
+  if (analystApiKey) {
+    const authHeader = req.headers["authorization"] || "";
+    const apiKeyHeader = req.headers["x-api-key"] || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : apiKeyHeader.trim();
+    if (token !== analystApiKey) {
+      return json(res, 401, { error: "Unauthorized: Invalid or missing API key" });
+    }
+  }
+
   try {
     let raw = "";
-    for await (const chunk of req) raw += chunk;
-    const body = JSON.parse(raw || "{}");
+    let bytes = 0;
+    for await (const chunk of req) {
+      bytes += chunk.length;
+      if (bytes > MAX_BODY_BYTES) {
+        return json(res, 413, { error: `Request body exceeds limit (${MAX_BODY_BYTES} bytes)` });
+      }
+      raw += chunk;
+    }
+
+    let body;
+    try {
+      body = JSON.parse(raw || "{}");
+    } catch {
+      return json(res, 400, { error: "Invalid JSON body" });
+    }
+
     if (typeof body.question !== "string" || body.question.trim() === "") {
       return json(res, 400, { error: "question must be a non-empty string" });
     }
-    const answerText = await answer(body.question.trim());
+
+    const question = body.question.trim();
+    if (question.length > MAX_QUESTION_CHARS) {
+      return json(res, 400, { error: `question exceeds limit (${MAX_QUESTION_CHARS} characters)` });
+    }
+
+    const answerText = await answer(question);
     return json(res, 200, { answer: answerText, model: `google/${modelId}` });
   } catch (error) {
     console.error(error);

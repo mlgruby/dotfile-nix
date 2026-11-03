@@ -19,7 +19,7 @@ in
   # Pi Coding Agent
   pil = "pi --provider lmstudio --model google/gemma-4-26b-a4b"; # Use Gemma 4 26B from LM Studio
   pig = "pi --provider lmstudio --model google/gemma-4-26b-a4b"; # Gemma shorthand
-  pib = "AWS_PROFILE=${aws.profiles.default} AWS_REGION=${aws.region} pi --provider amazon-bedrock --model eu.anthropic.claude-sonnet-4-6"; # Use Anthropic Claude Sonnet via Bedrock
+  pib = "AWS_PROFILE=${aws.profiles.default} AWS_REGION=${aws.region} pi --provider amazon-bedrock --model global.anthropic.claude-sonnet-5-5"; # Use Anthropic Claude Sonnet via Bedrock
   pic = "pi --continue"; # Continue previous pi session
   pir = "pi --resume"; # Resume a pi session
 

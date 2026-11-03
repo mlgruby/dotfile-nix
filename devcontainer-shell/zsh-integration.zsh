@@ -2,13 +2,16 @@
 
 # Ensure SSH agent forwarding works correctly on macOS host/Linux guest
 if [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
-  # Look for forwarded ssh agent socket in typical devcontainer mounts
-  for sock in $(find /tmp -type s -path "/tmp/ssh-*/agent.*" 2>/dev/null); do
-    if [ -S "$sock" ]; then
-      export SSH_AUTH_SOCK="$sock"
-      break
-    fi
-  done
+  # Look for forwarded ssh agent socket owned by the current user
+  local_user="${USER:-$(id -un 2>/dev/null || true)}"
+  if [ -n "$local_user" ]; then
+    for sock in $(find /tmp -maxdepth 2 -type s -user "$local_user" -path "/tmp/ssh-*/agent.*" 2>/dev/null); do
+      if [ -S "$sock" ] && [ -O "$sock" ] && [ -O "$(dirname "$sock")" ]; then
+        export SSH_AUTH_SOCK="$sock"
+        break
+      fi
+    done
+  fi
 fi
 
 # uv completions. Cache generated completions for faster shell startup

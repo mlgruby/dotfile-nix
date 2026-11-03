@@ -215,11 +215,37 @@ in
     (mkRebuildWrapper "bin/rebuild-personal" "--personal")
   ]);
 
-  # Build standalone native Swift screenshot utility
+  # Build the native screenshot utility after Home Manager has written files.
+  # Keep the Bash implementation available if this Mac has no working Swift
+  # compiler (for example, when Xcode Command Line Tools are not installed).
   home.activation.buildScreenshotUtility = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/bin"
-    if [ -x /usr/bin/swiftc ]; then
-      /usr/bin/swiftc -O ${./scripts/screenshots/capture-and-copy-screenshot.swift} -o "$HOME/bin/capture-and-copy-screenshot"
+    SWIFT_COMPILER=""
+    if [ -x /Library/Developer/CommandLineTools/usr/bin/swiftc ] && /Library/Developer/CommandLineTools/usr/bin/swiftc --version >/dev/null 2>&1; then
+      SWIFT_COMPILER=/Library/Developer/CommandLineTools/usr/bin/swiftc
+    elif [ -x /usr/bin/swiftc ] && env -u DEVELOPER_DIR -u SDKROOT /usr/bin/swiftc --version >/dev/null 2>&1; then
+      SWIFT_COMPILER=/usr/bin/swiftc
+    elif command -v swiftc >/dev/null 2>&1 && env -u DEVELOPER_DIR -u SDKROOT swiftc --version >/dev/null 2>&1; then
+      SWIFT_COMPILER=$(command -v swiftc)
+    fi
+
+    if [ -n "$SWIFT_COMPILER" ]; then
+      env -u DEVELOPER_DIR -u SDKROOT "$SWIFT_COMPILER" -O ${./scripts/screenshots/capture-and-copy-screenshot.swift} \
+        -o "$HOME/bin/capture-and-copy-screenshot"
+      chmod +x "$HOME/bin/capture-and-copy-screenshot"
+    else
+      echo "warning: Swift compiler unavailable; installing shell screenshot fallback"
+      cat <<'EOF' > "$HOME/bin/capture-and-copy-screenshot"
+#!/usr/bin/env bash
+set -euo pipefail
+SHOT_DIR="$HOME/Screenshots"
+mkdir -p "$SHOT_DIR"
+FILE="$SHOT_DIR/Screenshot $(date '+%Y-%m-%d at %H.%M.%S').png"
+if /usr/sbin/screencapture -i -x "$FILE" && [ -s "$FILE" ]; then
+  osascript -e "set the clipboard to (read (POSIX file \"$FILE\") as «class PNG »)" 2>/dev/null || true
+  afplay "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif" 2>/dev/null || true
+fi
+EOF
       chmod +x "$HOME/bin/capture-and-copy-screenshot"
     fi
   '';

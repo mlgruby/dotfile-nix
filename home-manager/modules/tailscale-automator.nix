@@ -21,7 +21,9 @@ let
 
     IS_HOME=false
 
-    if [ "$ROUTER_IP" = "192.168.10.1" ] || [ "$WIFI_SSID" = "Satyasheel" ]; then
+    # Verify that BOTH the specific Wi-Fi SSID AND the expected private gateway match
+    # to prevent tearing down the VPN on spoofed SSIDs or common 192.168.10.1 public subnets.
+    if [ "$ROUTER_IP" = "192.168.10.1" ] && [ "$WIFI_SSID" = "Satyasheel" ]; then
       IS_HOME=true
     fi
 
@@ -61,8 +63,8 @@ in
         "/Library/Preferences/SystemConfiguration"
         "/var/run/resolv.conf"
       ];
-      StandardOutPath = "/tmp/tailscale-automator.log";
-      StandardErrorPath = "/tmp/tailscale-automator.log";
+      StandardOutPath = "${config.home.homeDirectory}/Library/Logs/tailscale-automator.log";
+      StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/tailscale-automator.log";
     };
   };
 }

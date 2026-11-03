@@ -10,6 +10,10 @@ UPDATE_COMPLETE=0
 SKIP_HOMEBREW=0
 REBUILD_ARGS=()
 
+# Keep old Herdr executables available for macOS TCC attribution, including
+# during Homebrew operations performed by the subsequent activation.
+export HOMEBREW_NO_CLEANUP_FORMULAE="${HOMEBREW_NO_CLEANUP_FORMULAE:+$HOMEBREW_NO_CLEANUP_FORMULAE,}herdr"
+
 usage() {
   cat <<'EOF'
 Usage: update [--work|--personal|--current] [--skip-homebrew] [darwin-rebuild args]
@@ -73,13 +77,14 @@ if [[ "$SKIP_HOMEBREW" -eq 0 ]]; then
   echo "Stage 4/5: updating Homebrew packages"
   brew update
   brew upgrade
+
 else
   echo "Stage 4/5: skipping Homebrew update"
 fi
 
 echo "Stage 5/5: activating the selected host"
 export DOTFILE_DIR CURRENT_CONFIG_HOST
-bash "$DOTFILE_DIR/home-manager/scripts/rebuild-system.sh" "${REBUILD_ARGS[@]}"
+bash "$DOTFILE_DIR/home-manager/scripts/rebuild-system.sh" ${REBUILD_ARGS[@]+"${REBUILD_ARGS[@]}"}
 
 UPDATE_COMPLETE=1
 echo "System update complete."

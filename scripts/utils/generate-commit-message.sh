@@ -107,16 +107,22 @@ if [ ${#prompt} -gt $max_chars ]; then
   prompt="${prompt:0:$max_chars}... [diff truncated due to size]"
 fi
 
+# Safely construct JSON request payload using jq to prevent payload injection
+json_payload=$(jq -n \
+  --arg model "gpt-4o-mini" \
+  --arg prompt "$prompt" \
+  '{
+    model: $model,
+    messages: [{role: "user", content: $prompt}],
+    max_tokens: 500,
+    temperature: 0.7
+  }')
+
 # Make the API call to OpenAI
 response=$(curl -s https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -d "{
-    \"model\": \"gpt-3.5-turbo\",
-    \"messages\": [{\"role\": \"user\", \"content\": \"$prompt\"}],
-    \"max_tokens\": 500,
-    \"temperature\": 0.7
-  }")
+  -d "$json_payload")
 
 # Check if the API call was successful
 if echo "$response" | jq -e '.error' > /dev/null; then

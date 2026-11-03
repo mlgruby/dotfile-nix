@@ -12,6 +12,12 @@
 let
   profile = config.homelab.profile;
   bitwardenAgent = config.programs.ssh.custom.bitwardenAgent;
+  # Bitwarden binds the env var value verbatim, so expand a leading "~" to $HOME.
+  bitwardenSocketEnv =
+    if lib.hasPrefix "~/" bitwardenAgent.socketPath then
+      "$HOME/${lib.removePrefix "~/" bitwardenAgent.socketPath}"
+    else
+      bitwardenAgent.socketPath;
 in
 {
   programs = {
@@ -37,7 +43,7 @@ in
       }
       // lib.optionalAttrs bitwardenAgent.enable {
         DOTFILES_BITWARDEN_SSH_AGENT = "1";
-        BITWARDEN_SSH_AUTH_SOCK = bitwardenAgent.socketPath;
+        BITWARDEN_SSH_AUTH_SOCK = bitwardenSocketEnv;
       };
 
       initContent = ''
@@ -46,7 +52,7 @@ in
 
         ${lib.optionalString bitwardenAgent.enable ''
           export DOTFILES_BITWARDEN_SSH_AGENT="1"
-          export BITWARDEN_SSH_AUTH_SOCK="${bitwardenAgent.socketPath}"
+          export BITWARDEN_SSH_AUTH_SOCK="${bitwardenSocketEnv}"
         ''}
 
         source "${../scripts/zsh-integration.zsh}"

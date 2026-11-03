@@ -94,6 +94,8 @@ _load_aws_sso() {
     if [ -f "$credentials_file" ]; then
       cp "$credentials_file" "$HOME/.aws/credentials.backup.$(date +%Y%m%d_%H%M%S)"
       chmod 600 "$HOME/.aws/credentials.backup."* 2>/dev/null || true
+      # Retain only the 3 most recent backups
+      ls -t "$HOME/.aws/credentials.backup."* 2>/dev/null | tail -n +4 | xargs rm -f 2>/dev/null || true
       echo "📋 Backed up existing credentials file"
 
       awk -v replace_profiles="$profile_names" '
@@ -297,6 +299,10 @@ EOF
     echo "🧹 Clearing ALL AWS credentials and SSO sessions..."
     unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_REGION AWS_REGION
     aws sso logout 2>/dev/null || echo "⚠️  No active SSO session to logout"
+    if [ -f "$HOME/.aws/credentials" ]; then
+      rm -f "$HOME/.aws/credentials"
+      echo "🗑️  Removed exported ~/.aws/credentials file"
+    fi
     echo "✅ All AWS credentials and sessions cleared"
   }
 

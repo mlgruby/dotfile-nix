@@ -129,7 +129,7 @@ in
     models = {
       default = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
-        default = "eu.anthropic.claude-sonnet-5";
+        default = "global.anthropic.claude-sonnet-5-5";
         description = "Bedrock model ID for Sonnet (null to let Claude Code resolve latest default)";
       };
       fast = lib.mkOption {
@@ -139,7 +139,7 @@ in
       };
       opus = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
-        default = "eu.anthropic.claude-opus-5";
+        default = "eu.anthropic.claude-opus-5-5";
         description = "Bedrock model ID for Opus (null to let Claude Code resolve latest default)";
       };
       fable = lib.mkOption {
@@ -151,7 +151,7 @@ in
     modelNames = {
       default = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
-        default = "Sonnet 5";
+        default = "Sonnet 5.5";
         description = "Friendly name for Sonnet";
       };
       fast = lib.mkOption {
@@ -161,7 +161,7 @@ in
       };
       opus = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
-        default = "Opus 5";
+        default = "Opus 5.5";
         description = "Friendly name for Opus";
       };
       fable = lib.mkOption {
