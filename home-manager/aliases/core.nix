@@ -109,7 +109,7 @@ in
   # Clipboard (macOS)
   # ==========================================================================
   copy = "pbcopy"; # Copy to clipboard - usage: echo "text" | copy
-  paste = "pbpaste"; # Paste from clipboard - usage: paste > file.txt
+  # Keep the standard paste command for pipelines; use pbpaste for clipboard reads.
 
   # ==========================================================================
   # PATH Utilities
