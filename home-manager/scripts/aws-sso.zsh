@@ -13,12 +13,15 @@ _load_aws_sso() {
   _aws_profile_default="${AWS_SSO_DEFAULT_PROFILE:-default-sso}"
   _aws_profile_production="${AWS_SSO_PRODUCTION_PROFILE:-production-sso}"
   _aws_profile_staging="${AWS_SSO_STAGING_PROFILE:-staging-sso}"
+  _aws_profile_root="${AWS_SSO_ROOT_PROFILE:-root-sso}"
   _aws_profiles_dev="default dev develop development stg staging"
   _aws_profiles_prod="production prod prd"
+  _aws_profiles_root="root vortexa"
 
   aws_credential_profile_groups() {
     echo "dev:  $_aws_profiles_dev"
     echo "prod: $_aws_profiles_prod"
+    echo "root: $_aws_profiles_root"
   }
 
   # Helper: Parse credentials from AWS CLI env output.
@@ -196,9 +199,19 @@ EOF
     echo "✅ Credentials written to ~/.aws/credentials for: $profile_names"
   }
 
-  # Core SSO login function (single or both).
+  # Core SSO login function (single, both, or all).
   aws_sso_login() {
-    if [ $# -eq 0 ] || [ "$1" = "both" ]; then
+    if [ "$1" = "all" ]; then
+      echo "🔐 Logging into all AWS SSO profiles (production, default, root)..."
+      _aws_sso_login_single "$_aws_profile_production" "Production SSO login" || return 1
+      echo ""
+      _aws_sso_login_single "$_aws_profile_default" "Default SSO login" || return 1
+      echo ""
+      _aws_sso_login_single "$_aws_profile_root" "Root SSO login" || return 1
+      echo ""
+      echo "✅ All SSO profiles logged in successfully!"
+      export AWS_PROFILE="$_aws_profile_default"
+    elif [ $# -eq 0 ] || [ "$1" = "both" ]; then
       echo "🔐 Logging into both AWS SSO profiles..."
       _aws_sso_login_single "$_aws_profile_production" "Production SSO login" || return 1
       echo ""
@@ -207,11 +220,26 @@ EOF
       echo "✅ Both SSO profiles logged in successfully!"
       export AWS_PROFILE="$_aws_profile_default"
     else
-      _aws_sso_login_single "$1" "Logging into AWS SSO for profile: $1" || return 1
-      export AWS_PROFILE="$1"
+      local target_profile="$1"
+      case "$target_profile" in
+        root|vortexa)
+          target_profile="$_aws_profile_root"
+          ;;
+        prod|production)
+          target_profile="$_aws_profile_production"
+          ;;
+        dev|develop|development|staging|stg)
+          target_profile="$_aws_profile_staging"
+          ;;
+        default)
+          target_profile="$_aws_profile_default"
+          ;;
+      esac
+      _aws_sso_login_single "$target_profile" "Logging into AWS SSO for profile: $target_profile" || return 1
+      export AWS_PROFILE="$target_profile"
       sleep 2
       local account_id
-      if account_id="$(_aws_test_creds "$1")"; then
+      if account_id="$(_aws_test_creds "$target_profile")"; then
         echo "✅ SSO credentials working - Account: $account_id"
       else
         echo "⚠️  SSO login succeeded but credentials not ready"
@@ -340,6 +368,14 @@ EOF
     }
   }
 
+  aws_root_env() {
+    echo "👑 Setting root profile and exporting credentials..."
+    aws_profile "$_aws_profile_root" && aws_export_creds && {
+      echo "📁 Also exporting to ~/.aws/credentials file..."
+      _aws_export_to_profiles "$_aws_profile_root" "$_aws_profiles_root"
+    }
+  }
+
   aws_super_workflow() {
     echo "🚀 AWS Super Workflow: Login Both SSO → Export Both Credentials"
     aws_sso_login both && {
@@ -350,37 +386,58 @@ EOF
     }
   }
 
+  aws_export_all_to_file() {
+    echo "📁 Exporting all profiles (production, default/dev, root) to ~/.aws/credentials"
+    _aws_export_to_profiles "$_aws_profile_production" "$_aws_profiles_prod" || return 1
+    _aws_export_to_profiles "$_aws_profile_default" "$_aws_profiles_dev" || return 1
+    _aws_export_to_profiles "$_aws_profile_root" "$_aws_profiles_root" || return 1
+
+    echo "✅ All profiles written to ~/.aws/credentials"
+    echo "🎉 Ready for Scala/Java applications!"
+  }
+
   # Backward-compatible names.
   aws_prod() { aws_profile "$_aws_profile_production"; }
   aws_staging() { aws_profile "$_aws_profile_staging"; }
   aws_dev() { aws_profile "$_aws_profile_staging"; }
+  aws_root() { aws_profile "$_aws_profile_root"; }
   aws_refresh() { aws_sso_login "${1:-both}"; }
   aws_refresh_both() { aws_sso_login both; }
+  aws_refresh_all() { aws_sso_login all; }
   aws_refresh_prod() { aws_sso_login "$_aws_profile_production" && _aws_export_to_profiles "$_aws_profile_production" "$_aws_profiles_prod"; }
   aws_refresh_default() { aws_sso_login "$_aws_profile_default" && _aws_export_to_profiles "$_aws_profile_default" "$_aws_profiles_dev"; }
+  aws_refresh_root() { aws_sso_login "$_aws_profile_root" && _aws_export_to_profiles "$_aws_profile_root" "$_aws_profiles_root"; }
   aws_logout() { aws_clear; }
 }
 
 # Lazy wrapper functions that load AWS SSO on first use.
-unalias awsp awsd awse awsef awsf awsc awsl awsr awsw awsb awsall awsprod awsdefault awsprod-trad awsdefault-trad awsrp awsrs awsrd awsgroups 2>/dev/null || true
+unalias awsp awsd awsro awsroot awsroot-env awse awsef awsf awsc awsl awsla awsr awsra awsw awsb awsball awsall awsprod awsdefault awsroot-trad awsprod-trad awsdefault-trad awsrp awsrs awsrd awsrr awsgroups 2>/dev/null || true
 
 awsp() { _load_aws_sso && aws_prod_env "$@"; }
 awsd() { _load_aws_sso && aws_default_env "$@"; }
+awsro() { _load_aws_sso && aws_root_env "$@"; }
+awsroot() { _load_aws_sso && aws_root "$@"; }
+awsroot-env() { _load_aws_sso && aws_root_env "$@"; }
 awse() { _load_aws_sso && aws_export_creds "$@"; }
 awsef() { _load_aws_sso && aws_export_to_file "$@"; }
 awsf() { _load_aws_sso && aws_super_workflow "$@"; }
 awsc() { _load_aws_sso && aws_clear "$@"; }
 awsl() { _load_aws_sso && aws_sso_login both "$@"; }
+awsla() { _load_aws_sso && aws_sso_login all "$@"; }
 awsr() { _load_aws_sso && aws_refresh_both "$@"; }
+awsra() { _load_aws_sso && aws_refresh_all "$@"; }
 awsw() { _load_aws_sso && aws_status "$@"; }
 awsb() { _load_aws_sso && aws_export_both_to_file "$@"; }
+awsball() { _load_aws_sso && aws_export_all_to_file "$@"; }
 awsall() { _load_aws_sso && aws_super_workflow "$@"; }
 
 awsprod() { _load_aws_sso && aws_prod "$@"; }
 awsdefault() { _load_aws_sso && aws_profile "${AWS_SSO_DEFAULT_PROFILE:-default-sso}" "$@"; }
 awsprod-trad() { _load_aws_sso && aws_profile production "$@"; }
 awsdefault-trad() { _load_aws_sso && aws_profile default "$@"; }
+awsroot-trad() { _load_aws_sso && aws_profile root "$@"; }
 awsrp() { _load_aws_sso && aws_refresh_prod "$@"; }
 awsrs() { _load_aws_sso && aws_sso_login "${AWS_SSO_STAGING_PROFILE:-staging-sso}" "$@"; }
 awsrd() { _load_aws_sso && aws_refresh_default "$@"; }
+awsrr() { _load_aws_sso && aws_refresh_root "$@"; }
 awsgroups() { _load_aws_sso && aws_credential_profile_groups "$@"; }

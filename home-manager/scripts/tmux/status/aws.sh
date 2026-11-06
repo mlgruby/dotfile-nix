@@ -23,6 +23,10 @@ tmux_status_collect_aws() {
       aws_label="DEV"
       aws_color="#83a598"
       ;;
+    root-sso|root|vortexa-sso|vortexa)
+      aws_label="ROOT"
+      aws_color="#d3869b"
+      ;;
     "")
       aws_label=""
       ;;
