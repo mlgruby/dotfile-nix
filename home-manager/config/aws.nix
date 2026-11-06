@@ -6,12 +6,14 @@
   accounts = {
     production = "501857513371";
     staging = "045251666112";
+    root = "874568069660";
   };
 
   profiles = {
     default = "default-sso";
     production = "production-sso";
     staging = "staging-sso";
+    root = "root-sso";
   };
 
   traditionalProfiles = [
@@ -24,6 +26,8 @@
     "dev"
     "develop"
     "development"
+    "root"
+    "vortexa"
   ];
 
   ssoProfiles = [
@@ -38,6 +42,14 @@
     {
       name = "default-sso";
       account = "staging";
+    }
+    {
+      name = "root-sso";
+      account = "root";
+    }
+    {
+      name = "vortexa-sso";
+      account = "root";
     }
   ];
 }

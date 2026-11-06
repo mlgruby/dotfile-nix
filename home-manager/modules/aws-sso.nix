@@ -68,6 +68,7 @@ in
       default = {
         production = "501857513371";
         staging = "045251666112";
+        root = "874568069660";
       };
       description = "AWS Accounts mapping account name to account ID";
     };
@@ -87,6 +88,11 @@ in
         default = "staging-sso";
         description = "Staging SSO profile name";
       };
+      root = lib.mkOption {
+        type = lib.types.str;
+        default = "root-sso";
+        description = "Root SSO profile name";
+      };
     };
     traditionalProfiles = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -100,6 +106,8 @@ in
         "dev"
         "develop"
         "development"
+        "root"
+        "vortexa"
       ];
       description = "AWS traditional profiles to generate";
     };
@@ -124,6 +132,14 @@ in
         {
           name = "default-sso";
           account = "staging";
+        }
+        {
+          name = "root-sso";
+          account = "root";
+        }
+        {
+          name = "vortexa-sso";
+          account = "root";
         }
       ];
       description = "AWS SSO profiles to generate";
@@ -157,6 +173,7 @@ in
         AWS_SSO_DEFAULT_PROFILE = cfg.profiles.default;
         AWS_SSO_PRODUCTION_PROFILE = cfg.profiles.production;
         AWS_SSO_STAGING_PROFILE = cfg.profiles.staging;
+        AWS_SSO_ROOT_PROFILE = cfg.profiles.root;
       };
     };
   };

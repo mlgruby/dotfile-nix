@@ -232,10 +232,18 @@ For your organization's setup:
 |--------------|------------|------|--------------|
 | Development/Default | `045251666112` | `PMMT` | `default-sso` |
 | Production | `501857513371` | `PMMT` | `production-sso` |
+| Root / Management | `874568069660` | `PMMT` | `root-sso` |
 
 **SSO Portal URL:** `https://vortexa.awsapps.com/start`
 
 ## 🏢 **Configured AWS Accounts**
+
+### **Root Account (Vortexa / Fabio Kuhn)**
+
+- **Account ID**: `874568069660`
+- **Role**: `PMMT`
+- **SSO Profile**: `root-sso` (alias `vortexa-sso`)
+- **Traditional Profile**: `root` (alias `vortexa`)
 
 ### **Production Account**
 
@@ -503,18 +511,23 @@ These are **not** standard AWS CLI commands, but convenient shortcuts defined in
 | `awsall` | Complete AWS setup | Login to both SSO profiles + export credentials |
 | `awsprod` | Switch to production | Set production-sso profile |
 | `awsdefault` | Switch to default | Set default-sso profile |
+| `awsroot` | Switch to root | Set root-sso profile |
 | `awsp` | Production environment | Switch to production + export credentials to `production`, `prod`, and `prd` |
 | `awsd` | Default environment | Switch to default + export credentials to `default`, `dev`, `develop`, `development`, `stg`, and `staging` |
+| `awsro` | Root environment | Switch to root + export credentials to `root` and `vortexa` |
 
 #### **SSO Login Commands**
 
 | Alias | Function | Description |
 |-------|----------|-------------|
-| `awsl` | Quick SSO login | Login to both SSO profiles |
+| `awsl` | Quick SSO login | Login to both SSO profiles (default + production) |
+| `awsla` | All SSO login | Login to all SSO profiles (default + production + root) |
 | `awsrp` | Refresh production | Login to production-sso and refresh `production`, `prod`, and `prd` in `~/.aws/credentials` |
 | `awsrd` | Refresh default | Login to default-sso and refresh `default`, `dev`, `develop`, `development`, `stg`, and `staging` in `~/.aws/credentials` |
+| `awsrr` | Refresh root | Login to root-sso and refresh `root` and `vortexa` in `~/.aws/credentials` |
 | `awsrs` | Refresh staging | Login to staging-sso only |
 | `awsr` | Refresh both | Login to both SSO profiles |
+| `awsra` | Refresh all | Login to all SSO profiles |
 
 #### **Credential Management**
 
@@ -523,7 +536,8 @@ These are **not** standard AWS CLI commands, but convenient shortcuts defined in
 | `awse` | Export credentials | Export current profile to environment variables |
 | `awsef` | Export to file | Export credentials to one named profile in `~/.aws/credentials` without replacing unrelated profiles |
 | `awsb` | Export both profiles | Export default and production profile groups to credentials file |
-| `awsgroups` | Show credential groups | Print the dev/prod profile names that `awsd`, `awsrd`, `awsp`, and `awsrp` write |
+| `awsball` | Export all profiles | Export default, production, and root profile groups to credentials file |
+| `awsgroups` | Show credential groups | Print the dev/prod/root profile names that `awsd`, `awsp`, and `awsro` write |
 | `awsc` | Clear credentials | Clear all AWS credentials and sessions |
 
 #### **Utility Commands**
