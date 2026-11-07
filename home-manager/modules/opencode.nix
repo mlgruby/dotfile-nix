@@ -16,7 +16,13 @@ let
   opencodeConfig = "${config.home.homeDirectory}/.config/opencode/opencode.json";
 in
 {
-  programs.opencode.enable = true;
+  programs.opencode = {
+    enable = true;
+    # OpenCode is installed through Homebrew (anomalyco/tap) or curl/npm.
+    # Setting package = null prevents Home Manager from realizing the nixpkgs
+    # package, avoiding upstream aarch64-darwin fixed-output hash mismatches.
+    package = null;
+  };
 
   home.activation.configureOpenCodeLMStudio = lib.hm.dag.entryAfter [ "installCodingAgents" ] ''
     if [ ! -x "${opencodeBin}" ] || [ ! -d "/Applications/LM Studio.app" ]; then
