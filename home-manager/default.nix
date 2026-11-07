@@ -129,7 +129,7 @@ in
       compatibilityPackages.pipx
       markdownlint-cli
       # Python Development Environment
-      # System-wide Python 3.12 via Homebrew
+      # System-wide Python 3.12 managed in modules/packages/languages.nix
       # Project-specific versions via uv
       # Scala Build Tool
       sbt

@@ -116,6 +116,8 @@ fi
 
 echo "Building system configuration for target: $target_host"
 cd "$DOTFILE_DIR"
+prev_system="$(readlink -f /run/current-system 2>/dev/null || true)"
+
 # The daemon receives this setting declaratively after activation, while this
 # option also covers the bootstrap build that creates the next generation.
 sudo darwin-rebuild switch \
@@ -124,4 +126,12 @@ sudo darwin-rebuild switch \
   --option connect-timeout "${NIX_CONNECT_TIMEOUT:-15}" \
   --option download-attempts "${NIX_DOWNLOAD_ATTEMPTS:-5}" \
   "${extra_args[@]}"
+
+new_system="$(readlink -f /run/current-system 2>/dev/null || true)"
+if command -v nvd >/dev/null 2>&1 && [[ -n "$prev_system" && -n "$new_system" && -d "$prev_system" && -d "$new_system" ]]; then
+  echo ""
+  echo "📦 Package changes ($target_host):"
+  nvd diff "$prev_system" "$new_system" || true
+fi
+
 echo "System rebuild complete for: $target_host"
