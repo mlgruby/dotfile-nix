@@ -157,7 +157,10 @@ in
       nix-direnv.enable = true;
     };
 
-    claude-code.enable = true;
+    claude-code = {
+      enable = true;
+      package = null;
+    };
   };
 
   gtk.gtk4.theme = null;
