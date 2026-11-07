@@ -22,14 +22,15 @@
 # - Agent settings now managed declaratively
 # - Manual GPG config retained for advanced options
 # - Cache TTL optimized for daily development use
-{...}: {
-  # Install GnuPG via Home Manager.
+{ pkgs, ... }: {
+  # Install GnuPG via Home Manager packages (since home.file.".gnupg/gpg.conf"
+  # is managed explicitly below and programs.gpg.enable would conflict with it).
   # Note: We intentionally do NOT enable `services.gpg-agent` on macOS because
   # Home Manager's darwin launchd module runs `gpg-agent --supervised` (a Linux
   # systemd socket-activation flag expecting LISTEN_FDS), which crashes with exit
   # code 2 on macOS. GnuPG automatically spawns `gpg-agent --daemon` on demand
   # using ~/.gnupg/gpg-agent.conf below.
-  programs.gpg.enable = true;
+  home.packages = [ pkgs.gnupg ];
 
   home.file.".gnupg/gpg-agent.conf".text = ''
     default-cache-ttl 7200
