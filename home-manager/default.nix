@@ -221,20 +221,36 @@ in
   home.activation.buildScreenshotUtility = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/bin"
     SWIFT_COMPILER=""
-    if [ -x /Library/Developer/CommandLineTools/usr/bin/swiftc ] && /Library/Developer/CommandLineTools/usr/bin/swiftc --version >/dev/null 2>&1; then
+    SWIFT_SDK=""
+    if [ -d /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk ]; then
+      SWIFT_SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+    elif [ -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ]; then
+      SWIFT_SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+    fi
+
+    if [ -x /Library/Developer/CommandLineTools/usr/bin/swiftc ]; then
       SWIFT_COMPILER=/Library/Developer/CommandLineTools/usr/bin/swiftc
-    elif [ -x /usr/bin/swiftc ] && env -u DEVELOPER_DIR -u SDKROOT /usr/bin/swiftc --version >/dev/null 2>&1; then
+    elif [ -x /usr/bin/swiftc ]; then
       SWIFT_COMPILER=/usr/bin/swiftc
-    elif command -v swiftc >/dev/null 2>&1 && env -u DEVELOPER_DIR -u SDKROOT swiftc --version >/dev/null 2>&1; then
+    elif command -v swiftc >/dev/null 2>&1; then
       SWIFT_COMPILER=$(command -v swiftc)
     fi
 
+    COMPILED=0
     if [ -n "$SWIFT_COMPILER" ]; then
-      env -u DEVELOPER_DIR -u SDKROOT "$SWIFT_COMPILER" -O ${./scripts/screenshots/capture-and-copy-screenshot.swift} \
-        -o "$HOME/bin/capture-and-copy-screenshot"
-      chmod +x "$HOME/bin/capture-and-copy-screenshot"
-    else
-      echo "warning: Swift compiler unavailable; installing shell screenshot fallback"
+      SDK_ARG=()
+      if [ -n "$SWIFT_SDK" ]; then
+        SDK_ARG=(-sdk "$SWIFT_SDK")
+      fi
+      if env -u DEVELOPER_DIR -u SDKROOT "$SWIFT_COMPILER" "''${SDK_ARG[@]}" -O ${./scripts/screenshots/capture-and-copy-screenshot.swift} \
+        -o "$HOME/bin/capture-and-copy-screenshot" 2>/dev/null; then
+        chmod +x "$HOME/bin/capture-and-copy-screenshot"
+        COMPILED=1
+      fi
+    fi
+
+    if [ "$COMPILED" -ne 1 ]; then
+      echo "warning: Swift compiler unavailable or compilation failed; installing shell screenshot fallback"
       cat <<'EOF' > "$HOME/bin/capture-and-copy-screenshot"
 #!/usr/bin/env bash
 set -euo pipefail
