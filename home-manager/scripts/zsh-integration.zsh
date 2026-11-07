@@ -394,30 +394,6 @@ function agy-resume() {
   fi
 }
 
-function opencode-resume() {
-  if ! command -v opencode >/dev/null 2>&1; then
-    echo "opencode CLI is not installed." >&2
-    return 127
-  fi
-
-  if ! command -v fzf >/dev/null 2>&1; then
-    echo "fzf is required to resume sessions interactively." >&2
-    return 127
-  fi
-
-  local selected
-  selected=$(opencode session list | fzf --header="Select OpenCode session to resume")
-  if [ -n "$selected" ]; then
-    local uuid
-    uuid=$(echo "$selected" | grep -oE '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' | head -n 1)
-    if [ -n "$uuid" ]; then
-      opencode -s "$uuid"
-    else
-      opencode -s "$(echo "$selected" | awk '{print $1}')"
-    fi
-  fi
-}
-
 # Herdr Workspace launcher:
 # Opens or creates a Herdr space for a project with an automatic split layout:
 # - Left pane: Interactive shell

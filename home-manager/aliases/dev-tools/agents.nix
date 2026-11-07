@@ -10,12 +10,6 @@ in
   # Claude Code
   ccc = "claude --continue"; # Continue the latest Claude Code conversation
 
-  # OpenCode
-  oc = "opencode"; # OpenCode shorthand
-  occ = "opencode run --continue"; # Continue last OpenCode session
-  ocx = "opencode run"; # Execute opencode with a message (non-interactive)
-  ocr = "opencode-resume"; # Resume an OpenCode session
-
   # Pi Coding Agent
   pil = "pi --provider lmstudio --model google/gemma-4-26b-a4b"; # Use Gemma 4 26B from LM Studio
   pig = "pi --provider lmstudio --model google/gemma-4-26b-a4b"; # Gemma shorthand

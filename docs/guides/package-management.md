@@ -191,12 +191,7 @@ homebrew.casks = [
 - Tools not available or not appropriate in nixpkgs
 - Global language/build toolchains only when deliberately shared across projects
 
-LM Studio is installed as a Homebrew cask for local model serving. OpenCode is
-configured to use LM Studio's OpenAI-compatible server when both apps are
-installed.
-
-OpenCode is installed from the `anomalyco/tap` Homebrew tap because upstream
-recommends that tap for the most up-to-date terminal agent releases.
+LM Studio is installed as a Homebrew cask for local model serving.
 
 **Managing Homebrew**:
 

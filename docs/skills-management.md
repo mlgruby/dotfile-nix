@@ -58,8 +58,8 @@ acpx              = { url = "github:acpxio/acpx";       flake = false; };
 
 - Module: `programs.agent-skills` from `inputs.skills-catalog.homeManagerModules.default`
 - Skills are **copied** (not symlinked) so agents can mutate them at runtime
-- 6 deployment targets: `~/.claude/skills`, `~/.agents/skills`, `~/.pi/agent/skills`,
-  `~/.codex/skills`, `~/.config/opencode/skills`, `~/.hermes/skills`
+- Deployment targets: `~/.claude/skills`, `~/.agents/skills`, `~/.pi/agent/skills`,
+  `~/.codex/skills`, `~/.hermes/skills`
 - Conditional: skill only deployed if parent module enabled (`claude.enable`, `git.enable`, etc.)
 - Skills can be augmented with a `transform` block to append custom content per-agent
 
