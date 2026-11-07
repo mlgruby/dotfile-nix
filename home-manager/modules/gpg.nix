@@ -23,32 +23,22 @@
 # - Manual GPG config retained for advanced options
 # - Cache TTL optimized for daily development use
 {...}: {
-  # GPG Agent Service Configuration
-  # Uses Home Manager's built-in services.gpg-agent module
-  services.gpg-agent = {
-    enable = true;
-    
-    # Cache settings (in seconds)
-    # 2 hours default, 24 hours max for convenience
-    defaultCacheTtl = 7200;        # 2 hours
-    defaultCacheTtlSsh = 7200;     # 2 hours  
-    maxCacheTtl = 86400;           # 24 hours
-    maxCacheTtlSsh = 86400;        # 24 hours
-    
-    # Keep SSH auth on the OS ssh-agent (plus Keychain on macOS).
-    # Enabling gpg-agent SSH support rewires SSH_AUTH_SOCK and can
-    # cause "agent refused operation" with standard ~/.ssh/* keys.
-    enableSshSupport = false;
-    
-    # Use system default pinentry program
-    # pinentryPackage is handled automatically by Home Manager
-    
-    # Extra configuration for logging
-    extraConfig = ''
-      log-file ~/.gnupg/gpg-agent.log
-      debug-level basic
-    '';
-  };
+  # Install GnuPG via Home Manager.
+  # Note: We intentionally do NOT enable `services.gpg-agent` on macOS because
+  # Home Manager's darwin launchd module runs `gpg-agent --supervised` (a Linux
+  # systemd socket-activation flag expecting LISTEN_FDS), which crashes with exit
+  # code 2 on macOS. GnuPG automatically spawns `gpg-agent --daemon` on demand
+  # using ~/.gnupg/gpg-agent.conf below.
+  programs.gpg.enable = true;
+
+  home.file.".gnupg/gpg-agent.conf".text = ''
+    default-cache-ttl 7200
+    default-cache-ttl-ssh 7200
+    max-cache-ttl 86400
+    max-cache-ttl-ssh 86400
+    log-file ~/.gnupg/gpg-agent.log
+    debug-level basic
+  '';
 
   # Main GPG Configuration
   # Keep as file configuration for advanced security settings

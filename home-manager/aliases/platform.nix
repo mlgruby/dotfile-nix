@@ -176,21 +176,6 @@ in
       ]; # Check and show critical alerts
 
   # --------------------------------------------------------------------------
-  # Log Viewing
-  # --------------------------------------------------------------------------
-  logs-health = "tail -f ~/.local/var/log/system-health-check.log"; # Follow health check logs
-  logs-report = "tail -f ~/.local/var/log/system-health-report.log"; # Follow weekly health report logs
-  logs-performance = "tail -f ~/.local/var/log/performance-monitor.log"; # Follow performance logs
-  logs-alerts = "tail -f ~/.local/var/log/critical-alerts.log"; # Follow critical alert logs
-
-  # --------------------------------------------------------------------------
-  # Service Management
-  # --------------------------------------------------------------------------
-  monitor-status = "launchctl list | grep system-"; # Show status of monitoring services
-  monitor-load = "launchctl load ~/Library/LaunchAgents/system-*.plist"; # Load monitoring services
-  monitor-unload = "launchctl unload ~/Library/LaunchAgents/system-*.plist"; # Unload monitoring services
-
-  # --------------------------------------------------------------------------
   # Finder Utilities
   # --------------------------------------------------------------------------
   showhidden = "defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"; # Show hidden files in Finder
