@@ -29,7 +29,6 @@ aliases/
 | `d` | Docker | `d ps` |
 | `k` | Kubectl | `k get pods` |
 | `cc` | Claude Code | `cc` |
-| `oc` | OpenCode | `oc` |
 | `rebuild` | Rebuild system (supports profile flags) | `rebuild --work` |
 | `cleanup` | Confirm, then clean system; supports `--docker` and `--deep` | `cleanup --help` |
 
@@ -54,7 +53,6 @@ aliases/
 ### 2. Development Tools (dev-tools.nix)
 - Modern CLI: `eza`, `fd`, `duf`, `btm`
 - Claude Code: `cc`, `ccc`, `ccr`
-- OpenCode: `oc`, `occ`, `ocx`
 - Pi Coding Agent: `pil`, `pig`, `pib`
 - Tmux: `tn`, `ta`, `tk`, `t`
 - FZF: `fe`, `fcd`, `fif`, `fkill`

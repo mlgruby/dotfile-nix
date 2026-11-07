@@ -93,7 +93,6 @@ in
     ./modules/gpg.nix
     ./modules/claude-code.nix
     ./modules/plugins.nix
-    ./modules/opencode.nix
     ./modules/pi.nix
     ./modules/antigravity.nix
     ./modules/programs/btop.nix
