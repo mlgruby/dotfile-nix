@@ -508,21 +508,21 @@ check_alerts() {
     log_step "Checking for critical system issues..."
     
     # Check critical disk space
-    if df / | awk 'NR==2 {if ($5+0 > 95) exit 1}'; then
+    if ! df / | awk 'NR==2 {if ($5+0 > 95) exit 1}'; then
         log_error "CRITICAL: Root disk usage above 95%"
         critical_issues=$((critical_issues + 1))
     fi
-    
+
     # Check critical memory usage
     local memory_pressure
-    memory_pressure=$(memory_pressure | grep "System-wide memory free percentage" | awk '{print 100-$5}' | sed 's/%//')
+    memory_pressure=$(/usr/bin/memory_pressure | grep "System-wide memory free percentage" | awk '{print 100-$5}' | sed 's/%//')
     if (( $(echo "$memory_pressure > 95" | bc -l) )); then
         log_error "CRITICAL: Memory pressure above 95%"
         critical_issues=$((critical_issues + 1))
     fi
-    
+
     # Check if system is responsive
-    if ! ping -c 1 -t 5 localhost >/dev/null 2>&1; then
+    if ! /sbin/ping -c 1 -t 5 localhost >/dev/null 2>&1; then
         log_error "CRITICAL: System not responding to local ping"
         critical_issues=$((critical_issues + 1))
     fi
