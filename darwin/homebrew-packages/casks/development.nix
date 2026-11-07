@@ -4,8 +4,7 @@
 # vendor distribution is the expected macOS installation path.
 [
   "orbstack"
-  "jetbrains-toolbox"
-  "temurin@17"
-  "visual-studio-code"
+  "temurin@21"
   "codex"
+  "zed"
 ]
