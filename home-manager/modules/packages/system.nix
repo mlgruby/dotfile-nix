@@ -23,5 +23,6 @@
     tree # Directory structure visualization
     fastfetch # System information display
     screen # Terminal multiplexer fallback
+    nvd # Nix/NixOS package version diff tool for rebuilds
   ];
 }

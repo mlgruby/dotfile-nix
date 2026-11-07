@@ -33,9 +33,7 @@
     INPUTRC = "$XDG_CONFIG_HOME/readline/inputrc";
     # GNUPGHOME managed by tool-configs.nix for Homebrew GPG
     
-    # Development tools
-    CARGO_HOME = "$XDG_DATA_HOME/cargo";
-    RUSTUP_HOME = "$XDG_DATA_HOME/rustup";
+    # Development tools (CARGO_HOME and RUSTUP_HOME are owned by zsh.nix at ~/.cargo and ~/.rustup)
     GOPATH = "$XDG_DATA_HOME/go";
     GOMODCACHE = "$XDG_CACHE_HOME/go/mod";
     

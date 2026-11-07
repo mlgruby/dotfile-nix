@@ -39,7 +39,6 @@ in
         UV_PYTHON_PREFERENCE = "managed";
         CARGO_HOME = "$HOME/.cargo";
         RUSTUP_HOME = "$HOME/.rustup";
-        PATH = "$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$PATH";
       }
       // lib.optionalAttrs bitwardenAgent.enable {
         DOTFILES_BITWARDEN_SSH_AGENT = "1";
@@ -47,6 +46,9 @@ in
       };
 
       initContent = ''
+        # Deduplicate PATH entries automatically in Zsh
+        typeset -U path PATH
+
         # Ensure complete PATH including Nix profiles and standard macOS system bins
         export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
