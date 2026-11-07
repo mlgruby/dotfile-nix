@@ -19,22 +19,50 @@ confirm() {
   [[ "$answer" = [Yy] || "$answer" = [Yy][Ee][Ss] ]]
 }
 
+get_available_kb() {
+  df -k / | awk 'NR==2 { print $4 }'
+}
+
+format_kb_delta() {
+  local before_kb="$1"
+  local after_kb="$2"
+  local diff_kb=$((after_kb - before_kb))
+  if (( diff_kb <= 0 )); then
+    echo "0 MiB"
+  elif (( diff_kb >= 1048576 )); then
+    awk -v kb="$diff_kb" 'BEGIN { printf "%.2f GiB\n", kb / 1048576 }'
+  else
+    awk -v kb="$diff_kb" 'BEGIN { printf "%.1f MiB\n", kb / 1024 }'
+  fi
+}
+
 run_regular_cleanup() {
   echo "Starting regular system cleanup..."
 
-  echo "Running Nix garbage collection..."
+  echo "Running Nix garbage collection (user & system generations)..."
   nix-collect-garbage -d --option max-jobs auto --option cores 0
+  sudo nix-collect-garbage -d --option max-jobs auto --option cores 0
   echo "Nix garbage collection complete"
 
-  echo "Cleaning macOS metadata files..."
-  find "$HOME" -type f -name ".DS_Store" -delete 2>/dev/null || true
-  find "$HOME" -type f -name "._*" -delete 2>/dev/null || true
+  echo "Cleaning macOS metadata files in workspace directories..."
+  local dir
+  for dir in "$HOME/Desktop" "$HOME/Documents" "$HOME/Downloads" "$HOME/Development" "$HOME/dotfile"; do
+    if [ -d "$dir" ]; then
+      find "$dir" \( -name ".git" -o -name "node_modules" -o -name ".direnv" -o -name ".venv" \) -prune \
+        -o -type f -name ".DS_Store" -delete 2>/dev/null || true
+      if [ -x /usr/sbin/dot_clean ]; then
+        /usr/sbin/dot_clean -m "$dir" 2>/dev/null || true
+      fi
+    fi
+  done
 
   echo "Cleaning screenshots..."
   if [ -d "$HOME/Screenshots" ]; then
-    find "$HOME/Screenshots" -type f -name "*.png" -print0 2>/dev/null | xargs -0 -r /usr/bin/trash 2>/dev/null || true
+    find "$HOME/Screenshots" -type f -name "*.png" -exec /usr/bin/trash {} + 2>/dev/null || true
   fi
-  find "$HOME/Desktop" -type f -name "Screenshot *.png" -print0 2>/dev/null | xargs -0 -r /usr/bin/trash 2>/dev/null || true
+  if [ -d "$HOME/Desktop" ]; then
+    find "$HOME/Desktop" -type f -name "Screenshot *.png" -exec /usr/bin/trash {} + 2>/dev/null || true
+  fi
 
   echo "Cleaning package caches..."
   if command -v npm >/dev/null 2>&1; then
@@ -42,6 +70,8 @@ run_regular_cleanup() {
   fi
 
   if command -v brew >/dev/null 2>&1; then
+    HOMEBREW_NO_CLEANUP_FORMULAE="${HOMEBREW_NO_CLEANUP_FORMULAE:+$HOMEBREW_NO_CLEANUP_FORMULAE,}herdr" \
+      brew autoremove 2>/dev/null || true
     HOMEBREW_NO_CLEANUP_FORMULAE="${HOMEBREW_NO_CLEANUP_FORMULAE:+$HOMEBREW_NO_CLEANUP_FORMULAE,}herdr" \
       brew cleanup --prune=all 2>/dev/null || true
   fi
@@ -52,9 +82,6 @@ run_regular_cleanup() {
     "$HOME/.local/bin/uv" cache clean 2>/dev/null || true
   fi
 
-  echo "Running Nix store GC..."
-  nix store gc --option max-jobs auto --option cores 0
-
   echo "Optimizing Nix store..."
   nix store optimise --option max-jobs auto --option cores 0
 
@@ -62,6 +89,10 @@ run_regular_cleanup() {
 }
 
 print_completion_note() {
+  local before_kb="$1"
+  local after_kb
+  after_kb="$(get_available_kb)"
+  echo "Disk space reclaimed: $(format_kb_delta "$before_kb" "$after_kb")"
   echo "Cleanup complete. Start a new shell manually if you want to refresh the environment."
 }
 
@@ -79,24 +110,29 @@ run_docker_cleanup() {
 case "${1:-}" in
   "")
     if confirm "Run regular cleanup? This removes old generations and package caches."; then
+      before_kb="$(get_available_kb)"
       run_regular_cleanup
-      print_completion_note
+      print_completion_note "$before_kb"
     else
       echo "Cleanup cancelled."
     fi
     ;;
   --docker)
     if confirm "Run Docker cleanup? This removes all unused images, containers, networks, and build cache."; then
+      before_kb="$(get_available_kb)"
       run_docker_cleanup
+      after_kb="$(get_available_kb)"
+      echo "Disk space reclaimed: $(format_kb_delta "$before_kb" "$after_kb")"
     else
       echo "Docker cleanup cancelled."
     fi
     ;;
   --deep)
     if confirm "Run deep cleanup? This runs regular cleanup plus Docker cleanup."; then
+      before_kb="$(get_available_kb)"
       run_regular_cleanup
       run_docker_cleanup
-      print_completion_note
+      print_completion_note "$before_kb"
     else
       echo "Deep cleanup cancelled."
     fi
