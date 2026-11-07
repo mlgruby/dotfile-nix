@@ -50,11 +50,10 @@
             # Ensure flakes and nix-commands are globally enabled for this activation session
             export NIX_CONFIG="experimental-features = nix-command flakes"
 
-            # Temporary nix-run of home-manager to switch configurations
+            # Use pinned home-manager and nixpkgs from devcontainer-shell/flake.lock
             nix run --impure github:nix-community/home-manager -- switch \
               --flake ".#$USERNAME-$SYSTEM" \
-              --impure \
-              --override-input nixpkgs github:nixos/nixpkgs/nixos-unstable
+              --impure
           '');
         };
       });
