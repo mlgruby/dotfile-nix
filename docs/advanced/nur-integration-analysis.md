@@ -47,7 +47,7 @@ project-local tooling.
 | **Terminal Utils** | glow | ❌ | Home Manager package |
 | | fastfetch | ✅ | Home Manager package |
 | | tldr | ❌ | Home Manager `programs.tealdeer` |
-| **Security** | gnupg | ❌ | Homebrew formula |
+| **Security** | gnupg | ❌ | Home Manager package |
 | | sops | ❌ | Home Manager package |
 | | age | ❌ | Home Manager package |
 | **Cloud Tools** | awscli | ❌ | Home Manager package (`awscli2`) |
@@ -58,17 +58,15 @@ project-local tooling.
 
 | Category | Homebrew Cask | NUR Available | Migration Status |
 |----------|---------------|---------------|------------------|
-| **Development JDKs** | temurin@11/17 | ❌ | Homebrew cask |
-| **Development Tools** | cursor | ❌ | Homebrew cask |
+| **Development JDKs** | temurin@21 | ❌ | Homebrew cask |
+| **Development Tools** | zed | ❌ | Homebrew cask |
 | | orbstack | ❌ | Homebrew cask, macOS integration |
-| | jetbrains-toolbox | ❌ | Homebrew cask |
-| | postman | ❌ | Homebrew cask |
-| | visual-studio-code | ❌ | Homebrew cask |
+| | beekeeper-studio | ❌ | Homebrew cask |
 | **Browsers** | brave-browser | ❌ | Homebrew cask |
 | | google-chrome | ❌ | Homebrew cask |
-| **System Tools** | alacritty | ✅ | Nix/Home Manager |
+| **System Tools** | ghostty / alacritty | ✅ | Homebrew cask / Home Manager |
 | | karabiner-elements | ❌ | Homebrew cask, macOS integration |
-| | rectangle | ❌ | Homebrew cask, macOS integration |
+| | aerospace | ❌ | Homebrew cask, macOS integration |
 | **Productivity** | bitwarden | ❌ | Homebrew cask |
 | | obsidian | ❌ | Homebrew cask |
 

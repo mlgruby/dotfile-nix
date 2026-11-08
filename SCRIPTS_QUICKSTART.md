@@ -6,7 +6,7 @@
 rebuild
 ```
 
-This will install all scripts to `~/.config/home-manager/scripts/` and activate the aliases.
+This wires all helper scripts in `~/dotfile/home-manager/scripts/` into your shell aliases (and installs `rebuild`, `rebuild-work`, and `rebuild-personal` to `~/bin/`).
 
 ---
 
@@ -173,13 +173,17 @@ alias-help <category>  # Deep dive into categories
 
 ## 🔍 Where Are the Scripts?
 
-After running `rebuild`, scripts are installed to:
+The source scripts live in your repository at:
 ```
-~/.config/home-manager/scripts/
+~/dotfile/home-manager/scripts/
 ├── git-fuzzy-checkout.sh
 ├── git-fuzzy-log.sh
 ├── git-fuzzy-stash.sh
+├── rebuild-system.sh
 ├── system-rollback.sh
+├── cleanup-system.sh
+├── update-system.sh
+├── agent-usage.py
 └── alias-cheatsheet.sh
 ```
 
@@ -187,7 +191,10 @@ After running `rebuild`, scripts are installed to:
 - `gcb` → git-fuzzy-checkout.sh
 - `fshow` → git-fuzzy-log.sh
 - `fstash` → git-fuzzy-stash.sh
+- `rebuild` → rebuild-system.sh
 - `rollback` → system-rollback.sh
+- `cleanup` → cleanup-system.sh
+- `update` → update-system.sh
 - `alias-help` → alias-cheatsheet.sh
 
 ---
@@ -206,10 +213,10 @@ After running `rebuild`, scripts are installed to:
 
 ### Problem: Scripts not found after rebuild
 ```bash
-# Check if they're installed
-ls -la ~/.config/home-manager/scripts/
+# Check if they exist in your repository
+ls -la ~/dotfile/home-manager/scripts/
 
-# If missing, rebuild again
+# Rebuild to update Nix store symlinks
 rebuild
 ```
 

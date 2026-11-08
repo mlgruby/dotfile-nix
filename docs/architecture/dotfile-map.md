@@ -17,11 +17,22 @@ workstation automation.
 
 - `home-manager/modules/zsh.nix` - zsh Home Manager options and small shell
   functions.
-- `home-manager/scripts/zsh-integration.zsh` - interactive zsh behavior.
+- `home-manager/scripts/zsh-integration.zsh` - interactive zsh behavior (`p` project workspace launcher, `cb`/`rc` clipboard wrappers, fzf bindings).
+- `home-manager/modules/ghostty.nix` - primary Ghostty terminal configuration (`tmux` + `herdr` session entrypoint).
+- `home-manager/modules/herdr.nix` - Herdr TUI session manager configuration.
+- `home-manager/modules/alacritty/` - secondary Alacritty terminal configuration.
 - `home-manager/modules/starship.nix` - prompt configuration.
 - `home-manager/modules/tmux.nix` - tmux wiring and status script installation.
-- `home-manager/scripts/tmux/status/` - tmux status modules.
-- `home-manager/modules/alacritty/` - terminal configuration.
+- `home-manager/scripts/tmux/status/` - tmux status modules (CPU, RAM, disk, battery, AI usage `codexbar.sh`).
+
+## AI Agents And Skills
+
+- `home-manager/agent-extras/flake.nix` - child flake locking upstream AI skill and plugin repositories (`flake = false`).
+- `home-manager/modules/plugins.nix` - declarative skill/plugin installation into `~/.claude`, `~/.agents`, and `~/.gemini/config`.
+- `home-manager/modules/claude-code.nix` - declarative Claude Code configuration (`~/.claude/settings.json`, AWS Bedrock profile, statusline, MCPs) while using the native `~/.local/bin/claude` binary (`package = null`).
+- `home-manager/modules/antigravity.nix` - Google Antigravity CLI (`agy`) configuration and `agr` (`agy-resume`) picker.
+- `home-manager/modules/pi.nix` - Pi coding agent wrapper (`pil`, `pig`, `pib`) and local LLM configuration.
+- `home-manager/modules/px0.nix` - `px0` interactive terminal code navigator (`nav`, `navo`, `px`).
 
 ## Aliases
 

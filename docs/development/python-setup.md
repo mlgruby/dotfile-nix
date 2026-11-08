@@ -4,21 +4,20 @@
 
 This configuration provides a clean Python development environment using:
 
-- **System-wide Python 3.12** via Homebrew for consistent base
-environment
+- **System-wide Python 3.12** via Nix (`home-manager/modules/packages/languages.nix`) for a consistent base environment
 - **uv** for fast project-specific Python version and package management
 - **No pyenv** to avoid PATH conflicts and complexity
 
 ## System Python
 
-The system uses Python 3.12 from Homebrew:
+The system uses Python 3.12 from Home Manager:
 
 ```bash
 which python3
-# /opt/homebrew/opt/python@3.12/libexec/bin/python3
+# /etc/profiles/per-user/<username>/bin/python3
 
 python3 --version
-# Python 3.12.11
+# Python 3.12.x
 ```
 
 ## Project Management with uv
@@ -102,5 +101,5 @@ uv run python script.py
 
 The system is configured in:
 
-- `darwin/homebrew-packages/brews/toolchains.nix` - Python 3.12 and uv installation
+- `home-manager/modules/packages/languages.nix` - Python 3.12, `uv`, `poetry`, `pyright`, and `ruff` installation
 - `home-manager/modules/zsh.nix` - PATH setup and environment variables

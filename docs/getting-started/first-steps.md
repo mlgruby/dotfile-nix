@@ -37,10 +37,11 @@ vim hosts.nix
 **Key settings to verify:**
 
 - `username` - Must match your macOS username
-- `email` - Used for Git commits
 - `githubUsername` - For GitHub integration
 - `hostname` - Should match your Mac's hostname
 - `profile` - Keep `work` for work host and `personal` for personal host
+
+> **Note:** Git email addresses are intentionally excluded from `hosts.nix` (enforced by CI guardrails) and configured locally in `~/.gitconfig-work` and `~/.gitconfig-personal`.
 
 ### 2. Test Core Functionality
 
@@ -113,11 +114,11 @@ fc-list | grep -i nerd
 # Check system health
 health-check
 
-# View performance metrics
-perf-analyze
+# Generate a detailed health report
+health-report
 
-# Monitor system in real-time
-monitor-status
+# View build and Nix store performance metrics
+perf-analyze
 ```
 
 ## 📚 What to Read Next

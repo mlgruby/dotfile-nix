@@ -291,11 +291,10 @@ You can customize templates by:
 
 The templates work seamlessly with:
 
-- **VS Code** with direnv extension
-- **IntelliJ IDEA** with direnv plugin
+- **Zed** with direnv integration
+- **IntelliJ IDEA / PyCharm** with direnv plugin
 - **Neovim** with direnv integration
-- **Emacs** with direnv-mode
-- **Claude Code** with LSP plugins
+- **Claude Code & Antigravity** with LSP plugins
 
 ### Language Server Protocol (LSP) Support
 

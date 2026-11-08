@@ -236,7 +236,7 @@ lazygit --version
 
 Applications that could benefit from Stylix integration:
 
-- **VSCode**: If moved from Homebrew to Nix
+- **Ghostty**: Currently uses explicit `Gruvbox Dark Hard` theme in `home-manager/modules/ghostty.nix`
 - **Firefox**: If adopted as primary browser
 - **Discord**: If using Nix-managed version
 

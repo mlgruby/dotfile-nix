@@ -36,7 +36,7 @@ System-level configurations affect the entire macOS system and all users. These 
 
 2. **homebrew.nix**
 
-   Manages Homebrew packages and casks. This is where you configure GUI applications and packages that work better through Homebrew:
+   Manages Homebrew activation and merges shared and profile-specific package lists from `darwin/homebrew-packages/` and `darwin/profiles/`:
 
    ```nix
    # Homebrew package management
@@ -45,9 +45,9 @@ System-level configurations affect the entire macOS system and all users. These 
        enable = true;
        onActivation.autoUpdate = false;
        onActivation.upgrade = false;
-       onActivation.cleanup = "none";
-       brews = [ "git" "starship" ];
-       casks = [ "alacritty" "brave-browser" ];
+       onActivation.cleanup = "uninstall";
+       brews = [ "mas" "gnu-getopt" "herdr" ];
+       casks = [ "ghostty" "zed" "brave-browser" ];
      };
    }
    ```

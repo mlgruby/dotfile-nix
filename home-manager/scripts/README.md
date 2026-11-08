@@ -4,7 +4,7 @@ Helper scripts for complex alias operations. These scripts provide better error 
 
 ## 📁 Installation
 
-These scripts are automatically installed to `~/.config/home-manager/scripts/` when you run `rebuild`.
+These scripts live in `~/dotfile/home-manager/scripts/` and are referenced directly from the Nix store by your Home Manager aliases (with `rebuild`, `rebuild-work`, and `rebuild-personal` also installed into `~/bin/`) when you run `rebuild`.
 
 ## 🚀 Usage
 
@@ -13,7 +13,7 @@ All scripts are already aliased! You can use them directly:
 ### 1. Git Fuzzy Checkout (`gcb`)
 
 **Alias**: `gcb`
-**Direct**: `~/.config/home-manager/scripts/git-fuzzy-checkout.sh`
+**Direct**: `~/dotfile/home-manager/scripts/git-fuzzy-checkout.sh`
 
 Interactive branch checkout with commit preview.
 
@@ -22,7 +22,7 @@ Interactive branch checkout with commit preview.
 gcb
 
 # Or run directly
-~/.config/home-manager/scripts/git-fuzzy-checkout.sh
+~/dotfile/home-manager/scripts/git-fuzzy-checkout.sh
 ```
 
 **What it does:**
@@ -38,7 +38,7 @@ gcb
 ### 2. Git Fuzzy Log (`fshow`)
 
 **Alias**: `fshow`
-**Direct**: `~/.config/home-manager/scripts/git-fuzzy-log.sh`
+**Direct**: `~/dotfile/home-manager/scripts/git-fuzzy-log.sh`
 
 Interactive commit browser with diff preview.
 
@@ -47,7 +47,7 @@ Interactive commit browser with diff preview.
 fshow
 
 # Or run directly
-~/.config/home-manager/scripts/git-fuzzy-log.sh
+~/dotfile/home-manager/scripts/git-fuzzy-log.sh
 ```
 
 **What it does:**
@@ -63,7 +63,7 @@ fshow
 ### 3. Git Fuzzy Stash (`fstash`)
 
 **Alias**: `fstash`
-**Direct**: `~/.config/home-manager/scripts/git-fuzzy-stash.sh`
+**Direct**: `~/dotfile/home-manager/scripts/git-fuzzy-stash.sh`
 
 Interactive stash browser and applicator.
 
@@ -72,7 +72,7 @@ Interactive stash browser and applicator.
 fstash
 
 # Or run directly
-~/.config/home-manager/scripts/git-fuzzy-stash.sh
+~/dotfile/home-manager/scripts/git-fuzzy-stash.sh
 ```
 
 **What it does:**
@@ -88,7 +88,7 @@ fstash
 ### 4. System Rollback (`rollback`)
 
 **Alias**: `rollback`
-**Direct**: `~/.config/home-manager/scripts/system-rollback.sh`
+**Direct**: `~/dotfile/home-manager/scripts/system-rollback.sh`
 
 Interactive system generation rollback (macOS/nix-darwin only).
 
@@ -96,24 +96,27 @@ Interactive system generation rollback (macOS/nix-darwin only).
 # Use the alias
 rollback
 
+# Roll back directly to previous generation
+rollback --previous
+
 # Or run directly
-~/.config/home-manager/scripts/system-rollback.sh
+~/dotfile/home-manager/scripts/system-rollback.sh
 ```
 
 **What it does:**
-- Lists all system generations
-- Shows what's included in each generation
+- Lists all system generations from `/nix/var/nix/profiles/system-*-link`
+- Shows live `nvd diff` package changes for each generation in the fzf preview pane
 - Fuzzy search to select a generation
-- Rolls back to the selected generation
+- Switches to the selected generation via `/nix/var/nix/profiles/system-<gen>-link/activate`
 
-**Requirements:** fzf, darwin-rebuild (macOS only)
+**Requirements:** fzf, nix-darwin (macOS only)
 
 ---
 
 ### 5. Alias Cheatsheet (`alias-help`, `alias-quick`)
 
 **Aliases**: `alias-help`, `alias-quick`
-**Direct**: `~/.config/home-manager/scripts/alias-cheatsheet.sh`
+**Direct**: `~/dotfile/home-manager/scripts/alias-cheatsheet.sh`
 
 Interactive alias documentation viewer.
 
@@ -133,7 +136,7 @@ alias-help core
 alias-help dev
 
 # Or run directly
-~/.config/home-manager/scripts/alias-cheatsheet.sh [category]
+~/dotfile/home-manager/scripts/alias-cheatsheet.sh [category]
 ```
 
 **Categories:**
@@ -212,16 +215,19 @@ If you want to use the scripts directly (useful for testing or custom workflows)
 
 ```bash
 # Git scripts
-~/.config/home-manager/scripts/git-fuzzy-checkout.sh
-~/.config/home-manager/scripts/git-fuzzy-log.sh
-~/.config/home-manager/scripts/git-fuzzy-stash.sh
+~/dotfile/home-manager/scripts/git-fuzzy-checkout.sh
+~/dotfile/home-manager/scripts/git-fuzzy-log.sh
+~/dotfile/home-manager/scripts/git-fuzzy-stash.sh
 
 # System scripts
-~/.config/home-manager/scripts/system-rollback.sh
+~/dotfile/home-manager/scripts/rebuild-system.sh
+~/dotfile/home-manager/scripts/system-rollback.sh
+~/dotfile/home-manager/scripts/cleanup-system.sh
+~/dotfile/home-manager/scripts/update-system.sh
 
 # Help scripts
-~/.config/home-manager/scripts/alias-cheatsheet.sh quick
-~/.config/home-manager/scripts/alias-cheatsheet.sh git
+~/dotfile/home-manager/scripts/alias-cheatsheet.sh quick
+~/dotfile/home-manager/scripts/alias-cheatsheet.sh git
 ```
 
 ---
@@ -233,24 +239,22 @@ If you want to use the scripts directly (useful for testing or custom workflows)
 # After adding scripts, rebuild your system
 rebuild
 
-# Check if scripts exist
-ls -la ~/.config/home-manager/scripts/
+# Check if scripts exist in the repo
+ls -la ~/dotfile/home-manager/scripts/
 ```
 
 ### Permission denied
 ```bash
 # Scripts should be executable automatically
 # If not, fix permissions:
-chmod +x ~/.config/home-manager/scripts/*.sh
+chmod +x ~/dotfile/home-manager/scripts/*.sh
 ```
 
 ### FZF not available
 ```bash
 # FZF should be installed via home-manager
-# If missing, install it:
-nix-env -iA nixpkgs.fzf
-
-# Or add to your home-manager packages
+# If missing, rebuild your configuration:
+rebuild
 ```
 
 ### Script errors
@@ -258,7 +262,7 @@ All scripts have error checking built in. Common issues:
 
 1. **"Not a git repository"** - Run the git scripts inside a git repo
 2. **"fzf not found"** - Install fzf (should be in your config)
-3. **"darwin-rebuild not found"** - System rollback is macOS-only
+3. **"System profile directory not found"** - System rollback is macOS/nix-darwin only
 
 ---
 
@@ -266,12 +270,15 @@ All scripts have error checking built in. Common issues:
 
 | What | Alias | Direct Path |
 |------|-------|-------------|
-| Checkout branch | `gcb` | `~/.config/home-manager/scripts/git-fuzzy-checkout.sh` |
-| Browse commits | `fshow` | `~/.config/home-manager/scripts/git-fuzzy-log.sh` |
-| Apply stash | `fstash` | `~/.config/home-manager/scripts/git-fuzzy-stash.sh` |
-| System rollback | `rollback` | `~/.config/home-manager/scripts/system-rollback.sh` |
-| Quick help | `alias-quick` | `~/.config/home-manager/scripts/alias-cheatsheet.sh quick` |
-| Full help | `alias-help` | `~/.config/home-manager/scripts/alias-cheatsheet.sh all` |
+| Checkout branch | `gcb` | `~/dotfile/home-manager/scripts/git-fuzzy-checkout.sh` |
+| Browse commits | `fshow` | `~/dotfile/home-manager/scripts/git-fuzzy-log.sh` |
+| Apply stash | `fstash` | `~/dotfile/home-manager/scripts/git-fuzzy-stash.sh` |
+| System rebuild | `rebuild` | `~/dotfile/home-manager/scripts/rebuild-system.sh` |
+| System rollback | `rollback` | `~/dotfile/home-manager/scripts/system-rollback.sh` |
+| System cleanup | `cleanup` | `~/dotfile/home-manager/scripts/cleanup-system.sh` |
+| System update | `update` | `~/dotfile/home-manager/scripts/update-system.sh` |
+| Quick help | `alias-quick` | `~/dotfile/home-manager/scripts/alias-cheatsheet.sh quick` |
+| Full help | `alias-help` | `~/dotfile/home-manager/scripts/alias-cheatsheet.sh all` |
 
 ---
 

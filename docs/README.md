@@ -34,6 +34,7 @@ Follow this sequence to master your dotfiles configuration:
 - **[Repo Map](architecture/dotfile-map.md)** - How the repository is organized
 - **[Ownership Rules](architecture/ownership-rules.md)** - Where each kind of change belongs
 - **[Profile Surface](architecture/profile-surface.md)** - Work vs personal profile behavior
+- **[AI Agent Skills & Plugins](skills-management.md)** - Declarative skill & plugin management (`agent-extras`)
 - **[Performance Optimization](performance/rebuild-optimization.md)** - Speed up your system
 - **[System Monitoring](monitoring/system-health.md)** - Health checks and maintenance
 - **[Alias System](../home-manager/aliases/README.md)** - Complete alias reference (~220 total)

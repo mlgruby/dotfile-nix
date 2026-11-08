@@ -32,7 +32,7 @@ All configuration flows through `hosts.nix` (preferred) validation:
 - **Pattern**: Invalid config causes build-time errors, not runtime failures
 
 ```nix
-# Typical hosts.nix structure
+# Typical hosts.nix structure (note: git emails live in local ~/.gitconfig-{work,personal}, never in hosts.nix)
 {
   common = {
     username = "satya";
@@ -41,13 +41,11 @@ All configuration flows through `hosts.nix` (preferred) validation:
   };
   hosts = {
     work = {
-      hostname = "satya-work-mbp";
-      email = "satya@company.com";
+      hostname = "satya-wmbp";
       profile = "work";
     };
     personal = {
-      hostname = "satya-personal-mbp";
-      email = "satya@example.com";
+      hostname = "satya-pmbp";
       profile = "personal";
     };
   };
@@ -55,48 +53,46 @@ All configuration flows through `hosts.nix` (preferred) validation:
 ```
 
 ### 2. Modular Home-Manager Structure
-Each program/service gets dedicated module in `home-manager/modules/`:
-- **Module pattern**: `{ config, pkgs, ... }: { ... }`
+Each program/service gets a dedicated module in `home-manager/modules/`:
+- **Module pattern**: `{ config, pkgs, lib, ... }: { ... }`
 - **Comments explain**: purpose, configuration areas, integration points
 - **Defaults** provided where sensible, overrideable via hosts config
-- Examples: `git.nix` (87 lines), `zsh.nix` (220 lines), `aws-sso.nix` (376 lines)
+- Examples: `git.nix`, `zsh.nix`, `ghostty.nix`, `herdr.nix`, `claude-code.nix`, `antigravity.nix`, `pi.nix`, `plugins.nix`, `aws-sso.nix`
 
 ### 3. Shell Aliases Architecture (~220 aliases)
 Location: `home-manager/aliases/`
 - **Entry point**: `default.nix` imports modular alias files
-- **Modules**: helpers.nix, core.nix (~40), git.nix (~80), dev-tools.nix (~70), platform.nix (~30)
+- **Modules**: `helpers.nix`, `core.nix`, `git.nix`, `dev-tools.nix`, `platform.nix`, `homelab.nix`
 - **Pattern**: Aliases are pure data/functions, not imperative config
 - **FZF integration**: Many interactive aliases use fuzzy selection
 - See [alias documentation](../home-manager/aliases/README.md) for full reference
 
 ### 4. Performance Optimization
 - **AWS SSO functions**: Lazy-loaded in `aws-sso.nix` to avoid startup delay
-- **Shell initialization**: Optimized for fast zsh startup
-- **Rebuild strategy**: Use `home-manager switch --no-build` for shell-only changes to skip full rebuild
-- **Monitoring**: Run `scripts/monitoring/analyze-build-performance.sh` to measure bottlenecks
+- **Shell initialization**: Optimized for fast zsh startup with deduplicated `$PATH` (`typeset -U path PATH`)
+- **Rebuild strategy**: Use `rebuild` (wraps `sudo darwin-rebuild switch --flake .#<hostname>` and displays an `nvd diff` package summary)
+- **Monitoring**: Run `./scripts/monitoring/analyze-build-performance.sh` on demand to measure build & store metrics
 
 ## Development Workflows
 
 ### Standard Configuration Update
 ```bash
 # 1. Edit configuration (e.g., hosts.nix or home-manager module)
-# 2. Test build (dry-run, no system changes)
-time darwin-rebuild build --flake . --dry-run
+# 2. Check evaluation (no system changes)
+nix flake check --no-build
+rebuild-check
 
-# 3. Apply system configuration
-darwin-rebuild switch --flake .
-
-# 4. For shell-only changes (faster)
-home-manager switch --no-build
+# 3. Apply system configuration (auto-detects active host and prints nvd diff)
+rebuild
 ```
 
 ### Rollback
 ```bash
-# List previous generations
-darwin-rebuild list-generations
+# Interactive generation selector with live nvd diff preview
+rollback
 
-# Rollback to previous generation (replace GEN with generation number)
-darwin-rebuild switch --flake . --rollback
+# Or roll back directly to the previous generation
+rollback --previous
 ```
 
 ### Profile Management
@@ -151,11 +147,12 @@ darwin-rebuild switch --flake . --rollback
 - `darwin` - macOS system integration
 - `nix-homebrew` - Homebrew management
 - `stylix` - System-wide theming
+- `agent-extras` (`path:./home-manager/agent-extras`) - Child flake locking upstream AI agent skills and plugins
 
-**Post-Activation Scripts**
-- Java: SDKMAN setup (Java 8, 11, 17 via Amazon Corretto)
-- Python: System Python 3.12 via Homebrew + uv for project versions
-- AWS: Credential management setup
+**Toolchains & Runtimes**
+- Java: `temurin@21` via Homebrew cask (`darwin/homebrew-packages/casks/development.nix`)
+- Python / Node / Go / Rust: Managed declaratively via Nix in `home-manager/modules/packages/languages.nix` (`python312`, `uv`, `nodejs`, `bun`, `go`, `rustup`)
+- AWS: Declarative SSO profiles + lazy-loaded credential helpers (`home-manager/modules/aws-sso.nix`)
 
 ## Common Refactoring Opportunities
 

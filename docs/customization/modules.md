@@ -82,7 +82,7 @@ Guide to understanding, customizing, and creating modules in your Nix Darwin con
 
    ```nix
    { config, pkgs, lib, ... }: {
-     config = lib.mkIf pkgs.stdenv.isDarwin {
+     config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
        # Darwin-specific settings
      };
    }
