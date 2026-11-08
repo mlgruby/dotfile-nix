@@ -73,35 +73,6 @@ perf-profile
 perf-optimize
 ```
 
-### Log Monitoring Commands
-
-```bash
-# View health check logs
-logs-health
-
-# View weekly report logs
-logs-report
-
-# View performance logs
-logs-performance
-
-# View critical alerts logs
-logs-alerts
-```
-
-### Service Management Commands
-
-```bash
-# Check monitoring service status
-monitor-status
-
-# Load monitoring services
-monitor-load
-
-# Unload monitoring services
-monitor-unload
-```
-
 ## Health Check Details
 
 ### System Metrics Monitored
@@ -150,14 +121,9 @@ monitor-unload
 
 ## Maintenance Tasks
 
-### Scheduled Weekly Report
-
-Every Sunday the system generates a non-mutating health report. Use `health-maintain`
-when you intentionally want to run cleanup, upgrades, and maintenance commands.
-
 ### Manual Maintenance
 
-The manual maintenance command performs these tasks:
+The manual maintenance command performs these tasks when explicitly invoked:
 
 #### Nix Maintenance
 
@@ -221,54 +187,35 @@ Reports are written to XDG state directories (`~/.local/state/dotfiles/health-re
 
 ### Health Reports
 
-Generated reports are stored in `.health-reports/`:
+Generated reports are stored in `~/.local/state/dotfiles/health-reports/`:
 
 - **health_report_TIMESTAMP.txt** - Comprehensive health reports
 - **maintenance_TIMESTAMP.log** - Maintenance task logs
 
-These reports are generated locally and ignored by git.
-
 ### Performance Reports
 
-Performance analysis reports in `.performance-reports/`:
+Performance analysis reports are stored in `~/.local/state/dotfiles/performance-reports/`:
 
 - **system_analysis_TIMESTAMP.txt** - System configuration analysis
 - **rebuild_profile_TIMESTAMP.txt** - Build performance profiles
 - **cache_analysis_TIMESTAMP.txt** - Binary cache performance
 
-These reports are generated locally and ignored by git.
-
 ### Report Analysis
 
-Review reports regularly:
+Review reports when needed:
 
 ```bash
-# View latest health report
-ls -la .health-reports/ | tail -5
+# View latest health reports
+ls -la ~/.local/state/dotfiles/health-reports/ | tail -5
 
-# View latest performance report  
-ls -la .performance-reports/ | tail -5
+# View latest performance reports
+ls -la ~/.local/state/dotfiles/performance-reports/ | tail -5
 
 # Quick health status
 health-check
 ```
 
 ## Troubleshooting
-
-### Service Issues
-
-If monitoring services aren't running:
-
-```bash
-# Check service status
-monitor-status
-
-# Reload services
-monitor-unload && monitor-load
-
-# Check for errors
-logs-health
-```
 
 ### High Resource Usage
 

@@ -61,12 +61,12 @@ hostname  # Check current hostname
 
 # Error: Missing required attributes in host config
 # This error occurs when required fields are missing from your configuration.
-# Required fields:
+# Required fields in hosts.nix:
 # - username
 # - hostname
-# - email
 # - fullName
 # - githubUsername
+# (Note: Git email is configured locally in ~/.gitconfig-work and ~/.gitconfig-personal, not in hosts.nix)
 # Solution:
 # ```bash
 # # Check your configuration
@@ -100,7 +100,7 @@ hostname  # Check current hostname
 
 ```bash
 # Error: Configuration not applying
-darwin-rebuild switch --flake .
+rebuild
 
 # Error: Flake not updating
 rm flake.lock

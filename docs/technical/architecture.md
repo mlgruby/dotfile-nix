@@ -89,10 +89,17 @@ darwin/
 ```text
 home-manager/
 ├── default.nix           # Main entry point
+├── agent-extras/         # Child flake locking upstream AI skills & plugins
 ├── aliases/              # Shell shortcuts grouped by domain
 ├── neovim.nix           # Editor configuration
 └── modules/             # Individual application configs
-    ├── alacritty/       # Terminal emulator
+    ├── ghostty.nix      # Primary terminal emulator
+    ├── herdr.nix        # TUI session manager
+    ├── claude-code.nix  # Claude Code config
+    ├── antigravity.nix  # Antigravity config
+    ├── pi.nix           # Pi coding agent config
+    ├── plugins.nix      # Declarative AI skill/plugin links
+    ├── alacritty/       # Secondary terminal emulator
     ├── aws-sso.nix      # Cloud authentication
     ├── git.nix          # Version control
     ├── gpg.nix          # Encryption & signing
@@ -182,8 +189,8 @@ environment.systemPackages = with pkgs; [
 
 ```nix
 homebrew = {
-  brews = [ "mas" "mackup" ];
-  casks = [ "brave-browser" "orbstack" "visual-studio-code" ];
+  brews = [ "mas" "gnu-getopt" "herdr" ];
+  casks = [ "brave-browser" "ghostty" "orbstack" "zed" ];
 };
 ```
 

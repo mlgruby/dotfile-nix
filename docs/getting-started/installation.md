@@ -165,5 +165,5 @@ After successful installation, you can:
 If you need to remove the configuration and start fresh:
 
 ```bash
-./uninstall.sh
+./scripts/install/uninstall.sh
 ```

@@ -52,17 +52,17 @@ home.packages = with pkgs; [
 macOS-specific packages and GUI applications.
 
 ```nix
-# Shared GUI apps: darwin/homebrew-packages/casks/apps.nix
+# Shared GUI apps: darwin/homebrew-packages/casks/apps.nix & development.nix
 [
-  "alacritty"
+  "ghostty"
   "brave-browser"
-  "visual-studio-code"
+  "zed"
 ]
 
-# Shared global toolchains: darwin/homebrew-packages/brews/toolchains.nix
+# Shared Homebrew development tools: darwin/homebrew-packages/brews/development.nix
 [
-  "node"
-  "python@3.12"
+  "herdr"
+  "gcx"
 ]
 ```
 

@@ -361,6 +361,7 @@ dotfile/
 │   └── profiles/               # Work/personal Homebrew overrides
 ├── home-manager/
 │   ├── default.nix             # User environment entry point
+│   ├── agent-extras/           # Child flake locking external AI skills & plugins
 │   ├── aliases/                # Shell aliases split by ownership
 │   ├── config/                 # Shared declarative facts
 │   ├── modules/package-groups.nix
@@ -387,25 +388,36 @@ dotfile/
 ### System Commands
 
 ```bash
-rebuild   # Uses hostname resolved from active host in hosts.nix
+rebuild   # Rebuild active host & show nvd package diff
           # Optional: rebuild --work | rebuild --personal
 rebuild-work      # Explicit work target
 rebuild-personal  # Explicit personal target
+rollback  # Interactive generation rollback with nvd diff preview
 update    # Update Homebrew metadata/packages, flake inputs, and rebuild
-cleanup   # Clean old Nix generations
+cleanup   # Clean old Nix generations (user + system), Homebrew cache, and workspace metadata
 ```
 
-### Common Tools
+### Common Tools & AI Agents
 
 ```bash
-# Git
+# Workspace & Terminal (Ghostty + Herdr + Tmux)
+p         # Interactive project workspace launcher (Work 3-tab / Personal 4-tab)
+cb <cmd>  # Run command and copy ANSI-stripped output to clipboard
+rc        # Re-run last command and copy output to clipboard
+
+# AI Coding Agents & Usage
+cc / ccr  # Claude Code (new / resume)
+ag / agr  # Antigravity (open / fzf resume)
+cx / cxr  # Codex (new / resume)
+pil / pig # Pi Coding Agent (local / Gemini)
+cau-t     # AI token & cost usage report (today)
+
+# Git & GitHub
 gs        # Status
 gp        # Push
 gl        # Pull
 lg        # LazyGit TUI
-
-# GitHub
-ghprc     # Checkout PR
+ghprco    # Checkout PR interactively
 ghprl     # List PRs
 
 # Cloud (lazy-loaded for fast startup)

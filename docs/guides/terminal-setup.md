@@ -75,17 +75,28 @@ bmp     # Process view
 bmt     # Tree view
 ```
 
-## Terminal Emulator (Alacritty)
+## Terminal Emulators (Ghostty & Alacritty)
 
-### Configuration
+### Ghostty (Primary Terminal)
+
+Ghostty (`home-manager/modules/ghostty.nix`) is the primary terminal emulator, configured with Gruvbox Dark Hard colors, background blur, and automatic attachment to the `main` Tmux + Herdr session (`home-manager/modules/herdr.nix`).
+
+### Project Workspace Launcher (`p`)
+
+Run `p` in any interactive Zsh session to fuzzy-select a repository under `~/Development` and create/switch to a profile-aware Tmux window layout:
+
+- **Work profile (`satya-wmbp`)**: 3 tabs — `dev` (`$EDITOR` + shell split), `cc` (`claude --continue || claude`), and `git` (`lazygit` + open GitHub PR list).
+- **Personal profile (`satya-pmbp`)**: 4 tabs — `dev` (`$EDITOR` + shell split), `agy` (`agy .`), `cxr` (`codex resume`), and `lg` (`lazygit`).
+
+### Alacritty (Secondary Terminal)
 
 ```nix
 # Configuration in home-manager/modules/alacritty/default.nix
 programs.alacritty = {
   enable = true;
   settings = {
-    window.opacity = 0.95;
-    font.size = 14;
+    window.opacity = 0.85;
+    font.size = 12.0;
   };
 };
 ```

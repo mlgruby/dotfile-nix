@@ -87,10 +87,17 @@ darwin/
 ```text
 home-manager/
 ├── default.nix           # Main user config
+├── agent-extras/         # Child flake for upstream AI skills & plugins
 ├── aliases/              # Shell shortcuts grouped by domain
 ├── neovim.nix           # Editor config
 └── modules/             # Individual tool configs
-    ├── alacritty/       # Terminal
+    ├── ghostty.nix      # Primary terminal
+    ├── herdr.nix        # TUI session manager
+    ├── claude-code.nix  # Claude Code config
+    ├── antigravity.nix  # Antigravity config
+    ├── pi.nix           # Pi coding agent config
+    ├── plugins.nix      # Declarative AI skill/plugin links
+    ├── alacritty/       # Secondary terminal
     ├── git.nix          # Version control
     ├── zsh.nix          # Shell
     └── aws-sso.nix      # Cloud tools
@@ -175,20 +182,20 @@ setup-dev-env nodejs  # Creates .envrc with Node.js tools
 5. **Rollback Available**
 
    ```bash
-   sudo darwin-rebuild rollback  # If something breaks
+   rollback  # Interactive generation selector with nvd diff preview
    ```
 
 ### Generation Management
 
 ```bash
-# List all generations
-sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+# Interactive rollback (with live nvd diff preview)
+rollback
 
-# Switch to previous generation
-sudo darwin-rebuild rollback
+# Roll back directly to previous generation
+rollback --previous
 
-# Delete old generations
-sudo nix-collect-garbage -d
+# Delete old generations (user + system) and clean caches
+cleanup
 ```
 
 ## 🗂️ File Organization

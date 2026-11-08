@@ -44,7 +44,7 @@ lg      # Open LazyGit TUI
 
 ```bash
 # PR Management
-ghprc   # Checkout PR interactively
+ghprco  # Checkout PR interactively
 ghprl   # List all PRs
 ghpro   # List open PRs
 ghprch  # Check PR status

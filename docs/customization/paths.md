@@ -12,15 +12,14 @@ The dotfile system now supports dynamic path configuration through the `hosts.ni
 
 ```nix
 {
-  # Personal Information
-  username = "your-username";
-  fullName = "Your Full Name";
-  email = "your.email@example.com";
-  githubUsername = "your-github-username";
-  hostname = "your-hostname";
-  signingKey = "";
+  common = {
+    username = "your-username";
+    fullName = "Your Full Name";
+    githubUsername = "your-github-username";
+    signingKey = "";
+  };
   
-  # Directory Configuration
+  # Directory Configuration (in common or per-host)
   directories = {
     # Dotfiles repository location (relative to home directory)
     dotfiles = "dotfile";

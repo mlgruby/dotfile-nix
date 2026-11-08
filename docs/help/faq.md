@@ -85,12 +85,11 @@ directories = {
 **A:** Nix provides easy rollback:
 
 ```bash
-# Roll back to previous generation
-sudo darwin-rebuild rollback
+# Interactive generation picker with live nvd diff preview
+rollback
 
-# Or list all generations and pick one
-sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
-sudo darwin-rebuild switch --flake .#<hostname-from-hosts.nix> --rollback
+# Roll back directly to the previous generation
+rollback --previous
 ```
 
 ### Q: Updates are slow, how can I speed them up?

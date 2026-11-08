@@ -8,8 +8,11 @@ This is the current refactoring backlog. Historical audit notes live in
 - Consolidated Homebrew package ownership and guardrails.
 - Consolidated macOS defaults ownership into `darwin/macos-defaults.nix`.
 - Consolidated Nix daemon/settings ownership into `darwin/nix-settings.nix`.
-- Refactored system monitoring launchd paths and helpers.
-- Removed the unused Home Manager config compatibility aggregator.
+- Replaced background `launchd` monitoring bloat with on-demand health/performance scripts writing to XDG state directories (`~/.local/state/dotfiles/`).
+- Removed the unused Home Manager config compatibility aggregator and orphaned modules (`opencode`, `codex.nix`).
+- Eliminated Import-From-Derivation (IFD) in `darwin/configuration.nix` and fixed `stdenv.hostPlatform` deprecation warnings.
+- Decoupled Claude Code binary (`package = null`) while retaining declarative settings and skills/plugins via `home-manager/agent-extras`.
+- Upgraded `rebuild`, `rollback`, and `cleanup` with `nvd diff` previews and accurate generation management.
 - Declared stable macOS Finder, locale, Dock, text-input, and trackpad defaults.
 - Moved LazyVim bootstrap logic into a dedicated script.
 - Reduced bootstrap shell config to minimal pre-Home-Manager helpers.
@@ -20,4 +23,3 @@ This is the current refactoring backlog. Historical audit notes live in
 - Revisit whether LazyVim should stay mutable or become fully declarative.
 - Keep AWS SSO standalone setup only if non-Nix users still need it.
 - Continue moving complex aliases into scripts when quoting or prompts grow.
-- Review scheduled monitoring after a week of logs to tune cadence and noise.

@@ -14,7 +14,8 @@
 # - Profile management
 #
 # Shortcuts:
-# - Command + Shift + Enter -> Alacritty (Terminal)
+# - Command + Shift + 4     -> Capture screenshot to file + clipboard
+# - Command + Shift + Enter -> Ghostty (Terminal)
 # - Command + Shift + I     -> IntelliJ IDEA
 # - Command + Shift + P     -> PyCharm
 # - Command + Shift + S     -> Slack

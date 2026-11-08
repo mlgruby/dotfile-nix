@@ -129,23 +129,18 @@ Guide to customizing the visual appearance of your system and applications.
 }
 ```
 
-### VS Code Theme
+### Ghostty Theme
 
 ```nix
-# home-manager/modules/vscode.nix
+# home-manager/modules/ghostty.nix
 {
-  programs.vscode = {
-    enable = true;
-    extensions = with pkgs.vscode-extensions; [
-      dracula-theme.theme-dracula
-    ];
-    userSettings = {
-      "workbench.colorTheme" = "Dracula";
-      "workbench.iconTheme" = "material-icon-theme";
-      "editor.fontFamily" = "'JetBrainsMono Nerd Font'";
-      "editor.fontSize" = 14;
-    };
-  };
+  xdg.configFile."ghostty/config".text = ''
+    theme = Gruvbox Dark Hard
+    font-family = "JetBrainsMono Nerd Font"
+    font-size = 12
+    background-opacity = 0.85
+    background-blur = 20
+  '';
 }
 ```
 

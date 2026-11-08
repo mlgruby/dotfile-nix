@@ -37,17 +37,30 @@ stylix = {
 
 ### Terminal Customization
 
-**Alacritty Configuration**:
+**Ghostty Configuration** (primary terminal):
 
-```toml
-# In home-manager/modules/alacritty/config.toml
-[colors.primary]
-background = "#1d2021"  # Gruvbox dark background
-foreground = "#ebdbb2"  # Gruvbox light foreground
+```nix
+# In home-manager/modules/ghostty.nix
+xdg.configFile."ghostty/config".text = ''
+  theme = Gruvbox Dark Hard
+  font-family = "JetBrainsMono Nerd Font"
+  font-size = 12
+  background-opacity = 0.85
+  background-blur = 20
+'';
+```
 
-[font]
-size = 14.0
-normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+**Alacritty Configuration** (secondary terminal):
+
+```nix
+# In home-manager/modules/alacritty/default.nix
+programs.alacritty.settings = {
+  window.opacity = 0.85;
+  font = {
+    size = 12.0;
+    normal = { family = "JetBrainsMono Nerd Font"; style = "Regular"; };
+  };
+};
 ```
 
 **Starship Prompt**:
@@ -226,11 +239,12 @@ programs.git = {
 **GUI Applications via Homebrew**:
 
 ```nix
-# Shared apps: darwin/homebrew-packages/casks/apps.nix
+# Shared apps: darwin/homebrew-packages/casks/apps.nix or development.nix
 [
   # Existing apps
   "brave-browser"
-  "visual-studio-code"
+  "ghostty"
+  "zed"
   "orbstack"
   
   # Add your preferences
@@ -238,7 +252,6 @@ programs.git = {
   "discord"
   "notion"
   "figma"
-  "postman"
 ];
 ```
 

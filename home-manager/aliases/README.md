@@ -44,16 +44,20 @@ aliases/
 ## Category Overview
 
 ### 1. Core Shell (core.nix)
-- Navigation: `..`, `...`, `~`, `-`
+- Navigation: `..`, `...`, `~`, `-`, `dotfile`, `ws`, `codedot` (opens dotfiles in `zed`)
 - File operations: `backup`, `xtract`, `compress`
 - Documentation: `rtfm`, `cheat`, `md`
 - Network: `myip`, `pubip`, `ipp`, `ports`, `flushdns`
-- Clipboard: `copy`, `paste`
+- Clipboard & Screenshots: `copy`, `paste`, `pbimg`, `cshot`
+- Terminal helpers (in `zsh-integration.zsh`): `p` (project workspace launcher), `cb <cmd>` (run & copy output), `rc` (re-run last command & copy output)
 
-### 2. Development Tools (dev-tools.nix)
-- Modern CLI: `eza`, `fd`, `duf`, `btm`
+### 2. Development Tools & AI Agents (dev-tools.nix)
+- Modern CLI: `eza`, `fd`, `duf`, `btm`, `nav` / `navo` / `px` (`px0` code navigator)
 - Claude Code: `cc`, `ccc`, `ccr`
-- Pi Coding Agent: `pil`, `pig`, `pib`
+- Antigravity: `ag`, `agc`, `agr` (fuzzy session resume)
+- Codex: `cx`, `cxr`
+- Pi Coding Agent: `pil`, `pig`, `pib`, `pic`, `pir`
+- AI Agent Usage Reports: `cau-t`, `cau-w`, `cau-m`, `cau-tt`, `cau-wt`, `cau-mt`, `cau-s`, `cau-cc`, `cau-cx`, `cau-ag`, `cau-pi`, `cau-b`
 - Tmux: `tn`, `ta`, `tk`, `t`
 - FZF: `fe`, `fcd`, `fif`, `fkill`
 - Docker: `d`, `dc`, `dsp`, `drm`, `dlog`
@@ -62,16 +66,15 @@ aliases/
 
 ### 3. Git Workflows (git.nix)
 - Basic: `gs`, `gaa`, `gcm`, `gp`, `gl`
-- Branches: `gco`, `gcob`, `gbd`, `gba`
-- Stash: `gst`, `gstp`, `gstl`
+- Branches: `gco`, `gcob`, `gbd`, `gba`, `gcb`
+- Stash: `gst`, `gstp`, `gstl`, `fstash`
 - Rebase: `grb`, `grbi`, `grbc`
-- GitHub: `ghpr`, `ghprs`, `ghprv`
+- GitHub: `ghpr`, `ghprco`, `ghprl`, `ghpro`, `ghprf`, `ghprch`, `ghrv`
 - Conventional: `feat`, `fix`, `docs`, `chore`
 
 ### 4. System Management (platform.nix)
-- macOS: `rebuild`, `update`, `cleanup`, `rollback`
-- Health: `health-check`, `health-report`
-- Logs: `logs-health`, `logs-alerts`
+- macOS: `rebuild`, `rebuild-work`, `rebuild-personal`, `rebuild-fast`, `rebuild-check`, `update`, `cleanup`, `rollback`
+- Health & Performance: `health-check`, `health-report`, `health-maintain`, `health-alert`, `perf-analyze`, `perf-profile`, `perf-optimize`
 - Finder: `showhidden`, `hidedesktop`
 
 ### 5. Homelab (homelab.nix)

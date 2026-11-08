@@ -129,7 +129,7 @@ homebrew = {
   onActivation = {
     autoUpdate = false;
     upgrade = false;
-    cleanup = "none";
+    cleanup = "uninstall";
     extraEnv = {
       HOMEBREW_BUNDLE_CASK_SKIP = "...";
       HOMEBREW_NO_ENV_HINTS = "1";
@@ -137,14 +137,12 @@ homebrew = {
   };
   
   brews = [
-    # macOS-Specific Tools
+    # macOS-Specific & Homebrew-Only Tools
     "mas"              # Mac App Store CLI
-
-    # Language runtimes and build chains intentionally kept global
-    "node"
-    "go"
-    "python@3.12"
+    "coreutils"
     "gnu-getopt"       # GNU implementation of getopt
+    "herdr"            # TUI session manager
+    "gcx"              # Git kontekst CLI
   ];
 };
 ```
@@ -157,26 +155,23 @@ Shared casks live under `darwin/homebrew-packages/casks/`.
 homebrew.casks = [
   # Browsers
   "brave-browser"
-  "firefox"
   
-  # Development
-  "visual-studio-code"
+  # Development & Terminals
+  "ghostty"
+  "zed"
+  "temurin@21"
   "orbstack"
-  "postman"
+  "beekeeper-studio"
   
-  # Productivity
-  "notion"
-  "slack"
-  "zoom"
-  
-  # Media
-  "spotify"
-  "vlc"
+  # AI Agents
+  "claude"
+  "codex"
+  "antigravity"
   
   # Utilities
-  "rectangle"        # Window management
-  "alt-tab"         # Better app switching
-  "the-unarchiver"  # Archive extraction
+  "aerospace"        # Tiling window manager
+  "karabiner-elements"
+  "raycast"
 ];
 ```
 
@@ -259,24 +254,20 @@ use flake .#python-dev
 **Python**:
 
 ```bash
-# System Python via Homebrew
+# System Python via Nix (home-manager/modules/packages/languages.nix)
 python3 --version  # → Python 3.12.x
 
 # Project Python via uv
 uv python install 3.11
 uv venv --python 3.11
-uv pip install requirements.txt
+uv pip install -r requirements.txt
 ```
 
 **Node.js**:
 
 ```bash
-# System Node via Homebrew
-node --version  # → v20.x.x
-
-# Project Node via nvm (if needed)
-nvm use 18
-npm install
+# System Node via Nix (home-manager/modules/packages/languages.nix)
+node --version  # → v22.x.x
 ```
 
 **Rust**:

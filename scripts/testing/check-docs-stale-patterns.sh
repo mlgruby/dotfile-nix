@@ -29,7 +29,7 @@ check_no_matches() {
   shift 2
 
   local matches
-  matches="$(rg -n --glob '!docs/archive/**' "$pattern" "$@" || true)"
+  matches="$(rg -n --glob '!docs/archive/**' --glob '!docs/superpowers/**' "$pattern" "$@" || true)"
   if [[ -n "$matches" ]]; then
     fail "$label"
     printf '%s\n' "$matches"
@@ -38,8 +38,10 @@ check_no_matches() {
 
 docs_scope=(
   README.md
+  SCRIPTS_QUICKSTART.md
   docs
   home-manager/aliases/README.md
+  home-manager/scripts/README.md
 )
 
 repo_guidance_scope=(
@@ -95,6 +97,22 @@ check_no_matches \
   "docs and setup scripts should not recommend eval for AWS credential exports" \
   'eval[[:space:]]+["]?\$?\(?aws configure export-credentials|Copy and paste these commands to export credentials|AWS Credentials for \$profile|export-credentials --format env > \.env' \
   "${repo_guidance_scope[@]}"
+
+check_no_matches \
+  "docs should not reference removed background monitoring aliases or module" \
+  'darwin/system-monitoring\.nix|\b(logs-health|logs-report|logs-performance|logs-alerts|monitor-status|monitor-load|monitor-unload)\b' \
+  "${docs_scope[@]}"
+
+# shellcheck disable=SC2088 # Literal regex: tilde is part of stale docs text.
+check_no_matches \
+  "docs should not reference stale ~/.config/home-manager/scripts install path" \
+  '~/.config/home-manager/scripts/' \
+  "${docs_scope[@]}"
+
+check_no_matches \
+  "docs should not reference removed visual-studio-code cask" \
+  'visual-studio-code' \
+  "${docs_scope[@]}"
 
 if [[ "$HAS_FAILURES" -eq 0 ]]; then
   pass "documentation has no stale refactor patterns"

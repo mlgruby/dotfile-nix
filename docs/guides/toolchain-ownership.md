@@ -22,14 +22,18 @@ In practice:
 
 ## Current Home Manager Toolchains
 
-These are installed as user-level Nix packages:
+These are installed as user-level Nix packages (`home-manager/modules/packages/languages.nix` and `development.nix`):
 
 ```text
 uv
 poetry
-python 3.12
-go
+python 3.12 (with pyright, ruff)
+go (with gopls)
 nodejs
+bun
+rustup (with rust-analyzer)
+nixd
+kotlin-language-server
 maven
 cmake
 pkg-config
@@ -40,13 +44,15 @@ neovim
 Exact project versions should still come from project flakes, dev shells, or
 language-specific version files.
 
-## Current Homebrew Development Tools
+## Current Homebrew Development Tools & Casks
 
-Homebrew owns only tools that are unavailable or currently broken in nixpkgs:
+Homebrew owns CLI tools that are unavailable or broken in nixpkgs (`darwin/homebrew-packages/brews/development.nix`) and vendor SDK casks (`darwin/homebrew-packages/casks/development.nix`):
 
 ```text
-herdr
-yamlresume
+herdr       (brew formula - TUI session manager)
+gcx         (brew formula - Git kontekst CLI)
+temurin@21  (brew cask - global JDK 21)
+zed         (brew cask - editor)
 ```
 
 ## Project-Local First
@@ -101,8 +107,9 @@ Keep a tool in Homebrew when:
 - the Homebrew version is intentionally the compatibility baseline
 - the Nix package would be surprising or brittle on macOS
 
-The current examples are `herdr`, whose nixpkgs build is broken on
-aarch64-darwin, and `yamlresume`, which is not in nixpkgs.
+The current examples are `herdr` (whose nixpkgs build is broken on
+`aarch64-darwin`), `gcx` (distributed via custom tap), and `temurin@21` (macOS
+JDK bundle installed into `/Library/Java/JavaVirtualMachines`).
 
 ## Before Moving A Toolchain
 

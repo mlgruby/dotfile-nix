@@ -19,6 +19,9 @@ rebuild-check
 # Clean up old generations and free space
 cleanup
 
+# Interactive rollback with live package diff preview
+rollback
+
 # Full system garbage collection
 nix-collect-garbage -d
 ```
@@ -34,9 +37,6 @@ health-report
 
 # System maintenance (cleanup, updates, optimization)
 health-maintain
-
-# Monitor system performance
-monitor-status
 ```
 
 ### Development Environment
@@ -79,9 +79,9 @@ rebuild
 | Type | Location | Examples |
 |------|----------|----------|
 | **CLI Tools** | `home-manager/modules/packages/*.nix` | `fd`, `duf`, `shellcheck`, `awscli2` |
-| **GUI Apps** | `homebrew.casks` | `brave-browser`, `orbstack` |
-| **Global runtimes/build tools** | `darwin/homebrew-packages/brews/toolchains.nix` | `node`, `go`, `cmake` |
-| **Project tooling** | Template-specific | Language runtimes, debuggers |
+| **Language Runtimes & LSPs** | `home-manager/modules/packages/languages.nix` | `python312`, `uv`, `nodejs`, `bun`, `go`, `rustup` |
+| **GUI Apps & Vendor Casks** | `darwin/homebrew-packages/casks/*.nix` | `ghostty`, `zed`, `brave-browser`, `orbstack`, `temurin@21` |
+| **Project tooling** | Template-specific | Project `.envrc`, `uv`, or dev flakes |
 
 See [Toolchain Ownership](../guides/toolchain-ownership.md) before moving
 global runtimes or build tools.
@@ -194,14 +194,45 @@ fstash
 # Create pull request
 ghpr
 
-# List PRs with fzf selection
-ghprlist
+# Checkout PR interactively
+ghprco
+
+# List PRs (all / open / fuzzy)
+ghprl
+ghpro
+ghprf
 
 # Check PR status
-ghprcheck
+ghprch
 
 # View repository in browser
-ghrepo
+ghrv
+```
+
+## 🤖 AI Agents & Terminal Ergonomics
+
+```bash
+# Launch project workspace (Work 3-tab / Personal 4-tab in Tmux)
+p
+
+# Run command and copy ANSI-stripped output to clipboard
+cb <command>
+rc              # Re-run last command into clipboard
+
+# Screenshots for AI Agents
+pbimg           # Save clipboard image to /tmp and copy path
+cshot           # Copy latest screenshot path to clipboard
+
+# AI Coding Agents
+cc / ccr / ccc  # Claude Code (new / resume / continue)
+ag / agr / agc  # Antigravity (open / fzf resume / chat)
+cx / cxr        # Codex (new / resume)
+pil / pig / pib # Pi Coding Agent (local / Gemini / Bedrock)
+
+# AI Usage Reports
+cau-t           # Today's token & cost breakdown
+cau-w           # 7-day rolling usage
+cau-m           # 30-day rolling usage
 ```
 
 ## ☁️ AWS Management
@@ -231,7 +262,10 @@ awsw
 # Export credentials as environment variables
 awse
 
-# Generate a chmod 600 .env file
+# Export current profile to a named profile in ~/.aws/credentials
+awsef
+
+# Super workflow: login both SSO profiles + export both to ~/.aws/credentials
 awsf
 
 # Clear all credentials
@@ -243,14 +277,11 @@ awsc
 ### Theme & Appearance
 
 ```bash
-# View available Alacritty themes
-ls ~/.config/alacritty/themes/themes/
+# Primary terminal config (Ghostty)
+vim ~/dotfile/home-manager/modules/ghostty.nix
 
-# Edit terminal theme
-vim ~/.config/alacritty/config.toml
-
-# Reload terminal configuration
-# (restart Alacritty or use Cmd+R)
+# Secondary terminal config (Alacritty)
+vim ~/dotfile/home-manager/modules/alacritty/default.nix
 ```
 
 ### Configuration Files
@@ -259,10 +290,10 @@ vim ~/.config/alacritty/config.toml
 |----------------|--------------|
 | **Personal Info** | `hosts.nix` |
 | **System Settings** | `darwin/configuration.nix` |
-| **Packages** | `darwin/homebrew.nix`, `darwin/homebrew-packages/` |
+| **Packages** | `home-manager/modules/packages/`, `darwin/homebrew-packages/` |
 | **Shell Aliases** | `home-manager/aliases/` (organized by category) |
 | **Helper Scripts** | `home-manager/scripts/` (standalone scripts) |
-| **Terminal** | `home-manager/modules/alacritty/` |
+| **Terminal** | `home-manager/modules/ghostty.nix`, `home-manager/modules/herdr.nix` |
 
 ## 🔍 Troubleshooting
 
@@ -297,8 +328,8 @@ health-check
 # Check build performance
 perf-analyze
 
-# View detailed logs
-journalctl -u nix-daemon
+# View macOS nix-daemon service status
+sudo launchctl list | grep nix-daemon
 
 # Reset to known good state
 cd ~/dotfile && git stash && rebuild
@@ -310,12 +341,14 @@ cd ~/dotfile && git stash && rebuild
 
 | Shortcut | Action |
 |----------|--------|
-| `Cmd+Shift+Enter` | Open Alacritty |
+| `Cmd+Shift+4` | Capture screenshot to file + clipboard |
+| `Cmd+Shift+Enter` | Open Ghostty |
+| `Cmd+Shift+K` | Open Claude |
 | `Cmd+Shift+I` | Open IntelliJ IDEA |
-| `Cmd+Option+P` | Open PyCharm |
-| `Cmd+Shift+C` | Open Cursor |
+| `Cmd+Shift+P` | Open PyCharm |
+| `Cmd+Shift+S` | Open Slack |
 | `Cmd+Shift+X` | Open Codex |
-| `Cmd+Shift+D` | Open DataGrip |
+| `Cmd+Shift+D` | Open Beekeeper Studio |
 | `Cmd+Shift+A` | Open Calendar |
 | `Cmd+Shift+G` | Open Google Chrome |
 | `Cmd+Shift+B` | Open Brave Browser |
@@ -326,7 +359,7 @@ cd ~/dotfile && git stash && rebuild
 |----------|--------|
 | `Ctrl+G` | FZF Git status |
 | `Alt+D` | FZF directory navigation |
-| `Ctrl+_` | Open file in VSCode with FZF |
+| `Ctrl+_` | Open file in Zed with FZF |
 | `Alt+←/→` | Word navigation |
 | `Ctrl+U` | Clear line before cursor |
 
@@ -341,9 +374,6 @@ perf-profile
 
 # Optimize system performance
 perf-optimize
-
-# Monitor resource usage
-perf-monitor
 ```
 
 ## 💡 Pro Tips
