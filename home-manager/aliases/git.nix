@@ -29,9 +29,8 @@
   fstash = "bash ${../scripts/git-fuzzy-stash.sh}"; # Fuzzy select and apply stash
 
   # ==========================================================================
-  # LazyGit Integration
+  # LazyGit Integration (lg() directory-switching wrapper is provided by programs.lazygit)
   # ==========================================================================
-  lg = "lazygit"; # Open lazygit
   lgc = "lazygit -w $(pwd)"; # Open lazygit in current directory
   lgf = "lazygit -f $(find . -type d -name '.git' -exec dirname {} \\; | fzf)"; # Fuzzy find and open git repo in lazygit
   lgs = "lazygit status"; # Show lazygit status

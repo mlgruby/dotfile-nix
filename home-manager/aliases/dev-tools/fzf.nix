@@ -17,7 +17,7 @@
 
   # Process management
   fkill = "ps -ef | sed 1d | fzf -m | awk '{print $2}' | xargs kill"; # Fuzzy select and gracefully terminate processes
-  fmem = "ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head -20 | fzf --header-lines=1"; # Fuzzy browse top memory usage
+  fmem = "ps -axm -o pid,ppid,%mem,%cpu,comm | head -20 | fzf --header-lines=1"; # Fuzzy browse top memory usage
 
   # History and environment
   hist = "history 0 | fzf --ansi --preview 'echo {}' | sed 's/ *[0-9]* *//'"; # Fuzzy search command history

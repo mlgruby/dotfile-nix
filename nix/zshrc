@@ -20,7 +20,7 @@
 # - iTerm2 integration
 #
 # Related Files:
-# - nix/nix.conf: Core Nix configuration
+# - darwin/nix-settings.nix: Core Nix configuration
 # - nix/dynamic-config.zsh: Minimal bootstrap shell helpers
 # - home-manager/modules/zsh.nix: Main ZSH config
 #

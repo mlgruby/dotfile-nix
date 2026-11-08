@@ -82,7 +82,7 @@ in
   myip = "ifconfig | awk '/^[a-z0-9]+:/ { iface=$1; sub(\":\", \"\", iface) } /^[[:space:]]*inet / && $2 !~ /^127\\./ && iface !~ /^(lo|utun|awdl|llw|bridge)/ { print iface \": \" $2 }'"; # Show local LAN IP addresses
   ping1 = "ping -c 1"; # Ping once
   ping10 = "ping -c 10"; # Ping 10 times
-  ports-open = "netstat -tuln"; # Show open network ports
+  ports-open = "lsof -i -P -n | grep LISTEN"; # Show open listening network ports
   ports = "lsof -iTCP -sTCP:LISTEN -n -P"; # Show listening TCP ports
 
   # ==========================================================================
@@ -103,7 +103,7 @@ in
   # Disk and Size
   # ==========================================================================
   size = "du -sh"; # Show directory/file size - usage: size /path/to/dir
-  recent = "ls -lt | head -20"; # Show 20 most recently modified files
+  recent = "eza -l --sort=modified --reverse --icons | head -20"; # Show 20 most recently modified files
 
   # ==========================================================================
   # Clipboard (macOS)

@@ -27,7 +27,7 @@
       # Use SSH for better security and no password prompts
       git_protocol = "ssh";
       # Default editor for PR/Issue descriptions
-      editor = "vim";
+      editor = "nvim";
     };
   };
 

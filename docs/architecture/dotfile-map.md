@@ -50,8 +50,7 @@ workstation automation.
 ## Work Profile
 
 - `darwin/profiles/work.nix` - work-specific system/Homebrew choices.
-- `home-manager/config/aws.nix` - AWS account/profile naming.
-- `home-manager/modules/aws-sso.nix` - declarative AWS config wiring.
+- `home-manager/modules/aws-sso.nix` - declarative AWS SSO accounts, profiles, and config wiring.
 - `home-manager/scripts/aws-sso.zsh` - AWS SSO and credentials workflow.
 - `home-manager/scripts/work.zsh` - work shell helpers.
 
@@ -71,8 +70,6 @@ workstation automation.
 
 - `docs/runbooks/homelab/` - procedures for external systems such as monitoring,
   Grafana, Paperless, Uptime Kuma, and Proxmox.
-- `Grafana_dashboards/` - dashboard and alerting source artifacts. These are not
-  workstation config, but they are tracked here as homelab operational assets.
 
 ## Testing And Guardrails
 

@@ -25,26 +25,6 @@ if [ -z "${SSH_AUTH_SOCK:-}" ] && command -v launchctl > /dev/null 2>&1; then
   unset launchd_ssh_sock
 fi
 
-# uv completions. Generating them dynamically is surprisingly expensive, so
-# cache the generated file and source it on later shell starts.
-if command -v uv > /dev/null 2>&1; then
-  uv_completion_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/uv-completion.zsh"
-  uv_completion_meta="${uv_completion_cache}.meta"
-  uv_path="$(command -v uv)"
-  uv_meta="$uv_path:$(uv --version 2>/dev/null)"
-
-  if [ ! -r "$uv_completion_cache" ] || [ "$(cat "$uv_completion_meta" 2>/dev/null)" != "$uv_meta" ]; then
-    mkdir -p "${uv_completion_cache:h}"
-    uv generate-shell-completion zsh > "$uv_completion_cache" 2>/dev/null &&
-      printf '%s\n' "$uv_meta" > "$uv_completion_meta"
-  fi
-
-  if (( $+functions[compdef] )) && [ -r "$uv_completion_cache" ]; then
-    source "$uv_completion_cache"
-  fi
-  unset uv_completion_cache uv_completion_meta uv_path uv_meta
-fi
-
 function tm() {
   tmux attach-session -t main 2>/dev/null || tmux new-session -s main herdr
 }
@@ -135,13 +115,18 @@ fi
 
 function dotfiles-sync-tmux-env() {
   [ -n "$TMUX" ] || return 0
+  local current_profile="${AWS_PROFILE:-}"
+  if [ "${_DOTFILES_LAST_SYNCED_AWS_PROFILE-__UNSET__}" = "$current_profile" ]; then
+    return 0
+  fi
   command -v tmux > /dev/null 2>&1 || return 0
 
-  if [ -n "${AWS_PROFILE:-}" ]; then
-    tmux set-environment -g AWS_PROFILE "$AWS_PROFILE" 2>/dev/null || true
+  if [ -n "$current_profile" ]; then
+    tmux set-environment -g AWS_PROFILE "$current_profile" 2>/dev/null || true
   else
     tmux set-environment -gu AWS_PROFILE 2>/dev/null || true
   fi
+  _DOTFILES_LAST_SYNCED_AWS_PROFILE="$current_profile"
 }
 
 autoload -Uz add-zsh-hook
@@ -205,7 +190,7 @@ function fzf-git-status() {
   selections=$(
     git status --porcelain |
       fzf --ansi \
-        --preview 'path=$(printf "%s\n" {q} | sed "s/^...//; s/.* -> //")
+        --preview 'path=$(printf "%s\n" {} | sed "s/^...//; s/.* -> //")
                   if [ -f "$path" ]; then
                     bat --color=always --style=numbers "$path"
                   elif [ -d "$path" ]; then
@@ -294,10 +279,11 @@ function zsh-startup-time() {
 }
 
 function gitdefaultbranch() {
-  git remote show origin | grep 'HEAD' | cut -d':' -f2 | sed -e 's/^ *//g' -e 's/ *$//g'
+  git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' ||
+    git remote show origin | grep 'HEAD' | cut -d':' -f2 | sed -e 's/^ *//g' -e 's/ *$//g'
 }
 
-function ghpr() { gh pr list --state "$1" --limit 1000 | fzf; }
+function ghprs-state() { gh pr list --state "$1" --limit 1000 | fzf; }
 function ghprall() { gh pr list --state all --limit 1000 | fzf; }
 function ghpropen() { gh pr list --state open --limit 1000 | fzf; }
 function ghopr() {

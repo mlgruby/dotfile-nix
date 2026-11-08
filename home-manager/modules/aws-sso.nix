@@ -40,6 +40,17 @@ let
   awsConfigText = builtins.concatStringsSep "\n" (
     (map mkTraditionalProfile cfg.traditionalProfiles) ++ (map mkSsoProfile cfg.ssoProfiles)
   );
+
+  precompiledAwsSsoZsh =
+    pkgs.runCommand "aws-sso-zsh-precompiled"
+      {
+        nativeBuildInputs = [ pkgs.zsh ];
+      }
+      ''
+        mkdir -p "$out"
+        cp "${../scripts/aws-sso.zsh}" "$out/aws-sso.zsh"
+        zsh -c "zcompile '$out/aws-sso.zsh'"
+      '';
 in
 {
   options.programs.aws-sso = {
@@ -158,7 +169,7 @@ in
         bashcompinit
         complete -C "${pkgs.awscli2}/bin/aws_completer" aws
 
-        source "${../scripts/aws-sso.zsh}"
+        source "${precompiledAwsSsoZsh}/aws-sso.zsh"
       '';
 
       sessionVariables = {
