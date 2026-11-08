@@ -23,26 +23,47 @@ set -euo pipefail
 
 input=$(cat)
 
-# Raw values from JSON.
-MODEL=$(echo "$input" | jq -r '.model.display_name // empty')
-CWD=$(echo "$input" | jq -r '.workspace.current_dir // empty')
-PCT_RAW=$(echo "$input" | jq -r '.context_window.used_percentage // 0')
-PCT=$(printf '%.0f' "$PCT_RAW")
-IN_TOK=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // 0')
-OUT_TOK=$(echo "$input" | jq -r '.context_window.current_usage.output_tokens // 0')
-CR_TOK=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_input_tokens // 0')
-CW_TOK=$(echo "$input" | jq -r '.context_window.current_usage.cache_creation_input_tokens // 0')
-COST_RAW=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
-SESSION_ID=$(echo "$input" | jq -r '.session_id // empty')
-TOTAL_DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
-API_TIME=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
-LINES_ADD=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
-LINES_DEL=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
-EXCEEDS_200K=$(echo "$input" | jq -r '.exceeds_200k_tokens // false')
-RL5_RAW=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0')
-RL7_RAW=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // 0')
-RL5=$(printf '%.0f' "$RL5_RAW")
-RL7=$(printf '%.0f' "$RL7_RAW")
+# Raw values from JSON (parsed in a single jq pass to avoid 15 subprocess forks).
+{
+  read -r MODEL
+  read -r CWD
+  read -r PCT_RAW
+  read -r IN_TOK
+  read -r OUT_TOK
+  read -r CR_TOK
+  read -r CW_TOK
+  read -r COST_RAW
+  read -r SESSION_ID
+  read -r TOTAL_DURATION_MS
+  read -r API_TIME
+  read -r LINES_ADD
+  read -r LINES_DEL
+  read -r EXCEEDS_200K
+  read -r RL5_RAW
+  read -r RL7_RAW
+} <<< "$(
+  echo "$input" | jq -r '
+    (.model.display_name // ""),
+    (.workspace.current_dir // ""),
+    (.context_window.used_percentage // 0),
+    (.context_window.current_usage.input_tokens // 0),
+    (.context_window.current_usage.output_tokens // 0),
+    (.context_window.current_usage.cache_read_input_tokens // 0),
+    (.context_window.current_usage.cache_creation_input_tokens // 0),
+    (.cost.total_cost_usd // 0),
+    (.session_id // ""),
+    (.cost.total_duration_ms // 0),
+    (.cost.total_api_duration_ms // 0),
+    (.cost.total_lines_added // 0),
+    (.cost.total_lines_removed // 0),
+    (.exceeds_200k_tokens // false),
+    (.rate_limits.five_hour.used_percentage // 0),
+    (.rate_limits.seven_day.used_percentage // 0)
+  ' 2>/dev/null || printf "\n\n0\n0\n0\n0\n0\n0\n\n0\n0\n0\n0\nfalse\n0\n0\n"
+)"
+PCT=$(printf '%.0f' "${PCT_RAW:-0}")
+RL5=$(printf '%.0f' "${RL5_RAW:-0}")
+RL7=$(printf '%.0f' "${RL7_RAW:-0}")
 
 # Colors: gruvbox, truecolor where the terminal advertises it, 256-color
 # otherwise. `printf -v` keeps this to zero subshells.
@@ -157,8 +178,12 @@ CLAUDE_COST_LOCK="${CLAUDE_COST_CACHE}.lock"
 CLAUDE_COST_TMP="${CLAUDE_COST_CACHE}.$$"
 if mkdir "$CLAUDE_COST_LOCK" 2>/dev/null; then
   trap 'rmdir "$CLAUDE_COST_LOCK" 2>/dev/null || true' EXIT
-  PREVIOUS_TOTAL=$(jq -r '.session_total // 0' "$CLAUDE_COST_CACHE" 2>/dev/null || echo 0)
-  PREVIOUS_DAY_COST=$(jq -r '.cost // 0' "$CLAUDE_COST_CACHE" 2>/dev/null || echo 0)
+  {
+    read -r PREVIOUS_TOTAL
+    read -r PREVIOUS_DAY_COST
+  } <<< "$(jq -r '(.session_total // 0), (.cost // 0)' "$CLAUDE_COST_CACHE" 2>/dev/null || printf "0\n0\n")"
+  PREVIOUS_TOTAL=${PREVIOUS_TOTAL:-0}
+  PREVIOUS_DAY_COST=${PREVIOUS_DAY_COST:-0}
   if [ ! -f "$CLAUDE_COST_CACHE" ]; then
     # If this session crossed midnight, use its last known cumulative total as
     # today's baseline so yesterday's spend is not counted again.

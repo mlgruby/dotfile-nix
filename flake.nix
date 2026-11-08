@@ -160,9 +160,6 @@
       agentSourceCheck =
         let
           requiredSources = [
-            "compound-engineering"
-            "hyperframes-skills"
-            "mattpocock-skills"
             "caveman-skill"
             "claude-plugins-official"
             "codex-plugin-cc"

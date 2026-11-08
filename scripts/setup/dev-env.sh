@@ -160,6 +160,63 @@ interactive_selection() {
     fi
 }
 
+# Render built-in .envrc template when no external file exists
+render_template() {
+    local template="$1"
+    case "$template" in
+        python)
+            cat << 'EOF'
+# Python Development Environment (uv)
+export UV_PYTHON_PREFERENCE="managed"
+if [ -d ".venv" ]; then
+  VIRTUAL_ENV="$(pwd)/.venv"
+  PATH_add "$VIRTUAL_ENV/bin"
+  export VIRTUAL_ENV
+fi
+dotenv_if_exists .env
+EOF
+            ;;
+        nodejs)
+            cat << 'EOF'
+# Node.js Development Environment
+PATH_add node_modules/.bin
+dotenv_if_exists .env
+EOF
+            ;;
+        rust)
+            cat << 'EOF'
+# Rust Development Environment
+export RUST_BACKTRACE=1
+dotenv_if_exists .env
+EOF
+            ;;
+        go)
+            cat << 'EOF'
+# Go Development Environment
+PATH_add bin
+dotenv_if_exists .env
+EOF
+            ;;
+        java)
+            cat << 'EOF'
+# Java / Scala Development Environment
+dotenv_if_exists .env
+EOF
+            ;;
+        docker)
+            cat << 'EOF'
+# Docker Compose Development Environment
+export COMPOSE_DOCKER_CLI_BUILD=1
+export DOCKER_BUILDKIT=1
+dotenv_if_exists .env
+EOF
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 # Validate template exists
 validate_template() {
     local template="$1"
@@ -179,11 +236,6 @@ validate_template() {
         for template_info in "${TEMPLATES[@]}"; do
             echo "  - ${template_info%:*}"
         done
-        exit 1
-    fi
-    
-    if [[ ! -f "$TEMPLATES_DIR/$template/.envrc" ]]; then
-        log_error "Template file not found: $TEMPLATES_DIR/$template/.envrc"
         exit 1
     fi
 }
@@ -210,9 +262,13 @@ setup_environment() {
         fi
     fi
     
-    # Copy template
+    # Write template (prefer external override if present, otherwise built-in)
     log_step "Setting up $template environment in $target_dir"
-    cp "$TEMPLATES_DIR/$template/.envrc" "$target_dir/.envrc"
+    if [[ -f "$TEMPLATES_DIR/$template/.envrc" ]]; then
+        cp "$TEMPLATES_DIR/$template/.envrc" "$target_dir/.envrc"
+    else
+        render_template "$template" > "$target_dir/.envrc"
+    fi
     
     # Make sure direnv is configured
     if ! command -v direnv >/dev/null 2>&1; then
@@ -307,13 +363,5 @@ main() {
     setup_environment "$template" "$target_dir" "$force"
 }
 
-# Check if templates directory exists
-if [[ ! -d "$TEMPLATES_DIR" ]]; then
-    log_error "Templates directory not found: $TEMPLATES_DIR"
-    log_info "Make sure you're running this script from the dotfile directory"
-    exit 1
-fi
-
 # Run main function
 main "$@"
- 

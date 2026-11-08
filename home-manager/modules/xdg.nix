@@ -27,9 +27,8 @@
   home.sessionVariables = {
     # Note: Base XDG variables managed by Home Manager's built-in xdg module
     
-    # Application-specific XDG compliance
+    # Application-specific XDG compliance (HISTFILE is owned by programs.zsh.history)
     LESSHISTFILE = "$XDG_CACHE_HOME/less/history";
-    HISTFILE = "$XDG_STATE_HOME/zsh/history";
     INPUTRC = "$XDG_CONFIG_HOME/readline/inputrc";
     # GNUPGHOME managed by tool-configs.nix for Homebrew GPG
     
