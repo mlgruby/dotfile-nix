@@ -144,7 +144,8 @@
     # Dircolors - Color scheme for ls and file listings
     dircolors = {
       enable = true;
-      enableZshIntegration = true;
+      # Pre-compiled at Nix build time in zsh.nix to avoid spawning `dircolors -b` on every shell launch.
+      enableZshIntegration = false;
       
       extraConfig = ''
         # Gruvbox color scheme for ls and file listings

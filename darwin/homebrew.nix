@@ -29,6 +29,11 @@ in
     # Custom taps are composed declaratively below, but remain mutable because
     # their Git repositories are not pinned as flake inputs.
     mutableTaps = true;
+
+    # Disable nix-homebrew's `eval "$(brew shellenv)"` in /etc/zshrc (~51ms per
+    # shell spawn). Home Manager sets the static /opt/homebrew environment
+    # variables and PATH/fpath directly in zsh.nix with zero subshell overhead.
+    enableZshIntegration = false;
   };
 
   # Homebrew packages configuration

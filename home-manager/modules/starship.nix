@@ -41,6 +41,9 @@ in
   config = {
     programs.starship = {
       enable = true;
+      # Pre-compiled at Nix build time in zsh.nix to avoid spawning
+      # `starship init zsh` + `starship prompt --continuation` (~50ms) on every shell launch.
+      enableZshIntegration = false;
       settings = {
         "$schema" = "https://starship.rs/config-schema.json";
 

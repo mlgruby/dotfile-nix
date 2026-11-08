@@ -32,6 +32,6 @@
     font-thicken = true
 
     # Auto-launch tmux + Herdr, but keep a shell available if either exits/fails.
-    command = /bin/zsh -l -c "tmux attach-session -t main 2>/dev/null || tmux new-session -s main /opt/homebrew/bin/herdr; exec /bin/zsh -l"
+    command = /run/current-system/sw/bin/zsh -l -c "tmux attach-session -t main 2>/dev/null || tmux new-session -s main /opt/homebrew/bin/herdr; exec /run/current-system/sw/bin/zsh -l"
   '';
 }
