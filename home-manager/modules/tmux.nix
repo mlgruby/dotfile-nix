@@ -80,8 +80,8 @@ in
       set -g status-position top
       set -g status-interval 5
       set -g status-right-length 220
-      set -g default-terminal "screen-256color"
-      set -ag terminal-overrides ",xterm-256color:RGB"
+      set -g default-terminal "tmux-256color"
+      set -ag terminal-overrides ",*:RGB"
       set -g allow-passthrough all
       set -g update-environment "DISPLAY KRB5CCNAME SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY DOCKER_CONFIG AWS_PROFILE AWS_DEFAULT_REGION AWS_REGION"
       # Do not inherit Codex/sandbox color suppression into agent panes.
