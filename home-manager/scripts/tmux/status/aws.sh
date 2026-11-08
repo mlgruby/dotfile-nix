@@ -36,50 +36,28 @@ tmux_status_collect_aws() {
       ;;
   esac
 
-  aws_expiry="$(
-    python3 - <<'PY' 2>/dev/null || true
-import datetime as dt
-import glob
-import json
-import os
-
-now = dt.datetime.now(dt.timezone.utc)
-expiries = []
-
-for path in glob.glob(os.path.expanduser("~/.aws/sso/cache/*.json")):
-    try:
-        with open(path) as fh:
-            data = json.load(fh)
-    except Exception:
-        continue
-
-    if "startUrl" not in data:
-        continue
-
-    raw = data.get("expiresAt")
-    if not raw:
-        continue
-
-    try:
-        expires = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
-    except ValueError:
-        continue
-
-    expiries.append(expires)
-
-if not expiries:
-    raise SystemExit
-
-remaining = int((max(expiries) - now).total_seconds() // 60)
-if remaining <= 0:
-    print("exp")
-elif remaining < 60:
-    print(f"{remaining}m")
-else:
-    hours, minutes = divmod(remaining, 60)
-    print(f"{hours}h" if minutes < 10 else f"{hours}h{minutes}m")
-PY
-  )"
+  aws_expiry=""
+  if [ -n "$aws_label" ]; then
+    aws_expiry="$(
+      jq -rn --argjson now "$(date +%s)" '
+        [ inputs
+          | select(.startUrl != null and .expiresAt != null)
+          | (.expiresAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)
+        ]
+        | if length == 0 then empty
+          else
+            ((max - $now) / 60 | floor) as $rem
+            | if $rem <= 0 then "exp"
+              elif $rem < 60 then "\($rem)m"
+              else
+                (($rem / 60 | floor)) as $h
+                | (($rem % 60)) as $m
+                | if $m < 10 then "\($h)h" else "\($h)h\($m)m" end
+              end
+          end
+      ' "$HOME"/.aws/sso/cache/*.json 2>/dev/null || true
+    )"
+  fi
 
   aws_status=""
   if [ -n "$aws_label" ]; then
