@@ -3,18 +3,6 @@
 
   inputs = {
     # Skills
-    compound-engineering = {
-      url = "github:EveryInc/compound-engineering-plugin";
-      flake = false;
-    };
-    hyperframes-skills = {
-      url = "github:heygen-com/hyperframes";
-      flake = false;
-    };
-    mattpocock-skills = {
-      url = "github:mattpocock/skills";
-      flake = false;
-    };
     caveman-skill = {
       url = "github:JuliusBrussee/caveman";
       flake = false;

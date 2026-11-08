@@ -47,7 +47,7 @@ EOF
 }
 
 list_aliases() {
-    zsh -ic alias 2>/dev/null
+    zsh -ic alias 2>/dev/null | sed "s/^alias -- //; s/^'//; s/'=/=/"
 }
 
 show_quick_reference() {
@@ -131,11 +131,11 @@ show_category() {
             ;;
         opentofu|tofu)
             echo -e "${CYAN}OpenTofu Aliases${NC}\n"
-            list_aliases | grep -E "^(tofu=|tf=|tfin=|tfp=|tfa=|tfd=|tfwst=|tfwsw=|tfwls=)" | sort
+            list_aliases | grep -E "^(tf=|tfin=|tfp=|tfa=|tfd=|tfwst=|tfwsw=|tfwls=)" | sort
             ;;
         dev)
             echo -e "${CYAN}Development Tools Aliases${NC}\n"
-            list_aliases | grep -E "^(d=|dc=|k=|tofu=|tf=|tn=|ta=|tk=|fe=|fcd=|fif=|lsa=|lst=|fdh=|fa=)" | sort
+            list_aliases | grep -E "^(d=|dc=|k=|tf=|tn=|ta=|tk=|fe=|fcd=|fif=|lsa=|lst=|fdh=|fa=)" | sort
             ;;
         quick)
             show_quick_reference

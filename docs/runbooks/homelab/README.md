@@ -12,6 +12,7 @@ configuration in Home Manager modules instead.
 - `monitoring` (`192.168.10.27`) - consolidated Prometheus, Grafana,
   Alertmanager, and Uptime Kuma host.
 - `paperlessng` (`192.168.10.20`) - Paperless-ngx document service.
+- `pve-incident-lxc-disk-write.md` - Proxmox LXC high disk write incident postmortem and remediation.
 
 Host aliases are declared in `home-manager/config/ssh.nix`.
 

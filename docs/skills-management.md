@@ -26,19 +26,13 @@ dotfile/
 
 ## Upstream Sources (`home-manager/agent-extras/flake.nix`)
 
-Upstream repositories are declared with `flake = false` in `home-manager/agent-extras/flake.nix`:
+Upstream repositories wired into `home-manager/modules/plugins.nix` are declared with `flake = false` in `home-manager/agent-extras/flake.nix`:
 
-- `claude-plugins-official` (`github:anthropics/claude-plugins-official`) — official Anthropic Claude Code plugins (`pyright-lsp`, `typescript-lsp`, `rust-analyzer-lsp`, `gopls-lsp`, `context7`, `code-review`, `commit-commands`, `security-guidance`, `skill-creator`, `claude-md-management`)
-- `superpowers-marketplace` (`github:obra/superpowers-marketplace`) — Superpowers workflow plugin
+- `claude-plugins-official` (`github:anthropics/claude-plugins-official`) — official Anthropic Claude Code plugins (`pyright-lsp`, `rust-analyzer-lsp`, `context7`, `code-review`, `code-simplifier`, `frontend-design`, `pr-review-toolkit`, `ralph-loop`, `security-guidance`, `skill-creator`, `claude-code-setup`, `claude-md-management`)
 - `codex-plugin-cc` (`github:openai/codex-plugin-cc`) — OpenAI Codex plugin for Claude Code
-- `mattpocock-skills` (`github:mattpocock/skills`) — TDD, grill-me, diagnose, architecture, writing, and triage skills
-- `frontend-design` (`github:anthropics/claude-code`) — Frontend design skill
-- `modern-web-guidance` (`github:GoogleChromeLabs/web-skills`) — Modern web and Chrome extensions skills
-- `android-cli` (`github:google/android-cli`) — Android CLI skill
-- `science-skills` (`github:google-deepmind/science-skills`) — Bioinformatics and scientific research skills
-- `caveman` (`github:JuliusBrussee/caveman`) — Ultra-compressed communication skill
+- `caveman-skill` (`github:JuliusBrussee/caveman`) — Ultra-compressed communication skill
 
-Additionally, locally authored skills (such as `security-audit`) live directly in `home-manager/skills/` and are symlinked via `home-manager/modules/plugins.nix`.
+Standalone skills and multi-skill bundles in `~/.agents/skills/` and `~/.gemini/config/plugins/` are managed locally alongside these pinned plugin marketplaces.
 
 ---
 
@@ -62,7 +56,7 @@ Running `update` (`home-manager/scripts/update-system.sh`) automatically updates
 
 ```bash
 # 1. Update a specific input in the child flake
-nix flake update mattpocock-skills --flake ~/dotfile/home-manager/agent-extras
+nix flake update claude-plugins-official --flake ~/dotfile/home-manager/agent-extras
 
 # 2. Propagate the updated child lock into the root flake.lock
 nix flake update agent-extras --flake ~/dotfile
