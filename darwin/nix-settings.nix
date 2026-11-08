@@ -52,8 +52,6 @@
     experimental-features = [
       "nix-command"
       "flakes"
-      "auto-allocate-uids" # Better sandbox performance
-      "cgroups" # Better resource management
     ];
 
     # Keep normal builds sandboxed while allowing trusted Darwin derivations
