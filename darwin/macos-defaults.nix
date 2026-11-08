@@ -32,6 +32,8 @@
       KeyRepeat = 2; # Fast key repeat
       InitialKeyRepeat = 15; # Initial key repeat delay
       ApplePressAndHoldEnabled = false; # Disable press and hold for accents
+      NSWindowResizeTime = 0.001; # Instant window resize animation speed
+      NSAutomaticWindowAnimationsEnabled = false; # Disable window opening/closing zoom animations
       NSAutomaticCapitalizationEnabled = false; # Disable auto capitalization
       NSAutomaticDashSubstitutionEnabled = false; # Disable dash substitution
       NSAutomaticPeriodSubstitutionEnabled = false; # Disable double-space period substitution
