@@ -1,9 +1,9 @@
 # home-manager/aliases/dev-tools/agents.nix
 #
 # Aliases for interactive coding agents and agent CLIs.
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
-  aws = import ../../config/aws.nix;
+  aws = config.programs.aws-sso;
   ccusageSummary = "${pkgs.python3}/bin/python3 ${../../scripts/ccusage-summary.py}";
 in
 {

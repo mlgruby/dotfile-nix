@@ -38,7 +38,7 @@
 #
 # Related Files:
 # - pre-nix-installation.sh: Installation script
-# - nix/nix.conf: Nix configuration
+# - darwin/nix-settings.nix: Nix configuration
 # - nix/zshrc: Shell configuration
 # - flake.nix: System configuration
 

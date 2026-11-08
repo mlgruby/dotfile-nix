@@ -6,13 +6,12 @@
 # This script automates the setup of a new macOS system with Nix, nix-darwin, and dotfiles.
 #
 # Core Files:
-# - nix/nix.conf: Core Nix configuration
+# - darwin/nix-settings.nix: Core Nix configuration
 # - nix/zshrc: Shell configuration
 # - nix/dynamic-config.zsh: Shell functions
 # - flake.nix: System configuration
 #
 # File Placement:
-# - nix.conf → /etc/nix/nix.conf
 # - zshrc → ~/.zshrc
 # - dynamic-config.zsh → ~/.dynamic-config.zsh
 #

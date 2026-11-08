@@ -20,10 +20,11 @@ let
     else
       bitwardenAgent.socketPath;
 
-  # Pre-generate and wordcode-compile (.zwc) static shell integrations at Nix
-  # build time. This eliminates 5 runtime process spawns on every interactive
-  # shell startup (`dircolors`, `zoxide init`, `starship init`, `starship prompt --continuation`,
-  # and `direnv hook`), saving ~90ms per shell launch without losing any behavior.
+  # Pre-generate and wordcode-compile (.zwc) static shell integrations and
+  # helper scripts at Nix build time. This eliminates 6 runtime process spawns
+  # on every interactive shell startup (`dircolors`, `zoxide init`, `starship init`,
+  # `starship prompt --continuation`, `direnv hook`, and `uv --version`) and
+  # precompiles our Zsh scripts into fast `.zwc` wordcode files.
   precompiledZshIntegrations =
     pkgs.runCommand "zsh-precompiled-integrations"
       {
@@ -40,12 +41,23 @@ let
           echo ""
           ${config.programs.direnv.package}/bin/direnv hook zsh
           echo ""
+          echo 'if (( $+functions[compdef] )); then'
+          ${pkgs.uv}/bin/uv generate-shell-completion zsh
+          echo 'fi'
+          echo ""
           echo 'if [[ $TERM != "dumb" ]]; then'
           ${config.programs.starship.package}/bin/starship init zsh --print-full-init \
             | sed 's|^PROMPT2="\(.*\)"$|PROMPT2='\'''\1'\'''|'
           echo 'fi'
         } > "$out/integrations.zsh"
-        zsh -c "zcompile '$out/integrations.zsh'"
+
+        cp "${../scripts/zsh-completion-init.zsh}" "$out/zsh-completion-init.zsh"
+        cp "${../scripts/zsh-integration.zsh}" "$out/zsh-integration.zsh"
+        cp "${../scripts/work.zsh}" "$out/work.zsh"
+
+        for f in "$out"/*.zsh; do
+          zsh -c "zcompile '$f'"
+        done
       '';
 in
 {
@@ -54,7 +66,7 @@ in
       enable = true;
       enableCompletion = true;
       completionInit = ''
-        source "${../scripts/zsh-completion-init.zsh}"
+        source "${precompiledZshIntegrations}/zsh-completion-init.zsh"
       '';
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
@@ -98,7 +110,7 @@ in
         ''}
 
         source "${precompiledZshIntegrations}/integrations.zsh"
-        source "${../scripts/zsh-integration.zsh}"
+        source "${precompiledZshIntegrations}/zsh-integration.zsh"
 
         ${lib.optionalString profile.isWork ''
           # Optional devcontainer-auto integration for the Work profile. The
@@ -110,7 +122,7 @@ in
         ''}
       ''
       + lib.optionalString profile.isWork ''
-        source "${../scripts/work.zsh}"
+        source "${precompiledZshIntegrations}/work.zsh"
       '';
 
       history = {

@@ -3,7 +3,6 @@
 # OpenTofu workflow aliases.
 { ... }:
 {
-  tofu = "tofu"; # OpenTofu command
   tf = "tofu"; # Short OpenTofu shorthand
   tfin = "tofu init"; # Initialize OpenTofu
   tfp = "tofu plan"; # Show execution plan

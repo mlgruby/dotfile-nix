@@ -172,7 +172,7 @@ in
   # --------------------------------------------------------------------------
   flushdns = "sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder"; # Flush DNS cache
   sleepnow = "pmset sleepnow"; # Put Mac to sleep immediately
-  lockscreen = "/System/Library/CoreServices/Menu\\ Extras/User.menu/Contents/Resources/CGSession -suspend"; # Lock screen immediately
+  lockscreen = "pmset displaysleepnow"; # Lock screen / sleep display immediately
 })
 //
   # ==========================================================================
