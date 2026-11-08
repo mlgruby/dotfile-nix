@@ -124,6 +124,18 @@ in
           echo "   Install it separately if you want rebuilds to set the default browser"
         fi
       '';
+
+      # nix-darwin skips user LaunchAgent cleanup when launchd.user.agents is empty ({}).
+      # Ensure any previously generated org.nixos.* user LaunchAgents are unloaded and removed.
+      cleanupOrphanedUserLaunchAgents.text = ''
+        user_home="/Users/${userConfig.username}"
+        for plist in "$user_home"/Library/LaunchAgents/org.nixos.*.plist; do
+          [[ -e "$plist" ]] || continue
+          echo "removing orphaned user service $(basename "$plist" .plist)" >&2
+          launchctl asuser "$(id -u -- ${userConfig.username})" sudo --user=${userConfig.username} -- launchctl unload "$plist" 2>/dev/null || true
+          rm -f "$plist"
+        done
+      '';
     };
 
     # System state version
@@ -153,17 +165,6 @@ in
       assertion = config.nix.enable;
       message = "Nix daemon must be enabled for this configuration";
     }
-  ];
-
-  # Warning Messages
-  # Display important notes during rebuild
-  warnings = [
-    # Remind about manual steps
-    "Remember to run 'xcode-select --install' if building fails"
-    # Note about credential management
-    "AWS credentials should be managed via the provided scripts"
-    # Python environment note
-    "Use 'uv' for project dependencies and Python version management"
   ];
 
   # Stylix System-wide Theming

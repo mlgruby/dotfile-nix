@@ -14,7 +14,7 @@
 # - mkFileTypeAliases: Extension-based alias patterns
 # - mkPathAliases: Directory navigation aliases
 {pkgs, ...}: let
-  inherit (pkgs.stdenv) isDarwin isLinux;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 in {
   # Platform flags
   inherit isDarwin isLinux;

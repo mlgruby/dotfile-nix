@@ -32,8 +32,8 @@ NC='\033[0m' # No Color
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-REPORTS_DIR="$DOTFILE_DIR/.health-reports"
-HOSTNAME=$(hostname)
+REPORTS_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/health-reports"
+HOSTNAME=$(scutil --get LocalHostName 2>/dev/null || hostname -s)
 
 # Health check thresholds
 CPU_THRESHOLD=80
@@ -252,9 +252,9 @@ check_nix_health() {
         echo "Garbage collection potential: $gc_size"
         
         # Check current generation
-        if command -v darwin-rebuild >/dev/null 2>&1; then
+        if [ -L /run/current-system ]; then
             local current_gen
-            current_gen=$(darwin-rebuild list-generations | tail -1 | awk '{print $1}')
+            current_gen=$(readlink /run/current-system || echo "unknown")
             echo "Current system generation: $current_gen"
         fi
     else

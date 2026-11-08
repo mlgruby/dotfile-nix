@@ -31,8 +31,8 @@ NC='\033[0m' # No Color
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-REPORT_DIR="$DOTFILE_DIR/.performance-reports"
-HOSTNAME=$(hostname)
+REPORT_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/performance-reports"
+HOSTNAME=$(scutil --get LocalHostName 2>/dev/null || hostname -s)
 
 # Logging functions
 log_info() {
@@ -83,7 +83,7 @@ analyze_current_system() {
         echo
         
         echo "=== Current Generation ==="
-        darwin-rebuild list-generations | head -5 || true
+        readlink /run/current-system || true
         echo
         
         echo "=== Store Statistics ==="
@@ -113,8 +113,8 @@ profile_rebuild() {
         echo
         
         echo "=== Dry Run Analysis ==="
-        echo "Running: time darwin-rebuild build --flake . --dry-run"
-        time darwin-rebuild build --flake . --dry-run 2>&1
+        echo "Running: time darwin-rebuild build --flake .#$HOSTNAME --dry-run"
+        time darwin-rebuild build --flake ".#$HOSTNAME" --dry-run 2>&1
         echo
         
         echo "=== Flake Evaluation Time ==="
@@ -281,8 +281,10 @@ Run `analyze-build-performance.sh --profile` regularly to track:
 
 EOF
 
-    # Replace $(date) in the file
-    sed -i "s/\$(date)/$(date)/g" "$rec_file"
+    # Replace $(date) in the file portably
+    local current_date
+    current_date="$(date)"
+    sed -i.bak "s/\$(date)/$current_date/g" "$rec_file" && rm -f "${rec_file}.bak"
     
     log_success "Recommendations saved to: $rec_file"
     cat "$rec_file"

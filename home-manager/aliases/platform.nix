@@ -29,30 +29,14 @@ in
   # --------------------------------------------------------------------------
   # System Rebuild
   # --------------------------------------------------------------------------
-  rebuild-fast =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        echo "🚀 Fast rebuild with maximum performance..." && \
-        sudo darwin-rebuild switch --flake .#"${userConfig.hostname}" --option max-jobs auto --option cores 0 --option keep-outputs true --option keep-derivations true && \
-        cd - && \
-        echo "⚡ Fast rebuild complete!" && \
-        rl
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Rebuild with parallel builds and caching optimizations
+  rebuild-fast = "rebuild && rl"; # Rebuild using rebuild-system.sh and reload shell
 
   rebuild-check =
     mkTemplateAlias
       ''
-        cd @dotfileDir@ && \
+        (cd @dotfileDir@ && \
         echo "🔍 Checking what will be built..." && \
-        darwin-rebuild build --flake .#"${userConfig.hostname}" --dry-run --option max-jobs auto && \
-        cd -
+        darwin-rebuild build --flake .#"${userConfig.hostname}" --dry-run --option sandbox relaxed --option max-jobs auto)
       ''
       [
         {
