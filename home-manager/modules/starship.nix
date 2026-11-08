@@ -46,6 +46,8 @@ in
       enableZshIntegration = false;
       settings = {
         "$schema" = "https://starship.rs/config-schema.json";
+        # Allow Git and external tools up to 1000ms (avoids timeouts on large repos, during daemon spinup, or under rebuild load)
+        command_timeout = 1000;
 
         format = "[](color_orange)$os$username[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_aqua)$git_branch$git_status[](fg:color_aqua bg:color_blue)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:color_blue bg:color_bg3)$docker_context$conda$cmd_duration[](fg:color_bg3 bg:color_bg1)[ ](fg:color_bg1)$line_break$character";
 
@@ -125,6 +127,7 @@ in
         git_status = {
           style = "bg:color_aqua"; # Gruvbox aqua
           format = "[[($all_status$ahead_behind )](fg:color_fg0 bg:color_aqua)]($style)";
+          ignore_submodules = true;
         };
 
         nodejs = {
