@@ -28,7 +28,22 @@ tmux_status_collect_system() {
   nix_status=""
   [ -n "$nix_generation" ] && nix_status=" $nix_generation"
 
-  logical_cpus="$(sysctl -n hw.logicalcpu 2>/dev/null || echo 1)"
+  hw_cache="${TMPDIR:-/tmp}/tmux_hw_$(id -u 2>/dev/null || echo 0).cache"
+  logical_cpus=""
+  mem_total_gb=""
+  if [ -r "$hw_cache" ]; then
+    read -r logical_cpus mem_total_gb < "$hw_cache" 2>/dev/null || true
+  fi
+  if [ -z "$logical_cpus" ] || [ -z "$mem_total_gb" ]; then
+    logical_cpus="$(sysctl -n hw.logicalcpu 2>/dev/null || echo 1)"
+    mem_total_gb="$(
+      sysctl -n hw.memsize 2>/dev/null \
+        | awk '{ if ($1 > 0) printf "%.0f", $1 / 1024 / 1024 / 1024 }' \
+        || true
+    )"
+    [ -n "$mem_total_gb" ] || mem_total_gb="16"
+    printf "%s %s\n" "$logical_cpus" "$mem_total_gb" > "$hw_cache" 2>/dev/null || true
+  fi
   load_avg="$(sysctl -n vm.loadavg 2>/dev/null | awk '{ print $2 }' || true)"
 
   # Avoid `top -l 1` on macOS, which sleeps internally and takes ~1.5s per call.
@@ -50,12 +65,6 @@ tmux_status_collect_system() {
   [ -n "$cpu" ] || cpu="n/a"
 
   cpu_status=" $cpu"
-
-  mem_total_gb="$(
-    sysctl -n hw.memsize 2>/dev/null \
-      | awk '{ if ($1 > 0) printf "%.0f", $1 / 1024 / 1024 / 1024 }' \
-      || true
-  )"
   # macOS keeps spare RAM busy as cache. Its own free-memory percentage is a
   # more useful signal than summing active and inactive VM pages.
   mem_free_percent="$(

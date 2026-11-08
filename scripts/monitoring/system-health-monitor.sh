@@ -67,17 +67,28 @@ mkdir -p "$REPORTS_DIR"
 
 # System information gathering
 get_system_info() {
-    local timestamp
+    local timestamp hw_info model processor memory serial
     timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+    # Query system_profiler once instead of 4 separate invocations
+    hw_info=$(system_profiler SPHardwareDataType 2>/dev/null || true)
+    model=$(echo "$hw_info" | awk -F: '/Model Name/ {print $2; exit}' | xargs)
+    [ -z "$model" ] && model=$(sysctl -n hw.model 2>/dev/null || echo "Unknown")
+    processor=$(echo "$hw_info" | awk -F: '/(Processor Name|Chip)/ {print $2; exit}' | xargs)
+    [ -z "$processor" ] && processor=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "Unknown")
+    memory=$(echo "$hw_info" | awk -F: '/Memory/ {print $2; exit}' | xargs)
+    [ -z "$memory" ] && memory="$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1024 / 1024 / 1024 )) GB"
+    serial=$(echo "$hw_info" | awk -F: '/Serial Number/ {print $2; exit}' | xargs)
+    [ -z "$serial" ] && serial="Unknown"
     
     cat << EOF
 === System Health Report - $timestamp ===
 
 Hardware Information:
-- Model: $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F: '{print $2}' | xargs)
-- Processor: $(system_profiler SPHardwareDataType | grep "Processor Name" | awk -F: '{print $2}' | xargs)
-- Memory: $(system_profiler SPHardwareDataType | grep "Memory" | awk -F: '{print $2}' | xargs)
-- Serial: $(system_profiler SPHardwareDataType | grep "Serial Number" | awk -F: '{print $2}' | xargs)
+- Model: $model
+- Processor: $processor
+- Memory: $memory
+- Serial: $serial
 
 Software Information:
 - macOS Version: $(sw_vers -productVersion)
@@ -90,8 +101,20 @@ EOF
 
 # CPU monitoring
 check_cpu_usage() {
-    local cpu_usage
-    cpu_usage=$(top -l 1 | grep "CPU usage" | awk '{print $3}' | sed 's/%//')
+    local cpu_usage logical_cpus
+    logical_cpus=$(sysctl -n hw.logicalcpu 2>/dev/null || echo 1)
+    # Summing per-process %cpu from ps normalized by logical cores takes ~25ms
+    # whereas `top -l 1` delays for 1.5s with heavy CPU overhead.
+    cpu_usage=$(ps -A -o %cpu= 2>/dev/null | awk -v cores="$logical_cpus" '
+        { sum += $1 }
+        END {
+            if (cores <= 0) cores = 1
+            pct = sum / cores
+            if (pct > 100) pct = 100
+            printf "%.1f", pct
+        }
+    ')
+    [ -n "$cpu_usage" ] || cpu_usage="0.0"
     
     echo "CPU Usage: ${cpu_usage}%"
     
@@ -165,7 +188,8 @@ check_disk_usage() {
     # Check Nix store size specifically
     if [ -d "/nix/store" ]; then
         local nix_store_size
-        nix_store_size=$(du -sh /nix/store 2>/dev/null | awk '{print $1}')
+        nix_store_size=$(df -h /nix/store 2>/dev/null | awk 'NR==2 {print $3}')
+        [ -n "$nix_store_size" ] || nix_store_size="Unknown"
         echo "  Nix Store: $nix_store_size"
         log_info "Nix store size: $nix_store_size"
     fi
@@ -239,7 +263,7 @@ check_nix_health() {
     # Check Nix store integrity
     if command -v nix >/dev/null 2>&1; then
         log_info "Checking Nix store integrity..."
-        if nix store verify --all >/dev/null 2>&1; then
+        if nix-store --verify >/dev/null 2>&1; then
             log_success "Nix store: Verified"
         else
             log_warning "Nix store: Verification issues detected"
@@ -363,7 +387,7 @@ perform_maintenance() {
             nix store optimise --option max-jobs auto || echo "Store optimization failed"
             
             echo "Verifying store integrity..."
-            nix store verify --all || echo "Store verification failed"
+            nix-store --verify || echo "Store verification failed"
             echo
         fi
         

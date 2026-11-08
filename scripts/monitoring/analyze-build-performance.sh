@@ -73,7 +73,7 @@ analyze_current_system() {
         echo "=== System Information ==="
         echo "Hostname: $HOSTNAME"
         echo "macOS Version: $(sw_vers -productVersion)"
-        echo "Hardware: $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F: '{print $2}' | xargs)"
+        echo "Hardware: $(sysctl -n machdep.cpu.brand_string 2>/dev/null || sysctl -n hw.model 2>/dev/null || echo 'Mac')"
         echo "CPU Cores: $(sysctl -n hw.ncpu)"
         echo "Memory: $(($(sysctl -n hw.memsize) / 1024 / 1024 / 1024)) GB"
         echo
@@ -86,8 +86,12 @@ analyze_current_system() {
         readlink /run/current-system || true
         echo
         
-        echo "=== Store Statistics ==="
-        nix path-info --store /nix/store --all --size --human-readable | head -20 || true
+        echo "=== Current System Closure Top Packages ==="
+        if [ -L /run/current-system ]; then
+            nix path-info -r /run/current-system --size --human-readable 2>/dev/null | sort -hr -k2 | head -20 || true
+        else
+            echo "No /run/current-system link found"
+        fi
         echo
         
         echo "=== Recent Builds ==="
@@ -118,8 +122,8 @@ profile_rebuild() {
         echo
         
         echo "=== Flake Evaluation Time ==="
-        echo "Running: time nix eval .#darwinConfigurations.$HOSTNAME.system"
-        time nix eval ".#darwinConfigurations.$HOSTNAME.system" --json > /dev/null 2>&1
+        echo "Running: time nix eval --raw .#darwinConfigurations.$HOSTNAME.system.drvPath"
+        time nix eval --raw ".#darwinConfigurations.$HOSTNAME.system.drvPath" > /dev/null 2>&1
         echo
         
         echo "=== Store Path Analysis ==="
@@ -163,7 +167,7 @@ check_binary_cache_hits() {
         echo
         
         echo "=== Store Optimization Status ==="
-        du -sh /nix/store 2>/dev/null || echo "Unable to check store size"
+        df -h /nix/store 2>/dev/null | awk 'NR==2 {print "Nix store used: " $3 " / " $2 " (" $5 ")"}' || echo "Unable to check store size"
         echo
         
         echo "=== Recent Cache Activity ==="

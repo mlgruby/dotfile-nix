@@ -29,10 +29,12 @@ tmux_status_collect_vpn() {
 
   # `tailscale status` can print a preferences error while still returning
   # exit code 0. Require valid JSON and an actually running backend before
-  # showing MESH.
-  if tailscale status --json 2>/dev/null \
-    | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
-    vpn_label="${vpn_label:+$vpn_label · }󰖂 MESH"
+  # showing MESH. Guard with pgrep so we skip CLI IPC + jq when Tailscale is inactive.
+  if command -v tailscale >/dev/null 2>&1 && pgrep -xi "Tailscale" >/dev/null 2>&1; then
+    if tailscale status --json 2>/dev/null \
+      | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
+      vpn_label="${vpn_label:+$vpn_label · }󰖂 MESH"
+    fi
   fi
 
   if [ -z "$vpn_label" ] && [ -n "$connected_vpns" ] && printf '%s\n' "$connected_vpns" | grep -v -Eiq 'tailscale'; then
