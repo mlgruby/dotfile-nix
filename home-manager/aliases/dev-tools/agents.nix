@@ -27,14 +27,14 @@ in
   # Coding-agent usage (ccusage; reports use current pricing when available)
   cau-t = "ccusage daily --since \"$(date +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # Today across all supported agents
   cau-w = "ccusage weekly --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # Rolling 7 days across all supported agents
-  cau-m = "ccusage monthly --since \"$(date -v1d +%Y-%m-%d 2>/dev/null || date -d \"$(date +%Y-%m-01)\" +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # This month across all supported agents
+  cau-m = "ccusage monthly --since \"$(date +%Y-%m-01)\" --until \"$(date +%Y-%m-%d)\" --by-agent"; # This month across all supported agents
   cau-tt = "${ccusageSummary} today"; # Today totals per agent plus grand total
   cau-wt = "${ccusageSummary} week"; # Rolling 7-day totals per agent plus grand total
   cau-mt = "${ccusageSummary} month"; # This-month totals per agent plus grand total
   cau-s = "ccusage session"; # Usage grouped by conversation/session
   cau-cc = "ccusage claude daily --since \"$(date +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Claude today by model
   cau-cx = "ccusage codex daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Codex rolling 7 days by model
-  cau-ag = "ccusage gemini daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Gemini/AGY rolling 7 days by model
+  cau-ag = "ccusage antigravity daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Antigravity rolling 7 days by model
   cau-pi = "ccusage pi daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Pi rolling 7 days by model
   cau-b = "ccusage claude blocks --active"; # Active Claude 5-hour block
 

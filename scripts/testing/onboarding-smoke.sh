@@ -56,8 +56,11 @@ check_command() {
 }
 
 collect_shell_files() {
-  find ./scripts -type f -name '*.sh' | sort
-  printf '%s\n' ./setup.sh
+  find ./scripts ./home-manager/scripts -type f -name '*.sh' ! -path './home-manager/scripts/tmux/status/*' | sort
+  printf '%s\n' \
+    ./home-manager/modules/claude-code/statusline.sh \
+    ./home-manager/modules/antigravity/statusline.sh \
+    ./setup.sh
 }
 
 check_required_files() {

@@ -14,10 +14,14 @@
   # Security Settings (Placeholder if needed later)
 
   # Shell Configuration (System-level ZSH enablement)
-  # ZSH setup and environment
+  # Disable nix-darwin's system-wide compinit/bashcompinit in /etc/zshrc because
+  # Home Manager already initializes cached Zsh completions (~/.zcompdump) via
+  # home-manager/scripts/zsh-completion-init.zsh. Running compinit twice adds
+  # ~150ms of uncached startup latency to every interactive Zsh session.
   programs.zsh = {
     enable = true; # Ensures zsh is available system-wide
-    enableCompletion = true; # System-wide completion (HM also manages this)
+    enableCompletion = false; # Managed by Home Manager with ~/.zcompdump caching
+    enableBashCompletion = false;
     promptInit = ""; # Avoid conflicting with Starship/HM prompt
   };
 

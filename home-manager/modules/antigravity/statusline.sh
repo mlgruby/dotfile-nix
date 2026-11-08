@@ -6,11 +6,9 @@ SANDBOX_LOG="$HOME/.gemini/antigravity-cli/cli.log"
 # ─── ANSI Helpers (Standard 16-color palette only) ───────────────────────────
 R="\033[0m"         # Reset
 B="\033[1m"         # Bold
-D="\033[2m"         # Dim
 I="\033[3m"         # Italic
 
 # Foreground accents (Standard 16 colors)
-FG_BLACK="\033[30m"
 FG_RED="\033[31m"
 FG_GREEN="\033[32m"
 FG_YELLOW="\033[33m"
@@ -37,8 +35,8 @@ NUM_COLOR="${FG_BRIGHT_WHITE}${B}"
   read -r USED_PCT
   read -r VCS_BRANCH
   read -r VCS_DIRTY
-  read -r VCS_TYPE
-  read -r VCS_CLIENT
+  read -r _
+  read -r _
   read -r SANDBOX
   read -r SANDBOX_NET
   read -r ARTIFACTS
@@ -49,12 +47,12 @@ NUM_COLOR="${FG_BRIGHT_WHITE}${B}"
   read -r COLS
   read -r CWD
   read -r CONV_ID
-  read -r PRODUCT
+  read -r _
   read -r INPUT_TOKENS
   read -r OUTPUT_TOKENS
   read -r CTX_LIMIT
   read -r CTX_USED
-  read -r REM_PCT
+  read -r _
   read -r QUOTA_5H_FRAC
   read -r QUOTA_5H_RESET
 } <<< "$(
@@ -153,14 +151,12 @@ DOT="${FG_GRAY} | ${R}"
 GIT_DIR="${CWD:-.}"
 VCS_BRANCH=$(git -C "$GIT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 if [ -n "$VCS_BRANCH" ]; then
-  VCS_TYPE="git"
   if ! git -C "$GIT_DIR" diff --quiet 2>/dev/null || ! git -C "$GIT_DIR" diff --cached --quiet 2>/dev/null; then
     VCS_DIRTY="true"
   else
     VCS_DIRTY="false"
   fi
 else
-  VCS_TYPE=""
   VCS_DIRTY="false"
 fi
 
@@ -507,8 +503,6 @@ CONV_WIDE=""
 CONV_MED=""
 [ -n "$CONV_ID" ] && CONV_MED="${FG_GRAY}${ICON_CONV} ${CONV_ID:0:4}${R}"
 
-CONV_NARROW="" # Omitted in narrow layout
-
 
 # --- Sandbox Badge Variants ---
 SB_WIDE=$(format_sandbox "wide")
@@ -537,9 +531,6 @@ if [ "$CTX_USED" -gt 0 ] 2>/dev/null; then
   TOK_DETAILS_MED=" (${CTX_USED_FMT}/${CTX_LIMIT_FMT})"
 fi
 
-# Tokens narrow (omitted)
-TOK_DETAILS_NARROW=""
-
 
 # --- Number Indicators Variants ---
 ART_WIDE="${FG_BLUE}${ICON_ART} ${NUM_COLOR}${ARTIFACTS}${R}"
@@ -564,9 +555,6 @@ QUOTA_NARROW=$(format_quota "narrow")
 # --- Assemble Single Row Layouts ---
 LINE1_WIDE=$(join_with_dot "$S" "$M_WIDE" "$DIR_WIDE" "$V_WIDE" "$CONV_WIDE")
 LINE2_WIDE=$(join_with_dot "$ART_WIDE" "$SUB_WIDE" "$BG_WIDE" "$SB_WIDE" "${CTX_BAR_WIDE}${TOK_DETAILS_WIDE}" "$QUOTA_WIDE")
-
-LINE1_MED=$(join_with_dot "$S" "$M_MED" "$DIR_MED" "$V_MED")
-LINE2_MED=$(join_with_dot "$ART_MED" "$SUB_MED" "$BG_MED" "$SB_MED" "${CTX_BAR_MED}${TOK_DETAILS_MED}" "$QUOTA_MED")
 
 
 # ─── Right-align helper ──────────────────────────────────────────────────────
@@ -599,9 +587,6 @@ MARGIN=8
 
 LEN1_WIDE=$(visible_len "$LINE1_WIDE")
 LEN2_WIDE=$(visible_len "$LINE2_WIDE")
-
-LEN1_MED=$(visible_len "$LINE1_MED")
-LEN2_MED=$(visible_len "$LINE2_MED")
 
 if [ "$COLS" -ge 135 ] && [ "$COLS" -ge $((LEN1_WIDE + LEN2_WIDE + MARGIN)) ]; then
   # 1. Single-row Wide Layout (with full details)

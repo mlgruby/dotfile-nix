@@ -20,13 +20,13 @@
   # Interactive FZF-powered Git
   # ==========================================================================
   # Branch selection with commit preview
-  gcb = "${../scripts/git-fuzzy-checkout.sh}"; # Fuzzy checkout branch with preview
+  gcb = "bash ${../scripts/git-fuzzy-checkout.sh}"; # Fuzzy checkout branch with preview
 
   # Log browsing with diff preview
-  fshow = "${../scripts/git-fuzzy-log.sh}"; # Fuzzy browse commits with diff
+  fshow = "bash ${../scripts/git-fuzzy-log.sh}"; # Fuzzy browse commits with diff
 
   # Stash selection and apply
-  fstash = "${../scripts/git-fuzzy-stash.sh}"; # Fuzzy select and apply stash
+  fstash = "bash ${../scripts/git-fuzzy-stash.sh}"; # Fuzzy select and apply stash
 
   # ==========================================================================
   # LazyGit Integration
