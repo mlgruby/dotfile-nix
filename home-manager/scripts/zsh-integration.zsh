@@ -246,7 +246,7 @@ bindkey "^U" backward-kill-line
 bindkey "^[^?" backward-kill-word
 bindkey "^A" beginning-of-line
 bindkey "^E" end-of-line
-bindkey -s '^_' 'code $(fzf)^M'
+bindkey -s '^_' 'zed $(fzf)^M'
 bindkey "^[d" fzf-cd-with-hidden
 bindkey '^G' fzf-git-status
 

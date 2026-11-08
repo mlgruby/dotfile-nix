@@ -71,9 +71,6 @@
 
   # Font-related environment variables
   home.sessionVariables = {
-    # Font configuration paths
-    FONTCONFIG_PATH = "$HOME/.nix-profile/etc/fonts";
-    
     # Application font preferences (using Homebrew fonts)
     TERMINAL_FONT = "JetBrainsMono NFM";
     EDITOR_FONT = "JetBrainsMono NFM";

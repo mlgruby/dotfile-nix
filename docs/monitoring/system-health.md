@@ -38,32 +38,9 @@ The system health monitoring provides comprehensive oversight of system performa
 - **Service Health**: Nix daemon and essential service monitoring
 - **Scheduled Reporting**: Regular health status reports
 
-## Automated Scheduling
+## On-Demand Execution
 
-The monitoring system runs on the following schedule:
-
-### Daily Tasks
-
-```text
-9:00 AM  - System Health Check
-12:00 PM - Performance Monitoring
-8:00 AM, 2:00 PM, 8:00 PM - Critical Alerts Check
-```
-
-### Weekly Tasks
-
-```text
-Sunday 10:00 AM - Weekly Health Report
-```
-
-### Services Configuration
-
-All services are managed via launchd and configured in `darwin/system-monitoring.nix`:
-
-- **system-health-check**: Daily comprehensive health assessment
-- **system-health-report**: Weekly non-mutating health report
-- **performance-monitor**: Daily performance analysis
-- **critical-alerts**: Three-times-daily critical issue detection
+Health and performance checks run on-demand via shell aliases (`health-check`, `health-report`, `health-maintain`, `health-alert`, `perf-analyze`, `perf-profile`, `perf-optimize`) rather than persistent background `launchd` agents, keeping background CPU and disk I/O free of polling noise.
 
 ## Manual Commands
 
@@ -236,27 +213,9 @@ DISK_THRESHOLD=90       # Disk usage percentage
 LOAD_THRESHOLD=8        # Load average threshold
 ```
 
-### Service Scheduling
+### Report Locations
 
-Modify schedules in `darwin/system-monitoring.nix`:
-
-```nix
-StartCalendarInterval = [
-  {
-    Hour = 9;      # Change hour
-    Minute = 0;    # Change minute
-  }
-];
-```
-
-### Log Configuration
-
-Logs are stored in `~/.local/var/log/`:
-
-- `system-health-check.log` - Daily health checks
-- `system-health-report.log` - Weekly health reports
-- `performance-monitor.log` - Performance analysis
-- `critical-alerts.log` - Critical issue alerts
+Reports are written to XDG state directories (`~/.local/state/dotfiles/health-reports` and `~/.local/state/dotfiles/performance-reports`) rather than inside the git repository.
 
 ## Reports and Analysis
 

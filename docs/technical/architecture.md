@@ -69,8 +69,7 @@ darwin/
 ├── macos-defaults.nix    # macOS system preferences
 ├── homebrew.nix          # Hybrid package management
 ├── homebrew-packages/    # Shared Homebrew package lists
-├── misc-system.nix       # Additional system settings
-└── system-monitoring.nix # Health monitoring & maintenance
+└── misc-system.nix       # Additional system settings
 ```
 
 **Responsibilities**:

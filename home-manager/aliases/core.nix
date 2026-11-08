@@ -127,14 +127,16 @@ in
   # ==========================================================================
   lazydot = "cd ${dotfileDir} && lazygit"; # Open lazygit in dotfiles directory
 
-  # Smart editor for dotfiles (cursor or code)
+  # Smart editor for dotfiles (zed, cursor, or nvim)
   codedot =
     mkTemplateAlias
       ''
-        if command -v cursor &> /dev/null; then
+        if command -v zed &> /dev/null; then
+          zed "@dotfileDir@"
+        elif command -v cursor &> /dev/null; then
           cursor "@dotfileDir@"
         else
-          code "@dotfileDir@"
+          nvim "@dotfileDir@"
         fi
       ''
       [
