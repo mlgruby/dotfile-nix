@@ -69,7 +69,7 @@ home.packages = with pkgs; [
   kotlin-language-server  # Kotlin LSP server
 
   # Documentation
-  markdownlint-cli
+  markdownlint-cli2
 ];
 ```
 
@@ -527,7 +527,7 @@ home.packages = with pkgs; [
   ansible awscli2 opentofu kubectl
   
   # Documentation & Productivity
-  markdownlint-cli pandoc
+  markdownlint-cli2 pandoc
   
   # System Monitoring
   btop htop duf dust

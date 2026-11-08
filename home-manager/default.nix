@@ -79,6 +79,20 @@ let
       executable = true;
     };
   };
+
+  mkUpdateWrapper = name: {
+    inherit name;
+    value = {
+      text = ''
+        #!/usr/bin/env bash
+        DOTFILE_DIR="$HOME/${userConfig.directories.dotfiles}"
+        CURRENT_CONFIG_HOST="${userConfig.hostname}"
+        export DOTFILE_DIR CURRENT_CONFIG_HOST
+        exec bash "${./scripts/update-system.sh}" "$@"
+      '';
+      executable = true;
+    };
+  };
 in
 {
   imports = [
@@ -127,7 +141,6 @@ in
     packages = with pkgs; [
       compatibilityPackages.direnv
       compatibilityPackages.pipx
-      markdownlint-cli
       # Python Development Environment
       # System-wide Python 3.12 managed in modules/packages/languages.nix
       # Project-specific versions via uv
@@ -212,11 +225,12 @@ in
     rofi.enable = false; # DISABLED: Linux launcher, unused on macOS
   };
 
-  # Install shell helper scripts and profile-aware rebuild wrappers.
+  # Install shell helper scripts and profile-aware rebuild/update wrappers.
   home.file = (builtins.listToAttrs [
     (mkRebuildWrapper "bin/rebuild" "")
     (mkRebuildWrapper "bin/rebuild-work" "--work")
     (mkRebuildWrapper "bin/rebuild-personal" "--personal")
+    (mkUpdateWrapper "bin/update")
   ]);
 
   # Build the native screenshot utility after Home Manager has written files.

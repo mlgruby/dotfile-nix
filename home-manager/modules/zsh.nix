@@ -108,30 +108,6 @@ in
             source "$HOME/.config/devcontainer-auto/zsh-hook"
           fi
         ''}
-
-        _dotfiles_run_rebuild() {
-          DOTFILE_DIR="${config.home.homeDirectory}/${userConfig.directories.dotfiles}" \
-          CURRENT_CONFIG_HOST="${userConfig.hostname}" \
-          bash "${../scripts/rebuild-system.sh}" "$@" || return $?
-        }
-
-        rebuild() {
-          _dotfiles_run_rebuild "$@"
-        }
-
-        rebuild-work() {
-          rebuild --work "$@"
-        }
-
-        rebuild-personal() {
-          rebuild --personal "$@"
-        }
-
-        update() {
-          DOTFILE_DIR="${config.home.homeDirectory}/${userConfig.directories.dotfiles}" \
-          CURRENT_CONFIG_HOST="${userConfig.hostname}" \
-          bash "${../scripts/update-system.sh}" "$@"
-        }
       ''
       + lib.optionalString profile.isWork ''
         source "${../scripts/work.zsh}"

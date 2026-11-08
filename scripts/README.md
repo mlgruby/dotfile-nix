@@ -9,8 +9,7 @@ scripts/
 ├── install/          # Installation and removal scripts
 ├── setup/           # Configuration and setup utilities  
 ├── monitoring/      # System monitoring and maintenance
-├── testing/         # Onboarding and quality gate checks
-└── utils/          # General utility scripts
+└── testing/         # Onboarding and quality gate checks
 ```
 
 ## 📦 Installation Scripts
@@ -92,17 +91,6 @@ scripts/
 - Performance optimization suggestions
 - **Usage**: `./scripts/monitoring/analyze-build-performance.sh [--profile|--fix|--report]`
 
-## 🔧 Utility Scripts
-
-### `utils/generate-commit-message.sh`
-
-**Purpose**: AI-powered Git commit message generation
-
-- Uses OpenAI API to generate commit messages
-- Analyzes git diff for context
-- **Prerequisites**: Set `OPENAI_API_KEY` environment variable
-- **Usage**: `./scripts/utils/generate-commit-message.sh`
-
 ## ✅ Testing Scripts
 
 ### `testing/onboarding-smoke.sh`
@@ -143,9 +131,6 @@ From the repository root, you can run any script using:
 # Testing
 ./scripts/testing/onboarding-smoke.sh --strict-shellcheck
 ./scripts/testing/onboarding-full-checklist.sh --print-only
-
-# Utilities
-./scripts/utils/generate-commit-message.sh
 ```
 
 ## Integration with Main Setup
