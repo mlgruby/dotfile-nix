@@ -115,7 +115,7 @@ show_category() {
     case "$category" in
         core)
             echo -e "${CYAN}Core Shell Aliases${NC}\n"
-            list_aliases | grep -E "^(c=|x=|h=|r=|rl=|l=|ll=|la=|ls=|\.\.=|backup=|xtract=|compress=|psg=|pkillf=|size=|copy=|paste=|json=|yaml=|path=|now=|today=|myip=|ports=)" | sort
+            list_aliases | grep -E "^(c=|x=|h=|r=|rl=|l=|ll=|la=|ls=|\.\.=|backup=|xtract=|compress=|psg=|pkillf=|size=|copy=|json=|yaml=|path=|now=|today=|myip=|ports=)" | sort
             ;;
         git)
             echo -e "${CYAN}Git Workflow Aliases${NC}\n"

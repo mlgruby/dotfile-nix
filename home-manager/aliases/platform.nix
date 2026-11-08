@@ -48,7 +48,7 @@ in
   # --------------------------------------------------------------------------
   # Rollback with Interactive Selection
   # --------------------------------------------------------------------------
-  rollback = "${../scripts/system-rollback.sh}"; # Interactively select and rollback to previous system generation
+  rollback = "bash ${../scripts/system-rollback.sh}"; # Interactively select and rollback to previous system generation
 
   # --------------------------------------------------------------------------
   # System Cleanup

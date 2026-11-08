@@ -48,7 +48,7 @@ aliases/
 - File operations: `backup`, `xtract`, `compress`
 - Documentation: `rtfm`, `cheat`, `md`
 - Network: `myip`, `pubip`, `ipp`, `ports`, `flushdns`
-- Clipboard & Screenshots: `copy`, `paste`, `pbimg`, `cshot`
+- Clipboard & Screenshots: `copy`, `pbpaste`, `pbimg`, `cshot`
 - Terminal helpers (in `zsh-integration.zsh`): `p` (project workspace launcher), `cb <cmd>` (run & copy output), `rc` (re-run last command & copy output)
 
 ### 2. Development Tools & AI Agents (dev-tools.nix)
@@ -122,7 +122,7 @@ cat config.yaml | yaml        # Pretty-print YAML
 
 # Clipboard
 echo "text" | copy            # Copy to clipboard
-paste | grep "pattern"        # Search clipboard
+pbpaste | grep "pattern"      # Search clipboard
 bwp                           # Fuzzy-pick Bitwarden item and copy password
 
 # Process search
