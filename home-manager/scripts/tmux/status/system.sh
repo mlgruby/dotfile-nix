@@ -20,14 +20,6 @@ tmux_status_collect_system() {
     disk="${disk_value}%"
   fi
 
-  nix_generation="$(
-    readlink /nix/var/nix/profiles/system 2>/dev/null \
-      | sed -n 's/^system-\([0-9][0-9]*\)-link$/\1/p' \
-      || true
-  )"
-  nix_status=""
-  [ -n "$nix_generation" ] && nix_status=" $nix_generation"
-
   hw_cache="${TMPDIR:-/tmp}/tmux_hw_$(id -u 2>/dev/null || echo 0).cache"
   logical_cpus=""
   mem_total_gb=""

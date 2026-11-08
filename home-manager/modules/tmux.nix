@@ -83,10 +83,11 @@ in
       set -g default-terminal "tmux-256color"
       set -ag terminal-overrides ",*:RGB"
       set -g allow-passthrough all
-      set -g update-environment "DISPLAY KRB5CCNAME SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY DOCKER_CONFIG AWS_PROFILE AWS_DEFAULT_REGION AWS_REGION"
+      set -g update-environment "DISPLAY KRB5CCNAME SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY DOCKER_CONFIG AWS_PROFILE AWS_DEFAULT_REGION AWS_REGION DOTFILES_TMUX_SHOW_AWS_VPN"
       # Do not inherit Codex/sandbox color suppression into agent panes.
       set-environment -gu NO_COLOR
       set-environment -g COLORTERM "truecolor"
+      set-environment -g DOTFILES_TMUX_SHOW_AWS_VPN "${if profile.isWork then "yes" else "no"}"
 
       # Pane Management
       bind h split-window -h -c "#{pane_current_path}"
@@ -122,7 +123,7 @@ in
       set -g @resurrect-capture-pane-contents 'on'
 
       # Status modules
-      set -g status-right "#(bash ${statusScript})"
+      set -g status-right "#(bash $HOME/.config/tmux/status/status-right.sh)"
     '';
   };
 
