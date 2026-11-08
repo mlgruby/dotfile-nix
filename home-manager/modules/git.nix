@@ -74,6 +74,8 @@ in
       core = {
         editor = "nvim"; # Default editor for commits
         autocrlf = "input"; # Line ending management
+        fsmonitor = true; # Built-in macOS FSEvents file monitor for faster git status
+        untrackedCache = true; # Cache directory mtimes to accelerate untracked file discovery
       };
 
       # UI Configuration

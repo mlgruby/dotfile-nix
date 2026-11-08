@@ -46,11 +46,8 @@ quota_color() {
 
 file_mtime() {
   local out
-  if stat --version >/dev/null 2>&1; then
-    out=$(stat -c %Y "$1" 2>/dev/null || echo 0)
-  else
-    out=$(/usr/bin/stat -f %m "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0)
-  fi
+  # On macOS, /usr/bin/stat uses -f %m. Avoid running `stat --version` which fails on Darwin.
+  out=$(/usr/bin/stat -f %m "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0)
   if [[ "$out" =~ ^[0-9]+$ ]]; then
     echo "$out"
   else
@@ -436,7 +433,7 @@ tmux_status_collect_codexbar() {
   fi
 
   if [ -f "$CACHE_FILE" ]; then
-    codexbar_status=$(cat "$CACHE_FILE")
+    codexbar_status=$(< "$CACHE_FILE")
   else
     codexbar_status="#[fg=#10a37f]CX #[fg=#ebdbb2]W:#[fg=${MUTED}]--#[fg=#ebdbb2] │ #[fg=#4285f4]AGY #[fg=${MUTED}]--#[fg=#ebdbb2] │ #[fg=#d97757]CC #[fg=${GREEN}]\$0.00#[fg=#ebdbb2]"
   fi

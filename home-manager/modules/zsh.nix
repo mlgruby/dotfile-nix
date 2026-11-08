@@ -49,8 +49,15 @@ let
           ${config.programs.starship.package}/bin/starship init zsh --print-full-init \
             | sed 's|^PROMPT2="\(.*\)"$|PROMPT2='\'''\1'\'''|'
           echo 'fi'
+          echo ""
+          echo 'if [[ $options[zle] = on ]]; then'
+          echo '  source "'"$out"'/fzf-key-bindings.zsh"'
+          echo 'fi'
+          echo 'source "'"$out"'/fzf-completion.zsh"'
         } > "$out/integrations.zsh"
 
+        cp "${config.programs.fzf.package}/share/fzf/key-bindings.zsh" "$out/fzf-key-bindings.zsh"
+        cp "${config.programs.fzf.package}/share/fzf/completion.zsh" "$out/fzf-completion.zsh"
         cp "${../scripts/zsh-completion-init.zsh}" "$out/zsh-completion-init.zsh"
         cp "${../scripts/zsh-integration.zsh}" "$out/zsh-integration.zsh"
         cp "${../scripts/work.zsh}" "$out/work.zsh"
@@ -137,7 +144,8 @@ in
 
     fzf = {
       enable = true;
-      enableZshIntegration = true;
+      # Pre-compiled at Nix build time above into .zwc wordcode to eliminate shell startup parsing latency.
+      enableZshIntegration = false;
     };
 
     zoxide = {

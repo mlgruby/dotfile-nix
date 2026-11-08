@@ -91,19 +91,25 @@ tmux_status_collect_system() {
     mem_color="#fabd2f"
   fi
 
-  batt_raw="$(pmset -g batt 2>/dev/null || true)"
-  battery="$(
-    printf '%s\n' "$batt_raw" \
-      | awk -F';' '/%/ { gsub(/^ +| +$/, "", $1); sub(/^.*\t/, "", $1); print $1; exit }' \
-      || true
+  batt_raw="$(
+    pmset -g batt 2>/dev/null | awk '
+      /AC Power/ { ac=1 }
+      /%/ {
+        pct = $0
+        sub(/^.*\t/, "", pct)
+        sub(/;.*/, "", pct)
+        gsub(/^ +| +$/, "", pct)
+        if (ac && /charged|charging/ && !/dischar/) chg="yes"; else chg="no"
+        printf "%s\t%s\n", (pct ? pct : "n/a"), chg
+        found=1
+        exit
+      }
+      END { if (!found) print "n/a\tno" }
+    ' 2>/dev/null || printf '%s\t%s\n' "n/a" "no"
   )"
+  battery="${batt_raw%%	*}"
+  battery_charging="${batt_raw##*	}"
   [ -n "$battery" ] || battery="n/a"
-
-  battery_charging="$(
-    printf '%s\n' "$batt_raw" \
-      | awk '/AC Power/ { ac=1 } /charged|charging/ { if (ac && !/dischar/) print "yes"; exit }' \
-      || true
-  )"
 
   cpu_color="#b8bb26"
   cpu_value="${cpu%%%}"
