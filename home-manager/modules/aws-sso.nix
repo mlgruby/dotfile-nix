@@ -153,16 +153,10 @@ in
 
     programs.zsh = {
       initContent = ''
-        # Enable AWS CLI command completion.
-        if command -v aws_completer > /dev/null 2>&1; then
-          autoload -U bashcompinit
-          bashcompinit
-          complete -C aws_completer aws
-        elif [ -x "${pkgs.awscli2}/bin/aws_completer" ]; then
-          autoload -U bashcompinit
-          bashcompinit
-          complete -C "${pkgs.awscli2}/bin/aws_completer" aws
-        fi
+        # Enable AWS CLI command completion without runtime PATH lookup.
+        autoload -Uz bashcompinit
+        bashcompinit
+        complete -C "${pkgs.awscli2}/bin/aws_completer" aws
 
         source "${../scripts/aws-sso.zsh}"
       '';

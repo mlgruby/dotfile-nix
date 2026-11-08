@@ -155,6 +155,8 @@ in
       enable = true;
       package = compatibilityPackages.direnv;
       nix-direnv.enable = true;
+      # Pre-compiled at Nix build time in zsh.nix to avoid spawning `direnv hook zsh` (~23ms) on every shell launch.
+      enableZshIntegration = false;
     };
 
     claude-code = {
