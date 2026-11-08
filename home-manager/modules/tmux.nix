@@ -145,9 +145,6 @@ in
       source = ../scripts/tmux/status/codexbar.sh;
       executable = true;
     };
-    ".config/tmux/status/logos/openai.svg".source = ../scripts/tmux/status/logos/openai.svg;
-    ".config/tmux/status/logos/gemini.svg".source = ../scripts/tmux/status/logos/gemini.svg;
-    ".config/tmux/status/logos/claude.svg".source = ../scripts/tmux/status/logos/claude.svg;
     ".config/tmux/status/status-right.sh" = {
       source = ../scripts/tmux/status/status-right.sh;
       executable = true;
@@ -155,7 +152,6 @@ in
   };
 
   home.packages = with pkgs; [
-    chafa
     jq
   ];
 }
