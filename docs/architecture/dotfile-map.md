@@ -32,7 +32,7 @@ workstation automation.
 - `home-manager/modules/claude-code.nix` - declarative Claude Code configuration (`~/.claude/settings.json`, AWS Bedrock profile, statusline, MCPs) while using the native `~/.local/bin/claude` binary (`package = null`).
 - `home-manager/modules/antigravity.nix` - Google Antigravity CLI (`agy`) configuration and `agr` (`agy-resume`) picker.
 - `home-manager/modules/pi.nix` - Pi coding agent wrapper (`pil`, `pig`, `pib`) and local LLM configuration.
-- `home-manager/modules/px0.nix` - `px0` interactive terminal code navigator (`nav`, `navo`, `px`).
+- `home-manager/modules/packages/development.nix` - includes `px0` interactive terminal code navigator (`nav`, `navo`, `px`), `ccusage`, `delta`, `pngpaste`, and CLI dev utilities.
 
 ## Aliases
 

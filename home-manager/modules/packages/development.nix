@@ -6,7 +6,15 @@ let
     version = "0.1.1";
 
     src = pkgs.fetchurl {
-      url = "https://github.com/px0-ai/px0/releases/download/v${version}/px0-${version}-darwin-arm64";
+      name = "px0-${version}-darwin-arm64";
+      urls = [
+        "https://api.github.com/repos/px0-ai/px0/releases/assets/561750673"
+        "https://github.com/px0-ai/px0/releases/download/v${version}/px0-${version}-darwin-arm64"
+      ];
+      curlOptsList = [
+        "-H"
+        "Accept: application/octet-stream"
+      ];
       sha256 = "18fgxzfymn1csgxa49075gva0hl9476plj3qdxch0zf32mp5w1vx";
     };
 
