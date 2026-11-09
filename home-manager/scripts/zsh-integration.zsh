@@ -1,5 +1,5 @@
 # Interactive Zsh helpers sourced by home-manager/modules/zsh.nix.
-setopt interactive_comments
+setopt interactive_comments auto_cd auto_pushd pushd_ignore_dups pushd_silent
 
 # Match filesystem paths and command names regardless of letter case.
 # For example, `cd wo<Tab>` completes a directory named `Work`.
@@ -219,15 +219,41 @@ function fzf-cd-with-hidden() {
 }
 zle -N fzf-cd-with-hidden
 
+# History search by typed prefix (falls back to normal history if prompt is empty)
 autoload -U up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[OA' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+bindkey '^[OB' down-line-or-beginning-search
+bindkey '^P' up-line-or-beginning-search
+bindkey '^N' down-line-or-beginning-search
+
+# Edit current command line in full $EDITOR (Neovim) with Ctrl+X Ctrl+E
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^X^E' edit-command-line
+
+# Sub-word / Path-aware navigation and deletion
+# Pressing Ctrl+W or Alt+Backspace deletes one path segment (e.g. `file` in `/path/to/file`) instead of the whole path
+autoload -U select-word-style
+select-word-style bash
+
+# macOS & Linux terminal word navigation (Option+Left / Option+Right across Ghostty, Alacritty, iTerm2, macOS Terminal)
 bindkey "^[f" forward-word
 bindkey "^[b" backward-word
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
+bindkey "^[^[[C" forward-word
+bindkey "^[^[[D" backward-word
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
 bindkey "^[[3;5~" kill-word
 bindkey "^H" backward-kill-word
 bindkey "^U" backward-kill-line
+bindkey "^W" backward-kill-word
 bindkey "^[^?" backward-kill-word
 bindkey "^A" beginning-of-line
 bindkey "^E" end-of-line
