@@ -122,7 +122,12 @@ in
       set -g @continuum-restore 'on'
       set -g @resurrect-capture-pane-contents 'on'
 
-      # Status modules
+      # Status modules & clean layout
+      # Herdr manages workspaces and tabs internally; suppress redundant tmux window tabs
+      # and smoothly terminate the session badge into the statusline background.
+      set -g status-left "#[bg=#665c54,fg=#bdae93] #S #[bg=#1d2021,fg=#665c54,nobold,noitalics,nounderscore]"
+      set -g window-status-format ""
+      set -g window-status-current-format ""
       set -g status-right "#(bash $HOME/.config/tmux/status/status-right.sh)"
     '';
   };
