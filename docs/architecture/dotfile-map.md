@@ -23,7 +23,7 @@ workstation automation.
 - `home-manager/modules/alacritty/` - secondary Alacritty terminal configuration.
 - `home-manager/modules/starship.nix` - prompt configuration.
 - `home-manager/modules/tmux.nix` - tmux wiring and status script installation.
-- `home-manager/scripts/tmux/status/` - tmux status modules (CPU, RAM, disk, battery, GitHub status `github.sh`, AI usage `codexbar.sh`).
+- `home-manager/scripts/tmux/status/` - tmux status modules (status-left Calendar Guard `calendar.sh`, GitHub reviews `reviews.sh`; status-right CPU, RAM, disk, battery, GitHub status `github.sh`, AI usage `codexbar.sh`).
 
 ## AI Agents And Skills
 

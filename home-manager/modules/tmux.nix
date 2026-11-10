@@ -124,8 +124,9 @@ in
 
       # Status modules & clean layout
       # Herdr manages workspaces and tabs internally; suppress redundant tmux window tabs
-      # and smoothly terminate the session badge into the statusline background.
-      set -g status-left "#[bg=#665c54,fg=#bdae93] #S #[bg=#1d2021,fg=#665c54,nobold,noitalics,nounderscore]"
+      # and render high-signal context (Calendar Guard & GitHub Reviews) next to session name.
+      set -g status-left-length 120
+      set -g status-left "#(bash $HOME/.config/tmux/status/status-left.sh '#{session_name}')"
       set -g window-status-format ""
       set -g window-status-current-format ""
       set -g status-right "#(bash $HOME/.config/tmux/status/status-right.sh)"
@@ -143,6 +144,18 @@ in
     };
 
     ".config/tmux/status/lib.sh".source = ../scripts/tmux/status/lib.sh;
+    ".config/tmux/status/calendar.sh" = {
+      source = ../scripts/tmux/status/calendar.sh;
+      executable = true;
+    };
+    ".config/tmux/status/reviews.sh" = {
+      source = ../scripts/tmux/status/reviews.sh;
+      executable = true;
+    };
+    ".config/tmux/status/status-left.sh" = {
+      source = ../scripts/tmux/status/status-left.sh;
+      executable = true;
+    };
     ".config/tmux/status/network.sh".source = ../scripts/tmux/status/network.sh;
     ".config/tmux/status/github.sh" = {
       source = ../scripts/tmux/status/github.sh;

@@ -41,9 +41,16 @@ else
 
   output="$(DOTFILES_TMUX_SHOW_AWS_VPN=yes bash "$status_dir/status-right.sh" 2>/dev/null || true)"
   if [[ -n "$output" && "$output" == *'#[default]'* ]]; then
-    pass "tmux status renders a non-empty tmux string"
+    pass "tmux status-right renders a non-empty tmux string"
   else
-    fail "tmux status did not render expected tmux markup"
+    fail "tmux status-right did not render expected tmux markup"
+  fi
+
+  left_output="$(bash "$status_dir/status-left.sh" "main" 2>/dev/null || true)"
+  if [[ -n "$left_output" && "$left_output" == *'#[default]'* ]]; then
+    pass "tmux status-left renders a non-empty tmux string"
+  else
+    fail "tmux status-left did not render expected tmux markup"
   fi
 fi
 
