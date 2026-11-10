@@ -139,6 +139,10 @@ in
 
     ".config/tmux/status/lib.sh".source = ../scripts/tmux/status/lib.sh;
     ".config/tmux/status/network.sh".source = ../scripts/tmux/status/network.sh;
+    ".config/tmux/status/github.sh" = {
+      source = ../scripts/tmux/status/github.sh;
+      executable = true;
+    };
     ".config/tmux/status/vpn.sh".source = ../scripts/tmux/status/vpn.sh;
     ".config/tmux/status/aws.sh".source = ../scripts/tmux/status/aws.sh;
     ".config/tmux/status/system.sh".source = ../scripts/tmux/status/system.sh;
