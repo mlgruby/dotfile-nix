@@ -7,13 +7,43 @@ json_cache="${cache_dir}/tmux_gh_reviews_data_${UID:-0}.json"
 
 fetch_reviews() {
   if command -v gh >/dev/null 2>&1; then
-    gh search prs --review-requested=@me --state=open --json number,title,repository,url 2>/dev/null || echo "[]"
+    gh api graphql -f query='
+query {
+  viewer {
+    login
+  }
+  search(query: "is:pr is:open review-requested:@me", type: ISSUE, first: 30) {
+    nodes {
+      ... on PullRequest {
+        number
+        title
+        url
+        repository {
+          name
+        }
+        reviewRequests(first: 10) {
+          nodes {
+            requestedReviewer {
+              __typename
+              ... on User {
+                login
+              }
+              ... on Team {
+                name
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+' 2>/dev/null || echo "{}"
   else
-    echo "[]"
+    echo "{}"
   fi
 }
 
-# If json_cache is missing, empty, or older than 180 seconds, refresh it
 now_s="$(date +%s 2>/dev/null || echo 0)"
 cache_mtime=0
 if [ -f "$json_cache" ]; then
@@ -23,7 +53,7 @@ cache_age=$(( now_s - cache_mtime ))
 
 if [ ! -s "$json_cache" ] || [ "$cache_age" -ge 180 ]; then
   raw="$(fetch_reviews)"
-  if [ -n "$raw" ] && [ "$raw" != "[]" ]; then
+  if [ -n "$raw" ] && [ "$raw" != "{}" ]; then
     printf '%s\n' "$raw" > "$json_cache" 2>/dev/null || true
   fi
 fi
@@ -37,21 +67,32 @@ if [ ! -s "$json_cache" ]; then
   exit 0
 fi
 
-# Filter out automated bot bumps (e.g. build(deps), chore(deps))
+# Filter out automated bot bumps, sort direct reviews first, then team reviews
 lines="$(
   jq -r '
-    [.[] | select(.title | test("^(build|chore)\\(deps.*\\):") | not)] |
+    .data.viewer.login as $me |
+    [.data.search.nodes[]? |
+      select(.title | test("^(build|chore)\\(deps.*\\):") | not) |
+      (
+        if ([.reviewRequests.nodes[]?.requestedReviewer | select(.__typename == "User" and .login == $me)] | length) > 0 then
+          "[direct] \(.repository.name)#\(.number)\t\(.title)\t\(.url)"
+        else
+          "[team] \(.repository.name)#\(.number)\t\(.title)\t\(.url)"
+        end
+      )
+    ] |
+    sort_by(startswith("[direct]") | not) |
     if length == 0 then
       empty
     else
-      .[] | "\(.repository.name)#\(.number)\t\(.title)\t\(.url)"
+      .[]
     end
   ' "$json_cache" 2>/dev/null || true
 )"
 
 if [ -z "$lines" ]; then
   echo ""
-  echo "  ✓ No pending human PR reviews waiting for you!"
+  echo "  ✓ No pending human PR reviews waiting for you or your teams!"
   echo ""
   read -r -p "  Press Enter to close..."
   exit 0
@@ -62,9 +103,9 @@ if command -v fzf >/dev/null 2>&1; then
     printf '%s\n' "$lines" | fzf \
       --delimiter=$'\t' \
       --with-nth=1,2 \
-      --preview='printf "\033[1;33mRepo/PR:\033[0m %s\n\033[1;36mTitle:\033[0m %s\n\033[1;32mURL:\033[0m %s\n" {1} {2} {3}' \
+      --preview='printf "\033[1;33mReview Target:\033[0m %s\n\033[1;36mTitle:\033[0m %s\n\033[1;32mURL:\033[0m %s\n" {1} {2} {3}' \
       --preview-window=down:4:wrap \
-      --header="Pending PR Reviews | Enter: Open in browser | Esc: Close" \
+      --header="PR Reviews | [direct] = requested you | [team] = requested your team | Enter: Open in browser" \
       --prompt="Review PR > "
   )" || true
 
