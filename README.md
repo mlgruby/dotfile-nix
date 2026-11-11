@@ -404,7 +404,7 @@ cleanup   # Clean old Nix generations (user + system), Homebrew cache, and works
 p         # Project workspace launcher (Work: Shell + CC; Personal: Shell + agents with history)
 herdr-review mark # Record task baseline in this worktree before an agent starts
 herdr-review diff # Review changes since baseline, or current changes against HEAD
-# Ctrl+A then g: Lazygit popup; Ctrl+A then d: task diff popup
+# Ctrl+A then g: GitView sidebar; Ctrl+A then Shift+G: GitView tab; Ctrl+A then l: Lazygit popup; Ctrl+A then d: task diff popup
 # A local Herdr plugin applies layouts to new work, personal and dotfile workspaces.
 # CC uses cc for new projects, ccr when this directory has Claude conversation history.
 # Personal/dotfile: Shell; AGY (agr) only with history; CX (cxr) only with history.

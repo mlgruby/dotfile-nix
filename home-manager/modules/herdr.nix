@@ -81,6 +81,10 @@ in
   home.activation.herdrProjectLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -x /opt/homebrew/bin/herdr ]; then
       run /opt/homebrew/bin/herdr plugin link ${projectPlugin}
+      # Ensure chmarax.gitview plugin is installed if missing
+      if ! /opt/homebrew/bin/herdr plugin list 2>/dev/null | grep -q "chmarax.gitview"; then
+        run /opt/homebrew/bin/herdr plugin install ChmaraX/herdr-gitview || true
+      fi
       # The long-running session must refresh paths into the new Nix generation.
       if [ -S "${config.home.homeDirectory}/.config/herdr/herdr.sock" ]; then
         run /opt/homebrew/bin/herdr server reload-config
@@ -92,6 +96,14 @@ in
     ".codex/skills/herdr/SKILL.md".source = ./herdr/skill/SKILL.md;
     ".claude/skills/herdr/SKILL.md".source = ./herdr/skill/SKILL.md;
   };
+
+  xdg.configFile."herdr/plugins/config/chmarax.gitview/config.toml".text = ''
+    theme = "dark"
+    editor = ["nvim"]
+    view_width_percent = 50
+    list_width_percent = 29
+    context_lines = 3
+  '';
 
   xdg.configFile."herdr/workflow.md".source = ../../docs/guides/herdr-workflow.md;
 
@@ -181,9 +193,22 @@ in
     switch_tab = "prefix+1..9"
     switch_workspace = "prefix+shift+1..9"
 
-    # Local Git review from the action's pane context, including existing workspaces.
+    # GitView: Native interactive diffs & agent review panel (ChmaraX/herdr-gitview)
     [[keys.command]]
     key = "prefix+g"
+    type = "plugin_action"
+    command = "chmarax.gitview.toggle"
+    description = "git view sidebar"
+
+    [[keys.command]]
+    key = "prefix+shift+g"
+    type = "plugin_action"
+    command = "chmarax.gitview.toggle-tab"
+    description = "git view tab"
+
+    # Lazygit popup: Full commit history, rebasing, branches, and stashes
+    [[keys.command]]
+    key = "prefix+l"
     type = "popup"
     command = "${review}/bin/herdr-review"
     width = "95%"

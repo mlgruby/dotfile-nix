@@ -9,7 +9,7 @@ Check `test "${HERDR_ENV:-}" = 1` before controlling Herdr. If outside Herdr, do
 
 ## Review changes
 
-`herdr-review` opens Lazygit in the calling pane's repository. Ctrl+A then g opens the same tool as a popup. It can inspect unstaged, staged and committed changes and open files in Neovim.
+`herdr-review` opens Lazygit in the calling pane's repository. Ctrl+A then g opens GitView (interactive diffs and agent feedback), Ctrl+A then Shift-G opens GitView in a dedicated tab, and Ctrl+A then l opens Lazygit as a popup for full commit history and rebasing.
 
 Before a new task, run `herdr-review mark` from its checkout to record HEAD. Do not reset an existing task's baseline automatically. Inspect `git status` first: a baseline includes existing uncommitted changes and cannot attribute them to an agent. Ctrl+A then d, or `herdr-review diff`, shows tracked changes since that baseline, including commits made during the task, and lists untracked files separately. Without a baseline it shows current changes against HEAD. Press q to close. Read new files separately. A baseline belongs to one Git worktree, not one agent or conversation.
 

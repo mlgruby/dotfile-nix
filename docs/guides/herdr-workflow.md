@@ -39,7 +39,7 @@ The launcher accepts open PRs. For historical PRs, use Octo or `gh pr diff`.
 
 In Neovim, press Space, g, R to open the selected PR in Octo, including from a detached review worktree. Space, g, I lists PRs. Space, g, v opens a local diff, and Space, g, H opens the current file's history. `:Octo review start` starts a line-level review. Use `:Octo review submit` to choose how to submit it. Octo writes comments to GitHub when you save or submit them, so inspect your text first.
 
-The PR-status pane remains available through Ctrl+A then p. Ctrl+A then g opens Lazygit; Ctrl+A then d shows the task diff.
+The PR-status pane remains available through Ctrl+A then p. Ctrl+A then g opens GitView (Ctrl+A then Shift+G for full tab); Ctrl+A then l opens Lazygit; Ctrl+A then d shows the task diff.
 
 ## Project checks
 
