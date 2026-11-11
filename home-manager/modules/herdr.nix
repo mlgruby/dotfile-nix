@@ -98,7 +98,7 @@ in
       {
         title = "Dependabot";
         filters = "is:open author:app/dependabot user:mlgruby org:VorTECHsa org:bodhispace-xyz";
-        limit = 50;
+        limit = 20;
       }
     ];
     keybindings.prs = [

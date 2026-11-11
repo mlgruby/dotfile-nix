@@ -10,7 +10,7 @@ The shell function delegates to `herdr-project-open`. Its implementation updates
 
 ## PR inbox and review
 
-Run `hinbox`, or press Ctrl+A then i, to open the GitHub inbox. Its sections show PRs that need your review, your open PRs, and PRs involving you. Dependabot has its own section covering your account and the VorTECHsa and bodhispace-xyz organisations. Bot PRs are excluded from the human-review sections. Select a PR and press Shift+V to open it in Herdr. Press q to close the inbox popup and see the review workspace.
+Run `hinbox`, or press Ctrl+A then i, to open the GitHub inbox. Its sections show PRs that need your review, your open PRs, and PRs involving you. Dependabot has its own section covering your account and the VorTECHsa and bodhispace-xyz organisations. Dependabot results load 20 at a time; move down to the last loaded PR to fetch more. Bot PRs are excluded from the human-review sections. Select a PR and press Shift+V to open it in Herdr. Press q to close the inbox popup and see the review workspace.
 
 Scroll the right-hand preview with your mouse wheel or a two-finger touchpad gesture while the pointer is over it. The preview scrolls three lines per wheel event and works in either the right or bottom position. Ctrl+D and Ctrl+U remain available.
 
