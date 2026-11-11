@@ -212,6 +212,44 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(argv[:2], ['gh-dash', '--config'])
         self.assertEqual(execute.call_args.kwargs['cwd'], Path.home())
 
+    def test_project_launcher_delegates_tab_creation_to_one_layout_driver(self):
+        calls = []
+        original = w.run
+        def api(*args):
+            calls.append(args)
+            if args[:2] == ('workspace', 'create'):
+                return dict(workspace=dict(workspace_id='new-project'), tab=dict(tab_id='new-project:t1'))
+            return {}
+        def execute(argv, cwd=None, **kwargs):
+            if argv[0] == 'herdr-project-layout':
+                calls.append(tuple(argv))
+                return ''
+            return original(argv, cwd, **kwargs)
+        with patch.object(w, 'herdr', side_effect=api), patch.object(w, 'run', side_effect=execute), redirect_stdout(io.StringIO()):
+            w.project_command(argparse.Namespace(directory=str(self.repo)))
+        self.assertIn(('tab', 'rename', 'new-project:t1', 'Shell'), calls)
+        self.assertEqual(sum(c[0] == 'herdr-project-layout' for c in calls), 1)
+        self.assertFalse(any(c[:2] == ('tab', 'create') for c in calls))
+
+    def test_loaded_p_shim_uses_updated_launcher_without_shell_reload(self):
+        source = Path(__file__).parents[2] / 'scripts/zsh-integration.zsh'
+        text = source.read_text()
+        start = text.index('function p() {')
+        end = text.index('\n# ==============================================================================', start)
+        shim = text[start:end]
+        directory = self.root / 'bin'; directory.mkdir()
+        executable = directory / 'herdr-project-open'
+        executable.write_text('#!/bin/sh\nprintf "version-one\\n"\n')
+        executable.chmod(0o755)
+        script = shim + '''
+p first
+printf '%s\\n' '#!/bin/sh' 'printf "version-two\\n"' > "$1/herdr-project-open"
+p second
+'''
+        env = dict(os.environ, PATH=str(directory) + os.pathsep + os.environ['PATH'])
+        result = subprocess.check_output(['zsh', '-f', '-c', script, '_', str(directory)], env=env, text=True)
+        self.assertEqual(result.splitlines(), ['version-one', 'version-two'])
+
 
 if __name__ == '__main__':
     unittest.main()

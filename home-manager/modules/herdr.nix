@@ -32,13 +32,14 @@ let
   };
   workflowMain = pkgs.writeShellApplication {
     name = "herdr-workflow";
-    runtimeInputs = [ pkgs.python3 pkgs.git pkgs.gh pkgs.gh-dash pkgs.delta pkgs.fzf pkgs.ripgrep config.programs.neovim.finalPackage ];
+    runtimeInputs = [ projectLayout pkgs.python3 pkgs.git pkgs.gh pkgs.gh-dash pkgs.delta pkgs.fzf pkgs.ripgrep config.programs.neovim.finalPackage ];
     text = ''
       exec python3 ${./herdr/workflow.py} "$@"
     '';
   };
   workflowCommands = {
     hinbox = "inbox";
+    herdr-project-open = "project";
     hpr = "pr";
     hpr-view = "pr-view";
     hpr-ci = "pr-ci";

@@ -2,6 +2,12 @@
 
 These tools run when opened. They use your existing GitHub authentication and Neovim configuration.
 
+## Project launcher
+
+Run `p` from a Shell tab to choose a project, or `p PATH` to open a specific repository. Work projects get Shell and CC. Personal projects and either dotfile checkout get Shell, then AGY only with Antigravity history, then CX only with Codex history.
+
+The shell function delegates to `herdr-project-open`. Its implementation updates with the system profile, so a future rebuild does not leave old layout logic loaded in a long-running shell. Shells with a launcher from before this shim need one initial refresh.
+
 ## PR inbox and review
 
 Run `hinbox`, or press Ctrl+A then i, to open the GitHub inbox. Its sections show PRs that need your review, your open PRs, and PRs involving you. Select a PR and press Shift+V to open it in Herdr. Press q to close the inbox popup and see the review workspace.

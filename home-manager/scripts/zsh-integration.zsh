@@ -407,61 +407,10 @@ function agy-resume() {
 }
 
 # Herdr Workspace launcher:
-# Creates a Herdr project workspace. Work repositories get Shell and CC tabs;
-# personal repositories get only the agent tabs for which history exists.
+# Keep p as a stable shim. The external launcher updates with the Nix profile,
+# including in shells that were already open during a rebuild.
 function p() {
-  if ! command -v herdr >/dev/null 2>&1; then
-    echo "herdr CLI is not installed." >&2
-    return 127
-  fi
-
-  local target_dir="$1"
-
-  if [ -z "$target_dir" ]; then
-    if command -v fzf >/dev/null 2>&1; then
-      target_dir=$(
-        {
-          find "$HOME/Documents/Work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|^|Work: |'
-          find "$HOME/Documents/Personal" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|^|Personal: |'
-          [ -d "$HOME/dotfile" ] && echo "Personal: $HOME/dotfile"
-        } |
-        fzf --prompt="Open Project in Herdr > " --header="Select project repository (Work or Personal)" |
-        sed -E 's/^(Work|Personal): //'
-      )
-    else
-      target_dir="$PWD"
-    fi
-  fi
-
-  [ -z "$target_dir" ] && return 0
-
-  local abs_path
-  abs_path="$(cd "$target_dir" 2>/dev/null && pwd)"
-  if [ -z "$abs_path" ] || [ ! -d "$abs_path" ]; then
-    echo "Directory not found: $target_dir" >&2
-    return 1
-  fi
-
-  local label
-  label="$(basename "$abs_path")"
-
-  # Create Herdr workspace (Tab 1 is created automatically)
-  local ws_json
-  ws_json="$(herdr workspace create --cwd "$abs_path" --label "$label")"
-  local ws_id
-  ws_id="$(echo "$ws_json" | jq -r '.result.workspace.workspace_id // empty')"
-  local tab1_id
-  tab1_id="$(echo "$ws_json" | jq -r '.result.tab.tab_id // empty')"
-
-  # Shared with the workspace-created plugin; safe if both run together.
-  if [ -n "$tab1_id" ]; then
-    herdr tab rename "$tab1_id" "Shell" >/dev/null 2>&1
-  fi
-  herdr-project-layout "$ws_id" || return
-
-  if [ -n "$ws_id" ]; then
-    herdr workspace focus "$ws_id" >/dev/null 2>&1
-  fi
+  command herdr-project-open "$@"
 }
 
 # ==============================================================================

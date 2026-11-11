@@ -181,6 +181,33 @@ def checkout_candidates():
                            ('node_modules', 'target', 'vendor', '.venv')]
 
 
+def project_command(args):
+    require_herdr()
+    if args.directory:
+        directory = Path(args.directory).expanduser()
+    else:
+        choices = list(checkout_candidates())
+        if not choices:
+            raise RuntimeError('No Git projects found under Work, Personal or the dotfile locations.')
+        rows = '\n'.join(f'{i}\t{path.name}: {str(path)!r}' for i, path in enumerate(choices))
+        selected = subprocess.run(['fzf', '--delimiter', '\t', '--with-nth', '2..',
+                                   '--prompt', 'Open project > '],
+                                  input=rows, capture_output=True, text=True)
+        if selected.returncode in (1, 130):
+            return
+        if selected.returncode:
+            raise RuntimeError(selected.stderr)
+        directory = choices[int(selected.stdout.split('\t', 1)[0])]
+    repo = repo_root(directory)
+    result = herdr('workspace', 'create', '--cwd', repo, '--label', repo.name)
+    workspace = result['workspace']['workspace_id']
+    herdr('tab', 'rename', result['tab']['tab_id'], 'Shell')
+    # Both this command and the workspace event use the same locked layout driver.
+    run(['herdr-project-layout', workspace])
+    herdr('workspace', 'focus', workspace)
+    print(f'Opened {repo.name}: {workspace}')
+
+
 def matches_repo(repo, target):
     host, identity = ('github.com', target) if target.count('/') == 1 else target.split('/', 1)
     try:
@@ -487,6 +514,7 @@ def main():
     parser = argparse.ArgumentParser(prog="herdr-workflow", description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser('inbox')
+    project = commands.add_parser('project'); project.add_argument('directory', nargs='?')
     pr = commands.add_parser('pr')
     pr.add_argument('pr'); pr.add_argument('--repo')
     commands.add_parser('pr-view'); commands.add_parser('pr-ci')
@@ -504,6 +532,8 @@ def main():
     if args.command == 'inbox':
         config = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'gh-dash/config.yml'
         return subprocess.run(['gh-dash', '--config', str(config)], cwd=Path.home()).returncode
+    if args.command == 'project':
+        return project_command(args)
     if args.command == 'pr':
         return pr_command(args)
     if args.command == 'pr-view':
