@@ -49,6 +49,7 @@ let
     hpr = "pr";
     hpr-view = "pr-view";
     hpr-ci = "pr-ci";
+    hpr-ai-review = "pr-ai-review";
     hcheck = "check";
     hfind = "find";
     htask = "task";
@@ -106,6 +107,11 @@ in
         key = "V";
         name = "Review in Herdr (q closes inbox)";
         command = "${workflow}/bin/hpr {{.PrNumber}} --repo {{.RepoName}}";
+      }
+      {
+        key = "A";
+        name = "AI review in Herdr (q closes inbox)";
+        command = "${workflow}/bin/hpr {{.PrNumber}} --repo {{.RepoName}} --ai-review";
       }
     ];
     pager.diff = "delta";

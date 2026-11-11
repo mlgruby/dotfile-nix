@@ -120,6 +120,55 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn(('tab', 'rename', 'new:t1', 'Review'), calls)
         self.assertIn('DOTFILES_HERDR_PROJECT_AGENT=hpr-ci', calls[-1])
 
+    def test_popup_ai_action_targets_selected_worktree_and_returns_without_waiting(self):
+        args = argparse.Namespace(pr='7', repo='example/repo', ai_review=True)
+        data = dict(headRefOid=self.base)
+        with patch.object(w, 'locate_checkout', return_value=self.repo), \
+             patch.object(w, 'prepare_pr', return_value=(self.repo, data)), \
+             patch.object(w, 'open_review', return_value='review-workspace'), \
+             patch.object(w, 'open_ai_review') as launch, \
+             patch.object(w, 'reviewer_command') as reviewer, redirect_stdout(io.StringIO()):
+            w.pr_command(args)
+        launch.assert_called_once_with(self.repo, 'review-workspace')
+        reviewer.assert_not_called()
+
+    def test_ai_tab_is_deferred_and_repeated_actions_reuse_it(self):
+        calls = []; tabs = []
+        def api(*args):
+            calls.append(args)
+            if args[:2] == ('tab', 'list'):
+                return dict(tabs=tabs)
+            if args[:2] == ('tab', 'create'):
+                tabs.append(dict(label='AI Review', tab_id='review:t3'))
+            return {}
+        with patch.object(w, 'herdr', side_effect=api):
+            w.open_ai_review(self.repo, 'review')
+            w.open_ai_review(self.repo, 'review')
+        created = [c for c in calls if c[:2] == ('tab', 'create')]
+        self.assertEqual(len(created), 1)
+        self.assertIn(self.repo, created[0])
+        self.assertIn('DOTFILES_HERDR_PROJECT_AGENT=hpr-ai-review', created[0])
+        self.assertEqual(calls[-1], ('tab', 'focus', 'review:t3'))
+
+    def test_deferred_ai_review_ignores_original_popup_directory(self):
+        with patch.object(Path, 'cwd', return_value=self.repo), \
+             patch.object(w, 'repo_root', return_value=self.repo) as root, \
+             patch.object(w, 'pr_metadata'), patch.object(w, 'reviewer_command', return_value=0) as reviewer, \
+             patch.object(sys, 'argv', ['herdr-workflow', 'pr-ai-review']):
+            self.assertEqual(w.main(), 0)
+        root.assert_called_once_with(self.repo)
+        self.assertEqual(reviewer.call_args.kwargs['repo'], self.repo)
+
+    def test_pr_prompt_includes_body_and_dependabot_checks(self):
+        w.atomic_json(w.private_path(self.repo, 'herdr-pr.json'),
+                      dict(base=self.base, url='https://github.com/example/repo/pull/7',
+                           title='Upgrade package', body='Migration notes', author=dict(login='app/dependabot')))
+        prompt = w.reviewer_prompt(self.repo, '')
+        for expected in ('Migration notes', 'breaking changes', 'lockfile consistency',
+                         'repository instructions', 'severity', 'suggested fixes',
+                         'do not edit files or submit GitHub comments'):
+            self.assertIn(expected, prompt)
+
     def test_task_context_preserves_notes_and_requires_explicit_finish(self):
         (self.repo / 'file.txt').write_text('pre-existing\n')
         path = w.start_task(self.repo, 'A task', 'Do the requested work')

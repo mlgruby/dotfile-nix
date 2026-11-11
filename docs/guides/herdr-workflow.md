@@ -12,6 +12,8 @@ The shell function delegates to `herdr-project-open`. Its implementation updates
 
 Run `hinbox`, or press Ctrl+A then i, to open the GitHub inbox. Its sections show PRs that need your review, your open PRs, and PRs involving you. Dependabot has its own section covering your account and the VorTECHsa and bodhispace-xyz organisations. Dependabot results load 20 at a time; move down to the last loaded PR to fetch more. Bot PRs are excluded from the human-review sections. Select a PR and press Shift+V to open it in Herdr. Press q to close the inbox popup and see the review workspace.
 
+Select a PR and press Shift+A to start an AI review in an isolated review workspace. Press q to close the inbox and see the AI Review tab. Repeating Shift+A for the same PR revision focuses the existing tab. Close that tab before requesting a fresh review. Claude reviews work repositories; Codex reviews personal repositories. The reviewer receives the PR description and exact diff, plus dependency upgrade checks for Dependabot PRs. Findings stay local and include severity, file/line references and suggested fixes. The command saves recent reviewer output; inspect the agent pane for the complete exchange or any approval prompt.
+
 Scroll the right-hand preview with your mouse wheel or a two-finger touchpad gesture while the pointer is over it. The preview scrolls three lines per wheel event and works in either the right or bottom position. Ctrl+D and Ctrl+U remain available.
 
 You can also run:

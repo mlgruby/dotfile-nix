@@ -486,9 +486,9 @@ function _dotfiles_herdr_project_agent() {
   unset DOTFILES_HERDR_PROJECT_AGENT
   case "$project_agent" in
     # These names are allowlisted. eval resolves aliases defined later in .zshrc.
-    cc|ccr|agr|cxr|hpr-view|hpr-ci) eval "$project_agent" ;;
+    cc|ccr|agr|cxr|hpr-view|hpr-ci|hpr-ai-review) eval "$project_agent" ;;
   esac
 }
-if [[ "${HERDR_ENV:-}" == "1" && "${DOTFILES_HERDR_PROJECT_AGENT:-}" == (cc|ccr|agr|cxr|hpr-view|hpr-ci) ]]; then
+if [[ "${HERDR_ENV:-}" == "1" && "${DOTFILES_HERDR_PROJECT_AGENT:-}" == (cc|ccr|agr|cxr|hpr-view|hpr-ci|hpr-ai-review) ]]; then
   add-zsh-hook precmd _dotfiles_herdr_project_agent
 fi
