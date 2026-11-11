@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
 from urllib.parse import urlsplit
 import uuid
@@ -545,6 +546,31 @@ def reviewer_prompt(repo, requirements):
             'State any unverified assumptions. Do not treat idle status as proof of passing tests.')
 
 
+def start_reviewer(name, kind, pane, native, prompt_path):
+    try:
+        herdr('agent', 'start', name, '--kind', kind, '--pane', pane, '--timeout', '120000', '--', *native)
+        return True
+    except subprocess.CalledProcessError as error:
+        try:
+            code = json.loads(error.stderr or error.output)['error']['code']
+        except (ValueError, KeyError, TypeError):
+            raise error
+        if code not in ('agent_not_ready', 'timeout'):
+            raise
+    # Agent start has not submitted a prompt. Wait for user-handled startup
+    # approval without answering it, and never interrupt a manually started turn.
+    notify('Reviewer startup needs attention', f'Inspect {pane}; complete any startup approval. The review prompt is saved at {prompt_path}.')
+    deadline = time.monotonic() + 120
+    while time.monotonic() < deadline:
+        agent = herdr('agent', 'get', name)['agent']
+        if agent.get('interactive_ready') and agent.get('agent_status') == 'working':
+            return False
+        if agent.get('interactive_ready') and agent.get('agent_status') in ('idle', 'done'):
+            return True
+        time.sleep(1)
+    raise RuntimeError(f'{name} did not become ready. Inspect {pane}; the unsent review prompt is saved at {prompt_path}.')
+
+
 def reviewer_command(args, repo=None):
     require_herdr()
     repo = repo or repo_root()
@@ -564,11 +590,15 @@ def reviewer_command(args, repo=None):
     name = 'reviewer-' + uuid.uuid4().hex[:8]
     print(f'Reviewer: {name}, pane: {pane}', flush=True)
     native = ['--sandbox', 'read-only'] if kind == 'codex' else ['--permission-mode', 'plan']
+    prompt_path = task_dir(repo) / f'{name}-prompt.txt'
+    prompt_path.write_text(prompt + '\n')
     try:
-        herdr('agent', 'start', name, '--kind', kind, '--pane', pane, '--', *native)
+        if not start_reviewer(name, kind, pane, native, prompt_path):
+            print(f'{name} is already working. No additional prompt was sent. Inspect {pane}.')
+            return 0
         herdr('agent', 'prompt', name, prompt, '--wait', '--timeout', str(args.timeout))
-    except subprocess.CalledProcessError as error:
-        print(error.stderr or str(error), file=sys.stderr)
+    except (subprocess.CalledProcessError, RuntimeError) as error:
+        print(error.stderr if isinstance(error, subprocess.CalledProcessError) else str(error), file=sys.stderr)
         print(f'The reviewer may need attention. Inspect {pane}; do not resend the task blindly.', file=sys.stderr)
         if getattr(args, 'notify', False):
             notify('PR review needs attention', f'Inspect reviewer {name} in {pane}; it may need approval or more time.')
@@ -624,7 +654,7 @@ def main():
         return reviewer_command(argparse.Namespace(kind=None, requirements='', timeout=1800000, notify=True), repo=repo)
     if args.command == 'pr-view':
         repo = repo_root(); data = pr_metadata(repo)
-        return subprocess.run(['nvim', '-c', f"DiffviewOpen {data['base']}..{data['headRefOid']}"], cwd=repo).returncode
+        return subprocess.run(['nvim', '-c', "lua require('config.pr_review').open()"], cwd=repo).returncode
     if args.command == 'pr-ci':
         repo = repo_root(); data = pr_metadata(repo)
         return subprocess.run(['gh', 'pr', 'checks', str(data['number']), '--repo', data['repository']], cwd=repo).returncode

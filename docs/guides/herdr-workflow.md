@@ -32,7 +32,7 @@ The launcher fetches and verifies the PR head and base commits. It creates a det
 
 The workspace has two tabs:
 
-- **Review:** Neovim with Diffview showing the selected PR revision.
+- **Review:** Neovim with Octo showing the selected PR revision side by side. The flat file list stays on the left; up/down or j/k open each file immediately. Press v in the file list, or Space r v in a diff, to toggle GitHub Viewed. Use ]u / [u to jump between unviewed files. Opening the viewer browses the PR without starting or submitting a GitHub review. If the PR head has changed, reopen it from the inbox. Space g v still opens Diffview for local changes.
 - **Checks:** a shell that prints the current GitHub CI result. Run `hpr-ci` again to refresh it. Run `hcheck` here to execute local checks.
 
 The launcher accepts open PRs. For historical PRs, use Octo or `gh pr diff`.
@@ -93,6 +93,6 @@ The command starts one helper in a sibling pane without changing your focus. Its
 
 The helper receives the checkout, comparison baseline, requirements, task-summary path and available validation evidence. The command waits for its state and saves its recent output as a transcript. The lead agent must inspect the findings, check them against the diff, and resolve or report them. Captured output is not a guarantee that every finding or the full response is present.
 
-If startup needs approval, or a wait times out, inspect the named helper pane before trying again. A timeout does not mean the prompt was not delivered. No approval dialog is answered automatically, and no review is posted by the helper command.
+If startup needs approval, the launcher notifies you and waits up to two minutes for you to complete it in the helper pane. It saves the unsent prompt before startup and submits it once the agent becomes ready. If you have already started a turn manually, it leaves that turn alone. If startup remains blocked, or a wait times out, inspect the named helper pane before trying again. A timeout does not mean the prompt was not delivered. No approval dialog is answered automatically, and no review is posted by the helper command.
 
 Close finished helpers when you no longer need them. Review worktrees are retained for inspection. After closing their Herdr workspaces, use `git worktree list` and `git worktree remove PATH` from the source repository to remove a finished review checkout. Git will refuse to remove a dirty worktree without an explicit override.

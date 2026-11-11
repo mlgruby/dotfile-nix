@@ -316,6 +316,33 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(len(task['reviews']), 1)
         self.assertIn('Actionable', Path(task['reviews'][0]['path']).read_text())
 
+    def test_startup_waits_for_user_handled_readiness_before_prompting(self):
+        states = iter([dict(agent_status='blocked', interactive_ready=False),
+                       dict(agent_status='idle', interactive_ready=True)])
+        calls = []
+        def api(*args):
+            calls.append(args)
+            if args[:2] == ('agent', 'start'):
+                raise subprocess.CalledProcessError(1, [], stderr=json.dumps(dict(error=dict(code='agent_not_ready'))))
+            if args[:2] == ('agent', 'get'):
+                return dict(agent=next(states))
+            return {}
+        with patch.object(w, 'herdr', side_effect=api), patch.object(w.time, 'sleep'):
+            w.start_reviewer('reviewer-12345678', 'claude', 'pane', ['--permission-mode', 'plan'], self.root / 'prompt.txt')
+        self.assertFalse(any(c[:2] == ('agent', 'prompt') for c in calls))
+        self.assertEqual(sum(c[:2] == ('agent', 'get') for c in calls), 2)
+        self.assertTrue(any(c[:2] == ('notification', 'show') for c in calls))
+
+    def test_startup_does_not_interrupt_a_manually_started_review(self):
+        def api(*args):
+            if args[:2] == ('agent', 'start'):
+                raise subprocess.CalledProcessError(1, [], stderr=json.dumps(dict(error=dict(code='agent_not_ready'))))
+            if args[:2] == ('agent', 'get'):
+                return dict(agent=dict(agent_status='working', interactive_ready=True))
+            return {}
+        with patch.object(w, 'herdr', side_effect=api):
+            self.assertFalse(w.start_reviewer('reviewer-12345678', 'claude', 'pane', [], self.root / 'prompt.txt'))
+
     def test_pr_input_and_ssh_remote_normalization(self):
         self.assertEqual(w.parse_pr('https://github.com/a/b/pull/23'), (23, 'github.com/a/b'))
         self.assertEqual(w.normalize_remote('git@github.com:a/b.git'), ('github.com', 'a/b'))
