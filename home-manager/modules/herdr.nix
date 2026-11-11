@@ -114,8 +114,8 @@ in
       }
       {
         key = "A";
-        name = "AI review in Herdr (q closes inbox)";
-        command = "${workflow}/bin/hpr {{.PrNumber}} --repo {{.RepoName}} --ai-review";
+        name = "Queue AI review (keep working; q closes inbox)";
+        command = "${workflow}/bin/hpr {{.PrNumber}} --repo {{.RepoName}} --ai-review --background";
       }
     ];
     pager.diff = "delta";

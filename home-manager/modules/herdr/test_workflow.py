@@ -138,7 +138,7 @@ class WorkflowTests(unittest.TestCase):
              patch.object(w, 'open_ai_review') as launch, \
              patch.object(w, 'reviewer_command') as reviewer, redirect_stdout(io.StringIO()):
             w.pr_command(args)
-        launch.assert_called_once_with(self.repo, 'review-workspace')
+        launch.assert_called_once_with(self.repo, 'review-workspace', focus=True)
         reviewer.assert_not_called()
 
     def test_ai_tab_is_deferred_and_repeated_actions_reuse_it(self):
@@ -177,6 +177,65 @@ class WorkflowTests(unittest.TestCase):
                          'repository instructions', 'severity', 'suggested fixes',
                          'do not edit files or submit GitHub comments'):
             self.assertIn(expected, prompt)
+
+    def test_background_queue_returns_while_detached_worker_runs_and_deduplicates(self):
+        args = argparse.Namespace(pr='7', repo='example/repo', ai_review=True, background=True)
+        original = subprocess.Popen; children = []; invocations = []
+        def spawn(argv, **kwargs):
+            invocations.append((argv, kwargs))
+            child = original([sys.executable, '-c', 'import time; time.sleep(30)'], **kwargs)
+            children.append(child)
+            return child
+        try:
+            with patch.object(subprocess, 'Popen', side_effect=spawn), \
+                 patch.object(w, 'locate_checkout', side_effect=AssertionError('network preparation blocked caller')), \
+                 redirect_stdout(io.StringIO()):
+                w.pr_command(args)
+                self.assertIsNone(children[0].poll())
+                w.pr_command(args)
+            self.assertEqual(len(invocations), 1)
+            argv, options = invocations[0]
+            self.assertIn('--ai-review', argv); self.assertIn('--no-focus', argv)
+            self.assertNotIn('--background', argv)
+            self.assertTrue(options['start_new_session'])
+            self.assertEqual(options['stdin'], subprocess.DEVNULL)
+            self.assertIn('HERDR_REVIEW_LAUNCH_LOG', options['env'])
+            self.assertTrue(options['pass_fds'])
+            self.assertEqual(len(list((w.state_root() / 'launches').glob('*.json'))), 1)
+        finally:
+            for child in children:
+                child.terminate(); child.wait(timeout=5)
+
+    def test_background_workspaces_and_ai_tabs_never_change_focus(self):
+        calls = []
+        def api(*args):
+            calls.append(args)
+            if args[:2] == ('pane', 'list'):
+                return dict(panes=[])
+            if args[:2] == ('workspace', 'create'):
+                return dict(workspace=dict(workspace_id='review'), tab=dict(tab_id='review:t1'))
+            if args[:2] == ('tab', 'list'):
+                return dict(tabs=[])
+            return {}
+        with patch.object(w, 'herdr', side_effect=api):
+            workspace = w.open_review(self.repo, dict(repository='x/y', number=7), focus=False)
+            w.open_ai_review(self.repo, workspace, focus=False)
+        for call in calls:
+            self.assertNotIn(call[:2], [('workspace', 'focus'), ('tab', 'focus')])
+            if call[:2] in [('workspace', 'create'), ('tab', 'create')]:
+                self.assertIn('--no-focus', call)
+
+    def test_reused_background_review_does_not_focus_existing_tab(self):
+        calls = []
+        def api(*args):
+            calls.append(args)
+            if args[:2] == ('pane', 'list'):
+                return dict(panes=[dict(cwd=str(self.repo), workspace_id='review')])
+            return dict(tabs=[dict(label='AI Review', tab_id='review:t3')])
+        with patch.object(w, 'herdr', side_effect=api):
+            workspace = w.open_review(self.repo, {}, focus=False)
+            w.open_ai_review(self.repo, workspace, focus=False)
+        self.assertEqual([c[:2] for c in calls], [('pane', 'list'), ('tab', 'list')])
 
     def test_task_context_preserves_notes_and_requires_explicit_finish(self):
         (self.repo / 'file.txt').write_text('pre-existing\n')
@@ -247,7 +306,8 @@ class WorkflowTests(unittest.TestCase):
                 return 'Actionable reviewer findings'
             return original(argv, cwd, **kwargs)
         with patch.object(w, 'herdr', side_effect=api), patch.object(w, 'run', side_effect=read), redirect_stdout(io.StringIO()):
-            self.assertEqual(w.reviewer_command(argparse.Namespace(kind='codex', requirements='Check edge cases', timeout=120000)), 0)
+            self.assertEqual(w.reviewer_command(argparse.Namespace(kind='codex', requirements='Check edge cases', timeout=120000, notify=True)), 0)
+        self.assertTrue(any(c[:3] == ('notification', 'show', 'PR reviewer output ready') for c in calls))
         start = next(c for c in calls if c[:2] == ('agent', 'start'))
         self.assertEqual(start[-3:], ('--', '--sandbox', 'read-only'))
         split = next(c for c in calls if c[:2] == ('pane', 'split'))

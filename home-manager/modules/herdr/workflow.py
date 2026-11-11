@@ -273,14 +273,16 @@ def prepare_pr(repo, number, target=None):
     return directory, metadata
 
 
-def open_review(directory, metadata):
+def open_review(directory, metadata, focus=True):
     for pane in herdr('pane', 'list')['panes']:
         if pane.get('cwd') and Path(pane['cwd']).resolve() == directory:
-            herdr('workspace', 'focus', pane['workspace_id'])
+            if focus:
+                herdr('workspace', 'focus', pane['workspace_id'])
             return pane['workspace_id']
     label = f"PR {metadata['repository'].split('/')[-1]}#{metadata['number']}"
     result = herdr('workspace', 'create', '--cwd', directory, '--label', label,
-                   '--env', 'DOTFILES_HERDR_PROJECT_AGENT=hpr-view')
+                   '--env', 'DOTFILES_HERDR_PROJECT_AGENT=hpr-view',
+                   *([] if focus else ['--no-focus']))
     workspace = result['workspace']['workspace_id']
     herdr('tab', 'rename', result['tab']['tab_id'], 'Review')
     herdr('tab', 'create', '--workspace', workspace, '--cwd', directory,
@@ -288,27 +290,72 @@ def open_review(directory, metadata):
     return workspace
 
 
-def open_ai_review(directory, workspace):
+def open_ai_review(directory, workspace, focus=True):
     # Serialize repeated popup actions while the deferred shell starts.
     with locked_task(directory):
         for tab in herdr('tab', 'list', '--workspace', workspace)['tabs']:
             if tab.get('label') == 'AI Review':
-                herdr('tab', 'focus', tab['tab_id'])
+                if focus:
+                    herdr('tab', 'focus', tab['tab_id'])
                 return
         herdr('tab', 'create', '--workspace', workspace, '--cwd', directory,
-              '--label', 'AI Review', '--env', 'DOTFILES_HERDR_PROJECT_AGENT=hpr-ai-review')
+              '--label', 'AI Review', '--env', 'DOTFILES_HERDR_PROJECT_AGENT=hpr-ai-review',
+              *([] if focus else ['--no-focus']))
+
+
+def notify(title, body):
+    try:
+        herdr('notification', 'show', title, '--body', body, '--sound', 'none')
+    except (OSError, subprocess.CalledProcessError, ValueError, KeyError) as error:
+        print(f'Could not show notification: {error}', file=sys.stderr)
+
+
+def queue_pr_review(args):
+    number, target = parse_pr(args.pr, args.repo)
+    identity = target or str(context_dir())
+    key = hashlib.sha256(f'{identity}#{number}'.encode()).hexdigest()[:20]
+    directory = state_root() / 'launches'
+    directory.mkdir(exist_ok=True, mode=0o700)
+    log_path = directory / f'{key}.log'
+    with (directory / f'{key}.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(f'AI review launch already queued. Log: {log_path}')
+            return
+        argv = [sys.executable, str(Path(__file__).resolve()), 'pr', args.pr,
+                '--ai-review', '--no-focus']
+        if args.repo:
+            argv += ['--repo', args.repo]
+        env = dict(os.environ, HERDR_REVIEW_LAUNCH_LOG=str(log_path))
+        with log_path.open('w') as log:
+            # The child retains this flock until preparation exits. No popup TTY
+            # or output pipe is inherited, so gh-dash resumes immediately.
+            child = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                                     start_new_session=True, pass_fds=(lock.fileno(),), env=env,
+                                     cwd=Path.cwd())
+        atomic_json(directory / f'{key}.json', dict(pid=child.pid, queued=now(),
+                    pr=number, repository=identity, log=str(log_path)))
+    print(f'AI review queued for {identity}#{number}. Keep browsing or press q to return. Log: {log_path}')
 
 
 def pr_command(args):
     require_herdr()
+    if getattr(args, 'background', False):
+        return queue_pr_review(args)
     number, target = parse_pr(args.pr, args.repo)
     repo = locate_checkout(target)
     directory, metadata = prepare_pr(repo, number, target)
-    workspace = open_review(directory, metadata)
+    focus = not getattr(args, 'no_focus', False)
+    workspace = open_review(directory, metadata, focus=focus)
     if args.ai_review:
-        open_ai_review(directory, workspace)
+        open_ai_review(directory, workspace, focus=focus)
+    if os.environ.get('HERDR_REVIEW_LAUNCH_LOG'):
+        notify('PR review workspace ready', f"{metadata['repository']}#{number}: {workspace}, AI Review tab. Continue working; the reviewer runs there.")
+    next_step = ('Close the inbox with q to see the workspace.' if focus else
+                 f'Keep working; select workspace {workspace} and its AI Review tab to inspect progress.')
     print(f"Opened {workspace}: {directory}\nReview exact head: {metadata['headRefOid']}\n"
-          'In Neovim use <leader>gR for GitHub comments. Close the inbox with q to see the workspace.')
+          f'In Neovim use <leader>gR for GitHub comments. {next_step}')
 
 
 def pr_metadata(repo):
@@ -523,6 +570,8 @@ def reviewer_command(args, repo=None):
     except subprocess.CalledProcessError as error:
         print(error.stderr or str(error), file=sys.stderr)
         print(f'The reviewer may need attention. Inspect {pane}; do not resend the task blindly.', file=sys.stderr)
+        if getattr(args, 'notify', False):
+            notify('PR review needs attention', f'Inspect reviewer {name} in {pane}; it may need approval or more time.')
         return 1
     status = herdr('agent', 'get', name)['agent']['agent_status']
     binary = os.environ.get('HERDR_BIN_PATH') or '/opt/homebrew/bin/herdr'
@@ -532,6 +581,9 @@ def reviewer_command(args, repo=None):
     update_task(repo, 'reviews', dict(time=now(), agent=name, status=status, path=str(path)))
     print(output)
     print(f'Captured reviewer transcript: {path}\nState: {status}. Check findings against the actual diff.')
+    if getattr(args, 'notify', False):
+        title = 'PR reviewer output ready' if status in ('done', 'idle') else 'PR review needs attention'
+        notify(title, f'{name}: {pane}. Inspect findings and the saved transcript: {path}')
     return 0 if status in ('done', 'idle') else 1
 
 
@@ -543,6 +595,8 @@ def main():
     pr = commands.add_parser('pr')
     pr.add_argument('pr'); pr.add_argument('--repo')
     pr.add_argument('--ai-review', action='store_true')
+    pr.add_argument('--background', action='store_true', help='Queue an AI review without blocking or changing focus')
+    pr.add_argument('--no-focus', action='store_true')
     commands.add_parser('pr-view'); commands.add_parser('pr-ci')
     commands.add_parser('pr-ai-review')
     checks = commands.add_parser('check'); checks.add_argument('--init', action='store_true')
@@ -567,7 +621,7 @@ def main():
         # Use this deferred tab's checkout, not the popup caller's inherited cwd.
         repo = repo_root(Path.cwd())
         pr_metadata(repo)
-        return reviewer_command(argparse.Namespace(kind=None, requirements='', timeout=120000), repo=repo)
+        return reviewer_command(argparse.Namespace(kind=None, requirements='', timeout=1800000, notify=True), repo=repo)
     if args.command == 'pr-view':
         repo = repo_root(); data = pr_metadata(repo)
         return subprocess.run(['nvim', '-c', f"DiffviewOpen {data['base']}..{data['headRefOid']}"], cwd=repo).returncode
@@ -589,6 +643,8 @@ if __name__ == '__main__':
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.CalledProcessError) as error:
         detail = error.stderr if isinstance(error, subprocess.CalledProcessError) else str(error)
         print(detail or str(error), file=sys.stderr)
+        if os.environ.get('HERDR_REVIEW_LAUNCH_LOG'):
+            notify('PR review could not start', 'See launch log: ' + os.environ['HERDR_REVIEW_LAUNCH_LOG'])
         if sys.stdin.isatty() and sys.stderr.isatty():
             input('Press Enter to close. ')
         sys.exit(1)
