@@ -368,7 +368,7 @@ function agy-resume() {
       fi
       [ -n "$preview" ] || continue
 
-      session_cwd=$(sqlite3 "$db_path" "select data from trajectory_metadata_blob;" 2>/dev/null | grep -oaE 'file:///[a-zA-Z0-9_/.-]+' | head -n 1 | sed 's/file:\/\///' || true)
+      session_cwd="$(herdr-project-layout --agy-cwd "$db_path" 2>/dev/null || true)"
 
       if [ "$show_all" = "false" ] && [ "$session_cwd" != "$PWD" ]; then
         continue
@@ -407,9 +407,8 @@ function agy-resume() {
 }
 
 # Herdr Workspace launcher:
-# Opens or creates a Herdr space for a project with an automatic split layout:
-# - Left pane: Interactive shell
-# - Right pane: Context-specific agent (Claude for Work, Codex or Antigravity for Personal)
+# Creates a Herdr project workspace. Work repositories get Shell and CC tabs;
+# personal repositories get only the agent tabs for which history exists.
 function p() {
   if ! command -v herdr >/dev/null 2>&1; then
     echo "herdr CLI is not installed." >&2
@@ -454,131 +453,11 @@ function p() {
   local tab1_id
   tab1_id="$(echo "$ws_json" | jq -r '.result.tab.tab_id // empty')"
 
-  # Tab 1: Always dev shell
+  # Shared with the workspace-created plugin; safe if both run together.
   if [ -n "$tab1_id" ]; then
-    herdr tab rename "$tab1_id" "dev" >/dev/null 2>&1
+    herdr tab rename "$tab1_id" "Shell" >/dev/null 2>&1
   fi
-
-  if [[ "$abs_path" == *"/Documents/Work"* ]]; then
-    # =========================================================================
-    # WORK REPO LAYOUT (3 Tabs)
-    # =========================================================================
-    # Tab 2: Claude Code (resumes latest session)
-    local tab2_json
-    tab2_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "cc" --focus)"
-    local tab2_pane
-    tab2_pane="$(echo "$tab2_json" | jq -r '.result.root_pane.pane_id // empty')"
-    local tab2_id
-    tab2_id="$(echo "$tab2_json" | jq -r '.result.tab.tab_id // empty')"
-    if [ -n "$tab2_pane" ]; then
-      herdr pane run "$tab2_pane" "claude --continue"
-
-      # Check if an active open PR exists on this branch
-      local has_pr
-      has_pr="$(cd "$abs_path" && gh pr view --json number -q .number 2>/dev/null || true)"
-      if [ -n "$has_pr" ]; then
-        # Split right pane for GitHub PR Preview (status & live CI checks)
-        herdr plugin pane open \
-          --plugin "juninaba.herdr-pr-preview" \
-          --entrypoint "preview" \
-          --target-pane "$tab2_pane" \
-          --placement split \
-          --direction right \
-          --no-focus \
-          --env "HERDR_WORKSPACE_ID=$ws_id" \
-          --env "HERDR_PR_STATUS_WORKTREE_PATH=$abs_path" >/dev/null 2>&1
-      fi
-      # Keep focus on Claude's input pane
-      herdr pane focus "$tab2_pane" >/dev/null 2>&1
-    fi
-
-    # Tab 3: Lazygit
-    local tab3_json
-    tab3_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "git" --no-focus)"
-    local tab3_pane
-    tab3_pane="$(echo "$tab3_json" | jq -r '.result.root_pane.pane_id // empty')"
-    if [ -n "$tab3_pane" ]; then
-      herdr pane run "$tab3_pane" "lazygit"
-    fi
-
-    # Focus Tab 2 (Claude Code) by default
-    if [ -n "$tab2_id" ]; then
-      herdr tab focus "$tab2_id" >/dev/null 2>&1
-    fi
-
-  else
-    # =========================================================================
-    # PERSONAL REPO LAYOUT (4 Tabs)
-    # Tab 1: dev shell (already renamed above)
-    # Tab 2: AGY (Antigravity session resume via agr)
-    # Tab 3: CXR (Codex resume session)
-    # Tab 4: lg (Lazygit)
-    # =========================================================================
-
-    # Check if an active open PR exists on this branch
-    local has_pr
-    has_pr="$(cd "$abs_path" && gh pr view --json number -q .number 2>/dev/null || true)"
-
-    # Tab 2: Antigravity (AGY resume)
-    local tab2_json
-    tab2_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "agy" --focus)"
-    local tab2_pane
-    tab2_pane="$(echo "$tab2_json" | jq -r '.result.root_pane.pane_id // empty')"
-    local tab2_id
-    tab2_id="$(echo "$tab2_json" | jq -r '.result.tab.tab_id // empty')"
-    if [ -n "$tab2_pane" ]; then
-      herdr pane run "$tab2_pane" "agr"
-
-      if [ -n "$has_pr" ]; then
-        herdr plugin pane open \
-          --plugin "juninaba.herdr-pr-preview" \
-          --entrypoint "preview" \
-          --target-pane "$tab2_pane" \
-          --placement split \
-          --direction right \
-          --no-focus \
-          --env "HERDR_WORKSPACE_ID=$ws_id" \
-          --env "HERDR_PR_STATUS_WORKTREE_PATH=$abs_path" >/dev/null 2>&1
-      fi
-      herdr pane focus "$tab2_pane" >/dev/null 2>&1
-    fi
-
-    # Tab 3: Codex (CXR)
-    local tab3_json
-    tab3_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "cxr" --no-focus)"
-    local tab3_pane
-    tab3_pane="$(echo "$tab3_json" | jq -r '.result.root_pane.pane_id // empty')"
-    if [ -n "$tab3_pane" ]; then
-      herdr pane run "$tab3_pane" "cxr"
-
-      if [ -n "$has_pr" ]; then
-        herdr plugin pane open \
-          --plugin "juninaba.herdr-pr-preview" \
-          --entrypoint "preview" \
-          --target-pane "$tab3_pane" \
-          --placement split \
-          --direction right \
-          --no-focus \
-          --env "HERDR_WORKSPACE_ID=$ws_id" \
-          --env "HERDR_PR_STATUS_WORKTREE_PATH=$abs_path" >/dev/null 2>&1
-      fi
-      herdr pane focus "$tab3_pane" >/dev/null 2>&1
-    fi
-
-    # Tab 4: Lazygit (lg)
-    local tab4_json
-    tab4_json="$(herdr tab create --workspace "$ws_id" --cwd "$abs_path" --label "lg" --no-focus)"
-    local tab4_pane
-    tab4_pane="$(echo "$tab4_json" | jq -r '.result.root_pane.pane_id // empty')"
-    if [ -n "$tab4_pane" ]; then
-      herdr pane run "$tab4_pane" "lazygit"
-    fi
-
-    # Focus Tab 2 (Antigravity) by default
-    if [ -n "$tab2_id" ]; then
-      herdr tab focus "$tab2_id" >/dev/null 2>&1
-    fi
-  fi
+  herdr-project-layout "$ws_id" || return
 
   if [ -n "$ws_id" ]; then
     herdr workspace focus "$ws_id" >/dev/null 2>&1
@@ -648,3 +527,19 @@ function rc() {
   return "$exit_code"
 }
 
+
+
+# Agent startup is deferred until the first prompt, after all shell setup and
+# aliases have loaded. Consume the marker before starting any child process.
+function _dotfiles_herdr_project_agent() {
+  add-zsh-hook -d precmd _dotfiles_herdr_project_agent
+  local project_agent="${DOTFILES_HERDR_PROJECT_AGENT:-}"
+  unset DOTFILES_HERDR_PROJECT_AGENT
+  case "$project_agent" in
+    # These names are allowlisted. eval resolves aliases defined later in .zshrc.
+    cc|ccr|agr|cxr|hpr-view|hpr-ci) eval "$project_agent" ;;
+  esac
+}
+if [[ "${HERDR_ENV:-}" == "1" && "${DOTFILES_HERDR_PROJECT_AGENT:-}" == (cc|ccr|agr|cxr|hpr-view|hpr-ci) ]]; then
+  add-zsh-hook precmd _dotfiles_herdr_project_agent
+fi

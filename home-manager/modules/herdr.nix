@@ -17,7 +17,88 @@
   pkgs,
   ...
 }:
+let
+  review = pkgs.writeShellApplication {
+    name = "herdr-review";
+    runtimeInputs = [ pkgs.git pkgs.jq pkgs.less config.programs.lazygit.package ];
+    text = builtins.readFile ./herdr/herdr-review.sh;
+  };
+  projectLayout = pkgs.writeShellApplication {
+    name = "herdr-project-layout";
+    runtimeInputs = [ pkgs.python3 pkgs.git ];
+    text = ''
+      exec python3 ${./herdr/project-layout.py} "$@"
+    '';
+  };
+  workflowMain = pkgs.writeShellApplication {
+    name = "herdr-workflow";
+    runtimeInputs = [ pkgs.python3 pkgs.git pkgs.gh pkgs.gh-dash pkgs.delta pkgs.fzf pkgs.ripgrep config.programs.neovim.finalPackage ];
+    text = ''
+      exec python3 ${./herdr/workflow.py} "$@"
+    '';
+  };
+  workflowCommands = {
+    hinbox = "inbox";
+    hpr = "pr";
+    hpr-view = "pr-view";
+    hpr-ci = "pr-ci";
+    hcheck = "check";
+    hfind = "find";
+    htask = "task";
+    hreview-agent = "reviewer";
+  };
+  workflow = pkgs.symlinkJoin {
+    name = "herdr-workflow-tools";
+    paths = [ workflowMain ] ++ lib.mapAttrsToList (name: subcommand:
+      pkgs.writeShellScriptBin name ''
+        exec ${workflowMain}/bin/herdr-workflow ${subcommand} "$@"
+      ''
+    ) workflowCommands;
+  };
+  projectPlugin = pkgs.writeTextDir "herdr-plugin.toml" ''
+    id = "dotfiles.work-project-layout"
+    name = "Work project tabs"
+    version = "0.1.0"
+    min_herdr_version = "0.9.5"
+    description = "Create Shell and CC tabs for new work repositories"
+    platforms = ["macos"]
+
+    [[events]]
+    on = "workspace.created"
+    command = ["${projectLayout}/bin/herdr-project-layout"]
+  '';
+in
 {
+  home.packages = [ review projectLayout workflow pkgs.gh-dash ];
+  home.activation.herdrProjectLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -x /opt/homebrew/bin/herdr ]; then
+      run /opt/homebrew/bin/herdr plugin link ${projectPlugin}
+    fi
+  '';
+  home.file = {
+    ".agents/skills/herdr/SKILL.md".source = ./herdr/skill/SKILL.md;
+    ".codex/skills/herdr/SKILL.md".source = ./herdr/skill/SKILL.md;
+    ".claude/skills/herdr/SKILL.md".source = ./herdr/skill/SKILL.md;
+  };
+
+  xdg.configFile."herdr/workflow.md".source = ../../docs/guides/herdr-workflow.md;
+
+  xdg.configFile."gh-dash/config.yml".source = (pkgs.formats.yaml {}).generate "gh-dash.yml" {
+    prSections = [
+      { title = "Needs my review"; filters = "is:open review-requested:@me"; }
+      { title = "My PRs"; filters = "is:open author:@me"; }
+      { title = "Involved"; filters = "is:open involves:@me -author:@me"; }
+    ];
+    keybindings.prs = [
+      {
+        key = "V";
+        name = "Review in Herdr (q closes inbox)";
+        command = "${workflow}/bin/hpr {{.PrNumber}} --repo {{.RepoName}}";
+      }
+    ];
+    pager.diff = "delta";
+  };
+
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
 
@@ -68,6 +149,7 @@
     next_agent = "alt+down"
 
     # System & Panes
+    goto = "prefix+alt+g"
     workspace_picker = "prefix+s"
     settings = "prefix+comma"
     split_vertical = "prefix+v"
@@ -76,6 +158,35 @@
     # Indexed Tab & Workspace Jumps with prefix (Ctrl+a 1..9)
     switch_tab = "prefix+1..9"
     switch_workspace = "prefix+shift+1..9"
+
+    # Local Git review from the action's pane context, including existing workspaces.
+    [[keys.command]]
+    key = "prefix+g"
+    type = "popup"
+    command = "${review}/bin/herdr-review"
+    width = "95%"
+    height = "90%"
+
+    [[keys.command]]
+    key = "prefix+d"
+    type = "popup"
+    command = "${review}/bin/herdr-review diff"
+    width = "95%"
+    height = "90%"
+
+    [[keys.command]]
+    key = "prefix+i"
+    type = "popup"
+    command = "${workflow}/bin/hinbox"
+    width = "95%"
+    height = "90%"
+
+    [[keys.command]]
+    key = "prefix+f"
+    type = "popup"
+    command = "${workflow}/bin/hfind"
+    width = "95%"
+    height = "90%"
 
     # Shortcut: prefix + p to toggle/open GitHub PR Preview split pane
     [[keys.command]]

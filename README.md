@@ -401,7 +401,14 @@ cleanup   # Clean old Nix generations (user + system), Homebrew cache, and works
 
 ```bash
 # Workspace & Terminal (Ghostty + Herdr + Tmux)
-p         # Interactive project workspace launcher (Work 3-tab / Personal 4-tab)
+p         # Project workspace launcher (Work: Shell + CC; Personal: Shell + agents with history)
+herdr-review mark # Record task baseline in this worktree before an agent starts
+herdr-review diff # Review changes since baseline, or current changes against HEAD
+# Ctrl+A then g: Lazygit popup; Ctrl+A then d: task diff popup
+# A local Herdr plugin applies layouts to new work, personal and dotfile workspaces.
+# CC uses cc for new projects, ccr when this directory has Claude conversation history.
+# Personal/dotfile: Shell; AGY (agr) only with history; CX (cxr) only with history.
+# Herdr skill: lead agent implements, requested helper reviews and reports back
 cb <cmd>  # Run command and copy ANSI-stripped output to clipboard
 rc        # Re-run last command and copy output to clipboard
 
@@ -411,6 +418,15 @@ ag / agr  # Antigravity (open / fzf resume)
 cx / cxr  # Codex (new / resume)
 pil / pig # Pi Coding Agent (local / Gemini)
 cau-t     # AI token & cost usage report (today)
+
+# Herdr review and task workflow
+hinbox       # GitHub PR inbox (Ctrl+A then i); Shift+V opens an isolated review
+hpr 123      # Open PR in Review + Checks tabs, preserving this checkout
+hcheck       # Run project checks and retain results/logs
+hfind text   # Search and open the matching file/line in Neovim (Ctrl+A then f for files)
+htask start "task" --goal "expected result"  # Record task context and baseline
+hreview-agent --requirements "review scope" # Request one read-only helper review
+htask show   # Read the goal, notes, check results and reviewer transcript links
 
 # Git & GitHub
 gs        # Status
@@ -487,3 +503,5 @@ This configuration was developed with the assistance of [Cursor](https://cursor.
   run `bash scripts/testing/check-neovim-config.sh`, and deploy via `rebuild`.
   The managed UI uses Gruvbox in terminals configured with JetBrainsMonoNL Nerd
   Font Mono and Fira Code as the monospace fallback.
+
+Terminal review and task commands: [Herdr workflow guide](docs/guides/herdr-workflow.md).
