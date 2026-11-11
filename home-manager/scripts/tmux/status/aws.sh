@@ -59,18 +59,6 @@ tmux_status_collect_aws() {
     )"
   fi
 
-  aws_status=""
-  if [ -n "$aws_label" ]; then
-    aws_status="󰸏 $aws_label"
-    [ -n "$aws_expiry" ] && aws_status="$aws_status $aws_expiry"
-  fi
-
-  if [ "$aws_expiry" = "exp" ]; then
-    aws_color="#fb4934"
-  elif [ -n "$aws_expiry" ] && [ "${aws_expiry%m}" != "$aws_expiry" ] && [ "${aws_expiry%m}" -le 60 ] 2>/dev/null; then
-    aws_color="#fabd2f"
-  fi
-
   aws_alert=""
   aws_alert_bg=""
   aws_alert_fg=""
@@ -84,5 +72,18 @@ tmux_status_collect_aws() {
       aws_alert_bg="#fabd2f"
       aws_alert_fg="#1d2021"
     fi
+  fi
+
+  # Suppress right-side label when active alert is showing on the left to prevent duplication
+  aws_status=""
+  if [ -n "$aws_label" ] && [ -z "$aws_alert" ]; then
+    aws_status="󰸏 $aws_label"
+    [ -n "$aws_expiry" ] && aws_status="$aws_status $aws_expiry"
+  fi
+
+  if [ "$aws_expiry" = "exp" ]; then
+    aws_color="#fb4934"
+  elif [ -n "$aws_expiry" ] && [ "${aws_expiry%m}" != "$aws_expiry" ] && [ "${aws_expiry%m}" -le 60 ] 2>/dev/null; then
+    aws_color="#fabd2f"
   fi
 }
