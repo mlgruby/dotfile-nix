@@ -18,6 +18,12 @@
   ...
 }:
 let
+  ghDash = pkgs.gh-dash.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [ ./herdr/gh-dash-mouse.patch ];
+    postCheck = (old.postCheck or "") + ''
+      go test ./internal/tui/components/sidebar ./internal/tui
+    '';
+  });
   review = pkgs.writeShellApplication {
     name = "herdr-review";
     runtimeInputs = [ pkgs.git pkgs.jq pkgs.less config.programs.lazygit.package ];
@@ -32,7 +38,7 @@ let
   };
   workflowMain = pkgs.writeShellApplication {
     name = "herdr-workflow";
-    runtimeInputs = [ projectLayout pkgs.python3 pkgs.git pkgs.gh pkgs.gh-dash pkgs.delta pkgs.fzf pkgs.ripgrep config.programs.neovim.finalPackage ];
+    runtimeInputs = [ projectLayout pkgs.python3 pkgs.git pkgs.gh ghDash pkgs.delta pkgs.fzf pkgs.ripgrep config.programs.neovim.finalPackage ];
     text = ''
       exec python3 ${./herdr/workflow.py} "$@"
     '';
@@ -70,7 +76,7 @@ let
   '';
 in
 {
-  home.packages = [ review projectLayout workflow pkgs.gh-dash ];
+  home.packages = [ review projectLayout workflow ghDash ];
   home.activation.herdrProjectLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -x /opt/homebrew/bin/herdr ]; then
       run /opt/homebrew/bin/herdr plugin link ${projectPlugin}
@@ -86,9 +92,14 @@ in
 
   xdg.configFile."gh-dash/config.yml".source = (pkgs.formats.yaml {}).generate "gh-dash.yml" {
     prSections = [
-      { title = "Needs my review"; filters = "is:open review-requested:@me"; }
+      { title = "Needs my review"; filters = "is:open review-requested:@me -author:app/dependabot"; }
       { title = "My PRs"; filters = "is:open author:@me"; }
-      { title = "Involved"; filters = "is:open involves:@me -author:@me"; }
+      { title = "Involved"; filters = "is:open involves:@me -author:@me -author:app/dependabot"; }
+      {
+        title = "Dependabot";
+        filters = "is:open author:app/dependabot user:mlgruby org:VorTECHsa org:bodhispace-xyz";
+        limit = 50;
+      }
     ];
     keybindings.prs = [
       {
