@@ -114,8 +114,9 @@ in
       # bind -n M-S-Up resize-pane -U 2
       # bind -n M-S-Down resize-pane -D 2
 
-      # Config reload
+      # Config reload & Quick Shortcuts
       bind r source-file $HOME/.config/tmux/tmux.conf \; display "Config reloaded!"
+      bind R display-popup -E -w 85% -h 60% "bash $HOME/.config/tmux/status/review-popup.sh"
 
       # Plugin Settings
       set -g @tmux-gruvbox 'dark'
@@ -125,7 +126,7 @@ in
       # Status modules & clean layout
       # Herdr manages workspaces and tabs internally; suppress redundant tmux window tabs
       # and render high-signal context (Calendar Guard & GitHub Reviews) next to session name.
-      set -g status-left-length 120
+      set -g status-left-length 160
       set -g status-left "#(bash $HOME/.config/tmux/status/status-left.sh '#{session_name}')"
       set -g window-status-format ""
       set -g window-status-current-format ""
@@ -150,6 +151,10 @@ in
     };
     ".config/tmux/status/reviews.sh" = {
       source = ../scripts/tmux/status/reviews.sh;
+      executable = true;
+    };
+    ".config/tmux/status/review-popup.sh" = {
+      source = ../scripts/tmux/status/review-popup.sh;
       executable = true;
     };
     ".config/tmux/status/status-left.sh" = {
