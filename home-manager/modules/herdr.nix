@@ -176,9 +176,11 @@ in
     previous_tab = "alt+shift+left"
     next_tab = "alt+shift+right"
 
-    # Small elements (Panes & Agents) use Alt (no Shift)
-    focus_pane_left = "alt+left"
-    focus_pane_right = "alt+right"
+    # Panes & Agents
+    focus_pane_left = "prefix+left"
+    focus_pane_right = "prefix+right"
+    focus_pane_up = "prefix+up"
+    focus_pane_down = "prefix+down"
     cycle_pane_next = "prefix+tab"
     cycle_pane_previous = "prefix+shift+tab"
     previous_agent = "alt+up"
@@ -200,27 +202,6 @@ in
     # Indexed Tab & Workspace Jumps with prefix (Ctrl+a 1..9)
     switch_tab = "prefix+1..9"
     switch_workspace = "prefix+shift+1..9"
-
-    # Directional pane focus with prefix + arrows
-    [[keys.command]]
-    key = "prefix+left"
-    type = "shell"
-    command = "herdr pane focus --direction left"
-
-    [[keys.command]]
-    key = "prefix+right"
-    type = "shell"
-    command = "herdr pane focus --direction right"
-
-    [[keys.command]]
-    key = "prefix+up"
-    type = "shell"
-    command = "herdr pane focus --direction up"
-
-    [[keys.command]]
-    key = "prefix+down"
-    type = "shell"
-    command = "herdr pane focus --direction down"
 
     # GitView: Native interactive diffs & agent review panel (ChmaraX/herdr-gitview)
     [[keys.command]]
