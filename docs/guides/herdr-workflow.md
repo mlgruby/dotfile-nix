@@ -14,6 +14,8 @@ Run `hinbox`, or press Ctrl+A then i, to open the GitHub inbox. Its sections sho
 
 Select a PR and press Shift+A to start an AI review in an isolated review workspace. Press q to close the inbox and see the AI Review tab. Repeating Shift+A for the same PR revision focuses the existing tab. Close that tab before requesting a fresh review. Claude reviews work repositories; Codex reviews personal repositories. The reviewer receives the PR description and exact diff, plus dependency upgrade checks for Dependabot PRs. Findings stay local and include severity, file/line references and suggested fixes. The command saves recent reviewer output; inspect the agent pane for the complete exchange or any approval prompt.
 
+PR descriptions render with bold headings, shaded inline code and visible table borders. Rebuild activation reloads the running Herdr configuration so new popups use the current dashboard binary. Close and reopen an existing popup after rebuilding.
+
 Scroll the right-hand preview with your mouse wheel or a two-finger touchpad gesture while the pointer is over it. The preview scrolls three lines per wheel event and works in either the right or bottom position. Ctrl+D and Ctrl+U remain available.
 
 You can also run:

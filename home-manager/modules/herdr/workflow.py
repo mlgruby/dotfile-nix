@@ -251,9 +251,10 @@ def prepare_pr(repo, number, target=None):
     git(repo, 'fetch', '--no-tags', '--', remote, f'refs/pull/{number}/head')
     if git(repo, 'rev-parse', 'FETCH_HEAD') != pr['headRefOid']:
         raise RuntimeError('The PR changed while fetching. Rerun hpr to review its current revision.')
-    git(repo, 'fetch', '--no-tags', '--', remote, 'refs/heads/' + pr['baseRefName'])
+    # GitHub may report a PR base snapshot behind the current branch tip.
+    git(repo, 'fetch', '--no-tags', '--', remote, pr['baseRefOid'])
     if git(repo, 'rev-parse', 'FETCH_HEAD') != pr['baseRefOid']:
-        raise RuntimeError('The base branch changed while fetching. Rerun hpr.')
+        raise RuntimeError('The fetched base does not match GitHub PR metadata. Rerun hpr.')
     base = git(repo, 'merge-base', pr['baseRefOid'], pr['headRefOid'])
     directory = state_root() / 'reviews' / repo_key(repo) / f"pr-{number}-{pr['headRefOid'][:12]}"
     directory.parent.mkdir(parents=True, exist_ok=True)

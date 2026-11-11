@@ -19,9 +19,9 @@
 }:
 let
   ghDash = pkgs.gh-dash.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [ ./herdr/gh-dash-mouse.patch ];
+    patches = (old.patches or []) ++ [ ./herdr/gh-dash-mouse.patch ./herdr/gh-dash-markdown.patch ];
     postCheck = (old.postCheck or "") + ''
-      go test ./internal/tui/components/sidebar ./internal/tui
+      go test ./internal/tui/components/sidebar ./internal/tui/markdown ./internal/tui
     '';
   });
   review = pkgs.writeShellApplication {
@@ -81,6 +81,10 @@ in
   home.activation.herdrProjectLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -x /opt/homebrew/bin/herdr ]; then
       run /opt/homebrew/bin/herdr plugin link ${projectPlugin}
+      # The long-running session must refresh paths into the new Nix generation.
+      if [ -S "${config.home.homeDirectory}/.config/herdr/herdr.sock" ]; then
+        run /opt/homebrew/bin/herdr server reload-config
+      fi
     fi
   '';
   home.file = {

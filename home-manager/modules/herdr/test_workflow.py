@@ -87,6 +87,15 @@ class WorkflowTests(unittest.TestCase):
             w.prepare_pr(self.repo, 7)
         self.assertEqual(self.git('worktree', 'list', '--porcelain').count('worktree '), 1)
 
+    def test_pr_base_snapshot_can_differ_from_current_branch_tip(self):
+        self.make_pr()
+        (self.repo / 'unrelated.txt').write_text('new base branch commit\n')
+        self.git('add', 'unrelated.txt'); self.git('commit', '-m', 'base advanced')
+        self.git('push', str(self.remote), 'main:main')
+        directory, data = w.prepare_pr(self.repo, 7)
+        self.assertEqual(data['base'], self.base)
+        self.assertEqual(w.git(directory, 'rev-parse', 'HEAD'), self.head)
+
     def test_merged_pr_does_not_fetch_or_create_worktree(self):
         self.make_pr(); self.pr['state'] = 'MERGED'
         with self.assertRaisesRegex(RuntimeError, 'open PRs'):
