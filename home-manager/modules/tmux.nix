@@ -114,9 +114,12 @@ in
       # bind -n M-S-Up resize-pane -U 2
       # bind -n M-S-Down resize-pane -D 2
 
-      # Config reload & Quick Shortcuts
+      # Config reload & Quick Floating Popups
       bind r source-file $HOME/.config/tmux/tmux.conf \; display "Config reloaded!"
       bind R display-popup -E -w 85% -h 60% "bash $HOME/.config/tmux/status/review-popup.sh"
+      bind P display-popup -E -w 85% -h 65% "bash $HOME/.config/tmux/status/pr-popup.sh"
+      bind A display-popup -E -w 85% -h 65% "bash $HOME/.config/tmux/status/herdr-popup.sh"
+      bind G display-popup -d "#{pane_current_path}" -w 90% -h 85% -E "lazygit"
 
       # Plugin Settings
       set -g @tmux-gruvbox 'dark'
@@ -125,8 +128,8 @@ in
 
       # Status modules & clean layout
       # Herdr manages workspaces and tabs internally; suppress redundant tmux window tabs
-      # and render high-signal context (Calendar Guard & GitHub Reviews) next to session name.
-      set -g status-left-length 160
+      # and render high-signal context (Agents, Calendar, CI Watchdog, PR Reviews, AWS) next to session name.
+      set -g status-left-length 200
       set -g status-left "#(bash $HOME/.config/tmux/status/status-left.sh '#{session_name}')"
       set -g window-status-format ""
       set -g window-status-current-format ""
@@ -149,12 +152,28 @@ in
       source = ../scripts/tmux/status/calendar.sh;
       executable = true;
     };
+    ".config/tmux/status/herdr.sh" = {
+      source = ../scripts/tmux/status/herdr.sh;
+      executable = true;
+    };
+    ".config/tmux/status/my-prs.sh" = {
+      source = ../scripts/tmux/status/my-prs.sh;
+      executable = true;
+    };
     ".config/tmux/status/reviews.sh" = {
       source = ../scripts/tmux/status/reviews.sh;
       executable = true;
     };
     ".config/tmux/status/review-popup.sh" = {
       source = ../scripts/tmux/status/review-popup.sh;
+      executable = true;
+    };
+    ".config/tmux/status/pr-popup.sh" = {
+      source = ../scripts/tmux/status/pr-popup.sh;
+      executable = true;
+    };
+    ".config/tmux/status/herdr-popup.sh" = {
+      source = ../scripts/tmux/status/herdr-popup.sh;
       executable = true;
     };
     ".config/tmux/status/status-left.sh" = {
