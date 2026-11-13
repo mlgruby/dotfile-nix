@@ -32,7 +32,7 @@
   # LazyGit Integration (lg() directory-switching wrapper is provided by programs.lazygit)
   # ==========================================================================
   lgc = "lazygit -w $(pwd)"; # Open lazygit in current directory
-  lgf = "lazygit -f $(find . -type d -name '.git' -exec dirname {} \\; | fzf)"; # Fuzzy find and open git repo in lazygit
+  lgf = "fd -H -td -g '.git' -x dirname | fzf | xargs -r lazygit -p"; # Fuzzy find and open git repo in lazygit
   lgs = "lazygit status"; # Show lazygit status
 
   # ==========================================================================
@@ -190,7 +190,12 @@
   ghprl = "gh pr list --limit 1000"; # List all PRs
   ghpro = "gh pr list --state open --limit 1000"; # List open PRs
   ghprch = "gh pr checks"; # Show PR check status
-  ghprf = "gh pr list --state open | fzf --preview 'echo {} | awk \"{print \\$1}\" | xargs gh pr view' | awk '{print $1}' | xargs gh pr view --web"; # Fuzzy find and view PR
+  ghprf = "gh pr list --state open | fzf --preview 'echo {} | awk \"{print \\$1}\" | xargs -r gh pr view' | awk '{print $1}' | xargs -r gh pr view --web"; # Fuzzy find and view PR
+
+  # GitHub Actions CI
+  ghrl = "gh run list"; # List recent workflow runs
+  ghrw = "gh run watch"; # Watch active workflow run
+  ghrlog = "gh run view --log-failed"; # View failed run logs
 
   # Repository management
   ghrv = "gh repo view --web"; # View repo in browser
@@ -202,16 +207,6 @@
   ghil = "gh issue list --limit 1000"; # List all issues
   ghic = "gh issue create"; # Create new issue
   ghiv = "gh issue view"; # View issue details
-  ghif = "gh issue list | fzf --preview 'echo {} | awk \"{print \\$1}\" | xargs gh issue view' | awk '{print $1}' | xargs gh issue view --web"; # Fuzzy find and view issue
-
-  # ==========================================================================
-  # Conventional Commits
-  # ==========================================================================
-  feat = "git commit -m 'feat: '"; # Commit new feature
-  fix = "git commit -m 'fix: '"; # Commit bug fix
-  docs = "git commit -m 'docs: '"; # Commit documentation changes
-  style = "git commit -m 'style: '"; # Commit formatting changes
-  refactor = "git commit -m 'refactor: '"; # Commit refactoring
-  test = "git commit -m 'test: '"; # Commit test changes
-  chore = "git commit -m 'chore: '"; # Commit maintenance tasks
+  ghif = "gh issue list | fzf --preview 'echo {} | awk \"{print \\$1}\" | xargs -r gh issue view' | awk '{print $1}' | xargs -r gh issue view --web"; # Fuzzy find and view issue
+  # Conventional-commit helpers (feat/fix/docs/style/refactor/test/chore) live as functions in zsh-integration.zsh
 }

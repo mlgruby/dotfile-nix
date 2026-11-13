@@ -38,25 +38,31 @@ tmux_status_collect_aws() {
 
   aws_expiry=""
   if [ -n "$aws_label" ]; then
-    aws_expiry="$(
-      jq -rn --argjson now "$(date +%s)" '
-        [ inputs
-          | select(.startUrl != null and .expiresAt != null)
-          | (.expiresAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)
-        ]
-        | if length == 0 then empty
-          else
-            ((max - $now) / 60 | floor) as $rem
-            | if $rem <= 0 then "exp"
-              elif $rem < 60 then "\($rem)m"
-              else
-                (($rem / 60 | floor)) as $h
-                | (($rem % 60)) as $m
-                | if $m < 10 then "\($h)h" else "\($h)h\($m)m" end
-              end
-          end
-      ' "$HOME"/.aws/sso/cache/*.json 2>/dev/null || true
-    )"
+    local expiry_cache="${TMPDIR:-/tmp}/tmux_aws_expiry_${UID:-0}_${aws_label}.cache"
+    if declare -F tmux_status_cache_fresh >/dev/null 2>&1 && tmux_status_cache_fresh "$expiry_cache" 15; then
+      IFS= read -r aws_expiry < "$expiry_cache" 2>/dev/null || true
+    else
+      aws_expiry="$(
+        jq -rn --argjson now "$(date +%s)" '
+          [ inputs
+            | select(.startUrl != null and .expiresAt != null)
+            | (.expiresAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)
+          ]
+          | if length == 0 then empty
+            else
+              ((max - $now) / 60 | floor) as $rem
+              | if $rem <= 0 then "exp"
+                elif $rem < 60 then "\($rem)m"
+                else
+                  (($rem / 60 | floor)) as $h
+                  | (($rem % 60)) as $m
+                  | if $m < 10 then "\($h)h" else "\($h)h\($m)m" end
+                end
+            end
+        ' "$HOME"/.aws/sso/cache/*.json 2>/dev/null || true
+      )"
+      printf '%s\n' "$aws_expiry" > "$expiry_cache" 2>/dev/null || true
+    fi
   fi
 
   aws_status=""

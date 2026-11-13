@@ -5,6 +5,8 @@
 {
   k = "kubectl"; # Kubectl shorthand
   kgp = "kubectl get pods"; # List pods
+  kgpw = "kubectl get pods -w"; # Watch pods
+  kgpa = "kubectl get pods -A"; # List pods across all namespaces
   kgs = "kubectl get svc"; # List services
   kgd = "kubectl get deployments"; # List deployments
   kgn = "kubectl get nodes"; # List nodes
@@ -36,6 +38,6 @@
 
   # Interactive pod selection
   kfp = "kubectl get pods | fzf --header-lines=1 | awk '{print $1}'"; # Fuzzy select pod
-  kfl = "kubectl get pods | fzf --header-lines=1 | awk '{print $1}' | xargs kubectl logs -f"; # Fuzzy select and tail pod logs
-  kfe = "kubectl get pods | fzf --header-lines=1 | awk '{print $1}' | xargs -I {} kubectl exec -it {} -- /bin/sh"; # Fuzzy select and exec into pod
+  kfl = "kubectl get pods | fzf --header-lines=1 | awk '{print $1}' | xargs -r kubectl logs -f"; # Fuzzy select and tail pod logs
+  kfe = "kubectl get pods | fzf --header-lines=1 | awk '{print $1}' | xargs -r -I {} kubectl exec -it {} -- /bin/sh"; # Fuzzy select and exec into pod
 }

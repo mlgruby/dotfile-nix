@@ -101,20 +101,9 @@ in
         # Deduplicate PATH and fpath entries automatically in Zsh
         typeset -U path PATH fpath FPATH
 
-        # Static Homebrew environment (replaces `eval "$(brew shellenv)"` to save ~51ms per shell)
-        export HOMEBREW_PREFIX="/opt/homebrew"
-        export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
-        export HOMEBREW_REPOSITORY="/opt/homebrew/Library/.homebrew-is-managed-by-nix"
+        # Homebrew completions & complete PATH (HOMEBREW_* and BITWARDEN_* come from sessionVariables in ~/.zshenv)
         fpath=("/opt/homebrew/share/zsh/site-functions" $fpath)
-        export INFOPATH="/opt/homebrew/share/info:''${INFOPATH:-}"
-
-        # Ensure complete PATH including Nix profiles, Homebrew, and standard macOS system bins
         export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.docker/bin:$HOME/.cargo/bin:$HOME/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-
-        ${lib.optionalString bitwardenAgent.enable ''
-          export DOTFILES_BITWARDEN_SSH_AGENT="1"
-          export BITWARDEN_SSH_AUTH_SOCK="${bitwardenSocketEnv}"
-        ''}
 
         source "${precompiledZshIntegrations}/integrations.zsh"
         source "${precompiledZshIntegrations}/zsh-integration.zsh"
@@ -126,10 +115,8 @@ in
           if [ -r "$HOME/.config/devcontainer-auto/zsh-hook" ]; then
             source "$HOME/.config/devcontainer-auto/zsh-hook"
           fi
+          source "${precompiledZshIntegrations}/work.zsh"
         ''}
-      ''
-      + lib.optionalString profile.isWork ''
-        source "${precompiledZshIntegrations}/work.zsh"
       '';
 
       history = {

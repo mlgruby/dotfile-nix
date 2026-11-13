@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-_tmux_reviews_mtime() {
-  local target="$1"
-  /usr/bin/stat -f %m "$target" 2>/dev/null || stat -c %Y "$target" 2>/dev/null || echo 0
-}
-
 tmux_status_collect_reviews() {
   reviews_status=""
   reviews_bg="#504945"
@@ -17,78 +12,32 @@ tmux_status_collect_reviews() {
   local now_s
   now_s="$(date +%s 2>/dev/null || echo 0)"
 
-  local cache_mtime=0
-  if [ -f "$cache_file" ]; then
-    cache_mtime="$(_tmux_reviews_mtime "$cache_file")"
-  fi
-
-  local cache_age=$(( now_s - cache_mtime ))
-
   # Refresh cache in background if missing or older than 180 seconds (3 mins)
-  if [ "$cache_age" -ge 180 ] || [ ! -f "$cache_file" ]; then
-    local lock_mtime=0
-    if [ -f "$lock_file" ]; then
-      lock_mtime="$(_tmux_reviews_mtime "$lock_file")"
-    fi
-    local lock_age=$(( now_s - lock_mtime ))
-
-    if [ ! -f "$lock_file" ] || [ "$lock_age" -ge 60 ]; then
+  if ! tmux_status_cache_fresh "$cache_file" 180 "$now_s"; then
+    if ! tmux_status_cache_fresh "$lock_file" 60 "$now_s"; then
       touch "$lock_file" 2>/dev/null || true
       (
-        if command -v gh >/dev/null 2>&1; then
-          raw="$(gh api graphql -f query='
-query {
-  viewer {
-    login
-  }
-  search(query: "is:pr is:open review-requested:@me", type: ISSUE, first: 30) {
-    nodes {
-      ... on PullRequest {
-        number
-        title
-        url
-        repository {
-          name
-        }
-        reviewRequests(first: 10) {
-          nodes {
-            requestedReviewer {
-              __typename
-              ... on User {
-                login
-              }
-              ... on Team {
-                name
-                slug
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-' 2>/dev/null || true)"
-          if [ -n "$raw" ]; then
-            printf '%s\n' "$raw" > "$json_cache" 2>/dev/null || true
-            formatted="$(
-              printf '%s' "$raw" | jq -r '
-                .data.viewer.login as $me |
-                [.data.search.nodes[]? |
-                  select(.title | test("^(build|chore)\\(deps.*\\):") | not) |
-                  select(.reviewRequests.nodes[]?.requestedReviewer | (.__typename == "User" and .login == $me))
-                ] as $prs |
-                ($prs | length) as $len |
-                if $len == 0 then
-                  ""
-                elif $len <= 2 then
-                  " " + ($prs | map("\(.repository.name)#\(.number)") | join(", "))
-                else
-                  " " + ($prs[0:2] | map("\(.repository.name)#\(.number)") | join(", ")) + " (+" + (($len - 2) | tostring) + ")"
-                end
-              ' 2>/dev/null || true
-            )"
-            printf '%s\n' "$formatted" > "$cache_file" 2>/dev/null || true
-          fi
+        raw="$(tmux_status_fetch_gh_reviews_json || true)"
+        if [ -n "$raw" ]; then
+          printf '%s\n' "$raw" > "$json_cache" 2>/dev/null || true
+          formatted="$(
+            printf '%s' "$raw" | jq -r '
+              .data.viewer.login as $me |
+              [.data.search.nodes[]? |
+                select(.title | test("^(build|chore)\\(deps.*\\):") | not) |
+                select(.reviewRequests.nodes[]?.requestedReviewer | (.__typename == "User" and .login == $me))
+              ] as $prs |
+              ($prs | length) as $len |
+              if $len == 0 then
+                ""
+              elif $len <= 2 then
+                " " + ($prs | map("\(.repository.name)#\(.number)") | join(", "))
+              else
+                " " + ($prs[0:2] | map("\(.repository.name)#\(.number)") | join(", ")) + " (+" + (($len - 2) | tostring) + ")"
+              end
+            ' 2>/dev/null || true
+          )"
+          printf '%s\n' "$formatted" > "$cache_file" 2>/dev/null || true
         fi
         rm -f "$lock_file" 2>/dev/null || true
       ) </dev/null >/dev/null 2>&1 &

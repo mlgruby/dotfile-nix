@@ -18,7 +18,7 @@ export PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/${US
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux"
-mkdir -p "$CACHE_DIR" && chmod 700 "$CACHE_DIR" 2>/dev/null || true
+[ -d "$CACHE_DIR" ] || { mkdir -p "$CACHE_DIR" && chmod 700 "$CACHE_DIR" 2>/dev/null || true; }
 CACHE_FILE="${CODEXBAR_STATUS_CACHE_FILE:-$CACHE_DIR/codexbar_status.cache}"
 LOCK_DIR="${CACHE_FILE}.lock"
 CACHE_AGE_LIMIT=60 # 1 minute; the refresh itself runs asynchronously
@@ -319,47 +319,25 @@ update_cache() {
     codex_str="${openai_logo}#[fg=#ebdbb2]W:#[fg=${MUTED}]--#[fg=#ebdbb2]"
   fi
 
-  # Fetch Antigravity's Gemini quota directly from its native usage command.
+  # Fetch Antigravity's Gemini quota directly from its native usage command in one jq pass.
   agy_json=$(read_agy_usage)
-  agy_5h_window=$(echo "$agy_json" | jq -c '
-    [ .command.data.groups[]?
-      | select(.name == "Gemini Models")
-      | .buckets[]?
-      | select(.id == "gemini-5h")
-      | {
-          usedPercent: ((1 - (.remaining_fraction // 0)) * 100),
-          resetsAt: .reset_time
-        }
-    ][0] // empty
-  ' 2>/dev/null || true)
-  agy_w_window=$(echo "$agy_json" | jq -c '
-    [ .command.data.groups[]?
-      | select(.name == "Gemini Models")
-      | .buckets[]?
-      | select(.id == "gemini-weekly")
-      | {
-          usedPercent: ((1 - (.remaining_fraction // 0)) * 100),
-          resetsAt: .reset_time
-        }
-    ][0] // empty
-  ' 2>/dev/null || true)
-  agy_argon_window=$(echo "$agy_json" | jq -c '
-    [ .command.data.groups[]?
-      | select(.name | test("argon"; "i"))
-      | .buckets[]?
-      | select((.id | test("argon"; "i")) or .window == "weekly")
-      | {
-          usedPercent: ((1 - (.remaining_fraction // 0)) * 100),
-          resetsAt: .reset_time
-        }
-    ][0] // empty
-  ' 2>/dev/null || true)
-  gemini_5h_used=$(echo "$agy_5h_window" | jq -r '.usedPercent // empty' 2>/dev/null || true)
-  gemini_5h_reset=$(echo "$agy_5h_window" | jq -r '.resetsAt // empty' 2>/dev/null || true)
-  gemini_w_used=$(echo "$agy_w_window" | jq -r '.usedPercent // empty' 2>/dev/null || true)
-  gemini_w_reset=$(echo "$agy_w_window" | jq -r '.resetsAt // empty' 2>/dev/null || true)
-  argon_used=$(echo "$agy_argon_window" | jq -r '.usedPercent // empty' 2>/dev/null || true)
-  argon_reset=$(echo "$agy_argon_window" | jq -r '.resetsAt // empty' 2>/dev/null || true)
+  IFS=$'\t' read -r gemini_5h_used gemini_5h_reset gemini_w_used gemini_w_reset argon_used argon_reset < <(
+    printf '%s' "$agy_json" | jq -r '
+      def pick(pred):
+        ([ .command.data.groups[]? | .buckets[]? | select(pred) ][0] // {});
+      ( [ .command.data.groups[]? | select(.name == "Gemini Models") | .buckets[]? | select(.id == "gemini-5h") ][0] // {} ) as $g5h |
+      ( [ .command.data.groups[]? | select(.name == "Gemini Models") | .buckets[]? | select(.id == "gemini-weekly") ][0] // {} ) as $gw |
+      ( [ .command.data.groups[]? | select(.name | test("argon"; "i")) | .buckets[]? | select((.id | test("argon"; "i")) or .window == "weekly") ][0] // {} ) as $ar |
+      [
+        (if $g5h.remaining_fraction != null then ((1 - $g5h.remaining_fraction) * 100 | tostring) else "" end),
+        ($g5h.reset_time // ""),
+        (if $gw.remaining_fraction != null then ((1 - $gw.remaining_fraction) * 100 | tostring) else "" end),
+        ($gw.reset_time // ""),
+        (if $ar.remaining_fraction != null then ((1 - $ar.remaining_fraction) * 100 | tostring) else "" end),
+        ($ar.reset_time // "")
+      ] | @tsv
+    ' 2>/dev/null || true
+  )
 
   argon_str=""
   if [ -n "$argon_used" ] && [ "$argon_used" != "null" ]; then

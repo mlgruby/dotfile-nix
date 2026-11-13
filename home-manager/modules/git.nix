@@ -73,10 +73,16 @@ in
       # Editor and File Handling
       core = {
         editor = "nvim"; # Default editor for commits
+        pager = "delta"; # Syntax-highlighted diffs with delta
         autocrlf = "input"; # Line ending management
         fsmonitor = true; # Built-in macOS FSEvents file monitor for faster git status
         untrackedCache = true; # Cache directory mtimes to accelerate untracked file discovery
       };
+
+      interactive.diffFilter = "delta --color-only";
+      delta.navigate = true;
+      merge.conflictStyle = "zdiff3";
+      diff.colorMoved = "default";
 
       # UI Configuration
       color.ui = true; # Colorized output
@@ -155,6 +161,6 @@ in
     ];
   };
 
-  # Shell integration aliases live under aliases/
-  # ZSH functions moved to zsh.nix
+  # Shell integration aliases live under ../aliases/
+  # Zsh functions live under ../scripts/zsh-integration.zsh
 }

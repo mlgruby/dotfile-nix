@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 
 tmux_status_collect_system() {
-  disk="$(
-    df -h /System/Volumes/Data / 2>/dev/null \
-      | awk 'NR==2{print $5 " " $3 "/" $2; exit}' \
-      || echo "n/a"
-  )"
-  [ -n "$disk" ] || disk="n/a"
+  local disk_cache="${TMPDIR:-/tmp}/tmux_disk_${UID:-0}.cache"
+  if declare -F tmux_status_cache_fresh >/dev/null 2>&1 && tmux_status_cache_fresh "$disk_cache" 30; then
+    IFS= read -r disk < "$disk_cache" 2>/dev/null || true
+  else
+    disk="$(
+      df -h /System/Volumes/Data / 2>/dev/null \
+        | awk 'NR==2{print $5 " " $3 "/" $2; exit}' \
+        || echo "n/a"
+    )"
+    [ -n "$disk" ] || disk="n/a"
+    printf '%s\n' "$disk" > "$disk_cache" 2>/dev/null || true
+  fi
   disk_color="#b8bb26"
   disk_value="${disk%%% *}"
   if [ "$disk_value" -ge 90 ] 2>/dev/null; then
@@ -83,22 +89,28 @@ tmux_status_collect_system() {
     mem_color="#fabd2f"
   fi
 
-  batt_raw="$(
-    pmset -g batt 2>/dev/null | awk '
-      /AC Power/ { ac=1 }
-      /%/ {
-        pct = $0
-        sub(/^.*\t/, "", pct)
-        sub(/;.*/, "", pct)
-        gsub(/^ +| +$/, "", pct)
-        if (ac && /charged|charging/ && !/dischar/) chg="yes"; else chg="no"
-        printf "%s\t%s\n", (pct ? pct : "n/a"), chg
-        found=1
-        exit
-      }
-      END { if (!found) print "n/a\tno" }
-    ' 2>/dev/null || printf '%s\t%s\n' "n/a" "no"
-  )"
+  local batt_cache="${TMPDIR:-/tmp}/tmux_batt_${UID:-0}.cache"
+  if declare -F tmux_status_cache_fresh >/dev/null 2>&1 && tmux_status_cache_fresh "$batt_cache" 30; then
+    IFS= read -r batt_raw < "$batt_cache" 2>/dev/null || true
+  else
+    batt_raw="$(
+      pmset -g batt 2>/dev/null | awk '
+        /AC Power/ { ac=1 }
+        /%/ {
+          pct = $0
+          sub(/^.*\t/, "", pct)
+          sub(/;.*/, "", pct)
+          gsub(/^ +| +$/, "", pct)
+          if (ac && /charged|charging/ && !/dischar/) chg="yes"; else chg="no"
+          printf "%s\t%s\n", (pct ? pct : "n/a"), chg
+          found=1
+          exit
+        }
+        END { if (!found) print "n/a\tno" }
+      ' 2>/dev/null || printf '%s\t%s\n' "n/a" "no"
+    )"
+    printf '%s\n' "$batt_raw" > "$batt_cache" 2>/dev/null || true
+  fi
   battery="${batt_raw%%	*}"
   battery_charging="${batt_raw##*	}"
   [ -n "$battery" ] || battery="n/a"

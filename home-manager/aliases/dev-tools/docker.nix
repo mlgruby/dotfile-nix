@@ -4,7 +4,10 @@
 { ... }:
 {
   d = "docker"; # Docker shorthand
-  dc = "docker-compose"; # Docker Compose shorthand
+  dc = "docker compose"; # Docker Compose v2 shorthand
+  dcu = "docker compose up -d"; # Start compose stack detached
+  dcd = "docker compose down"; # Stop compose stack
+  dcl = "docker compose logs -f"; # Follow compose logs
 
   # Interactive container management
   dsp = "docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}' | fzf --header-lines=1 | awk '{print $1}' | xargs -r docker stop"; # Fuzzy select and stop container

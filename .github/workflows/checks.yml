@@ -24,5 +24,8 @@ jobs:
           nix develop --command ./scripts/testing/onboarding-smoke.sh
           --strict-shellcheck --skip-flake-check
 
+      - name: Run Herdr Python unit tests
+        run: nix develop --command python3 -m unittest discover -s home-manager/modules/herdr
+
       - name: Build flake checks
         run: nix flake check --option sandbox relaxed
