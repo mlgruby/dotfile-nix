@@ -6,15 +6,11 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/lib.sh"
 source "$script_dir/calendar.sh"
 source "$script_dir/herdr.sh"
-source "$script_dir/my-prs.sh"
 source "$script_dir/reviews.sh"
-source "$script_dir/aws.sh"
 
 tmux_status_collect_calendar
 tmux_status_collect_herdr
-tmux_status_collect_my_prs
 tmux_status_collect_reviews
-tmux_status_collect_aws
 
 session_name="${1:-main}"
 
@@ -59,22 +55,12 @@ if [ -n "$calendar_status" ]; then
   append_left_segment "$calendar_bg" "$calendar_fg" "$calendar_status"
 fi
 
-# 4. Own PR CI Watchdog (Red alert when your open PR has a failed check)
-if [ -n "$my_prs_status" ]; then
-  append_left_segment "$my_prs_bg" "$my_prs_fg" "$my_prs_status"
-fi
-
-# 5. GitHub PR Reviews Waiting on You
+# 4. GitHub PR Reviews Waiting on You
 if [ -n "$reviews_status" ]; then
   append_left_segment "$reviews_bg" "$reviews_fg" "$reviews_status"
 fi
 
-# 6. AWS Proactive Expiry Alert (warns when <= 15m remaining or expired)
-if [ -n "$aws_alert" ]; then
-  append_left_segment "$aws_alert_bg" "$aws_alert_fg" "$aws_alert"
-fi
-
-# 4. Terminate smoothly into statusline dark background (#1d2021)
+# Terminate smoothly into statusline dark background (#1d2021)
 if [ -n "$left_prev_bg" ]; then
   left_output+="#[bg=#1d2021,fg=${left_prev_bg},nobold,noitalics,nounderscore]#[default]"
 fi

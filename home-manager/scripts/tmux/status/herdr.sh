@@ -6,6 +6,8 @@ tmux_status_collect_herdr() {
   herdr_bg="#504945"
   herdr_fg="#83a598"
 
+  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/etc/profiles/per-user/${USER:-satyasheel}/bin:$PATH"
+
   if ! command -v herdr >/dev/null 2>&1; then
     return 0
   fi

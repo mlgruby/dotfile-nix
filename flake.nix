@@ -148,6 +148,14 @@
 
       nixpkgsConfig = {
         config.allowUnfree = true;
+        overlays = [
+          (final: prev: {
+            # ccusage 20.0.47+ adds zstd-sys which requires libzstd at build time via pkg-config
+            ccusage = prev.ccusage.overrideAttrs (old: {
+              buildInputs = (old.buildInputs or [ ]) ++ [ prev.zstd ];
+            });
+          })
+        ];
       };
 
       darwinConfigurations = builtins.listToAttrs (

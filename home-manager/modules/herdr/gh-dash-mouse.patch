@@ -1,0 +1,152 @@
+--- a/internal/tui/components/sidebar/sidebar.go
++++ b/internal/tui/components/sidebar/sidebar.go
+@@ -37,6 +37,13 @@
+ 
+ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+ 	switch msg := msg.(type) {
++	case tea.MouseWheelMsg:
++		switch msg.Button {
++		case tea.MouseWheelDown:
++			m.viewport.SetYOffset(m.viewport.YOffset() + 3)
++		case tea.MouseWheelUp:
++			m.viewport.SetYOffset(m.viewport.YOffset() - 3)
++		}
+ 	case tea.KeyMsg:
+ 		switch {
+ 		case key.Matches(msg, keys.Keys.PageDown):
+--- a/internal/tui/ui.go
++++ b/internal/tui/ui.go
+@@ -856,6 +856,14 @@
+ 			cmds = append(cmds, currSection.FetchNextPageSectionRows()...)
+ 		}
+ 
++	case tea.MouseWheelMsg:
++		if m.sidebar.IsOpen && zone.Get("preview-pane").InBounds(msg) {
++			m.sidebar, cmd = m.sidebar.Update(msg)
++			return m, cmd
++		}
++		// Keep wheel events outside the preview with the main list.
++		return m, m.updateCurrentSection(msg)
++
+ 	case tea.MouseClickMsg:
+ 		if msg.Button != tea.MouseLeft {
+ 			return m, nil
+@@ -973,13 +981,13 @@
+ 			content = lipgloss.JoinVertical(
+ 				lipgloss.Left,
+ 				m.getCurrSection().View(),
+-				m.sidebar.View(),
++				zone.Mark("preview-pane", m.sidebar.View()),
+ 			)
+ 		} else {
+ 			content = lipgloss.JoinHorizontal(
+ 				lipgloss.Top,
+ 				m.getCurrSection().View(),
+-				m.sidebar.View(),
++				zone.Mark("preview-pane", m.sidebar.View()),
+ 			)
+ 		}
+ 	} else {
+--- /dev/null
++++ b/internal/tui/components/sidebar/mouse_scroll_test.go
+@@ -0,0 +1,40 @@
++package sidebar
++
++import (
++	"strings"
++	"testing"
++
++	tea "charm.land/bubbletea/v2"
++)
++
++func TestMouseWheelScrollsSmallStepsAndClamps(t *testing.T) {
++	model := NewModel()
++	model.viewport.SetWidth(40)
++	model.viewport.SetHeight(10)
++	model.SetContent(strings.TrimSuffix(strings.Repeat("line\n", 100), "\n"))
++
++	model, _ = model.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
++	if model.YOffset() != 3 {
++		t.Fatalf("down: got %d, want 3", model.YOffset())
++	}
++	model, _ = model.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
++	if model.YOffset() != 0 {
++		t.Fatalf("up: got %d, want 0", model.YOffset())
++	}
++	for range 100 {
++		model, _ = model.Update(tea.MouseWheelMsg{Button: tea.MouseWheelDown})
++	}
++	if model.YOffset() != 90 {
++		t.Fatalf("bottom: got %d, want 90", model.YOffset())
++	}
++	model, _ = model.Update(tea.MouseWheelMsg{Button: tea.MouseWheelLeft})
++	if model.YOffset() != 90 {
++		t.Fatal("horizontal wheel changed vertical scroll")
++	}
++	for range 100 {
++		model, _ = model.Update(tea.MouseWheelMsg{Button: tea.MouseWheelUp})
++	}
++	if model.YOffset() != 0 {
++		t.Fatalf("top: got %d, want 0", model.YOffset())
++	}
++}
+--- /dev/null
++++ b/internal/tui/mouse_scroll_test.go
+@@ -0,0 +1,57 @@
++package tui
++
++import (
++	"strings"
++	"testing"
++	"time"
++
++	tea "charm.land/bubbletea/v2"
++	"github.com/dlvhdr/gh-dash/v4/internal/config"
++	"github.com/dlvhdr/gh-dash/v4/internal/tui/context"
++	zone "github.com/lrstanley/bubblezone/v2"
++)
++
++func TestMouseWheelRoutesOnlyToHoveredPreview(t *testing.T) {
++	for _, position := range []string{"right", "bottom"} {
++		t.Run(position, func(t *testing.T) {
++			zone.NewGlobal()
++			zone.SetEnabled(true)
++			model := NewModel(config.Location{}, Repositories{})
++			model.sidebar.IsOpen = true
++			model.sidebar.UpdateProgramContext(&context.ProgramContext{
++				MainContentHeight: 11, DynamicPreviewHeight: 11, DynamicPreviewWidth: 40,
++				PreviewPosition: position, Styles: context.DefaultStyles,
++			})
++			model.sidebar.SetContent(strings.Repeat("line\n", 100))
++			x, y := 65, 0
++			prefix := strings.Repeat(" ", 60)
++			if position == "bottom" {
++				x, y = 5, 15
++				prefix = strings.Repeat("header\n", 15)
++			}
++			zone.Scan(prefix + zone.Mark("preview-pane", strings.Repeat("x", 40)))
++			wheel := tea.MouseWheelMsg{X: x, Y: y, Button: tea.MouseWheelDown}
++			// Bubblezone publishes scanned bounds on its worker goroutine.
++			deadline := time.Now().Add(time.Second)
++			for !zone.Get("preview-pane").InBounds(wheel) {
++				if time.Now().After(deadline) {
++					t.Fatal("preview bounds were not published")
++				}
++				time.Sleep(time.Millisecond)
++			}
++			model.Update(wheel)
++			if model.sidebar.YOffset() != 3 {
++				t.Fatalf("hovered preview did not scroll: %d", model.sidebar.YOffset())
++			}
++			model.Update(tea.MouseWheelMsg{X: 1, Y: 1, Button: tea.MouseWheelDown})
++			if model.sidebar.YOffset() != 3 {
++				t.Fatal("wheel outside preview moved preview")
++			}
++			model.sidebar.IsOpen = false
++			model.Update(wheel)
++			if model.sidebar.YOffset() != 3 {
++				t.Fatal("closed preview moved")
++			}
++		})
++	}
++}

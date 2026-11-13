@@ -156,10 +156,6 @@ in
       source = ../scripts/tmux/status/herdr.sh;
       executable = true;
     };
-    ".config/tmux/status/my-prs.sh" = {
-      source = ../scripts/tmux/status/my-prs.sh;
-      executable = true;
-    };
     ".config/tmux/status/reviews.sh" = {
       source = ../scripts/tmux/status/reviews.sh;
       executable = true;

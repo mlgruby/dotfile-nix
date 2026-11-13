@@ -1,0 +1,65 @@
+--- a/internal/tui/markdown/markdownRenderer.go
++++ b/internal/tui/markdown/markdownRenderer.go
+@@ -46,8 +46,27 @@
+ 		InitializeMarkdownStyle(ctx)
+ 	}
+ 
++	// Present rendered Markdown without reintroducing its source delimiters.
++	style := *markdownStyle
++	for _, heading := range []*ansi.StyleBlock{&style.H1, &style.H2, &style.H3, &style.H4, &style.H5, &style.H6} {
++		heading.Prefix = ""
++		heading.Bold = boolPtr(true)
++	}
++	style.Code.Prefix = ""
++	style.Code.Suffix = ""
++	background := "#32302f"
++	if ctx != nil && !ctx.HasDarkBackground {
++		background = "#f2e5bc"
++	}
++	style.Code.BackgroundColor = stringPtr(background)
++	style.Table.Conceal = boolPtr(false)
++	style.Table.Format = ""
++	style.Table.CenterSeparator = stringPtr("┼")
++	style.Table.ColumnSeparator = stringPtr("│")
++	style.Table.RowSeparator = stringPtr("─")
++
+ 	markdownRenderer, err := glamour.NewTermRenderer(
+-		glamour.WithStyles(*markdownStyle),
++		glamour.WithStyles(style),
+ 		glamour.WithWordWrap(width),
+ 	)
+ 	if err != nil || markdownRenderer == nil {
+--- /dev/null
++++ b/internal/tui/markdown/readable_test.go
+@@ -0,0 +1,31 @@
++package markdown
++
++import (
++	"github.com/charmbracelet/x/ansi"
++	"github.com/dlvhdr/gh-dash/v4/internal/tui/context"
++	"strings"
++	"testing"
++)
++
++func TestReadableMarkdownForBothBackgrounds(t *testing.T) {
++	for _, dark := range []bool{true, false} {
++		markdownStyle = nil
++		markdownStyleSource = ""
++		renderer := GetMarkdownRenderer(70, &context.ProgramContext{HasDarkBackground: dark})
++		text, err := renderer.Render("# Heading one\n\n## Change Type\n\n### Risk\n\n#### Four\n\n##### Five\n\n###### Six\n\nUse `IOConfig` with **care**.\n\n- First item\n\n| Package | Version |\n| --- | --- |\n| library | 2.0 |\n")
++		if err != nil {
++			t.Fatal(err)
++		}
++		plain := ansi.Strip(text)
++		if strings.Contains(plain, "#") || strings.Contains(plain, "`") {
++			t.Fatalf("source markers still visible (dark=%v): %s", dark, plain)
++		}
++		for _, want := range []string{"Heading one", "Change Type", "IOConfig", "care", "First item", "Package", "library", "2.0", "│"} {
++			if !strings.Contains(plain, want) {
++				t.Fatalf("missing %q (dark=%v): %s", want, dark, plain)
++			}
++		}
++	}
++	markdownStyle = nil
++	markdownStyleSource = ""
++}
