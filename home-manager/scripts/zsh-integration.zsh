@@ -456,10 +456,18 @@ function rc() {
 }
 
 # Conventional-commit helpers (e.g. `feat "add cache"` or bare `feat` to open editor)
-for _cc_type in feat fix docs style refactor test chore; do
+# `gctest` is defined separately so it doesn't shadow POSIX `test` or `/opt/homebrew/bin/gtest`.
+for _cc_type in feat fix docs style refactor chore; do
   eval "function ${_cc_type}() { if [ \$# -gt 0 ]; then git commit -m \"${_cc_type}: \$*\"; else git commit -e -m \"${_cc_type}: \"; fi; }"
 done
 unset _cc_type
+function gctest() {
+  if [ $# -gt 0 ]; then
+    git commit -m "test: $*"
+  else
+    git commit -e -m "test: "
+  fi
+}
 
 
 
