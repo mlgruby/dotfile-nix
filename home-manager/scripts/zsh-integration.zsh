@@ -33,67 +33,49 @@ function main() {
   tm "$@"
 }
 
-# Claude Code launchers. Keep the dangerous permission bypass opt-in for every
+# Agent launchers. Keep the dangerous permission bypass opt-in for every
 # session, including resumed sessions, and default to the normal permission
 # checks when stdin is not interactive.
-function _claude_permission_args() {
-  CLAUDE_PERMISSION_ARGS=()
+function _agent_permission_args() {
+  local label="$1"
+  local var_name="$2"
+  set -A "$var_name"
 
   if [ ! -t 0 ] || [ ! -t 1 ]; then
     return 0
   fi
 
   local answer
-  printf 'Run Claude with --dangerously-skip-permissions? [y/N] '
+  printf 'Run %s with --dangerously-skip-permissions? [y/N] ' "$label"
   read -r answer
   case "$answer" in
     y | Y | yes | YES)
-      CLAUDE_PERMISSION_ARGS=(--dangerously-skip-permissions)
+      set -A "$var_name" --dangerously-skip-permissions
       ;;
   esac
 }
 
 function cc() {
   local -a CLAUDE_PERMISSION_ARGS
-  _claude_permission_args
+  _agent_permission_args "Claude" CLAUDE_PERMISSION_ARGS
   command claude "${CLAUDE_PERMISSION_ARGS[@]}" "$@"
 }
 
 function ccr() {
   local -a CLAUDE_PERMISSION_ARGS
-  _claude_permission_args
+  _agent_permission_args "Claude" CLAUDE_PERMISSION_ARGS
   command claude --resume "${CLAUDE_PERMISSION_ARGS[@]}" "$@"
-}
-
-# Antigravity launchers. Keep the dangerous permission bypass opt-in for every
-# session, including resumed sessions, and default to the normal permission
-# checks when stdin is not interactive.
-function _agy_permission_args() {
-  AGY_PERMISSION_ARGS=()
-
-  if [ ! -t 0 ] || [ ! -t 1 ]; then
-    return 0
-  fi
-
-  local answer
-  printf 'Run Antigravity with --dangerously-skip-permissions? [y/N] '
-  read -r answer
-  case "$answer" in
-    y | Y | yes | YES)
-      AGY_PERMISSION_ARGS=(--dangerously-skip-permissions)
-      ;;
-  esac
 }
 
 function ag() {
   local -a AGY_PERMISSION_ARGS
-  _agy_permission_args
+  _agent_permission_args "Antigravity" AGY_PERMISSION_ARGS
   command agy "${AGY_PERMISSION_ARGS[@]}" "$@"
 }
 
 function agc() {
   local -a AGY_PERMISSION_ARGS
-  _agy_permission_args
+  _agent_permission_args "Antigravity" AGY_PERMISSION_ARGS
   command agy --continue "${AGY_PERMISSION_ARGS[@]}" "$@"
 }
 
@@ -214,7 +196,7 @@ zle -N fzf-git-status
 
 function fzf-cd-with-hidden() {
   local dir
-  dir=$(find "${1:-$PWD}" -type d 2> /dev/null | fzf +m) && cd "$dir"
+  dir=$(fd -H -td . "${1:-$PWD}" 2> /dev/null | fzf +m) && cd "$dir"
   zle reset-prompt
 }
 zle -N fzf-cd-with-hidden
@@ -283,7 +265,15 @@ function extract() {
       *.gz) gunzip "$archive" ;;
       *.xz) unxz "$archive" ;;
       *.zip) unzip "$archive" ;;
-      *.rar) unrar x "$archive" ;;
+      *.rar)
+        if command -v unrar >/dev/null 2>&1; then
+          unrar x "$archive"
+        elif command -v 7z >/dev/null 2>&1; then
+          7z x "$archive"
+        else
+          echo "extract: neither unrar nor 7z installed for $archive" >&2
+        fi
+        ;;
       *.7z) 7z x "$archive" ;;
       *) echo "extract: unsupported archive: $archive" >&2 ;;
     esac
@@ -417,21 +407,14 @@ function p() {
 # Agent Ergonomics: Command Buffer & Re-run to Clipboard
 # ==============================================================================
 
-# Run any command, display output live on screen, and copy ANSI-stripped output to macOS clipboard.
-function cb() {
-  if [ $# -eq 0 ]; then
-    echo "Usage: cb <command...>"
-    return 1
-  fi
-
+# Shared helper: run command live, strip ANSI sequences, and copy to macOS clipboard.
+function _clipboard_tee_run() {
   local tmpfile
   tmpfile="$(mktemp /tmp/cb_output.XXXXXX)"
 
-  # Run command live and tee to temporary file
   "$@" 2>&1 | tee "$tmpfile"
   local exit_code="${pipestatus[1]:-${PIPESTATUS[0]:-0}}"
 
-  # Strip ANSI color/escape sequences and copy clean text to clipboard
   sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$tmpfile" | pbcopy
   local lines
   lines="$(wc -l < "$tmpfile" | tr -d ' ')"
@@ -439,6 +422,15 @@ function cb() {
 
   echo "📋 Output copied to clipboard ($lines lines)"
   return "$exit_code"
+}
+
+# Run any command, display output live on screen, and copy ANSI-stripped output to macOS clipboard.
+function cb() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: cb <command...>"
+    return 1
+  fi
+  _clipboard_tee_run "$@"
 }
 
 # Re-run the last command from history, display live, and copy ANSI-stripped output to macOS clipboard.
@@ -460,20 +452,21 @@ function rc() {
   fi
 
   echo "➜ Re-running: $last_cmd"
+  _clipboard_tee_run eval "$last_cmd"
+}
 
-  local tmpfile
-  tmpfile="$(mktemp /tmp/rc_output.XXXXXX)"
-
-  eval "$last_cmd" 2>&1 | tee "$tmpfile"
-  local exit_code="${pipestatus[1]:-${PIPESTATUS[0]:-0}}"
-
-  sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$tmpfile" | pbcopy
-  local lines
-  lines="$(wc -l < "$tmpfile" | tr -d ' ')"
-  rm -f "$tmpfile"
-
-  echo "📋 Output copied to clipboard ($lines lines)"
-  return "$exit_code"
+# Conventional-commit helpers (e.g. `feat "add cache"` or bare `feat` to open editor)
+# `gctest` is defined separately so it doesn't shadow POSIX `test` or `/opt/homebrew/bin/gtest`.
+for _cc_type in feat fix docs style refactor chore; do
+  eval "function ${_cc_type}() { if [ \$# -gt 0 ]; then git commit -m \"${_cc_type}: \$*\"; else git commit -e -m \"${_cc_type}: \"; fi; }"
+done
+unset _cc_type
+function gctest() {
+  if [ $# -gt 0 ]; then
+    git commit -m "test: $*"
+  else
+    git commit -e -m "test: "
+  fi
 }
 
 

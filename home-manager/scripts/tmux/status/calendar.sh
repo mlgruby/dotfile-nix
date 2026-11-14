@@ -10,22 +10,27 @@ tmux_status_collect_calendar() {
   command -v sqlite3 >/dev/null 2>&1 || return 0
 
   # Query next non-all-day meeting from personal/work accounts that has not ended yet.
-  local row
-  row="$(
-    sqlite3 -noheader -list "$db_path" "
-      SELECT
-        ci.summary || '|' ||
-        CAST(ROUND((oc.occurrence_date - (strftime('%s', 'now') - 978307200)) / 60) AS INT) || '|' ||
-        strftime('%H:%M', datetime(oc.occurrence_end_date + 978307200, 'unixepoch', 'localtime'))
-      FROM OccurrenceCache oc
-      JOIN CalendarItem ci ON oc.event_id = ci.ROWID
-      WHERE oc.calendar_id IN (SELECT ROWID FROM Calendar WHERE title LIKE '%@%')
-        AND oc.occurrence_end_date > (strftime('%s', 'now') - 978307200)
-        AND ci.all_day = 0
-      ORDER BY oc.occurrence_date ASC
-      LIMIT 1;
-    " 2>/dev/null || true
-  )"
+  local row cache_file="${TMPDIR:-/tmp}/tmux_calendar_${UID:-0}.cache"
+  if declare -F tmux_status_cache_fresh >/dev/null 2>&1 && tmux_status_cache_fresh "$cache_file" 30; then
+    IFS= read -r row < "$cache_file" 2>/dev/null || true
+  else
+    row="$(
+      sqlite3 -noheader -list "$db_path" "
+        SELECT
+          ci.summary || '|' ||
+          CAST(ROUND((oc.occurrence_date - (strftime('%s', 'now') - 978307200)) / 60) AS INT) || '|' ||
+          strftime('%H:%M', datetime(oc.occurrence_end_date + 978307200, 'unixepoch', 'localtime'))
+        FROM OccurrenceCache oc
+        JOIN CalendarItem ci ON oc.event_id = ci.ROWID
+        WHERE oc.calendar_id IN (SELECT ROWID FROM Calendar WHERE title LIKE '%@%')
+          AND oc.occurrence_end_date > (strftime('%s', 'now') - 978307200)
+          AND ci.all_day = 0
+        ORDER BY oc.occurrence_date ASC
+        LIMIT 1;
+      " 2>/dev/null || true
+    )"
+    printf '%s\n' "$row" > "$cache_file" 2>/dev/null || true
+  fi
 
   [ -n "$row" ] || return 0
 

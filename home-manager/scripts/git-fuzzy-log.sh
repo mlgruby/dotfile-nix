@@ -23,8 +23,8 @@ fi
 # Browse commits with fzf and diff preview
 git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr' | \
     fzf --ansi \
-        --preview 'echo {} | grep -o "[a-f0-9]\{7\}" | head -1 | xargs -I % sh -c "git show --color=always %"' \
+        --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs -I % sh -c "git show --color=always %"' \
         --preview-window=right:60% \
         --prompt="Browse commits: " \
         --header="Press ENTER to view commit, ESC to exit" \
-        --bind='enter:execute(echo {} | grep -o "[a-f0-9]\{7\}" | head -1 | xargs -I % sh -c "git show --color=always % | less -R")'
+        --bind='enter:execute(echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs -I % sh -c "git show --color=always % | less -R")'

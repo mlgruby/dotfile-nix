@@ -23,16 +23,7 @@ append_left_segment() {
   local text="$3"
   [ -n "$text" ] || return 0
 
-  if [ "$bg" = "$left_prev_bg" ]; then
-    case "$bg" in
-      "#3c3836") bg="#504945" ;;
-      "#504945") bg="#3c3836" ;;
-      "#fb4934") bg="#cc241d" ;;
-      "#cc241d") bg="#fb4934" ;;
-      "#fabd2f") bg="#d79921" ;;
-      "#d79921") bg="#fabd2f" ;;
-    esac
-  fi
+  bg="$(tmux_status_alt_bg "$bg" "$left_prev_bg")"
 
   if [ -z "$left_prev_bg" ]; then
     left_output+="#[bg=${bg},fg=${fg}] ${text} "

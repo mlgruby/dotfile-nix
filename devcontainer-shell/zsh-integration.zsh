@@ -37,7 +37,7 @@ function fzf-git-status() {
   selections=$(
     git status --porcelain |
       fzf --ansi \
-        --preview 'path=$(printf "%s\n" {q} | sed "s/^...//; s/.* -> //")
+        --preview 'path=$(printf "%s\n" {} | sed "s/^...//; s/.* -> //")
                   if [ -f "$path" ]; then
                     bat --color=always --style=numbers "$path"
                   elif [ -d "$path" ]; then

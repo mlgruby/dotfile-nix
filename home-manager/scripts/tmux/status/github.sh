@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-_tmux_github_mtime() {
-  local target="$1"
-  /usr/bin/stat -f %m "$target" 2>/dev/null || stat -c %Y "$target" 2>/dev/null || stat -f %m "$target" 2>/dev/null || echo 0
-}
-
 tmux_status_collect_github() {
   github_status=""
   github_bg="#fabd2f"
@@ -16,23 +11,10 @@ tmux_status_collect_github() {
   local now_s
   now_s="$(date +%s 2>/dev/null || echo 0)"
 
-  local cache_mtime=0
-  if [ -f "$cache_file" ]; then
-    cache_mtime="$(_tmux_github_mtime "$cache_file")"
-  fi
-
-  local cache_age=$(( now_s - cache_mtime ))
-
   # Refresh cache in background if missing or older than 180 seconds (3 mins)
-  if [ "$cache_age" -ge 180 ] || [ ! -f "$cache_file" ]; then
-    local lock_mtime=0
-    if [ -f "$lock_file" ]; then
-      lock_mtime="$(_tmux_github_mtime "$lock_file")"
-    fi
-    local lock_age=$(( now_s - lock_mtime ))
-
+  if ! tmux_status_cache_fresh "$cache_file" 180 "$now_s"; then
     # Only spawn if no lock exists or previous lock is stale (> 60s)
-    if [ ! -f "$lock_file" ] || [ "$lock_age" -ge 60 ]; then
+    if ! tmux_status_cache_fresh "$lock_file" 60 "$now_s"; then
       touch "$lock_file" 2>/dev/null || true
       (
         raw="$(curl -fsSL --connect-timeout 2 --max-time 4 "https://www.githubstatus.com/api/v2/summary.json" 2>/dev/null || true)"

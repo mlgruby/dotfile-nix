@@ -62,7 +62,6 @@ in
   # Viewing Files
   # ==========================================================================
   cat = "bat"; # Use bat for syntax highlighting
-  less = "bat --paging=always";
 
   # ==========================================================================
   # Documentation Tools
@@ -77,8 +76,8 @@ in
   # ==========================================================================
   # Network Utilities
   # ==========================================================================
-  ipp = "curl https://ipecho.net/plain; echo"; # Show public IP address
-  pubip = "curl https://ipecho.net/plain; echo"; # Show public IP address
+  ipp = "curl -fsS https://ipecho.net/plain; echo"; # Show public IP address
+  pubip = "curl -fsS https://ipecho.net/plain; echo"; # Show public IP address
   myip = "ifconfig | awk '/^[a-z0-9]+:/ { iface=$1; sub(\":\", \"\", iface) } /^[[:space:]]*inet / && $2 !~ /^127\\./ && iface !~ /^(lo|utun|awdl|llw|bridge)/ { print iface \": \" $2 }'"; # Show local LAN IP addresses
   ping1 = "ping -c 1"; # Ping once
   ping10 = "ping -c 10"; # Ping 10 times
@@ -95,7 +94,7 @@ in
   # ==========================================================================
   # Process Management
   # ==========================================================================
-  psg = "ps aux | grep"; # Search running processes - usage: psg nginx
+  psg = "pgrep -fl"; # Search running processes - usage: psg nginx
   pkillf = "pkill -f"; # Kill processes by name pattern - usage: pkillf node
   sys = "fastfetch"; # Show system information
 
@@ -119,7 +118,7 @@ in
   # ==========================================================================
   # JSON/YAML Processing
   # ==========================================================================
-  json = "python3 -m json.tool"; # Pretty-print JSON - usage: cat file.json | json
+  json = "jq ."; # Pretty-print JSON - usage: cat file.json | json
   yaml = "yq eval '.' -"; # Pretty-print YAML - usage: cat file.yaml | yaml
 
   # ==========================================================================
@@ -127,14 +126,12 @@ in
   # ==========================================================================
   lazydot = "cd ${dotfileDir} && lazygit"; # Open lazygit in dotfiles directory
 
-  # Smart editor for dotfiles (zed, cursor, or nvim)
+  # Smart editor for dotfiles (zed or nvim)
   codedot =
     mkTemplateAlias
       ''
         if command -v zed &> /dev/null; then
           zed "@dotfileDir@"
-        elif command -v cursor &> /dev/null; then
-          cursor "@dotfileDir@"
         else
           nvim "@dotfileDir@"
         fi

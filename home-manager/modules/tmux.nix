@@ -55,7 +55,6 @@
 }:
 let
   profile = config.homelab.profile;
-  statusScript = "${config.home.homeDirectory}/.config/tmux/status-right.sh";
 in
 {
   programs.tmux = {
@@ -78,7 +77,7 @@ in
       set -g extended-keys on
       set -g status on
       set -g status-position top
-      set -g status-interval 5
+      set -g status-interval 10
       set -g status-right-length 220
       set -g default-terminal "tmux-256color"
       set -ag terminal-overrides ",*:RGB"
@@ -138,15 +137,6 @@ in
   };
 
   home.file = {
-    ".config/tmux/status-right.sh" = {
-      text = ''
-        #!/usr/bin/env bash
-        export DOTFILES_TMUX_SHOW_AWS_VPN="${if profile.isWork then "yes" else "no"}"
-        exec bash "$HOME/.config/tmux/status/status-right.sh"
-      '';
-      executable = true;
-    };
-
     ".config/tmux/status/lib.sh".source = ../scripts/tmux/status/lib.sh;
     ".config/tmux/status/calendar.sh" = {
       source = ../scripts/tmux/status/calendar.sh;

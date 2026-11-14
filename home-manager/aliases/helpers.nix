@@ -16,7 +16,6 @@
 in {
   # Platform flags
   inherit isDarwin isLinux;
-  isMacOS = isDarwin;
 
   # Platform-conditional alias creation
   # Only returns aliases if current platform matches

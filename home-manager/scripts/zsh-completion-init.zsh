@@ -6,10 +6,11 @@
 
 typeset -g _zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
 
-setopt localoptions extendedglob
-if [[ -n "$_zcompdump"(#qN.mh+20) || ! -s "$_zcompdump" ]]; then
-  homebrew_completion_dir="${DOTFILES_HOMEBREW_COMPLETION_DIR:-/opt/homebrew/share/zsh/site-functions}"
-  homebrew_completion_usable=1
+_dotfiles_refresh_zcompdump() {
+  local zcompdump="$1"
+  local homebrew_completion_dir="${DOTFILES_HOMEBREW_COMPLETION_DIR:-/opt/homebrew/share/zsh/site-functions}"
+  local homebrew_completion_usable=1
+  local completion_file
 
   if [[ -d "$homebrew_completion_dir" ]]; then
     for completion_file in "$homebrew_completion_dir"/_*(N); do
@@ -25,18 +26,27 @@ if [[ -n "$_zcompdump"(#qN.mh+20) || ! -s "$_zcompdump" ]]; then
     fi
   fi
 
-  unset homebrew_completion_dir homebrew_completion_usable completion_file
-
   autoload -Uz compinit
-  compinit -d "$_zcompdump"
+  compinit -d "$zcompdump"
   # Clean up stale temporary files left behind by interrupted subshells
-  command rm -f -- "${_zcompdump}."*(N) 2>/dev/null
+  command rm -f -- "${zcompdump}."*(N) 2>/dev/null
   # Compile to wordcode (.zwc) for instantaneous memory-mapped loading
-  zcompile "$_zcompdump" 2>/dev/null
+  zcompile "$zcompdump" 2>/dev/null
+}
+
+setopt localoptions extendedglob
+if [[ ! -s "$_zcompdump" ]]; then
+  _dotfiles_refresh_zcompdump "$_zcompdump"
+elif [[ -n "$_zcompdump"(#qN.mh+20) ]]; then
+  # Load cached dump immediately (~13ms), then refresh & compile in background
+  autoload -Uz compinit
+  compinit -C -d "$_zcompdump"
+  (_dotfiles_refresh_zcompdump "$_zcompdump" &) >/dev/null 2>&1
 else
   autoload -Uz compinit
   compinit -C -d "$_zcompdump"
 fi
 
+unfunction _dotfiles_refresh_zcompdump 2>/dev/null || true
 unset _zcompdump
 

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 tmux_status_collect_vpn() {
+  local cache_file="${TMPDIR:-/tmp}/tmux_vpn_${UID:-0}_${DOTFILES_TMUX_SHOW_AWS_VPN:-no}.cache"
+  if declare -F tmux_status_cache_fresh >/dev/null 2>&1 && tmux_status_cache_fresh "$cache_file" 15; then
+    IFS= read -r vpn_label < "$cache_file" 2>/dev/null || true
+    return 0
+  fi
+
   connected_vpns="$(scutil --nc list 2>/dev/null | awk '/\(Connected\)/' || true)"
   vpn_label=""
 
@@ -40,4 +46,5 @@ tmux_status_collect_vpn() {
   if [ -z "$vpn_label" ] && [ -n "$connected_vpns" ] && printf '%s\n' "$connected_vpns" | grep -v -Eiq 'tailscale'; then
     vpn_label="󰖂 VPN"
   fi
+  printf '%s\n' "$vpn_label" > "$cache_file" 2>/dev/null || true
 }

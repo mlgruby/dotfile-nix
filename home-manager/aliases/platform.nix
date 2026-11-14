@@ -25,6 +25,9 @@ in
 # ==========================================================================
 # macOS Aliases
 # ==========================================================================
+let
+  mkDotfileSubshell = script: "(cd ${dotfileDir} && ${script})";
+in
 (mkPlatformAliases "darwin" {
   # --------------------------------------------------------------------------
   # System Rebuild
@@ -58,106 +61,17 @@ in
   # --------------------------------------------------------------------------
   # Performance Analysis
   # --------------------------------------------------------------------------
-  perf-analyze =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/analyze-build-performance.sh --report && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Generate build performance report
-
-  perf-profile =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/analyze-build-performance.sh --profile && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Profile build performance with detailed metrics
-
-  perf-optimize =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/analyze-build-performance.sh --optimize && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Run build optimization recommendations
+  perf-analyze = mkDotfileSubshell "./scripts/monitoring/analyze-build-performance.sh --report"; # Generate build performance report
+  perf-profile = mkDotfileSubshell "./scripts/monitoring/analyze-build-performance.sh --profile"; # Profile build performance with detailed metrics
+  perf-optimize = mkDotfileSubshell "./scripts/monitoring/analyze-build-performance.sh --optimize"; # Run build optimization recommendations
 
   # --------------------------------------------------------------------------
   # Health Monitoring
   # --------------------------------------------------------------------------
-  health-check =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/system-health-monitor.sh --check && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Run system health check
-
-  health-report =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/system-health-monitor.sh --report && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Generate system health report
-
-  health-maintain =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/system-health-monitor.sh --maintain && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Run manual maintenance tasks
-
-  health-alert =
-    mkTemplateAlias
-      ''
-        cd @dotfileDir@ && \
-        ./scripts/monitoring/system-health-monitor.sh --alert && \
-        cd -
-      ''
-      [
-        {
-          name = "dotfileDir";
-          value = dotfileDir;
-        }
-      ]; # Check and show critical alerts
+  health-check = mkDotfileSubshell "./scripts/monitoring/system-health-monitor.sh --check"; # Run system health check
+  health-report = mkDotfileSubshell "./scripts/monitoring/system-health-monitor.sh --report"; # Generate system health report
+  health-maintain = mkDotfileSubshell "./scripts/monitoring/system-health-monitor.sh --maintain"; # Run manual maintenance tasks
+  health-alert = mkDotfileSubshell "./scripts/monitoring/system-health-monitor.sh --alert"; # Check and show critical alerts
 
   # --------------------------------------------------------------------------
   # Finder Utilities
@@ -174,15 +88,3 @@ in
   sleepnow = "pmset sleepnow"; # Put Mac to sleep immediately
   lockscreen = "pmset displaysleepnow"; # Lock screen / sleep display immediately
 })
-//
-  # ==========================================================================
-  # Linux Aliases
-  # ==========================================================================
-  (mkPlatformAliases "linux" {
-    rebuild = "sudo nixos-rebuild switch --flake ${dotfileDir}#$(hostname)"; # Rebuild NixOS system
-    install = "nix-env -iA"; # Install package
-    search = "nix search nixpkgs"; # Search for packages
-    services = "systemctl list-units --type=service"; # List systemd services
-    restart-service = "systemctl restart"; # Restart systemd service
-    logs = "journalctl -f"; # Follow systemd logs
-  })

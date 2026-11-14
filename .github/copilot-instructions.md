@@ -161,8 +161,9 @@ cleanup work. Historical analysis lives under `docs/archive/`.
 
 ## Testing & Validation
 
-✅ **Before applying changes:**
-- Syntax check: `nix flake check`
+✅ **Before applying changes or opening a PR:**
+- Local pre-PR check suite (required before creating/updating any PR): `./scripts/testing/pre-pr-check.sh` (use `--build` for full `nix flake check` derivation builds)
+- Syntax check: `nix flake check --no-build`
 - Dry-run build: `darwin-rebuild build --flake . --dry-run`
 - Host config present: `hosts.nix` must exist and be valid
 
