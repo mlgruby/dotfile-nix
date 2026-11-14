@@ -7,3 +7,10 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+## Pre-PR Local Validation
+
+GitHub Actions CI checks are disabled in favor of local verification. Before creating or updating any pull request:
+- Always run `./scripts/testing/pre-pr-check.sh` (runs `onboarding-smoke.sh --strict-shellcheck`, `nix flake check --no-build`, `zsh -n`, and Herdr Python unit tests).
+- Run `./scripts/testing/pre-pr-check.sh --build` when Nix module/package derivations or `flake.lock` changed.
+- Verify no standard builtins or commands are shadowed when editing Zsh helpers/aliases.
