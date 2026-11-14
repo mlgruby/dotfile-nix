@@ -19,13 +19,16 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@v3
 
-      - name: Run repository checks
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v15
+
+      - name: Run repository checks and Herdr unit tests
         run: >-
-          nix develop --command ./scripts/testing/onboarding-smoke.sh
-          --strict-shellcheck --skip-flake-check
+          nix develop --command bash -lc '
+          ./scripts/testing/onboarding-smoke.sh --strict-shellcheck &&
+          python3 -m unittest discover -s home-manager/modules/herdr
+          '
 
-      - name: Run Herdr Python unit tests
-        run: nix develop --command python3 -m unittest discover -s home-manager/modules/herdr
-
-      - name: Build flake checks
+      - name: Build flake checks (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: nix flake check --option sandbox relaxed
