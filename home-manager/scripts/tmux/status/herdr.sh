@@ -23,9 +23,7 @@ tmux_status_collect_herdr() {
   )"
 
   if [ -n "$working_count" ] && [ "$working_count" -gt 0 ] 2>/dev/null; then
-    local label="agent"
-    [ "$working_count" -gt 1 ] && label="agents"
-    herdr_status="󰚩 ${working_count} ${label} working"
+    herdr_status="󰚩 ${working_count}"
     herdr_bg="#504945"
     herdr_fg="#83a598"
   fi
