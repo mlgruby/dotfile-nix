@@ -10,7 +10,7 @@ Rules:
 
 ## Pre-PR Local Validation
 
-GitHub Actions CI checks are disabled in favor of local verification. Before creating or updating any pull request:
+GitHub Actions (`.github/workflows/checks.yml`) runs `pre-pr-check.sh` on each pull request, and also `nix flake check` on pushes to main. Run the same checks locally first. Before creating or updating any pull request:
 - Always run `./scripts/testing/pre-pr-check.sh` (runs `onboarding-smoke.sh --strict-shellcheck`, `nix flake check --no-build`, `zsh -n`, and Herdr Python unit tests).
 - Run `./scripts/testing/pre-pr-check.sh --build` when Nix module/package derivations or `flake.lock` changed.
 - Verify no standard builtins or commands are shadowed when editing Zsh helpers/aliases.

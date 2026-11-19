@@ -1,0 +1,35 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: macos-15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v15
+
+      # The same suite that contributors run before a PR.
+      - name: Run pre-PR checks
+        run: nix develop --command ./scripts/testing/pre-pr-check.sh
+
+      - name: Build flake checks (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: nix flake check --option sandbox relaxed
