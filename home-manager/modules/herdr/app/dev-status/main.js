@@ -279,8 +279,8 @@ export default class DevStatus extends View {
   tabNames(list) {
     const byTab = {};
     for (const a of list) (byTab[a.tab] ??= new Set()).add(tagOf(a));
-    // A pane whose agent has not reported yet (Antigravity before its first
-    // prompt) is not in agents(): the pane's program (programs.json key) still names it.
+    // An agent that sends no OSC 7501 status (agy 1.3.5) is not in
+    // agents(): the pane's program (programs.json key) still names it.
     for (const p of panes()) {
       if (p.program?.agent || AGENT_TAGS.some(([re]) => re.test(p.program?.key ?? ""))) (byTab[p.tab] ??= new Set()).add(tagOf(p));
     }
