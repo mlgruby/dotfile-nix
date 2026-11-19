@@ -391,7 +391,7 @@ function agy-resume() {
     uuid="${uuid## }"
     uuid="${uuid%% }"
     local -a AGY_PERMISSION_ARGS
-    _agy_permission_args
+    _agent_permission_args "Antigravity" AGY_PERMISSION_ARGS
     command agy --conversation "$uuid" "${AGY_PERMISSION_ARGS[@]}"
   fi
 }

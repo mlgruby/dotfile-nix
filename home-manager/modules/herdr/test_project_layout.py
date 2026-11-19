@@ -96,12 +96,16 @@ class LayoutTests(unittest.TestCase):
         subprocess.run(['git', 'init', str(self.repo)], check=True, capture_output=True)
         self.panes[0]['cwd'] = str(self.repo)
 
-    def seed_codex(self, archived=0, source='cli'):
+    def seed_codex(self, archived=0, source='cli', rollout=True):
         home = self.root / 'codex'
         home.mkdir(exist_ok=True)
+        path = home / f'sessions/rollout-{archived}-{len(source)}.jsonl'
+        if rollout:
+            path.parent.mkdir(exist_ok=True)
+            path.write_text('{}\n')
         with sqlite3.connect(home / 'state_5.sqlite') as db:
-            db.execute('CREATE TABLE IF NOT EXISTS threads(cwd TEXT, source TEXT, archived INTEGER, has_user_event INTEGER)')
-            db.execute('INSERT INTO threads VALUES(?,?,?,0)', (str(self.repo), source, archived))
+            db.execute('CREATE TABLE IF NOT EXISTS threads(cwd TEXT, source TEXT, archived INTEGER, has_user_event INTEGER, rollout_path TEXT)')
+            db.execute('INSERT INTO threads VALUES(?,?,?,0,?)', (str(self.repo), source, archived, str(path)))
 
     def seed_agy(self, content='A saved user conversation'):
         home = self.root / 'agy'
@@ -161,6 +165,11 @@ class LayoutTests(unittest.TestCase):
         self.personal_repo()
         self.seed_codex(archived=1)
         self.seed_codex(source='{"subagent":"review"}')
+        self.assertFalse(layout.has_codex_history(self.repo, self.root / 'codex'))
+
+    def test_codex_thread_without_rollout_file_is_excluded(self):
+        self.personal_repo()
+        self.seed_codex(rollout=False)
         self.assertFalse(layout.has_codex_history(self.repo, self.root / 'codex'))
 
     def test_codex_rollout_fallback(self):

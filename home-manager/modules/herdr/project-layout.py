@@ -51,9 +51,11 @@ def has_codex_history(repo, codex_home=None):
     for database in databases:
         try:
             with closing(sqlite3.connect(f"{database.resolve().as_uri()}?mode=ro", uri=True, timeout=0.2)) as db:
-                rows = db.execute("SELECT cwd, source FROM threads WHERE archived = 0")
+                # `codex resume` lists only threads whose rollout file exists.
+                rows = db.execute("SELECT cwd, source, rollout_path FROM threads WHERE archived = 0")
                 return any("subagent" not in (source or "") and _same_directory(cwd, repo)
-                           for cwd, source in rows)
+                           and bool(rollout) and Path(rollout).is_file()
+                           for cwd, source, rollout in rows)
         except (OSError, sqlite3.Error):
             continue
     # Older installs may have rollout files but no usable state database.
