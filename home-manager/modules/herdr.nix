@@ -190,6 +190,7 @@ in
   xdg.configFile."herdr-app/mods/dev-status/main.js".source = ./herdr/app/dev-status/main.js;
   xdg.configFile."herdr-app/mods/dev-status/mod.json".source = ./herdr/app/dev-status/mod.json;
   xdg.configFile."herdr-app/mods/dev-status/sep.svg".source = ./herdr/app/dev-status/sep.svg;
+  xdg.configFile."herdr-app/mods/dev-status/sep-right.svg".source = ./herdr/app/dev-status/sep-right.svg;
   # Clones of the shipped "spaces" and "agents" sidebars (Herdr 0.1.16): a
   # machine icon per row (aqua local, purple remote) and agent state colours.
   xdg.configFile."herdr-app/mods/dev-spaces/main.js".source = ./herdr/app/dev-spaces/main.js;

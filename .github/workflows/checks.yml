@@ -26,6 +26,17 @@ jobs:
       - name: Setup Magic Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@v15
 
+      # Stylix reads its base16 scheme file from the base16-schemes package
+      # at evaluation time (import from derivation). `nix flake check
+      # --no-build` cannot fetch that package on an empty store, so this
+      # evaluation, which can build, puts it in the store first.
+      - name: Fetch Stylix scheme for evaluation
+        run: |
+          for host in satya-pmbp satya-wmbp; do
+            nix eval --raw ".#darwinConfigurations.${host}.config.lib.stylix.colors.base00"
+            echo
+          done
+
       # The same suite that contributors run before a PR.
       - name: Run pre-PR checks
         run: nix develop --command ./scripts/testing/pre-pr-check.sh

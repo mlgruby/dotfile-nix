@@ -5,7 +5,7 @@
 // (#[fg=..,bg=..]text); parse() turns it into coloured runs.
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, theme, exec, home, checking, props, setBadge } from "herdr";
+import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge } from "herdr";
 
 const SEPARATOR = "\u{e0b2}"; // powerline left-pointing solid arrow
 const REFRESH_MS = 10000; // same as tmux status-interval
@@ -24,6 +24,39 @@ printf '%s' "$status_output"
 `;
 // tmux bar background in status-right.sh; drawn as the app bar colour instead.
 const TMUX_BAR_BG = "#1d2021";
+// Segment backgrounds that tmux_status_alt_bg (lib.sh) takes in turn.
+const SEGMENT_BG = ["#3c3836", "#504945"];
+// The dot between items in one segment, as codexbar.sh draws it (AI_SEPARATOR).
+const DOTS = "#bdae93";
+const dots = (id) => div().id(id).flex_none().text_color(DOTS).child("\u22ee");
+// Puts the dots between each two items.
+const dotted = (key, items) => items.flatMap((el, i) => (i ? [dots(`${key}-dots-${i}`), el] : [el]));
+// The open PR of the focused terminal's branch, and its checks. gh asks
+// GitHub, so look once a minute, and again when the folder changes.
+const PR_MS = 60000;
+const PR_FIELDS = "number,state,isDraft,url,statusCheckRollup";
+
+// The focused terminal's folder; null on a remote machine (gh runs here).
+function focusedFolder() {
+  const space = spaces().find((s) => s.active), f = focused();
+  const pane = f?.pane ? panes().find((p) => p.pane === f.pane) : null;
+  const remote = f?.pane === null ? f.terminal?.includes("/") : Boolean(space?.machine);
+  return remote ? null : pane?.cwd || f?.cwd || space?.folder || null;
+}
+
+// Sum of a PR's checks: CheckRun has status/conclusion, StatusContext has state.
+export function checkSummary(rollup) {
+  const n = { pass: 0, fail: 0, pending: 0 };
+  for (const c of rollup ?? []) {
+    const v = (c.conclusion || c.state || "").toUpperCase();
+    if (c.status && c.status !== "COMPLETED") n.pending++;
+    else if (["FAILURE", "ERROR", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE"].includes(v)) n.fail++;
+    else if (["PENDING", "EXPECTED", "QUEUED", "IN_PROGRESS", ""].includes(v)) n.pending++;
+    else n.pass++;
+  }
+  return n;
+}
+
 // The AWS profile that aws.sh shows (for Copy on click).
 const AWS_PROFILE = `
 d="$HOME/.config/tmux/status"
@@ -74,6 +107,45 @@ export default class DevStatus extends View {
     this.script = `${home()}/.config/tmux/status/status-right.sh`;
     this.refresh(cx);
     cx.timer.every(REFRESH_MS, (cx) => this.refresh(cx));
+    this.pr = null; // { number, url, draft, checks } or null
+    this.refreshPr(cx, true);
+    // Look each 2 s for a new folder; ask GitHub when it changes or PR_MS passed.
+    cx.timer.every(2000, (cx) => this.refreshPr(cx, false));
+  }
+
+  refreshPr(cx, force) {
+    const cwd = focusedFolder();
+    const due = force || cwd !== this.prAt || Date.now() - (this.prChecked ?? 0) > PR_MS;
+    if (this.prBusy || !due) return;
+    this.prBusy = true;
+    this.prAt = cwd;
+    this.prChecked = Date.now();
+    cx.spawn(async (cx) => {
+      let pr = null;
+      try {
+        if (cwd) {
+          const r = await exec("gh", ["pr", "view", "--json", PR_FIELDS], { cwd, timeout: 15000 });
+          const d = r.code === 0 ? JSON.parse(r.stdout) : null;
+          if (d?.state === "OPEN") pr = { number: d.number, url: d.url, draft: d.isDraft, checks: checkSummary(d.statusCheckRollup) };
+        }
+      } catch {}
+      finally { this.prBusy = false; }
+      if (cwd === this.prAt && JSON.stringify(pr) !== JSON.stringify(this.pr)) { this.pr = pr; cx.notify(); }
+    });
+  }
+
+  prSegment(t) {
+    const pr = this.pr;
+    if (!pr) return null;
+    const c = pr.checks;
+    const [icon, color, word] = c.fail ? ["\u{f00d}", t.ansi9, "failing"]
+      : c.pending ? ["\u{f017}", t.blocked, "running"]
+      : c.pass ? ["\u{f00c}", t.done, "passed"] : [null, t.dim, "no checks"];
+    const tip = `PR #${pr.number}${pr.draft ? " (draft)" : ""}: ${c.pass} passed, ${c.fail} failed, ${c.pending} running. Click to open.`;
+    return h_flex().id("pr").gap(8).items_center().flex_none().cursor_pointer().tooltip(tip)
+      .on_click(() => { exec("open", [pr.url]).catch(() => {}); })
+      .child(div().text_color(pr.draft ? t.dim : t.ansi13).child(`\u{f407} #${pr.number}`))
+      .when(Boolean(icon), (el) => el.child(dots("pr-dots")).child(div().text_color(color).child(`${icon} ${word}`)));
   }
 
   refresh(cx) {
@@ -118,10 +190,19 @@ export default class DevStatus extends View {
       ["idle", "\u{f04b2}", t.idle ?? t.muted],
       ["unknown", "\u{f0625}", t.dim],
     ].map(([name, icon, color]) => ({ name, icon, color, n: count(name) })).filter((st) => st.n > 0);
-    return h_flex().items_center().px(12).overflow_hidden().flex_1()
-      .child(h_flex().gap(12).items_center().flex_none()
-        .when(list.length === 0, (el) => el.child(div().text_color(t.dim).child("no agents")))
-        .children(states.map((st) => div().id(`agents-${st.name}`).text_color(st.color).tooltip(`${st.n} ${st.name}`).child(`${st.icon} ${st.n}`))));
+    const agentsEl = h_flex().gap(12).items_center()
+      .when(list.length === 0, (el) => el.child(div().text_color(t.dim).child("no agents")))
+      .children(dotted("agents", states.map((st) => div().id(`agents-${st.name}`).text_color(st.color).tooltip(`${st.n} ${st.name}`).child(`${st.icon} ${st.n}`))));
+    // Segments as on the right side: tmux's two greys in turn, then an arrow
+    // that points right, into the next segment or the bar.
+    const parts = [agentsEl, this.prSegment(t)].filter(Boolean);
+    const bgs = parts.map((_, i) => SEGMENT_BG[i % 2]);
+    return h_flex().h_full().items_center().overflow_hidden().flex_1()
+      .children(parts.flatMap((el, i) => [
+        div().id(`left-${i}`).h_full().flex_none().flex().items_center().px(12).bg(bgs[i]).child(el),
+        div().id(`left-sep-${i}`).h_full().w(12).flex_none().when(i + 1 < parts.length, (s) => s.bg(bgs[i + 1]))
+          .child(svg("mods/dev-status/sep-right.svg").w(12).h_full().text_color(bgs[i])),
+      ]));
   }
 
   right(t) {
