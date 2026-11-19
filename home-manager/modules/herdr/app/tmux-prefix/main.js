@@ -56,7 +56,7 @@ function cyclePane(step) {
   if (next?.pane) run("pane.focus", { pane: next.pane });
 }
 
-// The TUI's prefix+p opens a PR preview pane; here the browser shows it.
+// The PR of the focused folder's branch, in the browser.
 function openBranchPr() {
   const cwd = focused()?.cwd;
   if (cwd) exec("gh", ["pr", "view", "--web"], { cwd }).catch(() => {});
@@ -70,7 +70,7 @@ function nextWaiting() {
   if (next) run("agent.focus", { terminal: next.address });
 }
 
-// A tool in a floating window, like the TUI's popup keys. The tool-popup
+// A tool in a floating window. The tool-popup
 // mod starts it: this popup closes before the terminal exists.
 function openToolPopup(title, argv) {
   const space = spaces().find((s) => s.active);
@@ -110,6 +110,7 @@ const BINDINGS = [
   { key: "g", label: "Changes panel", run: () => toggleChangesPanel() },
   { key: "G", label: "Changes tab", run: () => run("tab.new", { name: "Changes", mod: "dev-changes" }) },
   { key: "p", label: "PR of this branch (browser)", run: () => openBranchPr() },
+  { key: "P", label: "PR/MR review (Redline)", run: () => run("mod.open", { name: "redline" }) },
   { key: "l", label: "Lazygit (herdr-review)", run: () => openToolPopup("Lazygit", ["herdr-review"]) },
   { key: "d", label: "Diff (herdr-review)", run: () => openToolPopup("Diff", ["herdr-review", "diff"]) },
   { key: "i", label: "PR Inbox (hinbox)", run: () => openToolPopup("Inbox", ["hinbox"]) },

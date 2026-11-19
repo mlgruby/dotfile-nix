@@ -61,7 +61,6 @@ macOS-specific packages and GUI applications.
 
 # Shared Homebrew development tools: darwin/homebrew-packages/brews/development.nix
 [
-  "herdr"
   "gcx"
 ]
 ```

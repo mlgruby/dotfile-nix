@@ -26,7 +26,7 @@ if [ -z "${SSH_AUTH_SOCK:-}" ] && command -v launchctl > /dev/null 2>&1; then
 fi
 
 function tm() {
-  tmux attach-session -t main 2>/dev/null || tmux new-session -s main herdr
+  tmux attach-session -t main 2>/dev/null || tmux new-session -s main
 }
 
 function main() {
@@ -83,15 +83,6 @@ function agc() {
 if [ "$DOTFILES_AUTO_TMUX" = "1" ] && command -v tmux > /dev/null 2>&1; then
   if [ -z "$TMUX" ]; then
     tm
-  fi
-fi
-
-# Auto-launch Herdr only for terminals that explicitly opt in.
-# Herdr can spawn child shells, so guard against recursively launching it again.
-if [ "$DOTFILES_AUTO_HERDR" = "1" ] && command -v herdr > /dev/null 2>&1; then
-  if [ -z "${DOTFILES_AUTO_HERDR_STARTED:-}" ]; then
-    export DOTFILES_AUTO_HERDR_STARTED="1"
-    herdr
   fi
 fi
 
@@ -324,9 +315,9 @@ function ghprcheck() {
 function agy-resume() {
   setopt local_options typesetsilent interactive_comments
   local conversations_dir="$HOME/.gemini/antigravity-cli/conversations"
-  local brain_dir="$HOME/.gemini/antigravity-cli/brain"
   local show_all=false
-  local arg selected uuid db_path transcript preview session_cwd mtime_epoch mtime_fmt clean_preview short_cwd
+  local arg selected uuid
+  local -a list_args
 
   for arg in "$@"; do
     if [ "$arg" = "-a" ] || [ "$arg" = "--all" ]; then
@@ -344,45 +335,14 @@ function agy-resume() {
     return 127
   fi
 
+  list_args=(--agy-list)
+  if [ "$show_all" = "true" ]; then
+    list_args+=(--all)
+  fi
+  list_args+=("$PWD")
+
   selected=$(
-    for db_path in "$conversations_dir"/*.db; do
-      [ -f "$db_path" ] || continue
-      uuid=$(basename "$db_path" .db)
-
-      transcript="$brain_dir/$uuid/.system_generated/logs/transcript.jsonl"
-      [ -f "$transcript" ] || continue
-
-      preview=""
-      if command -v jq >/dev/null 2>&1; then
-        preview=$(jq -r 'select(.type == "USER_INPUT") | .content' "$transcript" 2>/dev/null | grep -v 'USER_REQUEST' | grep -v 'ADDITIONAL_METADATA' | grep -v 'USER_SETTINGS_CHANGE' | grep -v '^$' | head -n 1)
-      fi
-      [ -n "$preview" ] || continue
-
-      session_cwd="$(herdr-project-layout --agy-cwd "$db_path" 2>/dev/null || true)"
-
-      if [ "$show_all" = "false" ] && [ "$session_cwd" != "$PWD" ]; then
-        continue
-      fi
-
-      if stat --version >/dev/null 2>&1; then
-        mtime_epoch=$(stat -c "%Y" "$db_path" 2>/dev/null || echo 0)
-        mtime_fmt=$(stat -c "%y" "$db_path" 2>/dev/null | cut -c 1-16)
-      else
-        mtime_epoch=$(/usr/bin/stat -f "%m" "$db_path" 2>/dev/null || echo 0)
-        mtime_fmt=$(/usr/bin/stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$db_path" 2>/dev/null || echo "Unknown")
-      fi
-      [ -n "$mtime_fmt" ] || mtime_fmt="Unknown"
-      clean_preview=$(printf "%s" "$preview" | tr -d '\r\n' | tr '\t' ' ' | cut -c 1-80)
-
-      if [ "$show_all" = "true" ] && [ -n "$session_cwd" ]; then
-        short_cwd="${session_cwd/#$HOME/\~}"
-        printf "%s\t%s | %-25s | %-60s | %s\n" "$mtime_epoch" "$mtime_fmt" "$short_cwd" "$clean_preview" "$uuid"
-      else
-        printf "%s\t%s | %-75s | %s\n" "$mtime_epoch" "$mtime_fmt" "$clean_preview" "$uuid"
-      fi
-    done |
-    sort -k1,1nr |
-    cut -f2- |
+    herdr-project-layout "${list_args[@]}" 2>/dev/null |
     fzf --no-sort --prompt="Resume Antigravity > " --header="Select conversation (use -a / --all to show all directories)"
   )
 
@@ -394,13 +354,6 @@ function agy-resume() {
     _agent_permission_args "Antigravity" AGY_PERMISSION_ARGS
     command agy --conversation "$uuid" "${AGY_PERMISSION_ARGS[@]}"
   fi
-}
-
-# Herdr Workspace launcher:
-# Keep p as a stable shim. The external launcher updates with the Nix profile,
-# including in shells that were already open during a rebuild.
-function p() {
-  command herdr-project-open "$@"
 }
 
 # ==============================================================================
@@ -468,20 +421,3 @@ function gctest() {
     git commit -e -m "test: "
   fi
 }
-
-
-
-# Agent startup is deferred until the first prompt, after all shell setup and
-# aliases have loaded. Consume the marker before starting any child process.
-function _dotfiles_herdr_project_agent() {
-  add-zsh-hook -d precmd _dotfiles_herdr_project_agent
-  local project_agent="${DOTFILES_HERDR_PROJECT_AGENT:-}"
-  unset DOTFILES_HERDR_PROJECT_AGENT
-  case "$project_agent" in
-    # These names are allowlisted. eval resolves aliases defined later in .zshrc.
-    cc|ccr|agr|cxr|hpr-view|hpr-ci|hpr-ai-review) eval "$project_agent" ;;
-  esac
-}
-if [[ "${HERDR_ENV:-}" == "1" && "${DOTFILES_HERDR_PROJECT_AGENT:-}" == (cc|ccr|agr|cxr|hpr-view|hpr-ci|hpr-ai-review) ]]; then
-  add-zsh-hook precmd _dotfiles_herdr_project_agent
-fi

@@ -94,7 +94,7 @@ home-manager/
 ├── neovim.nix           # Editor configuration
 └── modules/             # Individual application configs
     ├── ghostty.nix      # Primary terminal emulator
-    ├── herdr.nix        # TUI session manager
+    ├── herdr.nix        # Herdr.app (desktop) config
     ├── claude-code.nix  # Claude Code config
     ├── antigravity.nix  # Antigravity config
     ├── pi.nix           # Pi coding agent config
@@ -189,7 +189,7 @@ environment.systemPackages = with pkgs; [
 
 ```nix
 homebrew = {
-  brews = [ "mas" "gnu-getopt" "herdr" ];
+  brews = [ "mas" "gnu-getopt" ];
   casks = [ "brave-browser" "ghostty" "orbstack" "zed" ];
 };
 ```

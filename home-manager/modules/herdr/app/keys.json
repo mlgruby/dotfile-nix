@@ -26,6 +26,7 @@
     "cmd-o": "mod.open:project-open",
     "cmd-p": "mod.open:picker",
     "cmd-shift-p": "app.palette",
+    "cmd-shift-f": "mod.open:redline",
     "cmd-,": "app.settings",
     "cmd-d": "pane.split:right",
     "cmd-shift-d": "pane.split:down",

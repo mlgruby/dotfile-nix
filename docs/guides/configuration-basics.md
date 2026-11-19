@@ -46,7 +46,7 @@ System-level configurations affect the entire macOS system and all users. These 
        onActivation.autoUpdate = false;
        onActivation.upgrade = false;
        onActivation.cleanup = "uninstall";
-       brews = [ "mas" "gnu-getopt" "herdr" ];
+       brews = [ "mas" "gnu-getopt" ];
        casks = [ "ghostty" "zed" "brave-browser" ];
      };
    }

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Create project tabs, starting personal agents only when history exists."""
-import fcntl
+"""Herdr.app project tabs: the agent tabs a new project gets, from saved history."""
 from contextlib import closing
-import hashlib
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -110,29 +109,85 @@ def agy_directory(database):
     return None
 
 
+def _agy_first_preview(transcript):
+    """Return the first meaningful user prompt line from an Antigravity transcript."""
+    try:
+        with transcript.open(encoding="utf-8", errors="replace") as lines:
+            for line in lines:
+                # Skip non-input events before decoding JSON to keep large transcripts fast.
+                if '"USER_INPUT"' not in line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                if not isinstance(record, dict) or record.get("type") != "USER_INPUT":
+                    continue
+                content = record.get("content", "")
+                if not isinstance(content, str):
+                    continue
+                for part in content.splitlines():
+                    if part.strip() and not any(
+                        token in part
+                        for token in ("USER_REQUEST", "ADDITIONAL_METADATA", "USER_SETTINGS_CHANGE")
+                    ):
+                        return part
+    except (OSError, ValueError, TypeError):
+        pass
+    return None
+
+
+def _short_home_path(directory, home_dir=None):
+    home_str = str((Path(home_dir) if home_dir else Path.home()).resolve())
+    path_str = str(directory)
+    if path_str == home_str or path_str.startswith(home_str + os.sep):
+        return "~" + path_str[len(home_str):]
+    return path_str
+
+
+def list_agy_conversations(cwd=None, show_all=False, agy_home=None, home_dir=None):
+    """Format Antigravity conversations sorted newest-first for fzf selection."""
+    home = Path(agy_home or Path.home() / ".gemini/antigravity-cli")
+    target_cwd = None if show_all else Path(cwd or os.getcwd()).resolve()
+    entries = []
+    for database in (home / "conversations").glob("*.db"):
+        if not database.is_file():
+            continue
+        uuid = database.stem
+        transcript = home / "brain" / uuid / ".system_generated/logs/transcript.jsonl"
+        if not transcript.is_file():
+            continue
+        session_cwd = agy_directory(database)
+        # Check directory match before reading transcript so non-matching repos skip JSON I/O.
+        if not show_all and session_cwd != target_cwd:
+            continue
+        preview = _agy_first_preview(transcript)
+        if not preview:
+            continue
+        try:
+            mtime_epoch = database.stat().st_mtime
+        except OSError:
+            mtime_epoch = 0
+        mtime_fmt = datetime.fromtimestamp(mtime_epoch).strftime("%Y-%m-%d %H:%M") if mtime_epoch else "Unknown"
+        clean_preview = preview.replace("\r", "").replace("\n", "").replace("\t", " ")[:80]
+        if show_all and session_cwd is not None:
+            short_cwd = _short_home_path(session_cwd, home_dir=home_dir)
+            line = f"{mtime_fmt} | {short_cwd:<25} | {clean_preview:<60} | {uuid}"
+        else:
+            line = f"{mtime_fmt} | {clean_preview:<75} | {uuid}"
+        entries.append((mtime_epoch, line))
+    entries.sort(key=lambda item: item[0], reverse=True)
+    return [line for _, line in entries]
+
+
 def has_agy_history(repo, agy_home=None):
     home = Path(agy_home or Path.home() / ".gemini/antigravity-cli")
     for database in (home / "conversations").glob("*.db"):
         if agy_directory(database) != repo:
             continue
         transcript = home / "brain" / database.stem / ".system_generated/logs/transcript.jsonl"
-        try:
-            with transcript.open() as lines:
-                for line in lines:
-                    try:
-                        record = json.loads(line)
-                    except ValueError:
-                        continue
-                    if not isinstance(record, dict):
-                        continue
-                    content = record.get("content", "")
-                    if (record.get("type") == "USER_INPUT" and isinstance(content, str)
-                            and any(part.strip() and not any(token in part for token in
-                                    ("USER_REQUEST", "ADDITIONAL_METADATA", "USER_SETTINGS_CHANGE"))
-                                    for part in content.splitlines())):
-                        return True
-        except (OSError, ValueError, TypeError):
-            continue
+        if _agy_first_preview(transcript) is not None:
+            return True
     return False
 
 
@@ -141,7 +196,7 @@ def plan_agents(cwd, work_root=None, config_dir=None, personal_root=None,
     """The agent tabs a new project gets, as (label, command) pairs.
 
     None: the folder is not a git repo under the work or personal roots.
-    Herdr TUI (apply_layout) and Herdr.app (`--plan DIR`) share this rule.
+    Herdr.app reads it with `--plan DIR`.
     """
     repo = Path(cwd).resolve()
     work = Path(work_root or Path.home() / "Documents/Work").resolve()
@@ -166,62 +221,32 @@ def plan_agents(cwd, work_root=None, config_dir=None, personal_root=None,
     return agents
 
 
-def apply_layout(workspace_id, call, work_root=None, config_dir=None,
-                 personal_root=None, dotfile_roots=None, codex_home=None, agy_home=None):
-    tabs = call("tab", "list", "--workspace", workspace_id)["tabs"]
-    panes = call("pane", "list", "--workspace", workspace_id)["panes"]
-    # Never remodel an established workspace or take over an agent's pane.
-    if len(tabs) != 1 or len(panes) != 1 or panes[0].get("agent"):
-        return False
-    pane = panes[0]
-    cwd = pane.get("foreground_cwd") or pane.get("cwd")
-    if not cwd:
-        return False
-    repo = Path(cwd).resolve()
-    agents = plan_agents(repo, work_root, config_dir, personal_root, dotfile_roots,
-                         codex_home, agy_home)
-    if agents is None:
-        return False
-    call("tab", "rename", tabs[0]["tab_id"], "Shell")
-    for label, command in agents:
-        call("tab", "create", "--workspace", workspace_id, "--cwd", str(repo),
-             "--label", label, "--no-focus", "--env", f"DOTFILES_HERDR_PROJECT_AGENT={command}")
-    return True
-
-
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--plan":
         # For Herdr.app: JSON [[label, command], ...], or null for no layout.
         print(json.dumps(plan_agents(sys.argv[2])))
+        return
+    if len(sys.argv) >= 2 and sys.argv[1] == "--agy-list":
+        show_all = False
+        cwd = None
+        for arg in sys.argv[2:]:
+            if arg in ("-a", "--all"):
+                show_all = True
+            elif cwd is None:
+                cwd = arg
+        for line in list_agy_conversations(cwd=cwd, show_all=show_all):
+            print(line)
         return
     if len(sys.argv) == 3 and sys.argv[1] == "--agy-cwd":
         directory = agy_directory(sys.argv[2])
         if directory:
             print(directory)
         return
-    if os.environ.get("HERDR_ENV") != "1":
-        raise RuntimeError("Run inside Herdr or as a Herdr plugin hook.")
-    workspace = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("HERDR_WORKSPACE_ID")
-    if not workspace:
-        raise RuntimeError("A workspace ID is required.")
-    binary = os.environ.get("HERDR_BIN_PATH") or "/opt/homebrew/bin/herdr"
-
-    def call(*args):
-        result = subprocess.run([binary, *args], capture_output=True, text=True, check=True)
-        return json.loads(result.stdout)["result"]
-
-    # The p launcher and workspace-created event may arrive together.
-    state = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "herdr-project-layout"
-    state.mkdir(parents=True, exist_ok=True)
-    key = hashlib.sha256((os.environ.get("HERDR_SOCKET_PATH", "default") + workspace).encode()).hexdigest()
-    with (state / (key + ".lock")).open("w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        apply_layout(workspace, call)
-
+    raise RuntimeError("Use --plan DIR, --agy-list [DIR] [-a] or --agy-cwd DB.")
 
 if __name__ == "__main__":
     try:
         main()
     except (OSError, RuntimeError, ValueError, KeyError, subprocess.CalledProcessError) as error:
-        print(f"Herdr project layout: {error}", file=sys.stderr)
+        print(f"herdr-project-layout: {error}", file=sys.stderr)
         sys.exit(1)

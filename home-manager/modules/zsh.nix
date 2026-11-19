@@ -63,6 +63,7 @@ let
         cp "${config.programs.fzf.package}/share/fzf/completion.zsh" "$out/fzf-completion.zsh"
         cp "${../scripts/zsh-completion-init.zsh}" "$out/zsh-completion-init.zsh"
         cp "${../scripts/zsh-integration.zsh}" "$out/zsh-integration.zsh"
+        cp "${../scripts/hc-busy.zsh}" "$out/hc-busy.zsh"
         cp "${../scripts/work.zsh}" "$out/work.zsh"
 
         for f in "$out"/*.zsh; do
@@ -113,6 +114,7 @@ in
 
         source "${precompiledZshIntegrations}/integrations.zsh"
         source "${precompiledZshIntegrations}/zsh-integration.zsh"
+        source "${precompiledZshIntegrations}/hc-busy.zsh"
 
         ${lib.optionalString profile.isWork ''
           # Optional devcontainer-auto integration for the Work profile. The

@@ -5,7 +5,7 @@
 # Purpose:
 # - Configures Ghostty with Gruvbox dark theme and JetBrains Mono Nerd Font
 # - Sets fullscreen launch behavior
-# - Directly attaches to Herdr on startup
+# - Attaches to the tmux "main" session on startup
 #
 { config, lib, pkgs, ... }:
 {
@@ -31,7 +31,8 @@
     adjust-box-thickness = 1
     font-thicken = true
 
-    # Auto-launch tmux + Herdr, but keep a shell available if either exits/fails.
-    command = /run/current-system/sw/bin/zsh -l -c "tmux attach-session -t main 2>/dev/null || tmux new-session -s main /opt/homebrew/bin/herdr; exec /run/current-system/sw/bin/zsh -l"
+    # Auto-launch tmux, but keep a shell available if it exits or fails.
+    # Herdr runs in Herdr.app, so Ghostty does not start the Herdr TUI.
+    command = /run/current-system/sw/bin/zsh -l -c "tmux attach-session -t main 2>/dev/null || tmux new-session -s main; exec /run/current-system/sw/bin/zsh -l"
   '';
 }

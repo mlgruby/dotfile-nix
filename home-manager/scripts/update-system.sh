@@ -10,10 +10,6 @@ UPDATE_COMPLETE=0
 SKIP_HOMEBREW=0
 REBUILD_ARGS=()
 
-# Keep old Herdr executables available for macOS TCC attribution, including
-# during Homebrew operations performed by the subsequent activation.
-export HOMEBREW_NO_CLEANUP_FORMULAE="${HOMEBREW_NO_CLEANUP_FORMULAE:+$HOMEBREW_NO_CLEANUP_FORMULAE,}herdr"
-
 usage() {
   cat <<'EOF'
 Usage: update [--work|--personal|--current] [--skip-homebrew] [darwin-rebuild args]

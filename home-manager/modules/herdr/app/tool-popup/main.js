@@ -1,4 +1,4 @@
-// A tool in a floating window over the panes, like the TUI's popup keys
+// A tool in a floating window over the panes
 // (tmux-prefix l, d, i, f; 95% x 90% of the window). Two roles:
 // - Starter, props { title, argv, cwd?, on? }: a tiny overlay that starts the
 //   program as a terminal with no pane (hc run --bg), opens the popup, then

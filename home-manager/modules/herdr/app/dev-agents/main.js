@@ -227,7 +227,8 @@ export default class Agents extends View {
     if (props()?.sortMenu) return this.sortMenu(t);
     const collapsed = narrow();
     const sort = sortOf();
-    let list = agents();
+    // hc-busy.zsh shell commands (app "shell") spin their tab but are not agents.
+    let list = agents().filter((a) => a.app !== "shell");
     this.listed = new Map(list.map((a) => [a.address, a.status]));
     const all = terminals();
     this.migratePins(all);

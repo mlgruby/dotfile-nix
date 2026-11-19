@@ -94,7 +94,7 @@
           "id": "status",
           "type": "block",
           "size": {
-            "px": 32
+            "px": 26
           },
           "content": {
             "mod": "dev-status",

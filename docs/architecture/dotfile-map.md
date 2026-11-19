@@ -18,12 +18,12 @@ workstation automation.
 - `home-manager/modules/zsh.nix` - zsh Home Manager options and small shell
   functions.
 - `home-manager/scripts/zsh-integration.zsh` - interactive zsh behavior (`p` project workspace launcher, `cb`/`rc` clipboard wrappers, fzf bindings).
-- `home-manager/modules/ghostty.nix` - primary Ghostty terminal configuration (`tmux` + `herdr` session entrypoint).
-- `home-manager/modules/herdr.nix` - Herdr TUI session manager configuration.
+- `home-manager/modules/ghostty.nix` - primary Ghostty terminal configuration (`tmux` session entrypoint).
+- `home-manager/modules/herdr.nix` - Herdr.app configuration: herdr-core, the dev layout, keys and mods.
 - `home-manager/modules/alacritty/` - secondary Alacritty terminal configuration.
 - `home-manager/modules/starship.nix` - prompt configuration.
 - `home-manager/modules/tmux.nix` - tmux wiring and status script installation.
-- `home-manager/scripts/tmux/status/` - tmux status modules (status-left Calendar Guard `calendar.sh`, Herdr agent monitor `herdr.sh`, GitHub reviews `reviews.sh`, interactive popups `review-popup.sh`, `pr-popup.sh`, `herdr-popup.sh`; status-right CPU, RAM, disk, battery, GitHub status `github.sh`, AWS profile `aws.sh`, AI usage `codexbar.sh`).
+- `home-manager/scripts/tmux/status/` - tmux status modules (status-left Calendar Guard `calendar.sh`, GitHub reviews `reviews.sh`, interactive popups `review-popup.sh`, `pr-popup.sh`; status-right CPU, RAM, disk, battery, GitHub status `github.sh`, AWS profile `aws.sh`, AI usage `codexbar.sh`).
 
 ## AI Agents And Skills
 

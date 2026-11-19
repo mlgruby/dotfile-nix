@@ -12,7 +12,7 @@ const ICON = { blocked: "\u{f009e}", done: "\u{f012c}" };
 
 // Agents that wait for the person, in the order to look at them.
 export function waiting(list = agents()) {
-  return list.filter((a) => a.status in RANK).sort((x, y) => RANK[x.status] - RANK[y.status] || x.seq - y.seq);
+  return list.filter((a) => a.status in RANK && a.app !== "shell").sort((x, y) => RANK[x.status] - RANK[y.status] || x.seq - y.seq);
 }
 
 const clean = (title) => (title ?? "").replace(/^[^\p{L}\p{N}~/]+/u, "").trim();

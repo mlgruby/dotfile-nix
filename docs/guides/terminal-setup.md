@@ -79,7 +79,7 @@ bmt     # Tree view
 
 ### Ghostty (Primary Terminal)
 
-Ghostty (`home-manager/modules/ghostty.nix`) is the primary terminal emulator, configured with Gruvbox Dark Hard colors, background blur, and automatic attachment to the `main` Tmux + Herdr session (`home-manager/modules/herdr.nix`).
+Ghostty (`home-manager/modules/ghostty.nix`) is the primary terminal emulator, configured with Gruvbox Dark Hard colors, background blur, and automatic attachment to the `main` Tmux session. Herdr.app is a separate desktop app (`home-manager/modules/herdr.nix`).
 
 ### Project Workspace Launcher (`p`)
 

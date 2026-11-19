@@ -5,25 +5,35 @@
 // (#[fg=..,bg=..]text); parse() turns it into coloured runs.
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge, run, shared, setShared, window } from "herdr";
+import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge, run, shared, setShared, window, notify } from "herdr";
 
 // Tab names follow what runs in them: CC (Claude Code), CX (Codex), AGY
 // (Antigravity), "CC+CX" for more than one, SHELL for no agent. A tab
 // someone named by hand ("fix login") keeps its name. A SHELL tab goes first.
 const AGENT_TAGS = [[/claude/i, "CC"], [/codex/i, "CX"], [/antigravity|\bagy\b/i, "AGY"]];
 const SHELL_TAG = "SHELL";
-// Names this code may replace: its own, and the TUI project-layout tabs.
+// Names this code may replace: its own, and "Shell" (older project tabs).
 const AUTO_NAMES = new Set(["CC", "CX", "AGY", "SHELL", "Shell"]);
-// New local spaces get the Herdr TUI's project tabs: project-layout.py --plan
+// New local spaces get project tabs: project-layout.py --plan
 // says which agents (work repo: CC; personal: AGY/CX with history). Login
 // shell for PATH; the agents start in an interactive shell (aliases, functions).
 const PLAN = 'herdr-project-layout --plan "$1"';
 const START_GRACE_MS = 60000; // an agent tab keeps its name this long before its agent reports
 const CWD_WAIT_MS = 5000; // how long a new space's shell may take to report its folder
 const tagOf = (a) => {
+  // hc-busy.zsh reports a long shell command as app "shell": keep the tab SHELL.
+  if (a.app === "shell") return SHELL_TAG;
   const id = `${a.app ?? ""} ${a.program?.key ?? ""} ${a.program?.name ?? ""}`;
   return AGENT_TAGS.find(([re]) => re.test(id))?.[1] ?? (a.program?.name || "AGENT").toUpperCase();
 };
+
+// Copy toast. Herdr.app copies a mouse selection when the button comes up
+// (copy_on_select) and shows nothing. While the focused terminal has a
+// selection, read the clipboard each COPY_POLL_MS, at most COPY_LOOKS times
+// after the last selection change, and show a toast when it changes. The
+// first read after a selection starts is the baseline. No selection: no reads.
+const COPY_POLL_MS = 150;
+const COPY_LOOKS = 20;
 
 const SEPARATOR = "\u{e0b2}"; // powerline left-pointing solid arrow
 // tmux redraws its own bar every 5 s; the app bar needs less. Both share the
@@ -32,8 +42,8 @@ const REFRESH_MS = 10000;
 const IDLE_REFRESH_MS = 60000; // the same, with another app in front
 const FONT = "JetBrainsMono NFM"; // Nerd Font glyphs used by the script
 // The status-left.sh segments that belong in this bar: the next meeting
-// and PRs waiting on your review. The session name and the herdr TUI count
-// are left out (the app shows its own agents on the left).
+// and PRs waiting on your review. The tmux session name is left out (the
+// app shows its own agents on the left).
 const LEFT_EXTRAS = `
 d="$HOME/.config/tmux/status"
 source "$d/lib.sh"; source "$d/calendar.sh"; source "$d/reviews.sh"
@@ -128,6 +138,8 @@ export default class DevStatus extends View {
     this.script = `${home()}/.config/tmux/status/status-right.sh`;
     this.refresh(cx);
     cx.timer.every(REFRESH_MS, (cx) => this.refresh(cx));
+    this.copy = { key: null, looks: 0, clip: null, busy: false };
+    cx.timer.every(COPY_POLL_MS, () => this.watchCopy());
     this.pr = null; // { number, url, draft, checks } or null
     this.refreshPr(cx, true);
     // Look each 2 s for a new folder; ask GitHub when it changes or PR_MS passed.
@@ -219,10 +231,11 @@ export default class DevStatus extends View {
   }
 
   left(t) {
-    const list = agents();
+    // Shell commands (hc-busy.zsh, app "shell") are not agents.
+    const list = agents().filter((a) => a.app !== "shell");
     const count = (status) => list.filter((a) => a.status === status).length;
-    // One icon and count per state that has agents (Nerd Font glyphs; the
-    // robot matches the tmux herdr segment). Hover shows the state name.
+    // One icon and count per state that has agents (Nerd Font glyphs).
+    // Hover shows the state name.
     const states = [
       ["working", "\u{f06a9}", t.working],
       ["blocked", "\u{f009e}", t.blocked],
@@ -240,8 +253,8 @@ export default class DevStatus extends View {
     return h_flex().h_full().items_center().overflow_hidden().flex_1()
       .children(parts.flatMap((el, i) => [
         div().id(`left-${i}`).h_full().flex_none().flex().items_center().px(12).bg(bgs[i]).child(el),
-        div().id(`left-sep-${i}`).h_full().w(12).flex_none().when(i + 1 < parts.length, (s) => s.bg(bgs[i + 1]))
-          .child(svg("mods/dev-status/sep-right.svg").w(12).h_full().text_color(bgs[i])),
+        div().id(`left-sep-${i}`).h_full().w(10).flex_none().when(i + 1 < parts.length, (s) => s.bg(bgs[i + 1]))
+          .child(svg("mods/dev-status/sep-right.svg").w(10).h_full().text_color(bgs[i])),
       ]));
   }
 
@@ -253,8 +266,8 @@ export default class DevStatus extends View {
     return h_flex().h_full().flex_none().items_center().children(
       this.runs.map((r, i) => {
         if (r.text === SEPARATOR) {
-          return div().id(`sep-${i}`).h_full().w(12).flex_none().when(Boolean(bg(r.bg)), (el) => el.bg(bg(r.bg)))
-            .child(svg("mods/dev-status/sep.svg").w(12).h_full().text_color(r.fg ?? t.chrome));
+          return div().id(`sep-${i}`).h_full().w(10).flex_none().when(Boolean(bg(r.bg)), (el) => el.bg(bg(r.bg)))
+            .child(svg("mods/dev-status/sep.svg").w(10).h_full().text_color(r.fg ?? t.chrome));
         }
         const action = ACTIONS.find((a) => a.test.test(r.text));
         return div().id(`run-${i}`).h_full().flex_none().flex().items_center().whitespace_nowrap()
@@ -272,6 +285,36 @@ export default class DevStatus extends View {
     if (n === this.badged) return;
     this.badged = n;
     setBadge(n ? String(n) : null);
+  }
+
+  async watchCopy() {
+    const c = this.copy;
+    if (c.busy) return;
+    const sel = focused()?.selection ?? null;
+    const key = sel ? JSON.stringify(sel) : null;
+    if (key !== c.key) {
+      // A new selection needs a fresh baseline: the clipboard can change in other apps.
+      if (!c.key) c.clip = null;
+      c.key = key;
+      c.looks = key ? COPY_LOOKS : 0;
+    }
+    if (!c.looks) return;
+    c.busy = true;
+    try {
+      const r = await exec("pbpaste", [], { timeout: 2000 });
+      const clip = r.stdout ?? "";
+      if (c.clip !== null && clip !== c.clip) {
+        notify({ title: "copied to clipboard", level: "success", timeout: 1500 });
+        c.looks = 0;
+      } else {
+        c.looks--;
+      }
+      c.clip = clip;
+    } catch {
+      c.looks = 0;
+    } finally {
+      c.busy = false;
+    }
   }
 
   // Rename each tab to the agents in it (see AGENT_TAGS). shared("tab.autonames")
@@ -317,7 +360,7 @@ export default class DevStatus extends View {
   }
 
   // A space made after this mod started, with one plain tab and pane, in a git
-  // repo the plan knows: add its agent tabs in the background, as the TUI does.
+  // repo the plan knows: add its agent tabs in the background.
   projectTabs(list) {
     const now = Date.now();
     if (!this.seenSpaces) {
@@ -360,7 +403,7 @@ export default class DevStatus extends View {
     const top = props()?.edge === "top";
     return h_flex().id("root").size_full().items_center().bg(t.chrome)
       .when(top, (el) => el.border_b(1)).when(!top, (el) => el.border_t(1)).border_color(t.border)
-      .font_family(FONT).text_size(14)
+      .font_family(FONT).text_size(15)
       .child(this.left(t))
       .child(this.right(t));
   }
