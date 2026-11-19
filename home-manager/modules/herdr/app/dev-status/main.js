@@ -5,7 +5,7 @@
 // (#[fg=..,bg=..]text); parse() turns it into coloured runs.
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge, run, shared, setShared } from "herdr";
+import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge, run, shared, setShared, window } from "herdr";
 
 // Tab names follow what runs in them: CC (Claude Code), CX (Codex), AGY
 // (Antigravity), "CC+CX" for more than one, SHELL for no agent. A tab
@@ -26,7 +26,10 @@ const tagOf = (a) => {
 };
 
 const SEPARATOR = "\u{e0b2}"; // powerline left-pointing solid arrow
-const REFRESH_MS = 10000; // same as tmux status-interval
+// tmux redraws its own bar every 5 s; the app bar needs less. Both share the
+// scripts' network caches, so this costs local CPU only (~110 ms a run).
+const REFRESH_MS = 10000;
+const IDLE_REFRESH_MS = 60000; // the same, with another app in front
 const FONT = "JetBrainsMono NFM"; // Nerd Font glyphs used by the script
 // The status-left.sh segments that belong in this bar: the next meeting
 // and PRs waiting on your review. The session name and the herdr TUI count
@@ -50,7 +53,7 @@ const dots = (id) => div().id(id).flex_none().text_color(DOTS).child("\u22ee");
 // Puts the dots between each two items.
 const dotted = (key, items) => items.flatMap((el, i) => (i ? [dots(`${key}-dots-${i}`), el] : [el]));
 // The open PR of the focused terminal's branch, and its checks. gh asks
-// GitHub, so look once a minute, and again when the folder changes.
+// GitHub (~0.7 s), so keep one answer per repo and branch for a minute.
 const PR_MS = 60000;
 const PR_FIELDS = "number,state,isDraft,url,statusCheckRollup";
 
@@ -133,8 +136,9 @@ export default class DevStatus extends View {
 
   refreshPr(cx, force) {
     const cwd = focusedFolder();
-    const due = force || cwd !== this.prAt || Date.now() - (this.prChecked ?? 0) > PR_MS;
-    if (this.prBusy || !due) return;
+    if (this.prBusy) return;
+    // Focus does not change in the background: only the minute check runs there.
+    if (!force && cwd === this.prAt && Date.now() - (this.prChecked ?? 0) < PR_MS) return;
     this.prBusy = true;
     this.prAt = cwd;
     this.prChecked = Date.now();
@@ -142,9 +146,18 @@ export default class DevStatus extends View {
       let pr = null;
       try {
         if (cwd) {
-          const r = await exec("gh", ["pr", "view", "--json", PR_FIELDS], { cwd, timeout: 15000 });
-          const d = r.code === 0 ? JSON.parse(r.stdout) : null;
-          if (d?.state === "OPEN") pr = { number: d.number, url: d.url, draft: d.isDraft, checks: checkSummary(d.statusCheckRollup) };
+          // One gh call per repo and branch a minute: cd inside a repo, or back
+          // and forth between spaces, reuses the answer.
+          const g = await exec("git", ["rev-parse", "--show-toplevel", "--abbrev-ref", "HEAD"], { cwd, timeout: 5000 });
+          const key = g.code === 0 ? g.stdout.trim().replace("\n", "@") : null;
+          const hit = key && this.prCache?.[key];
+          if (hit && Date.now() - hit.at < PR_MS) pr = hit.pr;
+          else if (key) {
+            const r = await exec("gh", ["pr", "view", "--json", PR_FIELDS], { cwd, timeout: 15000 });
+            const d = r.code === 0 ? JSON.parse(r.stdout) : null;
+            if (d?.state === "OPEN") pr = { number: d.number, url: d.url, draft: d.isDraft, checks: checkSummary(d.statusCheckRollup) };
+            (this.prCache ??= {})[key] = { pr, at: Date.now() };
+          }
         }
       } catch {}
       finally { this.prBusy = false; }
@@ -171,8 +184,12 @@ export default class DevStatus extends View {
   }
 
   refresh(cx) {
-    if (this.busy) return;
+    // In the background (another app in front) the window may still show:
+    // refresh once a minute there, not every tick.
+    if (this.busy || (!window().active && this.runs.length && Date.now() - (this.ranAt ?? 0) < IDLE_REFRESH_MS)) return;
     this.busy = true;
+    this.ranAt = Date.now();
+    const before = JSON.stringify([this.runs, this.error]);
     cx.spawn(async (cx) => {
       try {
         const [extra, r] = await Promise.all([
@@ -195,7 +212,8 @@ export default class DevStatus extends View {
         this.error = String(e?.message ?? e);
       } finally {
         this.busy = false;
-        cx.notify();
+        // A redraw of a mod redraws the window: only when the bar changed.
+        if (JSON.stringify([this.runs, this.error]) !== before) cx.notify();
       }
     });
   }

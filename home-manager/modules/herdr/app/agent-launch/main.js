@@ -62,7 +62,8 @@ export default class AgentLaunch extends View {
     });
   }
 
-  close() { closeOverlay(props().overlay); }
+  // Not close(): that name is the host cleanup hook, called when the view goes.
+  dismiss() { closeOverlay(props().overlay); }
 
   start(cx) {
     const task = this.text.trim();
@@ -70,7 +71,7 @@ export default class AgentLaunch extends View {
     const agent = AGENTS[this.agent];
     if (!(this.worktree && this.repo)) {
       run("tab.new", { name: agent.name, argv: agent.argv, task, ...(this.cwd ? { folder: this.cwd } : {}) });
-      return this.close();
+      return this.dismiss();
     }
     this.busy = true; this.error = null; cx.notify();
     cx.spawn(async (cx) => {
@@ -83,7 +84,7 @@ export default class AgentLaunch extends View {
         const r = await exec("git", ["worktree", "add", "-b", branch, path, "HEAD"], { cwd: this.repo, on, timeout: 600000 });
         if (r.code !== 0) throw new Error((r.stderr || r.stdout).trim() || "git worktree add failed");
         run("space.new", { folder: path, machine: on ?? "", argv: agent.argv, task });
-        this.close();
+        this.dismiss();
       } catch (e) {
         this.error = String(e?.message ?? e);
       } finally {
@@ -93,7 +94,7 @@ export default class AgentLaunch extends View {
   }
 
   key(e, cx) {
-    if (e.key === "escape") { this.close(); cx.stop_propagation(); return; }
+    if (e.key === "escape") { this.dismiss(); cx.stop_propagation(); return; }
     if (e.key === "tab") {
       if (e.modifiers.shift) this.worktree = !this.worktree;
       else this.agent = (this.agent + 1) % AGENTS.length;
@@ -122,7 +123,7 @@ export default class AgentLaunch extends View {
       .when(Boolean(this.error), (el) => el.child(div().text_size(11.5).text_color(t.ansi1).child(this.error)))
       .child(h_flex().gap(8).justify_end()
         .child(div().id("la-cancel").h(32).px(14).flex().items_center().rounded(8).bg(t.raised).cursor_pointer()
-          .on_click(() => this.close()).child("Cancel"))
+          .on_click(() => this.dismiss()).child("Cancel"))
         .child(div().id("la-start").h(32).px(14).flex().items_center().rounded(8).cursor_pointer()
           .bg(this.text.trim() ? t.solid : t.raised).text_color(this.text.trim() ? t.solid_foreground : t.dim)
           .on_click((_e, cx) => this.start(cx)).child(this.busy ? "Creating worktree…" : "Start")));

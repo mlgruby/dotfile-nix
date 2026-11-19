@@ -42,12 +42,20 @@ export default class ToolPopup extends View {
     });
   }
 
-  close(cx) {
+  // ✕: end the program, then close the popup.
+  dismiss(cx) {
     const { terminal, overlay } = props();
     cx.spawn(async () => {
       try { await hc(["kill", terminal]); } catch {}
       closeOverlay(overlay);
     });
+  }
+
+  // Host cleanup hook (AGENTS.md "Cleanup"): runs once when this view goes.
+  // Only the title bar owns a terminal; the starter has none to end.
+  async close() {
+    const { terminal } = props() ?? {};
+    if (terminal) { try { await hc(["kill", terminal]); } catch {} }
   }
 
   render() {
@@ -61,6 +69,6 @@ export default class ToolPopup extends View {
       .child(div().id("tool-popup-close").px(6).rounded(4).cursor_pointer()
         .hover((s) => s.bg(t.hover).text_color(t.foreground))
         .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
-        .on_click((_e, cx) => this.close(cx)).child("✕"));
+        .on_click((_e, cx) => this.dismiss(cx)).child("✕"));
   }
 }

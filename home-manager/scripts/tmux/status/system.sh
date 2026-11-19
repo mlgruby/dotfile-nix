@@ -26,7 +26,7 @@ tmux_status_collect_system() {
     disk="${disk_value}%"
   fi
 
-  hw_cache="${TMPDIR:-/tmp}/tmux_hw_$(id -u 2>/dev/null || echo 0).cache"
+  hw_cache="${TMPDIR:-/tmp}/tmux_hw_${UID:-0}.cache"
   logical_cpus=""
   mem_total_gb=""
   if [ -r "$hw_cache" ]; then
@@ -74,9 +74,9 @@ tmux_status_collect_system() {
   mem_used_gb=""
   if [[ "$mem_free_percent" =~ ^[0-9]+$ ]] && [ -n "$mem_total_gb" ]; then
     mem_used_percent=$(( 100 - mem_free_percent ))
-    mem_used_gb="$(awk -v total="$mem_total_gb" -v used="$mem_used_percent" 'BEGIN { printf "%.0f", total * used / 100 }')"
     mem="${mem_used_percent}%"
     if [ "$mem_used_percent" -ge 90 ]; then
+      mem_used_gb="$(awk -v total="$mem_total_gb" -v used="$mem_used_percent" 'BEGIN { printf "%.0f", total * used / 100 }')"
       mem="${mem} ${mem_used_gb}G/${mem_total_gb}G"
     fi
   else
@@ -179,5 +179,10 @@ tmux_status_collect_system() {
     esac
   fi
 
-  datetime="$(date "+%d-%b-%Y %H:%M" | tr '[:lower:]' '[:upper:]')"
+  if (( BASH_VERSINFO[0] >= 5 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2) )); then
+    printf -v datetime '%(%d-%b-%Y %H:%M)T' -1
+    datetime="${datetime^^}"
+  else
+    datetime="$(date "+%d-%b-%Y %H:%M" | tr '[:lower:]' '[:upper:]')"
+  fi
 }

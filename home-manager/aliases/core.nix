@@ -42,10 +42,10 @@ in
   # ==========================================================================
   # File Listing (basic - eza variants in dev-tools.nix)
   # ==========================================================================
-  l = "eza -la --icons"; # List all files with details
-  ll = "eza -l --icons"; # List files with details
-  la = "eza -la --icons"; # List all files including hidden
-  ls = "eza --icons"; # Use eza with icons by default
+  l = "eza -la --icons=auto"; # List all files with details
+  ll = "eza -l --icons=auto"; # List files with details
+  la = "eza -la --icons=auto"; # List all files including hidden
+  ls = "eza --icons=auto"; # Use eza with icons by default (=auto: a bare --icons takes the next argument)
 
   # ==========================================================================
   # File Operations

@@ -60,7 +60,8 @@ export default class ProjectOpen extends View {
     });
   }
 
-  close() { closeOverlay(props().overlay); }
+  // Not close(): that name is the host cleanup hook, called when the view goes.
+  dismiss() { closeOverlay(props().overlay); }
 
   // Filtered, in group order; with a query, best match first.
   shown() {
@@ -77,13 +78,13 @@ export default class ProjectOpen extends View {
     const space = spaceFor(p.path, spaces(), panes());
     if (space) run("space.select", { id: space.id });
     else run("space.new", { folder: p.path });
-    this.close();
+    this.dismiss();
   }
 
   key(e, cx) {
     const n = this.shown().length;
     const ctrl = e.modifiers.control;
-    if (e.key === "escape") { this.close(); cx.stop_propagation(); return; }
+    if (e.key === "escape") { this.dismiss(); cx.stop_propagation(); return; }
     if (e.key === "down" || (ctrl && e.key === "n")) this.sel = Math.min(this.sel + 1, Math.max(n - 1, 0));
     else if (e.key === "up" || (ctrl && e.key === "p")) this.sel = Math.max(this.sel - 1, 0);
     else return;

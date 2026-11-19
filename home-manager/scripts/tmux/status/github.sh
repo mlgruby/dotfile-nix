@@ -9,7 +9,7 @@ tmux_status_collect_github() {
   local cache_file="${cache_dir}/tmux_github_status_${UID:-0}.cache"
   local lock_file="${cache_dir}/tmux_github_status_${UID:-0}.lock"
   local now_s
-  now_s="$(date +%s 2>/dev/null || echo 0)"
+  tmux_status_now; now_s="$tmux_now"
 
   # Refresh cache in background if missing or older than 180 seconds (3 mins)
   if ! tmux_status_cache_fresh "$cache_file" 180 "$now_s"; then
@@ -39,7 +39,7 @@ tmux_status_collect_github() {
           fi
         fi
         rm -f "$lock_file" 2>/dev/null || true
-      ) &
+      ) </dev/null >/dev/null 2>&1 &
     fi
   fi
 

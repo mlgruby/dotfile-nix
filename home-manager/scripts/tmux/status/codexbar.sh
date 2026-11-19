@@ -16,12 +16,12 @@
 
 export PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/${USER:-$(id -un 2>/dev/null || true)}/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux"
 [ -d "$CACHE_DIR" ] || { mkdir -p "$CACHE_DIR" && chmod 700 "$CACHE_DIR" 2>/dev/null || true; }
 CACHE_FILE="${CODEXBAR_STATUS_CACHE_FILE:-$CACHE_DIR/codexbar_status.cache}"
 LOCK_DIR="${CACHE_FILE}.lock"
-CACHE_AGE_LIMIT=60 # 1 minute; the refresh itself runs asynchronously
+# 5 minutes: one refresh runs codex, agy and ccusage (~3.7 s CPU, ~950 MB peak).
+CACHE_AGE_LIMIT=300
 
 GREEN="#b8bb26"
 AMBER="#fabd2f"
@@ -100,7 +100,7 @@ reset_countdown() {
   }
 
   local now
-  now=$(date +%s)
+  tmux_status_now; now="$tmux_now"
   local seconds=$(( reset_epoch - now ))
   if (( seconds <= 0 )); then
     printf 'now'
@@ -134,7 +134,7 @@ reset_is_within() {
   local reset_epoch
   reset_epoch=$(parse_epoch_seconds "$resets_at") || return 1
   local now
-  now=$(date +%s)
+  tmux_status_now; now="$tmux_now"
   local remaining=$(( reset_epoch - now ))
   (( remaining >= 0 && remaining <= threshold_seconds ))
 }
@@ -385,7 +385,7 @@ update_cache() {
 
 tmux_status_collect_codexbar() {
   local now
-  now=$(date +%s)
+  tmux_status_now; now="$tmux_now"
   local mtime=0
 
   if [ -f "$CACHE_FILE" ]; then

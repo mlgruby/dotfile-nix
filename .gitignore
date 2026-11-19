@@ -35,3 +35,9 @@ home-manager/aliases.nix.bak
 .claude/
 # intelij
 .idea
+
+# Herdr.app writes these into a mod folder on `herdr-app check`.
+home-manager/modules/herdr/app/*/jsconfig.json
+home-manager/modules/herdr/app/*/*.d.ts
+herdr-shot.png
+__pycache__/

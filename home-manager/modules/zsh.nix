@@ -41,20 +41,23 @@ let
           echo ""
           ${config.programs.direnv.package}/bin/direnv hook zsh
           echo ""
-          echo 'if (( $+functions[compdef] )); then'
-          ${pkgs.uv}/bin/uv generate-shell-completion zsh
-          echo 'fi'
-          echo ""
           echo 'if [[ $TERM != "dumb" ]]; then'
           ${config.programs.starship.package}/bin/starship init zsh --print-full-init \
             | sed 's|^PROMPT2="\(.*\)"$|PROMPT2='\'''\1'\'''|'
           echo 'fi'
           echo ""
-          echo 'if [[ $options[zle] = on ]]; then'
+          # Line editor only: without a terminal (zsh -ic from Herdr.app) the
+          # fzf scripts print "can't change option: zle".
+          echo 'if [[ $options[zle] = on && -t 0 && -t 1 ]]; then'
           echo '  source "'"$out"'/fzf-key-bindings.zsh"'
+          echo '  source "'"$out"'/fzf-completion.zsh"'
           echo 'fi'
-          echo 'source "'"$out"'/fzf-completion.zsh"'
         } > "$out/integrations.zsh"
+
+        # uv completion as an autoloaded function (7000 lines; sourcing it
+        # inline cost ~50 ms per /bin/zsh start). Loaded on first `uv <Tab>`.
+        mkdir -p "$out/site-functions"
+        ${pkgs.uv}/bin/uv generate-shell-completion zsh > "$out/site-functions/_uv"
 
         cp "${config.programs.fzf.package}/share/fzf/key-bindings.zsh" "$out/fzf-key-bindings.zsh"
         cp "${config.programs.fzf.package}/share/fzf/completion.zsh" "$out/fzf-completion.zsh"
@@ -73,7 +76,10 @@ in
       enable = true;
       enableCompletion = true;
       completionInit = ''
+        fpath=("${precompiledZshIntegrations}/site-functions" $fpath)
         source "${precompiledZshIntegrations}/zsh-completion-init.zsh"
+        # compinit -C keeps an old dump that may not list _uv yet.
+        (( $+_comps[uv] )) || { autoload -Uz _uv && compdef _uv uv; }
       '';
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;

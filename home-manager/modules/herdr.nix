@@ -69,14 +69,16 @@ let
     name = "herdr-project-layout";
     runtimeInputs = [ pkgs.python3 pkgs.git ];
     text = ''
-      exec python3 ${./herdr/project-layout.py} "$@"
+      # -P: no script folder on sys.path. Here that is /nix/store (40k+ entries),
+      # which Python lists on each stdlib import (~40 ms a call).
+      exec python3 -P ${./herdr/project-layout.py} "$@"
     '';
   };
   workflowMain = pkgs.writeShellApplication {
     name = "herdr-workflow";
     runtimeInputs = [ projectLayout pkgs.python3 pkgs.git pkgs.gh ghDash pkgs.delta pkgs.fzf pkgs.ripgrep config.programs.neovim.finalPackage ];
     text = ''
-      exec python3 ${./herdr/workflow.py} "$@"
+      exec python3 -P ${./herdr/workflow.py} "$@"
     '';
   };
   workflowCommands = {
