@@ -203,6 +203,18 @@ in
   # Ctrl+A prefix popup with the same keys as the Herdr TUI config below.
   xdg.configFile."herdr-app/mods/tmux-prefix/main.js".source = ./herdr/app/tmux-prefix/main.js;
   xdg.configFile."herdr-app/mods/tmux-prefix/mod.json".source = ./herdr/app/tmux-prefix/mod.json;
+  # Ctrl+A a: start an agent on a task (own worktree and space).
+  xdg.configFile."herdr-app/mods/agent-launch/main.js".source = ./herdr/app/agent-launch/main.js;
+  xdg.configFile."herdr-app/mods/agent-launch/mod.json".source = ./herdr/app/agent-launch/mod.json;
+  # Ctrl+A l, d, i, f: the tool in a popup terminal, as in the TUI.
+  xdg.configFile."herdr-app/mods/tool-popup/main.js".source = ./herdr/app/tool-popup/main.js;
+  xdg.configFile."herdr-app/mods/tool-popup/mod.json".source = ./herdr/app/tool-popup/mod.json;
+  # Drawer on the panes' right edge: agents that are blocked or done.
+  xdg.configFile."herdr-app/mods/needs-me/main.js".source = ./herdr/app/needs-me/main.js;
+  xdg.configFile."herdr-app/mods/needs-me/mod.json".source = ./herdr/app/needs-me/mod.json;
+  # App shortcuts, with Ctrl+A bound to the tmux-prefix popup. Read-only:
+  # change keys here, not in Settings > Keyboard.
+  xdg.configFile."herdr-app/keys.json".source = ./herdr/app/keys.json;
   # Clone of the shipped "changes" panel (Herdr 0.1.16) with solid diff line
   # colours, coloured gutter/sign and changed-word highlight.
   xdg.configFile."herdr-app/mods/dev-changes/main.js".source = ./herdr/app/dev-changes/main.js;

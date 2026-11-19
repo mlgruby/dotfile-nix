@@ -1,6 +1,6 @@
 // Workspace spaces: stable colored avatars, worktrees under their checkout,
-// grouped by machine when more than one is known. After a space's name, the repo
-// its first terminal is in now, only where unusual: branch, ahead/behind. Agent state lives in the agents list, not here. Click to
+// grouped by machine when more than one is known. Under a space's name, for a git
+// repo only: the repo its first terminal is in now, branch, ahead/behind. Agent state lives in the agents list, not here. Click to
 // switch, right-click for its menu, drag to reorder.
 
 import { View, div, svg } from "gpui-kit";
@@ -25,10 +25,10 @@ function place(s, ps) {
   const tabs = new Set((s.tabs ?? []).map((c) => c.id));
   return ps.find((p) => tabs.has(p.tab) && p.cwd)?.cwd || s.folder;
 }
-const rowHeight = ({ tree }) => (tree ? 28 : 30);
+// Two lines (name, then git) for a repo, one line otherwise.
+const rowHeight = ({ tree, g }) => (tree ? 28 : 30) + (g ? 16 : 0);
 const RAIL_CELL = 32;
-// A space's name and its git tail never shrink below this, so a short one ("api")
-// stays readable instead of turning into an ellipsis next to a long branch.
+// A space name never shrinks below this, so a short one ("api") stays readable.
 const SIDE_MIN = 48;
 const railCell = (el) => h_flex().flex_none().justify_center().child(el);
 const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
@@ -423,25 +423,20 @@ export default class Spaces extends View {
     });
   }
 
-  // Only what's unusual, after the name: "herdr \u00b7 spike \u21912 \u21931". The repo or
-  // branch goes when the name already says it (a worktree is named after its branch),
-  // and master/main go: nearly every space is on one. When the row is full, it
-  // and the name both start from their text's width and give way in proportion.
-  gitTail(g, tree, name, t) {
-    const raw = g.branch ?? "detached";
-    const same = (a) => a.toLowerCase() === name.toLowerCase();
-    const branch = same(raw) || raw === "master" || raw === "main" ? "" : raw;
-    const repo = tree || same(g.name) ? "" : g.name;
+  // The second line, only for a git repo: "herdr \u00b7 spike \u21912 \u21931". The repo
+  // goes when the name already says it or the row is a worktree under its checkout.
+  gitLine(g, tree, name, t) {
+    const branch = g.branch ?? "detached";
+    const repo = tree || g.name.toLowerCase() === name.toLowerCase() ? "" : g.name;
     const where = [repo, branch].filter(Boolean).join(" \u00b7 ");
     return h_flex()
-      .flex_auto()
-      .min_w(where ? SIDE_MIN : 0)
+      .min_w(0)
       .gap(5)
-      .justify_end()
       .items_center()
+      .pl(tree ? 44 : 27)
       .text_size(11.5)
       .text_color(t.dim)
-      .when(Boolean(where), (el) => el.child(div().min_w(0).truncate().child(where)))
+      .child(div().min_w(0).truncate().child(where))
       .when(g.ahead > 0, (el) => el.child(div().flex_none().text_color(t.ansi2).child(`\u2191${g.ahead}`)))
       .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)));
   }
@@ -456,7 +451,7 @@ export default class Spaces extends View {
       .relative()
       .id(`space-${w.id}`)
       .px(8)
-      .h(rowHeight({ tree }))
+      .h(rowHeight({ tree, g }))
       .flex_none()
       .justify_center()
       .rounded(8)
@@ -498,11 +493,11 @@ export default class Spaces extends View {
           .items_center()
           .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).flex_none().text_color(t.dim)))
           .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).border_1().border_color(placeColor(t, w.machine)).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child([...w.name][0]?.toUpperCase() ?? "?")))
-          .child(div().flex_initial().min_w(SIDE_MIN).truncate().text_color(t.foreground).child(w.name))
-          .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1())
+          .child(div().flex_1().min_w(SIDE_MIN).truncate().text_color(t.foreground).child(w.name))
           .child(div().id(`space-place-${w.id}`).flex_none().tooltip(w.machine ?? "This computer")
             .child(svg(placeIcon(w.machine)).size(13).text_color(placeColor(t, w.machine)))),
-      );
+      )
+      .when(Boolean(g), (el) => el.child(this.gitLine(g, tree, w.name, t)));
   }
 
   compact({ w, i }, t) {

@@ -143,10 +143,40 @@ tmux_status_collect_system() {
     battery_color="#fabd2f"
   fi
 
+  # One glyph per 10% step (md-battery_10..90, full), so the icon shows the level.
+  # Round to the nearest step: 63% shows 60, 4% shows the empty outline.
+  batt_step=10
+  if [ "$battery_value" != "$battery" ] && [ "$battery_value" -ge 0 ] 2>/dev/null; then
+    batt_step=$(( (battery_value + 5) / 10 ))
+    [ "$batt_step" -gt 10 ] && batt_step=10
+  fi
   if [ "$battery_charging" = "yes" ]; then
-    batt_icon="󰂄"
+    case "$batt_step" in
+      0|1) batt_icon="󰢜" ;;
+      2) batt_icon="󰂆" ;;
+      3) batt_icon="󰂇" ;;
+      4) batt_icon="󰂈" ;;
+      5) batt_icon="󰢝" ;;
+      6) batt_icon="󰂉" ;;
+      7) batt_icon="󰢞" ;;
+      8) batt_icon="󰂊" ;;
+      9) batt_icon="󰂋" ;;
+      10) batt_icon="󰂅" ;;
+    esac
   else
-    batt_icon="󰁹"
+    case "$batt_step" in
+      0) batt_icon="󰂎" ;;
+      1) batt_icon="󰁺" ;;
+      2) batt_icon="󰁻" ;;
+      3) batt_icon="󰁼" ;;
+      4) batt_icon="󰁽" ;;
+      5) batt_icon="󰁾" ;;
+      6) batt_icon="󰁿" ;;
+      7) batt_icon="󰂀" ;;
+      8) batt_icon="󰂁" ;;
+      9) batt_icon="󰂂" ;;
+      10) batt_icon="󰁹" ;;
+    esac
   fi
 
   datetime="$(date "+%d-%b-%Y %H:%M" | tr '[:lower:]' '[:upper:]')"

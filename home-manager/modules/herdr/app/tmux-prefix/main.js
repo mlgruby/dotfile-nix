@@ -1,6 +1,7 @@
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import {
+  agents,
   checking,
   closeOverlay,
   exec,
@@ -8,9 +9,11 @@ import {
   hc,
   layout,
   nextCommand,
+  openOverlay,
   panes,
   props,
   run,
+  spaces,
   theme,
 } from "herdr";
 
@@ -59,10 +62,22 @@ function openBranchPr() {
   if (cwd) exec("gh", ["pr", "view", "--web"], { cwd }).catch(() => {});
 }
 
-function openToolTab(name, argv) {
-  const folder = focused()?.cwd;
-  const args = folder ? { name, folder, argv } : { name, argv };
-  run("tab.new", args);
+// The oldest blocked agent, else the oldest done one: the order of the
+// needs-me drawer.
+function nextWaiting() {
+  const rank = { blocked: 0, done: 1 };
+  const next = agents().filter((a) => a.status in rank).sort((x, y) => rank[x.status] - rank[y.status] || x.seq - y.seq)[0];
+  if (next) run("agent.focus", { terminal: next.address });
+}
+
+// A tool in a floating window, like the TUI's popup keys. The tool-popup
+// mod starts it: this popup closes before the terminal exists.
+function openToolPopup(title, argv) {
+  const space = spaces().find((s) => s.active);
+  const cwd = focused()?.cwd || space?.folder;
+  const on = space?.machine;
+  openOverlay({ mod: "tool-popup", kind: "popup", frame: "none", width: 2, height: 2,
+    props: { title, argv, ...(cwd ? { cwd } : {}), ...(on ? { on } : {}) } });
 }
 
 const BINDINGS = [
@@ -86,14 +101,18 @@ const BINDINGS = [
   { key: "tab", label: "Cycle pane next", run: () => cyclePane(1), repeat: true },
   { key: "shift-tab", label: "Cycle pane prev", run: () => cyclePane(-1), repeat: true },
 
+  // Agents
+  { key: "a", label: "Start agent on a task", run: () => openOverlay({ mod: "agent-launch", kind: "dialog", width: 560 }) },
+  { key: "j", label: "Jump to agent waiting for you", run: () => nextWaiting() },
+
   // Git / Workflow / System
   { key: "g", label: "Changes panel", run: () => toggleChangesPanel() },
   { key: "G", label: "Changes tab", run: () => run("tab.new", { name: "Changes", mod: "dev-changes" }) },
   { key: "p", label: "PR of this branch (browser)", run: () => openBranchPr() },
-  { key: "l", label: "Lazygit (herdr-review)", run: () => openToolTab("Lazygit", ["herdr-review"]) },
-  { key: "d", label: "Diff (herdr-review)", run: () => openToolTab("Diff", ["herdr-review", "diff"]) },
-  { key: "i", label: "PR Inbox (hinbox)", run: () => openToolTab("Inbox", ["hinbox"]) },
-  { key: "f", label: "Find file (hfind)", run: () => openToolTab("Find", ["hfind"]) },
+  { key: "l", label: "Lazygit (herdr-review)", run: () => openToolPopup("Lazygit", ["herdr-review"]) },
+  { key: "d", label: "Diff (herdr-review)", run: () => openToolPopup("Diff", ["herdr-review", "diff"]) },
+  { key: "i", label: "PR Inbox (hinbox)", run: () => openToolPopup("Inbox", ["hinbox"]) },
+  { key: "f", label: "Find file (hfind)", run: () => openToolPopup("Find", ["hfind"]) },
   { key: "s", label: "Space / tab picker", run: () => run("mod.open", { name: "picker" }) },
   { key: ",", label: "Settings", run: () => run("app.settings") },
 
@@ -186,8 +205,9 @@ export default class TmuxPrefix extends View {
       return this.dismiss();
     }
 
-    if (!binding.repeat) this.dismiss();
+    // Run first: a popup that closes drops the overlays it opens after.
     binding.run();
+    if (!binding.repeat) this.dismiss();
     if (binding.repeat) {
       this.repeat = true;
       const generation = ++this.generation;

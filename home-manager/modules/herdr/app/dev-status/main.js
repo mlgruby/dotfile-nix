@@ -138,14 +138,18 @@ export default class DevStatus extends View {
     const pr = this.pr;
     if (!pr) return null;
     const c = pr.checks;
-    const [icon, color, word] = c.fail ? ["\u{f00d}", t.ansi9, "failing"]
-      : c.pending ? ["\u{f017}", t.blocked, "running"]
-      : c.pass ? ["\u{f00c}", t.done, "passed"] : [null, t.dim, "no checks"];
+    // GitHub Actions icon, then one state glyph (Font Awesome stroke): x, clock or check.
+    const [icon, color] = c.fail ? ["\u{f00d}", t.ansi9]
+      : c.pending ? ["\u{f017}", t.blocked]
+      : c.pass ? ["\u{f00c}", t.done] : [null, t.dim];
     const tip = `PR #${pr.number}${pr.draft ? " (draft)" : ""}: ${c.pass} passed, ${c.fail} failed, ${c.pending} running. Click to open.`;
     return h_flex().id("pr").gap(8).items_center().flex_none().cursor_pointer().tooltip(tip)
       .on_click(() => { exec("open", [pr.url]).catch(() => {}); })
       .child(div().text_color(pr.draft ? t.dim : t.ansi13).child(`\u{f407} #${pr.number}`))
-      .when(Boolean(icon), (el) => el.child(dots("pr-dots")).child(div().text_color(color).child(`${icon} ${word}`)));
+      .when(Boolean(icon), (el) => el.child(dots("pr-dots"))
+        .child(h_flex().gap(6).items_center()
+          .child(div().text_color(t.muted).child("\u{f52e}"))
+          .child(div().text_color(color).child(icon))));
   }
 
   refresh(cx) {

@@ -147,7 +147,18 @@
                     "reveal": "always"
                   }
                 }
-              }
+              },
+              "floating": [
+                {
+                  "id": "needs-me",
+                  "content": {
+                    "mod": "needs-me"
+                  },
+                  "edge": "right",
+                  "align": "start",
+                  "peek": 36
+                }
+              ]
             },
             {
               "id": "panel",
