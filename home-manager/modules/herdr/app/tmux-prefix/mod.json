@@ -1,0 +1,11 @@
+{
+  "place": "none",
+  "title": "Prefix (Ctrl+A)",
+  "overlay": {
+    "kind": "popup",
+    "at": "top",
+    "offset": 64,
+    "width": 540,
+    "height": 440
+  }
+}

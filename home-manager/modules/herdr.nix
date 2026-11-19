@@ -18,6 +18,42 @@
   ...
 }:
 let
+  herdrCoreVersion = "0.1.21";
+  herdrCoreAssets = {
+    aarch64-darwin = {
+      target = "macos-aarch64";
+      sha256 = "1ab38dd9270f63a8f794d6d60e8702eb0d1c85a72bda85d735e5eea43f05ffed";
+    };
+    x86_64-darwin = {
+      target = "macos-x86_64";
+      sha256 = "e377e1d342cddce0346da5b2f3c281b9701e4731c00024c7c5028265e77a217f";
+    };
+  };
+  herdrCoreAsset = herdrCoreAssets.${pkgs.stdenv.hostPlatform.system} or null;
+  herdrCore = lib.optionalAttrs (herdrCoreAsset != null) (
+    pkgs.stdenvNoCC.mkDerivation {
+      pname = "herdr-core-bundle";
+      version = herdrCoreVersion;
+
+      src = pkgs.fetchurl {
+        url = "https://releases.herdr.dev/core/${herdrCoreVersion}/herdr-core-${herdrCoreAsset.target}.tar.gz";
+        inherit (herdrCoreAsset) sha256;
+      };
+
+      sourceRoot = ".";
+      dontConfigure = true;
+      dontBuild = true;
+      # Keep Apple's Developer ID code signature intact inside Herdr Core.app.
+      dontFixup = true;
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p "$out/share/herdr-core"
+        cp -a "Herdr Core.app" "$out/share/herdr-core/"
+        runHook postInstall
+      '';
+    }
+  );
   ghDash = pkgs.gh-dash.overrideAttrs (old: {
     patches = (old.patches or []) ++ [ ./herdr/gh-dash-mouse.patch ./herdr/gh-dash-markdown.patch ];
     postCheck = (old.postCheck or "") + ''
@@ -78,6 +114,43 @@ let
 in
 {
   home.packages = [ review projectLayout workflow ghDash ];
+  home.activation.installHerdrCore = lib.mkIf (herdrCoreAsset != null) (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [ "$(id -u)" -ne 0 ]; then
+        hc_bin="${config.home.homeDirectory}/.local/bin/herdr-core"
+        need_install=1
+        if [ -x "$hc_bin" ]; then
+          installed="$("$hc_bin" --version 2>/dev/null || true)"
+          # Install/upgrade only when missing or older than the pinned Nix version;
+          # Herdr.app manages newer auto-updates via `hc update`.
+          if [ -n "$installed" ] && awk -v old="$installed" -v new="${herdrCoreVersion}" 'BEGIN {
+            sub(/^hc /, "", old);
+            split(old, a, /[.-]/); split(new, b, /[.-]/);
+            for (i = 1; i <= 3; i++) {
+              if ((a[i] + 0) > (b[i] + 0)) exit 0;
+              if ((a[i] + 0) < (b[i] + 0)) exit 1;
+            }
+            exit 0;
+          }'; then
+            need_install=0
+          fi
+        fi
+        if [ "$need_install" -eq 1 ]; then
+          run mkdir -p "${config.home.homeDirectory}/.local/bin"
+          if [ -d "${config.home.homeDirectory}/.local/share/herdr-core/versions" ]; then
+            chmod -R u+w "${config.home.homeDirectory}/.local/share/herdr-core/versions" 2>/dev/null || true
+          fi
+          tmp_bundle_dir="$(mktemp -d)"
+          # Nix store inputs are 0555; Herdr Core's installer expects a user-writable source bundle.
+          cp -R "${herdrCore}/share/herdr-core/Herdr Core.app" "$tmp_bundle_dir/Herdr Core.app"
+          chmod -R u+w "$tmp_bundle_dir/Herdr Core.app"
+          staged_hc="$tmp_bundle_dir/Herdr Core.app/Contents/MacOS/herdr-core"
+          run "$staged_hc" --hc-install-bundle "$staged_hc" "$hc_bin"
+          rm -rf "$tmp_bundle_dir"
+        fi
+      fi
+    ''
+  );
   home.activation.herdrProjectLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -x /opt/homebrew/bin/herdr ]; then
       run /opt/homebrew/bin/herdr plugin link ${projectPlugin}
@@ -106,6 +179,34 @@ in
   '';
 
   xdg.configFile."herdr/workflow.md".source = ../../docs/guides/herdr-workflow.md;
+
+  # Herdr.app (desktop): a "dev" layout (clone of the shipped "main") whose
+  # top bar is the dev-status mod. The mod draws the agent states and the
+  # tmux status-right.sh segments.
+  # Files are linked one by one so the mod folder stays writable (the app
+  # writes jsconfig.json/.d.ts into it).
+  # Select it with: herdr-app do layout.switch '{"name":"dev"}'
+  xdg.configFile."herdr-app/layouts/dev.json".source = ./herdr/app/dev-layout.json;
+  xdg.configFile."herdr-app/mods/dev-status/main.js".source = ./herdr/app/dev-status/main.js;
+  xdg.configFile."herdr-app/mods/dev-status/mod.json".source = ./herdr/app/dev-status/mod.json;
+  xdg.configFile."herdr-app/mods/dev-status/sep.svg".source = ./herdr/app/dev-status/sep.svg;
+  # Clones of the shipped "spaces" and "agents" sidebars (Herdr 0.1.16): a
+  # machine icon per row (aqua local, purple remote) and agent state colours.
+  xdg.configFile."herdr-app/mods/dev-spaces/main.js".source = ./herdr/app/dev-spaces/main.js;
+  xdg.configFile."herdr-app/mods/dev-spaces/mod.json".source = ./herdr/app/dev-spaces/mod.json;
+  xdg.configFile."herdr-app/mods/dev-agents/main.js".source = ./herdr/app/dev-agents/main.js;
+  xdg.configFile."herdr-app/mods/dev-agents/mod.json".source = ./herdr/app/dev-agents/mod.json;
+  # Clone of the shipped "pane" header: the agent state tints the header.
+  xdg.configFile."herdr-app/mods/dev-pane/main.js".source = ./herdr/app/dev-pane/main.js;
+  xdg.configFile."herdr-app/mods/dev-pane/mod.json".source = ./herdr/app/dev-pane/mod.json;
+  # Ctrl+A prefix popup with the same keys as the Herdr TUI config below.
+  xdg.configFile."herdr-app/mods/tmux-prefix/main.js".source = ./herdr/app/tmux-prefix/main.js;
+  xdg.configFile."herdr-app/mods/tmux-prefix/mod.json".source = ./herdr/app/tmux-prefix/mod.json;
+  # Clone of the shipped "changes" panel (Herdr 0.1.16) with solid diff line
+  # colours, coloured gutter/sign and changed-word highlight.
+  xdg.configFile."herdr-app/mods/dev-changes/main.js".source = ./herdr/app/dev-changes/main.js;
+  xdg.configFile."herdr-app/mods/dev-changes/mod.json".source = ./herdr/app/dev-changes/mod.json;
+  xdg.configFile."herdr-app/mods/dev-changes/changes.svg".source = ./herdr/app/dev-changes/changes.svg;
 
   xdg.configFile."gh-dash/config.yml".source = (pkgs.formats.yaml {}).generate "gh-dash.yml" {
     prSections = [
