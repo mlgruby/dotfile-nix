@@ -3,6 +3,5 @@
 # Prefer Home Manager for user-level CLI tools. Keep tools here only when their
 # Homebrew installation is the deliberate global source of truth.
 [
-  "herdr" # nixpkgs build broken on aarch64-darwin (DarwinSdkNotFound in Zig/Ghostty dep)
   "gcx" # Grafana Cloud eXporter; available from the grafana/grafana tap
 ]

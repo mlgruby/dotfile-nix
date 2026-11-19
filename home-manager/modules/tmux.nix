@@ -98,26 +98,13 @@ in
       bind q confirm-before -p "Kill session #S? (y/n)" kill-session
 
       # Navigation (no prefix needed)
-      # DISABLED: Conflict with Herdr
-      # bind -n M-Left select-pane -L
-      # bind -n M-Right select-pane -R
-      # bind -n M-Up select-pane -U
-      # bind -n M-Down select-pane -D
       bind -n S-Left previous-window
       bind -n S-Right next-window
-
-      # Resizing
-      # DISABLED: Conflict with Herdr
-      # bind -n M-S-Left resize-pane -L 2
-      # bind -n M-S-Right resize-pane -R 2
-      # bind -n M-S-Up resize-pane -U 2
-      # bind -n M-S-Down resize-pane -D 2
 
       # Config reload & Quick Floating Popups
       bind r source-file $HOME/.config/tmux/tmux.conf \; display "Config reloaded!"
       bind R display-popup -E -w 85% -h 60% "bash $HOME/.config/tmux/status/review-popup.sh"
       bind P display-popup -E -w 85% -h 65% "bash $HOME/.config/tmux/status/pr-popup.sh"
-      bind A display-popup -E -w 85% -h 65% "bash $HOME/.config/tmux/status/herdr-popup.sh"
       bind G display-popup -d "#{pane_current_path}" -w 90% -h 85% -E "lazygit"
 
       # Plugin Settings
@@ -126,8 +113,7 @@ in
       set -g @resurrect-capture-pane-contents 'on'
 
       # Status modules & clean layout
-      # Herdr manages workspaces and tabs internally; suppress redundant tmux window tabs
-      # and render high-signal context (Agents, Calendar, CI Watchdog, PR Reviews, AWS) next to session name.
+      # No tmux window tabs; render high-signal context (Agents, Calendar, CI Watchdog, PR Reviews, AWS) next to session name.
       set -g status-left-length 200
       set -g status-left "#(bash $HOME/.config/tmux/status/status-left.sh '#{session_name}')"
       set -g window-status-format ""
@@ -142,10 +128,6 @@ in
       source = ../scripts/tmux/status/calendar.sh;
       executable = true;
     };
-    ".config/tmux/status/herdr.sh" = {
-      source = ../scripts/tmux/status/herdr.sh;
-      executable = true;
-    };
     ".config/tmux/status/reviews.sh" = {
       source = ../scripts/tmux/status/reviews.sh;
       executable = true;
@@ -158,10 +140,6 @@ in
       source = ../scripts/tmux/status/pr-popup.sh;
       executable = true;
     };
-    ".config/tmux/status/herdr-popup.sh" = {
-      source = ../scripts/tmux/status/herdr-popup.sh;
-      executable = true;
-    };
     ".config/tmux/status/status-left.sh" = {
       source = ../scripts/tmux/status/status-left.sh;
       executable = true;
@@ -172,6 +150,10 @@ in
       executable = true;
     };
     ".config/tmux/status/vpn.sh".source = ../scripts/tmux/status/vpn.sh;
+    # vpn.sh reads this when DOTFILES_TMUX_SHOW_AWS_VPN is unset (Herdr.app).
+    ".config/tmux/status/profile.env".text = ''
+      DOTFILES_TMUX_SHOW_AWS_VPN="''${DOTFILES_TMUX_SHOW_AWS_VPN:-${if profile.isWork then "yes" else "no"}}"
+    '';
     ".config/tmux/status/aws.sh".source = ../scripts/tmux/status/aws.sh;
     ".config/tmux/status/system.sh".source = ../scripts/tmux/status/system.sh;
     ".config/tmux/status/codexbar.sh" = {

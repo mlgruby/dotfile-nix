@@ -41,7 +41,12 @@ elif [[ -n "$_zcompdump"(#qN.mh+20) ]]; then
   # Load cached dump immediately (~13ms), then refresh & compile in background
   autoload -Uz compinit
   compinit -C -d "$_zcompdump"
-  (_dotfiles_refresh_zcompdump "$_zcompdump" &) >/dev/null 2>&1
+  # One refresh at a time: a layout opens many shells at once. A lock older
+  # than 10 minutes is from a refresh that died.
+  [[ -n "$_zcompdump.lock"(#qN/mm+10) ]] && command rmdir -- "$_zcompdump.lock" 2>/dev/null
+  if command mkdir -- "$_zcompdump.lock" 2>/dev/null; then
+    ({ _dotfiles_refresh_zcompdump "$_zcompdump"; command rmdir -- "$_zcompdump.lock"; } &) >/dev/null 2>&1
+  fi
 else
   autoload -Uz compinit
   compinit -C -d "$_zcompdump"

@@ -1,0 +1,5 @@
+{
+  "place": "none",
+  "title": "Start agent",
+  "overlay": { "kind": "dialog", "width": 560 }
+}

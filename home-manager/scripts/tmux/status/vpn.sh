@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 tmux_status_collect_vpn() {
+  # The tmux server sets DOTFILES_TMUX_SHOW_AWS_VPN. Herdr.app runs this script
+  # without it, so read the profile default that Home Manager writes.
+  if [ -z "${DOTFILES_TMUX_SHOW_AWS_VPN:-}" ] && [ -r "$HOME/.config/tmux/status/profile.env" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.config/tmux/status/profile.env"
+  fi
   local cache_file="${TMPDIR:-/tmp}/tmux_vpn_${UID:-0}_${DOTFILES_TMUX_SHOW_AWS_VPN:-no}.cache"
   if declare -F tmux_status_cache_fresh >/dev/null 2>&1 && tmux_status_cache_fresh "$cache_file" 15; then
     IFS= read -r vpn_label < "$cache_file" 2>/dev/null || true

@@ -13,17 +13,7 @@ on_error() {
 }
 trap on_error ERR
 
-# Herdr supplies action context; never use a different client's focused pane.
-if [[ -n "${HERDR_ACTIVE_PANE_CWD:-}" ]]; then
-  cd "$HERDR_ACTIVE_PANE_CWD"
-elif [[ -n "${HERDR_FOCUSED_PANE_CWD:-}" ]]; then
-  cd "$HERDR_FOCUSED_PANE_CWD"
-elif [[ -n "${HERDR_PANE_ID:-}" ]]; then
-  pane_json="$(herdr pane get "$HERDR_PANE_ID")"
-  pane_cwd="$(printf '%s' "$pane_json" | jq -er '.result.pane.foreground_cwd // .result.pane.cwd')"
-  cd "$pane_cwd"
-fi
-
+# Herdr.app's tool-popup mod starts this in the focused pane's folder.
 action="${1:-git}"
 case "$action" in
   -h|--help)

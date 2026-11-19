@@ -49,7 +49,6 @@ language-specific version files.
 Homebrew owns CLI tools that are unavailable or broken in nixpkgs (`darwin/homebrew-packages/brews/development.nix`) and vendor SDK casks (`darwin/homebrew-packages/casks/development.nix`):
 
 ```text
-herdr       (brew formula - TUI session manager)
 gcx         (brew formula - Git kontekst CLI)
 temurin@21  (brew cask - global JDK 21)
 zed         (brew cask - editor)
@@ -107,8 +106,7 @@ Keep a tool in Homebrew when:
 - the Homebrew version is intentionally the compatibility baseline
 - the Nix package would be surprising or brittle on macOS
 
-The current examples are `herdr` (whose nixpkgs build is broken on
-`aarch64-darwin`), `gcx` (distributed via custom tap), and `temurin@21` (macOS
+The current examples are `gcx` (distributed via custom tap) and `temurin@21` (macOS
 JDK bundle installed into `/Library/Java/JavaVirtualMachines`).
 
 ## Before Moving A Toolchain

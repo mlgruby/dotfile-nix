@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# The epoch seconds, without a fork on bash 4.2+ (macOS /bin/bash 3.2 forks date).
+if (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2) )); then
+  tmux_status_now() { printf -v tmux_now '%(%s)T' -1; }
+else
+  tmux_status_now() { tmux_now="$(date +%s 2>/dev/null || echo 0)"; }
+fi
+
 tmux_status_mtime() {
   local target="$1"
   /usr/bin/stat -f %m "$target" 2>/dev/null || stat -c %Y "$target" 2>/dev/null || echo 0
@@ -8,7 +15,8 @@ tmux_status_mtime() {
 tmux_status_cache_fresh() {
   local target="$1"
   local ttl="$2"
-  local now_s="${3:-$(date +%s 2>/dev/null || echo 0)}"
+  local now_s="${3:-}"
+  [ -n "$now_s" ] || { tmux_status_now; now_s="$tmux_now"; }
   [ -r "$target" ] || return 1
   local mtime
   mtime="$(tmux_status_mtime "$target")"
@@ -46,8 +54,20 @@ append_segment() {
 
   [ -n "$text" ] || return 0
 
-  bg="$(tmux_status_alt_bg "$bg" "$status_prev_bg")"
-  status_output+=$(segment "$bg" "$fg" "$status_prev_bg" "$text")
+  # Same as tmux_status_alt_bg and segment, without two subshells per segment.
+  if [ "$bg" = "$status_prev_bg" ]; then
+    case "$bg" in
+      "#3c3836") bg="#504945" ;;
+      "#504945") bg="#3c3836" ;;
+      "#fb4934") bg="#cc241d" ;;
+      "#cc241d") bg="#fb4934" ;;
+      "#fabd2f") bg="#d79921" ;;
+      "#d79921") bg="#fabd2f" ;;
+    esac
+  fi
+  local seg
+  printf -v seg '#[fg=%s,bg=%s,nobold,nounderscore,noitalics]#[fg=%s,bg=%s] %s ' "$bg" "$status_prev_bg" "$fg" "$bg" "$text"
+  status_output+="$seg"
   status_prev_bg="$bg"
 }
 

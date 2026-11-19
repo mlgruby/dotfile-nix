@@ -92,7 +92,7 @@ home-manager/
 ├── neovim.nix           # Editor config
 └── modules/             # Individual tool configs
     ├── ghostty.nix      # Primary terminal
-    ├── herdr.nix        # TUI session manager
+    ├── herdr.nix        # Herdr.app (desktop) config
     ├── claude-code.nix  # Claude Code config
     ├── antigravity.nix  # Antigravity config
     ├── pi.nix           # Pi coding agent config

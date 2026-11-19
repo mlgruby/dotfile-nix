@@ -3,7 +3,8 @@
 tmux_status_collect_aws() {
   aws_profile="$(
     if command -v tmux >/dev/null 2>&1; then
-      tmux show-environment -g AWS_PROFILE 2>/dev/null | sed 's/^AWS_PROFILE=//' || true
+      v="$(tmux show-environment -g AWS_PROFILE 2>/dev/null || true)"
+      printf '%s' "${v#AWS_PROFILE=}"
     fi
   )"
   [ -n "$aws_profile" ] || aws_profile="${AWS_PROFILE:-}"
@@ -43,7 +44,7 @@ tmux_status_collect_aws() {
       IFS= read -r aws_expiry < "$expiry_cache" 2>/dev/null || true
     else
       aws_expiry="$(
-        jq -rn --argjson now "$(date +%s)" '
+        jq -rn --argjson now "$(tmux_status_now; printf '%s' "$tmux_now")" '
           [ inputs
             | select(.startUrl != null and .expiresAt != null)
             | (.expiresAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)

@@ -38,8 +38,4 @@ in
   cau-pi = "ccusage pi daily --since \"$(date -v-6d +%Y-%m-%d 2>/dev/null || date -d '6 days ago' +%Y-%m-%d)\" --until \"$(date +%Y-%m-%d)\" --breakdown"; # Pi rolling 7 days by model
   cau-b = "ccusage claude blocks --active"; # Active Claude 5-hour block
 
-  # Herdr (Agent Multiplexer)
-  he = "herdr"; # Launch/attach herdr session
-  hrld = "herdr server reload-config"; # Reload herdr configuration
-  hstat = "herdr status"; # Show herdr status
 }

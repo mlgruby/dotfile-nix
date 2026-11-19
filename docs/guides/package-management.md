@@ -141,7 +141,6 @@ homebrew = {
     "mas"              # Mac App Store CLI
     "coreutils"
     "gnu-getopt"       # GNU implementation of getopt
-    "herdr"            # TUI session manager
     "gcx"              # Git kontekst CLI
   ];
 };

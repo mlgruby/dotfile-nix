@@ -5,11 +5,9 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$script_dir/lib.sh"
 source "$script_dir/calendar.sh"
-source "$script_dir/herdr.sh"
 source "$script_dir/reviews.sh"
 
 tmux_status_collect_calendar
-tmux_status_collect_herdr
 tmux_status_collect_reviews
 
 session_name="${1:-main}"
@@ -36,17 +34,12 @@ append_left_segment() {
 # 1. Tmux Session Name
 append_left_segment "#665c54" "#bdae93" "$session_name"
 
-# 2. Herdr Active Agent Monitor (visible only when agents are working)
-if [ -n "$herdr_status" ]; then
-  append_left_segment "$herdr_bg" "$herdr_fg" "$herdr_status"
-fi
-
-# 3. Calendar Guard (Upcoming meeting notice / urgent alert)
+# 2. Calendar Guard (Upcoming meeting notice / urgent alert)
 if [ -n "$calendar_status" ]; then
   append_left_segment "$calendar_bg" "$calendar_fg" "$calendar_status"
 fi
 
-# 4. GitHub PR Reviews Waiting on You
+# 3. GitHub PR Reviews Waiting on You
 if [ -n "$reviews_status" ]; then
   append_left_segment "$reviews_bg" "$reviews_fg" "$reviews_status"
 fi

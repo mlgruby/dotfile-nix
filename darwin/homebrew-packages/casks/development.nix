@@ -7,4 +7,5 @@
   "temurin@21"
   "codex"
   "zed"
+  "herdr-app"
 ]

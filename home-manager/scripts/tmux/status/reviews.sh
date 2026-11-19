@@ -10,7 +10,7 @@ tmux_status_collect_reviews() {
   local json_cache="${cache_dir}/tmux_gh_reviews_data_${UID:-0}.json"
   local lock_file="${cache_dir}/tmux_gh_reviews_${UID:-0}.lock"
   local now_s
-  now_s="$(date +%s 2>/dev/null || echo 0)"
+  tmux_status_now; now_s="$tmux_now"
 
   # Refresh cache in background if missing or older than 180 seconds (3 mins)
   if ! tmux_status_cache_fresh "$cache_file" 180 "$now_s"; then
