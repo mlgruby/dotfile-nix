@@ -184,6 +184,16 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(layout.agy_directory(database), self.repo)
         self.assertTrue(layout.has_agy_history(self.repo, self.root / 'agy'))
 
+    def test_plan_matches_layout_rule(self):
+        roots = dict(personal_root=self.root / 'Personal', dotfile_roots=[],
+                     codex_home=self.root / 'codex', agy_home=self.root / 'agy')
+        self.assertEqual(layout.plan_agents(self.repo, self.work, self.config, **roots), [('CC', 'cc')])
+        personal = self.root / 'Personal/app'
+        personal.mkdir(parents=True)
+        self.assertIsNone(layout.plan_agents(personal, self.work, self.config, **roots))
+        subprocess.run(['git', 'init', str(personal)], check=True, capture_output=True)
+        self.assertEqual(layout.plan_agents(personal, self.work, self.config, **roots), [])
+
 
 if __name__ == '__main__':
     unittest.main()

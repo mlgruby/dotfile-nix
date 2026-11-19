@@ -5,7 +5,25 @@
 // (#[fg=..,bg=..]text); parse() turns it into coloured runs.
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge } from "herdr";
+import { agents, spaces, panes, focused, theme, exec, home, checking, props, setBadge, run, shared, setShared } from "herdr";
+
+// Tab names follow what runs in them: CC (Claude Code), CX (Codex), AGY
+// (Antigravity), "CC+CX" for more than one, SHELL for no agent. A tab
+// someone named by hand ("fix login") keeps its name. A SHELL tab goes first.
+const AGENT_TAGS = [[/claude/i, "CC"], [/codex/i, "CX"], [/antigravity|\bagy\b/i, "AGY"]];
+const SHELL_TAG = "SHELL";
+// Names this code may replace: its own, and the TUI project-layout tabs.
+const AUTO_NAMES = new Set(["CC", "CX", "AGY", "SHELL", "Shell"]);
+// New local spaces get the Herdr TUI's project tabs: project-layout.py --plan
+// says which agents (work repo: CC; personal: AGY/CX with history). Login
+// shell for PATH; the agents start in an interactive shell (aliases, functions).
+const PLAN = 'herdr-project-layout --plan "$1"';
+const START_GRACE_MS = 60000; // an agent tab keeps its name this long before its agent reports
+const CWD_WAIT_MS = 5000; // how long a new space's shell may take to report its folder
+const tagOf = (a) => {
+  const id = `${a.app ?? ""} ${a.program?.key ?? ""} ${a.program?.name ?? ""}`;
+  return AGENT_TAGS.find(([re]) => re.test(id))?.[1] ?? (a.program?.name || "AGENT").toUpperCase();
+};
 
 const SEPARATOR = "\u{e0b2}"; // powerline left-pointing solid arrow
 const REFRESH_MS = 10000; // same as tmux status-interval
@@ -238,9 +256,88 @@ export default class DevStatus extends View {
     setBadge(n ? String(n) : null);
   }
 
+  // Rename each tab to the agents in it (see AGENT_TAGS). shared("tab.autonames")
+  // keeps the name given per tab, so a later hand rename is left alone.
+  tabNames(list) {
+    const byTab = {};
+    for (const a of list) (byTab[a.tab] ??= new Set()).add(tagOf(a));
+    // Codex and Antigravity report no status, so agents() leaves them out: the
+    // pane's program (programs.json key) still names them.
+    for (const p of panes()) {
+      if (p.program?.agent || AGENT_TAGS.some(([re]) => re.test(p.program?.key ?? ""))) (byTab[p.tab] ??= new Set()).add(tagOf(p));
+    }
+    const given = shared("tab.autonames") ?? {};
+    const next = {};
+    let changed = false;
+    for (const space of spaces()) {
+      for (const tab of space.tabs ?? []) {
+        // An agent tab projectTabs() just made keeps its name until its agent reports.
+        if (!byTab[tab.id] && this.starting?.[`${space.id}/${tab.name}`] > Date.now()) {
+          next[tab.id] = tab.name;
+          continue;
+        }
+        const want = byTab[tab.id] ? [...byTab[tab.id]].sort().join("+") : SHELL_TAG;
+        const ours = !tab.named || AUTO_NAMES.has(tab.name) || given[tab.id] === tab.name;
+        if (!ours) { changed ||= tab.id in given; continue; }
+        next[tab.id] = want;
+        if (given[tab.id] !== want) changed = true;
+        // Asked once per name: spaces() shows it a frame later.
+        if (tab.name !== want && this.renaming?.[tab.id] !== want) {
+          (this.renaming ??= {})[tab.id] = want;
+          run("tab.rename", { id: tab.id, name: want });
+        }
+      }
+      // SHELL goes first: when the first tab is not a SHELL tab, move the first one there.
+      const tabs = [...(space.tabs ?? [])].sort((a, b) => a.index - b.index);
+      const shell = tabs.find((tab) => next[tab.id] === SHELL_TAG);
+      if (shell && shell !== tabs[0] && next[tabs[0].id] !== SHELL_TAG && this.moving?.[space.id] !== shell.id) {
+        (this.moving ??= {})[space.id] = shell.id;
+        run("tab.move", { id: shell.id, index: 1 });
+      } else if (shell === tabs[0] && this.moving) delete this.moving[space.id];
+    }
+    if (changed || Object.keys(given).length !== Object.keys(next).length) setShared("tab.autonames", next);
+  }
+
+  // A space made after this mod started, with one plain tab and pane, in a git
+  // repo the plan knows: add its agent tabs in the background, as the TUI does.
+  projectTabs(list) {
+    const now = Date.now();
+    if (!this.seenSpaces) {
+      this.seenSpaces = new Set(spaces().map((s) => s.id));
+      this.firstSeen = {};
+      return;
+    }
+    const ps = panes();
+    for (const space of spaces()) {
+      if (this.seenSpaces.has(space.id)) continue;
+      const tab = space.tabs?.[0];
+      const own = ps.filter((p) => p.tab === tab?.id);
+      const age = now - (this.firstSeen[space.id] ??= now);
+      if (!own[0]?.cwd && age < CWD_WAIT_MS) continue;
+      this.seenSpaces.add(space.id);
+      // Remote machines: the plan reads this computer's agent histories.
+      if (space.machine || space.tabs.length !== 1 || own.length !== 1) continue;
+      if (list.some((a) => a.tab === tab.id)) continue;
+      const dir = own[0]?.cwd || space.folder;
+      if (!dir) continue;
+      exec("/bin/zsh", ["-lc", PLAN, "_", dir], { timeout: 15000 }).then((r) => {
+        if (r.code !== 0) return;
+        for (const [label, command] of JSON.parse(r.stdout.trim() || "null") ?? []) {
+          (this.starting ??= {})[`${space.id}/${label}`] = Date.now() + START_GRACE_MS;
+          run("tab.new", { space: space.id, name: label, folder: dir, argv: ["/bin/zsh", "-ic", command], focus: false });
+        }
+      }).catch(() => {});
+    }
+  }
+
   render() {
     const t = theme();
-    if (!checking()) this.badge(agents());
+    if (!checking()) {
+      const list = agents();
+      this.badge(list);
+      this.projectTabs(list);
+      this.tabNames(list);
+    }
     // props.edge "top": the bar sits above the tabs, so the border goes below it.
     const top = props()?.edge === "top";
     return h_flex().id("root").size_full().items_center().bg(t.chrome)

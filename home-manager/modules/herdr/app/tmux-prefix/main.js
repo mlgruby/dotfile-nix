@@ -103,6 +103,7 @@ const BINDINGS = [
 
   // Agents
   { key: "a", label: "Start agent on a task", run: () => openOverlay({ mod: "agent-launch", kind: "dialog", width: 560 }) },
+  { key: "o", label: "Open project as a space", run: () => openOverlay({ mod: "project-open", kind: "dialog", width: 620 }) },
   { key: "j", label: "Jump to agent waiting for you", run: () => nextWaiting() },
 
   // Git / Workflow / System

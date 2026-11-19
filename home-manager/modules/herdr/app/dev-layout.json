@@ -6,6 +6,7 @@
     12,
     16
   ],
+  "theme": "gruvbox-hard",
   "font": "JetBrainsMono NFM",
   "font_size": 15,
   "ui_font": "JetBrainsMono NFM",
@@ -129,7 +130,7 @@
                   "gap": 8,
                   "radius": 10,
                   "background": "background",
-                  "lone": true,
+                  "lone": false,
                   "border": {
                     "width": 1,
                     "color": "border"

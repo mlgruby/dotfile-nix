@@ -187,6 +187,9 @@ in
   # writes jsconfig.json/.d.ts into it).
   # Select it with: herdr-app do layout.switch '{"name":"dev"}'
   xdg.configFile."herdr-app/layouts/dev.json".source = ./herdr/app/dev-layout.json;
+  # The dev layout's theme: Ghostty's "Gruvbox Dark Hard" (#1d2021 ground), as
+  # in the Herdr TUI, with the app's Gruvbox panel colours.
+  xdg.configFile."herdr-app/themes/gruvbox-hard.json".source = ./herdr/app/gruvbox-hard.json;
   xdg.configFile."herdr-app/mods/dev-status/main.js".source = ./herdr/app/dev-status/main.js;
   xdg.configFile."herdr-app/mods/dev-status/mod.json".source = ./herdr/app/dev-status/mod.json;
   xdg.configFile."herdr-app/mods/dev-status/sep.svg".source = ./herdr/app/dev-status/sep.svg;
@@ -200,12 +203,20 @@ in
   # Clone of the shipped "pane" header: the agent state tints the header.
   xdg.configFile."herdr-app/mods/dev-pane/main.js".source = ./herdr/app/dev-pane/main.js;
   xdg.configFile."herdr-app/mods/dev-pane/mod.json".source = ./herdr/app/dev-pane/mod.json;
+  xdg.configFile."herdr-app/mods/dev-pane/close.svg".source = ./herdr/app/dev-pane/close.svg;
+  xdg.configFile."herdr-app/mods/dev-pane/zoom.svg".source = ./herdr/app/dev-pane/zoom.svg;
+  xdg.configFile."herdr-app/mods/dev-pane/unzoom.svg".source = ./herdr/app/dev-pane/unzoom.svg;
+  xdg.configFile."herdr-app/mods/dev-pane/split-right.svg".source = ./herdr/app/dev-pane/split-right.svg;
+  xdg.configFile."herdr-app/mods/dev-pane/split-down.svg".source = ./herdr/app/dev-pane/split-down.svg;
   # Ctrl+A prefix popup with the same keys as the Herdr TUI config below.
   xdg.configFile."herdr-app/mods/tmux-prefix/main.js".source = ./herdr/app/tmux-prefix/main.js;
   xdg.configFile."herdr-app/mods/tmux-prefix/mod.json".source = ./herdr/app/tmux-prefix/mod.json;
   # Ctrl+A a: start an agent on a task (own worktree and space).
   xdg.configFile."herdr-app/mods/agent-launch/main.js".source = ./herdr/app/agent-launch/main.js;
   xdg.configFile."herdr-app/mods/agent-launch/mod.json".source = ./herdr/app/agent-launch/mod.json;
+  # Ctrl+A o or Cmd+O: pick a Work, Personal or dotfile project; open or go to its space.
+  xdg.configFile."herdr-app/mods/project-open/main.js".source = ./herdr/app/project-open/main.js;
+  xdg.configFile."herdr-app/mods/project-open/mod.json".source = ./herdr/app/project-open/mod.json;
   # Ctrl+A l, d, i, f: the tool in a popup terminal, as in the TUI.
   xdg.configFile."herdr-app/mods/tool-popup/main.js".source = ./herdr/app/tool-popup/main.js;
   xdg.configFile."herdr-app/mods/tool-popup/mod.json".source = ./herdr/app/tool-popup/mod.json;

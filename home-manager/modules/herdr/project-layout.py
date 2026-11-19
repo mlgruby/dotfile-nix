@@ -134,6 +134,36 @@ def has_agy_history(repo, agy_home=None):
     return False
 
 
+def plan_agents(cwd, work_root=None, config_dir=None, personal_root=None,
+                dotfile_roots=None, codex_home=None, agy_home=None):
+    """The agent tabs a new project gets, as (label, command) pairs.
+
+    None: the folder is not a git repo under the work or personal roots.
+    Herdr TUI (apply_layout) and Herdr.app (`--plan DIR`) share this rule.
+    """
+    repo = Path(cwd).resolve()
+    work = Path(work_root or Path.home() / "Documents/Work").resolve()
+    personal = Path(personal_root or Path.home() / "Documents/Personal").resolve()
+    dotfiles = [Path(p).resolve() for p in (dotfile_roots if dotfile_roots is not None else
+                [Path.home() / "dotfile", Path.home() / "Documents/dotfile"])]
+    is_work = repo != work and repo.is_relative_to(work)
+    is_personal = (repo != personal and repo.is_relative_to(personal)) or repo in dotfiles
+    if not (is_work or is_personal):
+        return None
+    git = subprocess.run(["git", "-C", str(repo), "rev-parse", "--show-toplevel"],
+                         capture_output=True, text=True)
+    if git.returncode:
+        return None
+    if is_work:
+        return [("CC", claude_command(repo, config_dir))]
+    agents = []
+    if has_agy_history(repo, agy_home):
+        agents.append(("AGY", "agr"))
+    if has_codex_history(repo, codex_home):
+        agents.append(("CX", "cxr"))
+    return agents
+
+
 def apply_layout(workspace_id, call, work_root=None, config_dir=None,
                  personal_root=None, dotfile_roots=None, codex_home=None, agy_home=None):
     tabs = call("tab", "list", "--workspace", workspace_id)["tabs"]
@@ -146,26 +176,10 @@ def apply_layout(workspace_id, call, work_root=None, config_dir=None,
     if not cwd:
         return False
     repo = Path(cwd).resolve()
-    work = Path(work_root or Path.home() / "Documents/Work").resolve()
-    personal = Path(personal_root or Path.home() / "Documents/Personal").resolve()
-    dotfiles = [Path(p).resolve() for p in (dotfile_roots if dotfile_roots is not None else
-                [Path.home() / "dotfile", Path.home() / "Documents/dotfile"])]
-    is_work = repo != work and repo.is_relative_to(work)
-    is_personal = (repo != personal and repo.is_relative_to(personal)) or repo in dotfiles
-    if not (is_work or is_personal):
+    agents = plan_agents(repo, work_root, config_dir, personal_root, dotfile_roots,
+                         codex_home, agy_home)
+    if agents is None:
         return False
-    git = subprocess.run(["git", "-C", str(repo), "rev-parse", "--show-toplevel"],
-                         capture_output=True, text=True)
-    if git.returncode:
-        return False
-    if is_work:
-        agents = [("CC", claude_command(repo, config_dir))]
-    else:
-        agents = []
-        if has_agy_history(repo, agy_home):
-            agents.append(("AGY", "agr"))
-        if has_codex_history(repo, codex_home):
-            agents.append(("CX", "cxr"))
     call("tab", "rename", tabs[0]["tab_id"], "Shell")
     for label, command in agents:
         call("tab", "create", "--workspace", workspace_id, "--cwd", str(repo),
@@ -174,6 +188,10 @@ def apply_layout(workspace_id, call, work_root=None, config_dir=None,
 
 
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == "--plan":
+        # For Herdr.app: JSON [[label, command], ...], or null for no layout.
+        print(json.dumps(plan_agents(sys.argv[2])))
+        return
     if len(sys.argv) == 3 and sys.argv[1] == "--agy-cwd":
         directory = agy_directory(sys.argv[2])
         if directory:

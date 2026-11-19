@@ -23,6 +23,7 @@
     "ctrl-a": "mod.open:tmux-prefix",
     "cmd-shift-l": "layout.switch",
     "cmd-n": "space.new",
+    "cmd-o": "mod.open:project-open",
     "cmd-p": "mod.open:picker",
     "cmd-shift-p": "app.palette",
     "cmd-,": "app.settings",

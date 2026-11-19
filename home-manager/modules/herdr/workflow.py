@@ -182,7 +182,20 @@ def checkout_candidates():
                            ('node_modules', 'target', 'vendor', '.venv')]
 
 
+def project_group(path):
+    """work, personal or dotfile: the root a checkout_candidates() path is under."""
+    for group, root in (('work', 'Documents/Work'), ('personal', 'Documents/Personal')):
+        if path.is_relative_to((Path.home() / root).resolve()):
+            return group
+    return 'dotfile'
+
+
 def project_command(args):
+    if getattr(args, 'list', False):
+        # For Herdr.app's project picker: the same projects, as JSON.
+        print(json.dumps([{'name': p.name, 'path': str(p), 'group': project_group(p)}
+                          for p in checkout_candidates()]))
+        return
     require_herdr()
     if args.directory:
         directory = Path(args.directory).expanduser()
@@ -622,6 +635,7 @@ def main():
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser('inbox')
     project = commands.add_parser('project'); project.add_argument('directory', nargs='?')
+    project.add_argument('--list', action='store_true', help='print the projects as JSON and exit')
     pr = commands.add_parser('pr')
     pr.add_argument('pr'); pr.add_argument('--repo')
     pr.add_argument('--ai-review', action='store_true')

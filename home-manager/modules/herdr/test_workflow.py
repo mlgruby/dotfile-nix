@@ -395,6 +395,16 @@ p second
         result = subprocess.check_output(['zsh', '-f', '-c', script, '_', str(directory)], env=env, text=True)
         self.assertEqual(result.splitlines(), ['version-one', 'version-two'])
 
+    def test_project_list_prints_groups_without_herdr(self):
+        home = self.root / 'home'
+        for rel in ('dotfile', 'Documents/Work/api', 'Documents/Personal/site'):
+            (home / rel / '.git').mkdir(parents=True)
+        out = io.StringIO()
+        with patch.object(Path, 'home', return_value=home), patch.dict(os.environ, {'HERDR_ENV': ''}), redirect_stdout(out):
+            w.project_command(argparse.Namespace(list=True, directory=None))
+        groups = {p['name']: p['group'] for p in json.loads(out.getvalue())}
+        self.assertEqual(groups, {'dotfile': 'dotfile', 'api': 'work', 'site': 'personal'})
+
 
 if __name__ == '__main__':
     unittest.main()
